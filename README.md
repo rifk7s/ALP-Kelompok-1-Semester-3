@@ -100,7 +100,7 @@ cd backend
 php artisan serve
 ```
 
-The API will be available at `http://localhost:8000`.
+The API will be available at `http://127.0.0.1:8000`.
 
 #### Frontend App
 
@@ -241,15 +241,3 @@ cd frontend
 flutter clean
 flutter pub get
 ```
-
-#### Unable to Connect to API
-
-**Problem:** Flutter app cannot communicate with the backend
-
-**Check:**
-- Verify the backend server is running at `http://localhost:8000`
-- For physical devices, use your computer's IP address instead of `localhost`
-- Check firewall settings
-
-> [!IMPORTANT]
-> When testing on physical devices, replace `localhost` with your computer's local IP address (e.g., `192.168.1.x`).
