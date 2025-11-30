@@ -10,8 +10,35 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
   bool _isLogin = true;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _glowAnimation = Tween<double>(begin: 0.0, end: 15.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +56,28 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 162,
-                    height: 163,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Container(
+                        width: 162,
+                        height: 163,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              blurRadius: _glowAnimation.value,
+                              spreadRadius: _glowAnimation.value / 2,
+                            ),
+                          ],
+                        ),
+                        child: Transform.scale(
+                          scale: _scaleAnimation.value,
+                          child: child,
+                        ),
+                      );
+                    },
                     child: ClipOval(
                       child: Image.asset(
                         'assets/images/logo.png',
@@ -53,14 +96,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // const Text(
-                  //   "PanenKi'",
-                  //   style: TextStyle(
-                  //     fontSize: 24,
-                  //     fontWeight: FontWeight.bold,
-                  //     color: AppColors.white,
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -86,6 +121,19 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.0, 0.2),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                       child: Text(
                         _isLogin ? 'Masuk Sekarang' : 'Mulai Sekarang',
                         key: ValueKey<bool>(_isLogin),
@@ -105,81 +153,98 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Tabs
+                    // Animated Tabs
                     Container(
+                      height: 50,
                       decoration: BoxDecoration(
                         color: AppColors.inputBackground,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
+                      child: Stack(
                         children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isLogin = true;
-                                });
-                              },
+                          // Sliding Indicator
+                          AnimatedAlign(
+                            alignment: _isLogin
+                                ? Alignment.centerLeft
+                                : Alignment.centerRight,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.5,
                               child: Container(
+                                margin: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: _isLogin ? AppColors.white : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: _isLogin
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                child: Center(
-                                  child: Text(
-                                    'Masuk',
-                                    style: TextStyle(
-                                      fontWeight: _isLogin ? FontWeight.bold : FontWeight.w500,
-                                      color: _isLogin ? AppColors.textPrimary : AppColors.textSecondary,
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isLogin = false;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: !_isLogin ? AppColors.white : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: !_isLogin
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                child: Center(
-                                  child: Text(
-                                    'Daftar',
-                                    style: TextStyle(
-                                      fontWeight: !_isLogin ? FontWeight.bold : FontWeight.w500,
-                                      color: !_isLogin ? AppColors.textPrimary : AppColors.textSecondary,
+                          // Tab Text
+                          Row(
+                            children: [
+                              Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isLogin = true;
+                                  });
+                                },
+                                behavior: HitTestBehavior.opaque,
+                                  child: Center(
+                                    child: AnimatedDefaultTextStyle(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: _isLogin
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: _isLogin
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      child: const Text('Masuk'),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+                              Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isLogin = false;
+                                  });
+                                },
+                                behavior: HitTestBehavior.opaque,
+                                  child: Center(
+                                    child: AnimatedDefaultTextStyle(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: !_isLogin
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: !_isLogin
+                                            ? AppColors.textPrimary
+                                            : AppColors.textSecondary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      child: const Text('Daftar'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -187,9 +252,18 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 24),
                     // Form Content
                     AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
+                      duration: const Duration(milliseconds: 400),
+                      switchInCurve: Curves.easeOutBack,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.05, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: FadeTransition(opacity: animation, child: child),
+                        );
                       },
                       child: _isLogin
                           ? const LoginForm(key: ValueKey('login'))
