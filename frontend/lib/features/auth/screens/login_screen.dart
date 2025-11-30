@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
+// import 'package:frontend/features/auth/screens/home_screen.dart';
+import 'package:frontend/start_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,9 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     width: 162,
                     height: 163,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
                     child: ClipOval(
                       child: Image.asset(
                         'assets/images/logo.png',
@@ -139,11 +139,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               onTap: () {
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RegisterScreen(),
+                                  ),
                                 );
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 child: const Center(
                                   child: Text(
                                     'Daftar',
@@ -191,7 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         hintText: 'Masukkan Kata Sandi',
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: AppColors.textSecondary,
                           ),
                           onPressed: () {
@@ -239,7 +246,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const StartPage(), // PERBAIKAN
+                          ),
+                        );
+                      },
                       child: const Text('Masuk'),
                     ),
                     const SizedBox(height: 24),
@@ -259,7 +274,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.g_mobiledata, size: 24), // Placeholder for Google Icon
+                      icon: const Icon(
+                        Icons.g_mobiledata,
+                        size: 24,
+                      ), // Placeholder for Google Icon
                       label: const Text('Masuk menggunakan Google'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
@@ -273,7 +291,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.facebook, size: 24, color: Colors.blue),
+                      icon: const Icon(
+                        Icons.facebook,
+                        size: 24,
+                        color: Colors.blue,
+                      ),
                       label: const Text('Masuk menggunakan Facebook'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,

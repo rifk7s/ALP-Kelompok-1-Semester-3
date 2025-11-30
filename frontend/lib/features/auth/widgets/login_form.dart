@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/start_page.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -20,10 +21,7 @@ class _LoginFormState extends State<LoginForm> {
       children: [
         const Text(
           'Email/Nomor HP',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -34,10 +32,7 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 16),
         const Text(
           'Kata Sandi',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -93,9 +88,28 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
         const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Masuk'),
+        Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const StartPage(),
+                  ),
+                );
+              },
+              child: const Text('Masuk'),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Login untuk melanjutkan',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         const Row(

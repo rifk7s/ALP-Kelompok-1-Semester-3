@@ -1,0 +1,187 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/screens/auth_screen.dart';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFBF0),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Stack(
+                children: [
+                  const Center(
+                    child: Text(
+                      "Profil",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const Positioned(
+                    right: 0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [Icon(Icons.edit_outlined)],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 65,
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
+
+                  const SizedBox(width: 18),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF8A6B4F),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          "Pembeli",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        'Gabriel',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      const Text(
+                        '0813-5635-3033',
+                        style: TextStyle(fontSize: 13, color: Colors.black87),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      const Text(
+                        'Jl. Pettarani No. 30',
+                        style: TextStyle(fontSize: 13, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    profileCard('Transaksi', Icons.description_outlined),
+                    const SizedBox(height: 12),
+
+                    profileCard('Pengaturan', Icons.settings_outlined),
+                    const SizedBox(height: 12),
+
+                    profileCard('Bantuan', Icons.help_outline),
+                    const SizedBox(height: 25),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AuthScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE53935),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              'Keluar',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget profileCard(String title, IconData icon) {
+    return Card(
+      elevation: 2,
+      color: const Color(0xFFFFE7C0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.black87),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {},
+      ),
+    );
+  }
+}
