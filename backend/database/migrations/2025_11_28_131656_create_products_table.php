@@ -34,9 +34,9 @@ return new class extends Migration
 
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('created_by')->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('seller_id')->nullable()->constrained()->onDelete('cascade');
+            // $table->foreignId('created_by')->constrained()->onDelete('cascade');
+            // $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('seller_id')->nullable()->constrained()->onDelete('cascade');
         });
     }
 
@@ -49,9 +49,9 @@ return new class extends Migration
 
         Schema::table('products', function (Blueprint $table) {
             $table->dropConstrainedForeignId('user_id');
-            $table->dropConstrainedForeignId('created_by');
-            $table->dropConstrainedForeignId('category_id');
-            $table->dropConstrainedForeignId('seller_id');
+            // $table->dropConstrainedForeignId('created_by');
+            // $table->dropConstrainedForeignId('category_id');
+            // $table->dropConstrainedForeignId('seller_id');
         });
     }
 };
