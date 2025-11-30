@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+
+import 'package:frontend/features/auth/screens/contact_screen.dart';
+import 'package:frontend/features/auth/screens/home_screen.dart';
+import 'package:frontend/features/auth/screens/profile_screen.dart';
+import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
+
+class StartPage extends StatefulWidget {
+  const StartPage({super.key});
+
+  @override
+  State<StartPage> createState() => _StartPageState();
+}
+
+class _StartPageState extends State<StartPage> {
+  int _page = 0;
+
+  final List<Widget> _pages = [
+    HomePage(),
+    TransactionHistoryPage(),
+    ContactPage(),
+    ProfilePage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFBF0),
+
+      // TAMPILKAN HALAMAN SESUAI INDEX
+      body: _pages[_page],
+
+      // BOTTOM NAV
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _page,
+        color: const Color(0xFF8A6B4F),
+        buttonBackgroundColor: const Color(0xFF8A6B4F),
+        backgroundColor: const Color(0xFFFFFBF0),
+        animationDuration: const Duration(milliseconds: 300),
+
+        items: [
+          CurvedNavigationBarItem(
+            child: Icon(
+              _page == 0 ? Icons.home : Icons.home_outlined,
+              color: Colors.white,
+            ),
+            label: _page == 0 ? 'Home' : '',
+            labelStyle: const TextStyle(color: Colors.white),
+          ),
+          CurvedNavigationBarItem(
+            child: Icon(
+              _page == 1 ? Icons.receipt : Icons.receipt_outlined,
+              color: Colors.white,
+            ),
+            label: _page == 1 ? 'Transaksi' : '',
+            labelStyle: const TextStyle(color: Colors.white),
+          ),
+          CurvedNavigationBarItem(
+            child: Icon(
+              _page == 2 ? Icons.chat : Icons.chat_bubble_outline,
+              color: Colors.white,
+            ),
+            label: _page == 2 ? 'Pesan' : '',
+            labelStyle: const TextStyle(color: Colors.white),
+          ),
+          CurvedNavigationBarItem(
+            child: Icon(
+              _page == 3 ? Icons.person : Icons.person_outline,
+              color: Colors.white,
+            ),
+            label: _page == 3 ? 'Profil' : '',
+            labelStyle: const TextStyle(color: Colors.white),
+          ),
+        ],
+
+        onTap: (index) {
+          setState(() {
+            _page = index;
+          });
+        },
+      ),
+    );
+  }
+}
