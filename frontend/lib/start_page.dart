@@ -30,7 +30,9 @@ class _StartPageState extends State<StartPage> {
       backgroundColor: const Color(0xFFFFFBF0),
 
       // TAMPILKAN HALAMAN SESUAI INDEX
-      body: _pages[_page],
+      body: SafeArea(
+        child: IndexedStack(index: _page, children: _pages),
+      ),
 
       // BOTTOM NAV
       bottomNavigationBar: CurvedNavigationBar(

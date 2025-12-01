@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
+import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -30,11 +31,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  const Positioned(
+                  Positioned(
                     right: 0,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [Icon(Icons.edit_outlined)],
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfilePage(),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.edit_outlined),
                     ),
                   ),
                 ],

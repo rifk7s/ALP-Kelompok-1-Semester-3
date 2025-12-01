@@ -68,7 +68,6 @@ class _ContactPageState extends State<ContactPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER (model halaman Profile)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
               width: double.infinity,
@@ -99,7 +98,6 @@ class _ContactPageState extends State<ContactPage> {
               ),
             ),
 
-            // SEARCH BAR
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               margin: const EdgeInsets.only(bottom: 10),
@@ -130,7 +128,6 @@ class _ContactPageState extends State<ContactPage> {
               ),
             ),
 
-            // LIST CHAT
             Expanded(
               child: _filteredChats.isEmpty
                   ? Center(
