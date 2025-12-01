@@ -57,6 +57,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       "fromMe": true,
       "text":
           "Baik, nanti saya catat di sistem PanenKu. Paling cepat sore sudah masuk semua datanya.",
+      "read": true,
     },
     {
       "fromMe": false,
@@ -78,6 +79,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       "fromMe": true,
       "text":
           "Betul Pak, banyak yang turun. Tapi PanenKu kita usahakan tetap stabil biar petani tidak rugi.",
+      "read": true,
     },
     {
       "fromMe": false,
@@ -96,7 +98,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     {"fromMe": true, "text": "Baik, saya tunggu kabarnya Pak.", "read": true},
   ];
 
-  //auto scroll
   void scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -145,12 +146,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               children: [
                 Text(
                   widget.name,
-                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 const Text(
                   "Online",
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                  style: TextStyle(color: Colors.black, fontSize: 14),
                 ),
               ],
             ),
@@ -222,7 +227,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             ),
           ),
 
-          // INPUT BAR
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: const BoxDecoration(color: Color(0xFFFFF1CB)),

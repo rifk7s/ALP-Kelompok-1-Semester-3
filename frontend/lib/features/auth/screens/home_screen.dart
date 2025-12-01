@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/search_screen.dart';
+import 'package:frontend/features/auth/screens/notification_screen.dart';
+import 'package:frontend/features/auth/screens/hpp_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -45,9 +47,17 @@ class HomePage extends StatelessWidget {
                           icon: const Icon(Icons.shopping_cart_outlined),
                           onPressed: () {},
                         ),
+                        SizedBox(width: 12),
                         IconButton(
                           icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotificationPage(),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -57,7 +67,6 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 5),
 
-              /// ---------------- SEARCH BAR ----------------
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
