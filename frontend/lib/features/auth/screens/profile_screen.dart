@@ -49,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   const CircleAvatar(
                     radius: 65,
-                    backgroundImage: AssetImage('assets/images/logo.png'),
+                    backgroundImage: AssetImage('assets/images/profile.png'),
                   ),
 
                   const SizedBox(width: 18),
@@ -79,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 8),
 
                       const Text(
-                        'Gabriel',
+                        'Vivian',
                         style: TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.bold,
