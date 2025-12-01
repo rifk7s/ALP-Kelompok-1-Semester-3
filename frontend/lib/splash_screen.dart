@@ -29,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
           _isScalTheCircle = true;
         });
         Future.delayed(const Duration(milliseconds: 600), () {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(

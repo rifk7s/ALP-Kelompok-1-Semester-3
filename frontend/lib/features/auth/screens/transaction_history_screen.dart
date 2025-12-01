@@ -103,7 +103,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     label: Text(_localizedStatus(trx['status'])),
                     backgroundColor: _statusColor(
                       trx['status'],
-                    ).withOpacity(0.15),
+                    ).withValues(alpha:0.15),
                     labelStyle: TextStyle(color: _statusColor(trx['status'])),
                   ),
                 ],
@@ -233,7 +233,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                 leading: CircleAvatar(
                                   backgroundColor: _statusColor(
                                     trx['status'],
-                                  ).withOpacity(0.12),
+                                  ).withValues(alpha:0.12),
                                   child: Icon(
                                     trx['status'] == 'completed'
                                         ? Icons.check_circle

@@ -226,6 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             
                             // Navigate with animated transition
                             Future.delayed(const Duration(milliseconds: 100), () {
+                              if (!mounted) return;
                               this.context.pushAndRemoveAllSmooth(const AuthScreen());
                             });
                           },

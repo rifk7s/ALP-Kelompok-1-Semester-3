@@ -65,7 +65,7 @@ class ProductDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.brown.withOpacity(0.15),
+                      color: Colors.brown.withValues(alpha:0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -132,7 +132,7 @@ class ProductDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.brown.withOpacity(0.1),
+                      color: Colors.brown.withValues(alpha:0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -264,7 +264,7 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.brown.withOpacity(0.08),
+            color: Colors.brown.withValues(alpha:0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
