@@ -46,7 +46,7 @@ class _StartPageState extends State<StartPage> {
               _page == 0 ? Icons.home : Icons.home_outlined,
               color: Colors.white,
             ),
-            label: _page == 0 ? 'Home' : '',
+            label: _page == 0 ? 'Beranda' : '',
             labelStyle: const TextStyle(color: Colors.white),
           ),
           CurvedNavigationBarItem(
