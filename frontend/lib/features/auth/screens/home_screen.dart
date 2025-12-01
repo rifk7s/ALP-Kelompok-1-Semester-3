@@ -264,18 +264,39 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 25),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "Kategori",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Kategori",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                    ),
+                    if (_selectedCategory.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedCategory = '';
+                          });
+                        },
+                        child: const Text(
+                          "Hapus Filter",
+                          style: TextStyle(
+                            color: Color(0xFFD81B1B),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 12),
 
               SizedBox(
-                height: 60,
+                height: 45,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -395,24 +416,35 @@ Widget kategoriItem(
   return GestureDetector(
     onTap: onTap,
     child: Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.fromLTRB(3, 3, 16, 3),
       decoration: BoxDecoration(
         color: isSelected ? const Color(0xFF8A6B4F) : const Color(0xFFFFD29A),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(40),
         border: Border.all(
-          color: isSelected ? const Color(0xFF8A6B4F) : Colors.black12,
+          color: isSelected ? const Color(0xFF8A6B4F) : Colors.transparent,
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(radius: 15, backgroundImage: AssetImage(imagePath)),
-          const SizedBox(width: 8),
+          SizedBox(
+            width: 38,
+            height: 38,
+            child: ClipOval(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
           Text(
             title,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : const Color(0xFF505050),
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
             ),
           ),
         ],
