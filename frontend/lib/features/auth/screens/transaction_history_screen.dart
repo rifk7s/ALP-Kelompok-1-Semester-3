@@ -4,262 +4,272 @@ class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
 
   @override
-  State<TransactionHistoryPage> createState() => _TransactionPageState();
+  State<TransactionHistoryPage> createState() => _TransactionHistoryPageState();
 }
 
-class _TransactionPageState extends State<TransactionHistoryPage> {
-  int selectedTab = 0;
+class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
+  final List<Map<String, dynamic>> _transactions = [
+    {
+      'id': 'TRX001',
+      'title': 'Penjualan Gabah Kering',
+      'amount': 'Rp 650.000',
+      'date': '2025-11-28',
+      'status': 'completed',
+    },
+    {
+      'id': 'TRX002',
+      'title': 'Pembelian Jagung Manis',
+      'amount': 'Rp 400.000',
+      'date': '2025-11-29',
+      'status': 'pending',
+    },
+    {
+      'id': 'TRX003',
+      'title': 'Refund Produk Rusak',
+      'amount': 'Rp 120.000',
+      'date': '2025-11-30',
+      'status': 'canceled',
+    },
+    {
+      'id': 'TRX004',
+      'title': 'Penjualan Padi Ciherang',
+      'amount': 'Rp 1.200.000',
+      'date': '2025-11-25',
+      'status': 'completed',
+    },
+  ];
 
-  final List<String> tabs = ["Semua", "Belum Bayar", "Proses", "Selesai"];
+  String _filter = 'all';
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+  Future<void> _refresh() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    setState(() {
+      _transactions.shuffle();
+    });
+  }
 
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "Transaksi",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+  List<Map<String, dynamic>> get _filteredTransactions {
+    if (_filter == 'all') return _transactions;
+    return _transactions.where((t) => t['status'] == _filter).toList();
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'completed':
+        return Colors.green.shade700;
+      case 'pending':
+        return Colors.orange.shade700;
+      case 'canceled':
+        return Colors.red.shade700;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _localizedStatus(String status) {
+    switch (status) {
+      case 'completed':
+        return 'Selesai';
+      case 'pending':
+        return 'Menunggu';
+      case 'canceled':
+        return 'Dibatalkan';
+      default:
+        return status;
+    }
+  }
+
+  void _showDetails(Map<String, dynamic> trx) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// ---------------- TAB STATUS ----------------
-          SizedBox(
-            height: 45,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: tabs.length,
-              itemBuilder: (context, index) {
-                bool active = selectedTab == index;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => selectedTab = index);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 15),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: active ? Colors.brown : Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: Colors.black26),
-                    ),
-
-                    child: Text(
-                      tabs[index],
-                      style: TextStyle(
-                        color: active ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    trx['id'],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                );
-              },
-            ),
+                  Chip(
+                    label: Text(_localizedStatus(trx['status'])),
+                    backgroundColor: _statusColor(
+                      trx['status'],
+                    ).withValues(alpha:0.15),
+                    labelStyle: TextStyle(color: _statusColor(trx['status'])),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                trx['title'],
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(trx['date'], style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Jumlah: ${trx['amount']}',
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 15),
-
-          /// ---------------- LIST TRANSAKSI ----------------
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              children: [
-                buildTransactionCard(
-                  title: "Gabah Kering Giling (GKG)",
-                  seller: "Pak Budi",
-                  date: "20 November 2025, 14:30",
-                  price: "Rp650.000",
-                  status: "Selesai",
-                  statusColor: Colors.green,
-                  buttonText: "Beli Lagi",
-                  buttonColor: Colors.brown,
-                ),
-
-                buildTransactionCard(
-                  title: "Gabah Kering Giling (GKG)",
-                  seller: "Pak Budi",
-                  date: "20 November 2025, 14:30",
-                  price: "Rp650.000",
-                  status: "Proses",
-                  statusColor: Colors.orange,
-                  buttonText: "Lacak",
-                  buttonColor: Colors.brown,
-                ),
-
-                buildTransactionCard(
-                  title: "Gabah Kering Giling (GKG)",
-                  seller: "Pak Budi",
-                  date: "20 November 2025, 14:30",
-                  price: "Rp650.000",
-                  status: "Batal",
-                  statusColor: Colors.red,
-                  buttonText: "Beli Ulang",
-                  buttonColor: Colors.brown,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  /// ---------------- CARD TRANSAKSI ----------------
-  Widget buildTransactionCard({
-    required String title,
-    required String seller,
-    required String date,
-    required String price,
-    required String status,
-    required Color statusColor,
-    required String buttonText,
-    required Color buttonColor,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        color: const Color(0xFFFFFBF0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// STATUS BADGE
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(height: 8),
+            const Text(
+              'Riwayat Transaksi',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('Semua'),
+                    selected: _filter == 'all',
+                    onSelected: (_) => setState(() => _filter = 'all'),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Selesai'),
+                    selected: _filter == 'completed',
+                    onSelected: (_) => setState(() => _filter = 'completed'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Menunggu'),
+                    selected: _filter == 'pending',
+                    onSelected: (_) => setState(() => _filter = 'pending'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Dibatalkan'),
+                    selected: _filter == 'canceled',
+                    onSelected: (_) => setState(() => _filter = 'canceled'),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 12),
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// IMAGE PLACEHOLDER
-                Container(
-                  width: 55,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                /// TEXTS
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "$title 100kg",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                child: _filteredTransactions.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 60),
+                          Center(child: Text('Tidak ada transaksi')),
+                        ],
+                      )
+                    : ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: _filteredTransactions.length,
+                        itemBuilder: (context, index) {
+                          final trx = _filteredTransactions[index];
+                          return TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 20.0, end: 0.0),
+                            duration: Duration(
+                              milliseconds: 350 + (index * 50),
+                            ),
+                            builder: (context, value, child) {
+                              return Transform.translate(
+                                offset: Offset(0, value),
+                                child: Opacity(
+                                  opacity: 1 - (value / 40),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: ListTile(
+                                onTap: () => _showDetails(trx),
+                                leading: CircleAvatar(
+                                  backgroundColor: _statusColor(
+                                    trx['status'],
+                                  ).withValues(alpha:0.12),
+                                  child: Icon(
+                                    trx['status'] == 'completed'
+                                        ? Icons.check_circle
+                                        : trx['status'] == 'pending'
+                                        ? Icons.hourglass_top
+                                        : Icons.cancel,
+                                    color: _statusColor(trx['status']),
+                                  ),
+                                ),
+                                title: Text(trx['title']),
+                                subtitle: Text(trx['date']),
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      trx['amount'],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      _localizedStatus(trx['status']),
+                                      style: TextStyle(
+                                        color: _statusColor(trx['status']),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-
-                      Text(seller, style: const TextStyle(fontSize: 13)),
-
-                      Text(
-                        date,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            /// HARGA
-            Text(
-              price,
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
               ),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// BUTTONS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                /// DETAIL button
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.black26),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text(
-                    "Detail",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                /// ACTION button
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    buttonText,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/start_page.dart';
 
 class LoginForm extends StatefulWidget {
@@ -92,12 +93,7 @@ class _LoginFormState extends State<LoginForm> {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const StartPage(),
-                  ),
-                );
+                context.pushReplacementSmooth(const StartPage());
               },
               child: const Text('Masuk'),
             ),
