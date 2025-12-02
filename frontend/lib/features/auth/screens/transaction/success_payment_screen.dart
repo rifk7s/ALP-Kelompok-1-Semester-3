@@ -23,6 +23,7 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
 
     // Delay 2 detik lalu ke receipt page
     Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -47,7 +48,7 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: brown.withOpacity(0.15),
+                color: brown.withValues(alpha: 0.15),
               ),
               child: Icon(Icons.check_circle_rounded, color: brown, size: 90),
             ),

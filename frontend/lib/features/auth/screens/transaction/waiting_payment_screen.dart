@@ -23,6 +23,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
 
     // Auto navigate ke success payment setelah 3 detik
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -175,7 +176,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
       boxShadow: [
         BoxShadow(
           blurRadius: 6,
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withValues(alpha: 0.08),
           offset: const Offset(0, 3),
         ),
       ],

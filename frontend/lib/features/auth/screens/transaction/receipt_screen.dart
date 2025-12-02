@@ -27,7 +27,7 @@ class ReceiptPage extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
-                BoxShadow(blurRadius: 6, color: Colors.black.withOpacity(0.08)),
+                BoxShadow(blurRadius: 6, color: Colors.black.withValues(alpha: 0.08)),
               ],
             ),
             child: Column(

@@ -134,7 +134,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<String>(
-                        value: shippingMethod,
+                        initialValue: shippingMethod,
                         decoration: InputDecoration(
                           labelText: "Metode Pengiriman",
                           border: OutlineInputBorder(
@@ -234,7 +234,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 6),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.07), blurRadius: 6),
               ],
             ),
             child: Row(
@@ -316,7 +316,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         boxShadow: [
           BoxShadow(
             blurRadius: 6,
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             offset: const Offset(0, 3),
           ),
         ],

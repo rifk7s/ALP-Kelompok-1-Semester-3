@@ -266,7 +266,7 @@ class _CartPageState extends State<CartPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 6),
           ],
         ),
         child: Column(
@@ -279,7 +279,7 @@ class _CartPageState extends State<CartPage> {
                 const Text("Pilih Semua"),
                 const Spacer(),
                 Text(
-                  "${totalSelectedItems} Item dipilih",
+                  "$totalSelectedItems Item dipilih",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
