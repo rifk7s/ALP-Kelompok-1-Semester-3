@@ -20,21 +20,12 @@ class Product extends Model
         'storage_days',
         'price_per_kg',
         'stock_kg',
-        // 'committed_kg',
-        // 'available_kg',
-        // 'sale_type',
-        // 'lead_time_days',
+        'sold_kg',
         'description',
         'status',
-        // 'managed_by_bumdes',
-        // 'seller_type',
-        // 'seller_display',
-        'sold_kg',
 
         // Foreign keys
         // 'user_id',
-        // 'created_by',
         // 'category_id',
-        // 'seller_id',
     ];
 }
