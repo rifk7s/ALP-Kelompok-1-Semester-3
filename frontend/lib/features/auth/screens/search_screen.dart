@@ -17,16 +17,11 @@ class SearchPage extends StatelessWidget {
           titleSpacing: 0,
 
           title: Padding(
-            padding: const EdgeInsets.only(left: 5, right: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
-                  ),
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
                   onPressed: () => Navigator.pop(context),
                 ),
 
@@ -35,21 +30,20 @@ class SearchPage extends StatelessWidget {
                     height: 45,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(100),
                       border: Border.all(color: Colors.black12, width: 1),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 15),
 
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: Colors.grey),
-                        const SizedBox(width: 10),
-
+                        const Icon(Icons.search, color: Colors.grey, size: 22),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
                             autofocus: true,
                             decoration: const InputDecoration(
-                              hintText: "Gabah",
+                              hintText: "Cari produk...",
                               hintStyle: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 15,

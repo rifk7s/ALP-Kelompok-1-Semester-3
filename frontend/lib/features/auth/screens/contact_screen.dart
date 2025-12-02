@@ -18,19 +18,19 @@ class _ContactPageState extends State<ContactPage> {
     super.initState();
     _allChats = [
       {
-        'name': 'Vivian',
+        'name': 'Pembeli 1',
         'message': 'Oke besok saya kirim ya',
         'time': '19.20',
         'image': 'assets/images/logo.png',
       },
       {
-        'name': 'Admin PanenKu',
+        'name': 'Pembeli 2',
         'message': 'Baik kak, sudah diterima',
         'time': '18.04',
         'image': 'assets/images/logo.png',
       },
       {
-        'name': 'Penjual Jagung',
+        'name': 'Pembeli 3',
         'message': 'Siap ditunggu',
         'time': '16.55',
         'image': 'assets/images/logo.png',

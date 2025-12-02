@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/screens/chat_detail_page.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final String name;
   final String price;
   final String stock;
   final String image;
-  final String farmerName;
+  final String sellerName;
   final String location;
   final String category;
   final String variety;
@@ -18,7 +19,7 @@ class ProductDetailPage extends StatelessWidget {
     required this.price,
     required this.stock,
     required this.image,
-    required this.farmerName,
+    required this.sellerName,
     required this.location,
     required this.category,
     required this.variety,
@@ -48,8 +49,7 @@ class ProductDetailPage extends StatelessWidget {
                         "Detail Produk",
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.brown.shade800,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -65,7 +65,7 @@ class ProductDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.brown.withValues(alpha:0.15),
+                      color: Colors.brown.withValues(alpha: 0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -113,7 +113,7 @@ class ProductDetailPage extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.brown[200],
+                    color: const Color(0xFF8A6B4F),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -132,7 +132,7 @@ class ProductDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.brown.withValues(alpha:0.1),
+                      color: Colors.brown.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -150,7 +150,7 @@ class ProductDetailPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            farmerName,
+                            sellerName,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -198,9 +198,20 @@ class ProductDetailPage extends StatelessWidget {
 
               Row(
                 children: [
+                  // 👉 Tombol chat BUMDes
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatDetailPage(
+                              name: name,
+                              image: image,
+                            ), // Halaman tujuan
+                          ),
+                        );
+                      },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         side: BorderSide(color: Colors.brown.shade300),
@@ -208,32 +219,76 @@ class ProductDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        "Kontak Petani",
-                        style: TextStyle(
-                          color: Colors.brown,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            color: Color(0xFF8A6B4F),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            "Kontak BUMDes",
+                            style: TextStyle(
+                              color: Color(0xFF8A6B4F),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 14),
+
+                  // 👉 Tombol Keranjang
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: const Text("Berhasil!"),
+                              content: const Text(
+                                "Item berhasil ditambahkan ke keranjang.",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("OK"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
+                        backgroundColor: const Color(0xFF8A6B4F),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        "Keranjang",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            "Keranjang",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -264,7 +319,7 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.brown.withValues(alpha:0.08),
+            color: Colors.brown.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
