@@ -22,8 +22,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'], // Email MUST be provided and be valid format
-            // 'phone' => ['nullable', 'string', 'max:15'], // Phone number MUST be provided and be a string
+            // 'email' => ['required', 'string', 'email'], // Email MUST be provided and be valid format
+            'phone' => ['required', 'string', 'max:15'], // Phone number MUST be provided and be a string
             'password' => ['required', 'string'], // Password MUST be provided and be a string
         ];
     }

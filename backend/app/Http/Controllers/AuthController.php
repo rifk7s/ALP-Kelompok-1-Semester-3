@@ -33,7 +33,7 @@ class AuthController extends Controller
     // LOGIN
     public function login(LoginRequest $request)
     {       
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('phone', $request->phone)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
