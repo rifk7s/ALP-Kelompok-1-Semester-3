@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -25,7 +26,11 @@ class Product extends Model
         'status',
 
         // Foreign keys
-        // 'user_id',
-        // 'category_id',
+        'category_id',
     ];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }
