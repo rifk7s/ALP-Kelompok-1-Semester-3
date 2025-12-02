@@ -46,20 +46,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Column(
           children: [
             Center(
-              child: Column(
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
                   const CircleAvatar(
                     radius: 55,
-                    backgroundImage: AssetImage("assets/images/logo.png"),
+                    backgroundImage: AssetImage("assets/images/profile.png"),
                   ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "Ubah Foto",
-                      style: TextStyle(
-                        color: Color(0xFF8A6B4F),
-                        fontWeight: FontWeight.bold,
+
+                  // Ikon pensil
+                  Positioned(
+                    bottom: -4,
+                    right: -4,
+                    child: GestureDetector(
+                      onTap: () {
+                        // aksi ganti foto
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF8A6B4F),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 18,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

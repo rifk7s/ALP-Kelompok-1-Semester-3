@@ -3,6 +3,7 @@ import 'package:frontend/features/auth/screens/search_screen.dart';
 import 'package:frontend/features/auth/screens/notification_screen.dart';
 import 'package:frontend/features/auth/screens/hpp_screen.dart';
 import 'package:frontend/features/auth/screens/product_detail_screen.dart';
+import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +21,7 @@ class _HomePageState extends State<HomePage> {
         'name': 'Apel Segar',
         'price': 'Rp 15.000/kg',
         'stock': '50kg',
-        'location': 'Sengkang, Gowa',
+        'location': 'Sengka, Gowa',
       },
       {
         'name': 'Mangga Harum',
@@ -34,7 +35,7 @@ class _HomePageState extends State<HomePage> {
         'name': 'Gabah Kering Giling',
         'price': 'Rp 6.500/kg',
         'stock': '100kg',
-        'location': 'Sengkang, Gowa',
+        'location': 'Sengka, Gowa',
       },
       {
         'name': 'Gabah Basah',
@@ -62,7 +63,7 @@ class _HomePageState extends State<HomePage> {
         'name': 'Jagung Manis',
         'price': 'Rp 10.000/kg',
         'stock': '40kg',
-        'location': 'Sengkang, Gowa',
+        'location': 'Sengka, Gowa',
       },
       {
         'name': 'Jagung Pakan',
@@ -90,7 +91,7 @@ class _HomePageState extends State<HomePage> {
         'name': 'Cabe Merah Segar',
         'price': 'Rp 25.000/kg',
         'stock': '30kg',
-        'location': 'Sengkang, Gowa',
+        'location': 'Sengka, Gowa',
       },
       {
         'name': 'Cabe Rawit',
@@ -108,37 +109,37 @@ class _HomePageState extends State<HomePage> {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
         {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
         {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
         {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
         {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
         {
           'name': 'Gabah Kering Giling',
           'price': 'Rp 6.500/kg',
           'stock': '100kg',
-          'location': 'Sengkang, Gowa',
+          'location': 'sengka, Gowa',
         },
       ];
     }
@@ -182,7 +183,14 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.shopping_cart_outlined),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CartPage(),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(width: 12),
                         IconButton(
@@ -271,7 +279,10 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     const Text(
                       "Kategori",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
                     ),
                     if (_selectedCategory.isNotEmpty)
                       GestureDetector(
@@ -431,12 +442,7 @@ Widget kategoriItem(
           SizedBox(
             width: 38,
             height: 38,
-            child: ClipOval(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: ClipOval(child: Image.asset(imagePath, fit: BoxFit.cover)),
           ),
           const SizedBox(width: 6),
           Text(
@@ -472,7 +478,7 @@ Widget productCard({
               price: price,
               stock: stock,
               image: image,
-              farmerName: "Petani Pak Abdulrahman",
+              sellerName: "BUMDes",
               location: location,
               category: "Gabah",
               variety: "Pandan Wangi",

@@ -3,6 +3,10 @@ import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
 
+// IMPORT PAGE
+import 'package:frontend/features/auth/screens/setting_screen.dart';
+import 'package:frontend/features/auth/screens/help_screen.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -60,7 +64,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     radius: 65,
                     backgroundImage: AssetImage('assets/images/profile.png'),
                   ),
-
                   const SizedBox(width: 18),
 
                   Column(
@@ -94,6 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+
                       const SizedBox(height: 4),
 
                       const Text(
@@ -120,13 +124,26 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    profileCard('Transaksi', Icons.description_outlined),
+                    // 🔵 TRANSAKSI (masih kosong onTapnya)
+                    profileCard('Transaksi', Icons.description_outlined, () {}),
                     const SizedBox(height: 12),
 
-                    profileCard('Pengaturan', Icons.settings_outlined),
+                    // 🔵 PENGATURAN (SUDAH TERHUBUNG)
+                    profileCard('Pengaturan', Icons.settings_outlined, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SettingsPage()),
+                      );
+                    }),
                     const SizedBox(height: 12),
 
-                    profileCard('Bantuan', Icons.help_outline),
+                    // 🔵 BANTUAN (SUDAH TERHUBUNG)
+                    profileCard('Bantuan', Icons.help_outline, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HelpPage()),
+                      );
+                    }),
                     const SizedBox(height: 25),
 
                     SizedBox(
@@ -183,10 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: ScaleTransition(
             scale: CurvedAnimation(
               parent: animation,
@@ -218,17 +232,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // "Ya" Button
                         GestureDetector(
                           onTap: () {
-                            // Close dialog first
                             Navigator.of(context).pop();
-                            
-                            // Navigate with animated transition
-                            Future.delayed(const Duration(milliseconds: 100), () {
-                              if (!mounted) return;
-                              this.context.pushAndRemoveAllSmooth(const AuthScreen());
-                            });
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                if (!mounted) return;
+                                this.context.pushAndRemoveAllSmooth(
+                                  const AuthScreen(),
+                                );
+                              },
+                            );
                           },
                           child: Container(
                             width: 88,
@@ -252,7 +267,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        // "Tidak" Button
                         GestureDetector(
                           onTap: () {
                             Navigator.pop(context);
@@ -287,7 +301,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget profileCard(String title, IconData icon) {
+  // 🔥 UPDATE: profileCard sekarang ada parameter onTap
+  Widget profileCard(String title, IconData icon, VoidCallback onTap) {
     return Card(
       elevation: 2,
       color: const Color(0xFFFFE7C0),
@@ -299,7 +314,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }
