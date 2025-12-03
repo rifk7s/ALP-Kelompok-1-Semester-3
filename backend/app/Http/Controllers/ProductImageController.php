@@ -58,6 +58,6 @@ class ProductImageController extends Controller
 
         return response()->json([
             'message' => 'Product image deleted successfully!'
-        ]);
+        ], 204);
     }
 }

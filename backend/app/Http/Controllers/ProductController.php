@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-// use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
@@ -12,9 +12,17 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Product::all());
+        // return response()->json(Product::all());
+        // return response()->json(Product::with('category', 'productImages')->get());
+        $query = Product::with('category', 'productImages');
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        return response()->json($query->get());
     }
 
     /**
@@ -47,6 +55,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        $product->load('category', 'productImages');
         return response()->json($product);
     }
 
@@ -71,7 +80,7 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Product updated successfully!',
             'product' => $product
-        ]);
+        ], 200);
     }
 
     /**
@@ -83,6 +92,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product deleted successfully!'
-        ]);
+        ], 204);
+
     }
 }
