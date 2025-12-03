@@ -2,10 +2,11 @@
 
 // use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
-use App\Http\Controllers\AuthController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -23,6 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me',      [AuthController::class, 'me']);
 });
 
+/*
+    Profile Routes
+*/
+Route::patch('profile/update', [ProfileController::class, 'update']);
+Route::get('profile/me', [ProfileController::class, 'userrn']);
 
 /*
     Product Routes
