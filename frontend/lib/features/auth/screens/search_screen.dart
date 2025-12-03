@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/product_detail_screen.dart';
 
 class SearchPage extends StatefulWidget {
@@ -90,11 +91,11 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
-          backgroundColor: const Color(0xFFFFFBF0),
+          backgroundColor: AppColors.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: 0,

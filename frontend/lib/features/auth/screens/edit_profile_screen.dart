@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -21,10 +22,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
+        backgroundColor: AppColors.surface,
         elevation: 1,
         centerTitle: true,
         title: const Text(
@@ -61,8 +62,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onTap: () {},
                       child: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF8A6B4F),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -92,7 +93,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8A6B4F),
+                  backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),

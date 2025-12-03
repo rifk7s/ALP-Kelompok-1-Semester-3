@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'success_payment_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
@@ -65,12 +66,10 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         title: const Text("Menunggu Pembayaran"),
         elevation: 0,
@@ -82,7 +81,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
           _section(
             child: Row(
               children: [
-                Icon(Icons.hourglass_top_rounded, size: 40, color: brown),
+                const Icon(Icons.hourglass_top_rounded, size: 40, color: AppColors.primary),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -144,9 +143,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                 ),
                 Text(
                   formatCurrency(widget.totalPayment),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
-                    color: brown,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -175,17 +174,17 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    Icon(Icons.copy_rounded, color: brown),
+                    const Icon(Icons.copy_rounded, color: AppColors.primary),
                     const SizedBox(width: 8),
-                    Text(
+                    const Text(
                       "Salin No. Rekening",
                       style: TextStyle(
-                        color: brown,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Spacer(),
-                    Icon(Icons.chevron_right, color: brown),
+                    const Spacer(),
+                    const Icon(Icons.chevron_right, color: AppColors.primary),
                   ],
                 ),
               ],

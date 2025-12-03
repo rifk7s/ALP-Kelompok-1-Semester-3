@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/contact_screen.dart';
 import 'package:frontend/features/auth/screens/home_screen.dart';
 import 'package:frontend/features/auth/screens/profile_screen.dart';
@@ -27,7 +28,7 @@ class _StartPageState extends State<StartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
 
       // TAMPILKAN HALAMAN SESUAI INDEX
       body: SafeArea(
@@ -37,9 +38,9 @@ class _StartPageState extends State<StartPage> {
       // BOTTOM NAV
       bottomNavigationBar: CurvedNavigationBar(
         index: _page,
-        color: const Color(0xFF8A6B4F),
-        buttonBackgroundColor: const Color(0xFF8A6B4F),
-        backgroundColor: const Color(0xFFFFFBF0),
+        color: AppColors.primary,
+        buttonBackgroundColor: AppColors.primary,
+        backgroundColor: AppColors.surface,
         animationDuration: const Duration(milliseconds: 300),
 
         items: [

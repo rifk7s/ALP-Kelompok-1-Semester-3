@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/transaction/checkout_screen.dart';
 import 'package:frontend/features/auth/screens/product_detail_screen.dart';
 
@@ -29,7 +30,6 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final Color brown = const Color(0xFF8A6B4F);
   final formatter = NumberFormat.decimalPattern("id");
 
   List<CartItem> cart = [
@@ -103,10 +103,10 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Keranjang"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -149,7 +149,7 @@ class _CartPageState extends State<CartPage> {
                       children: [
                         Checkbox(
                           value: item.selected,
-                          activeColor: brown,
+                          activeColor: AppColors.primary,
                           onChanged: (v) =>
                               setState(() => item.selected = v ?? false),
                         ),
@@ -180,8 +180,8 @@ class _CartPageState extends State<CartPage> {
 
                               Text(
                                 formatRupiah(item.totalPrice),
-                                style: TextStyle(
-                                  color: brown,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
@@ -286,7 +286,7 @@ class _CartPageState extends State<CartPage> {
               children: [
                 Checkbox(
                   value: selectAll,
-                  activeColor: brown,
+                  activeColor: AppColors.primary,
                   onChanged: (v) => toggleSelectAll(),
                 ),
                 const Text("Pilih Semua"),
@@ -312,8 +312,8 @@ class _CartPageState extends State<CartPage> {
                     ),
                     Text(
                       formatRupiah(totalPrice),
-                      style: TextStyle(
-                        color: brown,
+                      style: const TextStyle(
+                        color: AppColors.primary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -325,7 +325,7 @@ class _CartPageState extends State<CartPage> {
                   width: MediaQuery.of(context).size.width * 0.40,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brown,
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

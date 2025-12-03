@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
@@ -18,7 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8A6B4F),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
@@ -214,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              backgroundColor: const Color(0xFFFFFBF0),
+              backgroundColor: AppColors.surface,
               child: Container(
                 width: 260,
                 height: 170,
@@ -253,17 +254,17 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 88,
                             height: 31,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFFBF0),
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(30),
                               border: Border.all(
-                                color: const Color(0xFF886800),
+                                color: AppColors.primary,
                               ),
                             ),
                             alignment: Alignment.center,
                             child: const Text(
                               "Ya",
                               style: TextStyle(
-                                color: Color(0xFF8A6B4F),
+                                color: AppColors.primary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -279,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 88,
                             height: 31,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8A6B4F),
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             alignment: Alignment.center,

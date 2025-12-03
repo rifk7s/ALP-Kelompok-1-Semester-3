@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/transaction/waiting_payment_screen.dart';
 import 'cart_screen.dart';
 
@@ -29,8 +30,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
-
     int subtotal = widget.cart.fold(
       0,
       (t, item) => t + (item.pricePerKg * item.qty),
@@ -39,10 +38,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
     int totalAkhir = subtotal + ongkir + biayaLayanan;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Checkout"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -61,10 +60,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: brown.withValues(alpha: 0.12),
+                          color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(Icons.location_on, color: brown, size: 28),
+                        child: const Icon(Icons.location_on, color: AppColors.primary, size: 28),
                       ),
                       const SizedBox(width: 14),
 
@@ -162,8 +161,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                         Text(
                           rupiah.format(item.pricePerKg * item.qty),
-                          style: TextStyle(
-                            color: brown,
+                          style: const TextStyle(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -183,10 +182,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: brown.withValues(alpha: 0.12),
+                          color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(Icons.account_balance_wallet, color: brown),
+                        child: const Icon(Icons.account_balance_wallet, color: AppColors.primary),
                       ),
                       const SizedBox(width: 12),
 
@@ -270,7 +269,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                       Row(
                         children: [
-                          Icon(Icons.local_shipping, size: 22, color: brown),
+                          const Icon(Icons.local_shipping, size: 22, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Text(
                             "Estimasi tiba: $estimatedArrival",
@@ -297,7 +296,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         "Total Pembayaran",
                         rupiah.format(totalAkhir),
                         bold: true,
-                        color: brown,
+                        color: AppColors.primary,
                       ),
                     ],
                   ),
@@ -344,10 +343,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                     Text(
                       rupiah.format(totalAkhir),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
-                        color: brown,
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -357,7 +356,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   width: 150,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brown,
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

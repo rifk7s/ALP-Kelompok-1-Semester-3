@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class ReceiptPage extends StatelessWidget {
   final int total;
@@ -9,8 +10,6 @@ class ReceiptPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
-
     String formatRupiah(int number) {
       final f = NumberFormat.currency(
         locale: 'id_ID',
@@ -21,10 +20,10 @@ class ReceiptPage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Struk Pembayaran"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -49,13 +48,13 @@ class ReceiptPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: brown.withValues(alpha: 0.15),
+                    color: AppColors.primaryLight,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.receipt_long_rounded,
                     size: 50,
-                    color: brown,
+                    color: AppColors.primary,
                   ),
                 ),
 
@@ -78,10 +77,10 @@ class ReceiptPage extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                _detailRow("Total Pembayaran", formatRupiah(total), brown),
+                _detailRow("Total Pembayaran", formatRupiah(total), AppColors.primary),
                 const SizedBox(height: 10),
 
-                _detailRow("Metode Pembayaran", "Transfer Bank (BCA)", brown),
+                _detailRow("Metode Pembayaran", "Transfer Bank (BCA)", AppColors.primary),
                 const SizedBox(height: 10),
 
                 Row(
@@ -126,7 +125,7 @@ class ReceiptPage extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: brown,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -6,9 +7,9 @@ class HelpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         title: const Text(
           "Bantuan",

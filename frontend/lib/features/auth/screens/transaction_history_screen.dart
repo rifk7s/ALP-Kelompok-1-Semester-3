@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -176,7 +177,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   Widget build(BuildContext context) {
     Theme.of(context);
     return Material(
-      color: const Color(0xFFFFFBF0),
+      color: AppColors.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -418,10 +419,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => setState(() => _filter = key),
-      selectedColor: Colors.brown[100],
+      selectedColor: AppColors.primaryLight,
       backgroundColor: Colors.white,
       labelStyle: TextStyle(
-        color: selected ? Colors.brown[800] : Colors.black87,
+        color: selected ? AppColors.primary : Colors.black87,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
     );

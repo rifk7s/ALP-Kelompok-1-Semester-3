@@ -4,10 +4,21 @@ class AppColors {
   static const Color primary = Color(0xFF8A6B4F);
   static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Color(0xFFFFFBF0); // Cream background for main screens
+  static const Color surfaceAlt = Color(0xFFF9F4EC); // Alternative cream background
   static const Color textPrimary = Color(0xFF000000);
   static const Color textSecondary = Colors.grey;
   static const Color inputBackground = Color(0xFFF5F6F9);
   static const Color white = Colors.white;
+  static const Color accent = Color(0xFFFFD29A); // Light orange accent
+  
+  // Primary color variants
+  static Color get primaryLight => primary.withValues(alpha: 0.1);
+  static Color get primaryMedium => primary.withValues(alpha: 0.25);
+  static Color get primaryDark => const Color(0xFF6B5240);
+  
+  // For shadows and overlays
+  static Color get primaryShadow => primary.withValues(alpha: 0.08);
+  static Color get primaryShadowMedium => primary.withValues(alpha: 0.25);
 }
 
 class AppTheme {

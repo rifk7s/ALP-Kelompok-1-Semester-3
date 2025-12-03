@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/notification_screen.dart';
 import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
 import 'chat_detail_page.dart';
@@ -65,13 +66,13 @@ class _ContactPageState extends State<ContactPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              color: const Color(0xFFFFFBF0),
+              color: AppColors.surface,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

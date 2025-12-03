@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class HppPage extends StatelessWidget {
   const HppPage({super.key});
@@ -6,9 +7,9 @@ class HppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -134,7 +135,7 @@ class HppPage extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B5E3B),
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
@@ -263,7 +264,7 @@ class HppPage extends StatelessWidget {
       child: const Icon(
         Icons.inventory_2_rounded,
         size: 26,
-        color: Colors.brown,
+        color: AppColors.primary,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/transaction/receipt_screen.dart';
 
 class SuccessPaymentScreen extends StatefulWidget {
@@ -34,10 +35,8 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -46,17 +45,17 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: brown.withValues(alpha: 0.15),
+                color: AppColors.primaryLight,
               ),
-              child: Icon(Icons.check_circle_rounded, color: brown, size: 90),
+              child: const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 90),
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               "Pembayaran Berhasil!",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: brown,
+                color: AppColors.primary,
               ),
             ),
           ],

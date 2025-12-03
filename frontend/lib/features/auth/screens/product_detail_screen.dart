@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/chat_detail_page.dart';
 import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
 
@@ -43,7 +44,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFAF2),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -160,7 +161,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFF8A6B4F),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -177,7 +178,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.brown.withValues(alpha: 0.08), blurRadius: 10),
+          BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
         ],
       ),
       child: Row(
@@ -212,7 +213,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               );
             },
-            child: const Icon(Icons.chat_bubble_outline, color: Colors.brown),
+            child: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
           ),
         ],
       ),
@@ -237,7 +238,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: ElevatedButton(
           onPressed: () => _openQtyDialog(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8A6B4F),
+            backgroundColor: AppColors.primary,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -315,9 +316,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             margin: const EdgeInsets.symmetric(horizontal: 16),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.brown.shade50,
+                              color: AppColors.primaryLight,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.brown.shade200),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               tempQty.toString(),
@@ -339,7 +340,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.brown.shade50,
+                        color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -347,7 +348,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: Colors.brown,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -360,16 +361,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(context),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: Colors.brown.shade400),
+                              side: const BorderSide(color: AppColors.primary),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
-                            child: Text(
+                            child: const Text(
                               "Batal",
                               style: TextStyle(
-                                color: Colors.brown.shade700,
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -410,7 +411,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8A6B4F),
+                              backgroundColor: AppColors.primary,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -463,16 +464,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFF8A6B4F), width: 2),
+                borderSide: const BorderSide(color: AppColors.primary, width: 2),
               ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(
+              child: const Text(
                 "Batal",
-                style: TextStyle(color: Colors.brown.shade700),
+                style: TextStyle(color: AppColors.primary),
               ),
             ),
             ElevatedButton(
@@ -483,7 +484,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 onConfirm(qty);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8A6B4F),
+                backgroundColor: AppColors.primary,
               ),
               child: const Text("OK", style: TextStyle(color: Colors.white)),
             ),
@@ -500,11 +501,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: const Color(0xFF8A6B4F),
+          color: AppColors.primary,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.brown.withValues(alpha: 0.25),
+              color: AppColors.primaryShadowMedium,
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -530,7 +531,7 @@ class SectionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.brown.withValues(alpha: 0.08), blurRadius: 10),
+          BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
         ],
       ),
       child: Column(
@@ -566,7 +567,7 @@ class InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.brown.shade600),
+          Icon(icon, size: 18, color: AppColors.primary),
           const SizedBox(width: 8),
           Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
           Expanded(child: Text(value)),
