@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
+            $table->string('image_path');
+            $table->integer('order');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,6 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('products_images', function (Blueprint $table) {
+            // $table->dropConstrainedForeignId('user_id');
+            $table->dropConstrainedForeignId('product_id');
+        });
+        
         Schema::dropIfExists('product_images');
     }
 };

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -20,21 +22,21 @@ class Product extends Model
         'storage_days',
         'price_per_kg',
         'stock_kg',
-        // 'committed_kg',
-        // 'available_kg',
-        // 'sale_type',
-        // 'lead_time_days',
+        'sold_kg',
         'description',
         'status',
-        // 'managed_by_bumdes',
-        // 'seller_type',
-        // 'seller_display',
-        'sold_kg',
 
         // Foreign keys
-        // 'user_id',
-        // 'created_by',
-        // 'category_id',
-        // 'seller_id',
+        'category_id',
     ];
+
+    public function productImages(): HasMany
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }
