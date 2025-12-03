@@ -30,7 +30,7 @@ class Product extends Model
         'category_id',
     ];
 
-    public function products(): HasMany
+    public function productImages(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
