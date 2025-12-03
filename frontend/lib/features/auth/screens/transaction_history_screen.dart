@@ -175,11 +175,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SafeArea(
-      child: Container(
-        color: const Color(0xFFFFFBF0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
+    return Material(
+      color: const Color(0xFFFFFBF0),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
@@ -407,6 +408,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
           ],
         ),
       ),
+    ),
     );
   }
 

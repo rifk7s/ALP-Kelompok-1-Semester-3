@@ -305,13 +305,26 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             setStateDialog(() => tempQty--);
                           }
                         }),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22),
-                          child: Text(
-                            tempQty.toString(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                        GestureDetector(
+                          onTap: () {
+                            _showQtyInputDialog(context, tempQty, (newQty) {
+                              setStateDialog(() => tempQty = newQty);
+                            });
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.brown.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.brown.shade200),
+                            ),
+                            child: Text(
+                              tempQty.toString(),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -419,6 +432,62 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showQtyInputDialog(BuildContext context, int currentQty, Function(int) onConfirm) {
+    final controller = TextEditingController(text: currentQty.toString());
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          title: const Text(
+            "Masukkan Jumlah",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+              hintText: "Jumlah",
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF8A6B4F), width: 2),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Batal",
+                style: TextStyle(color: Colors.brown.shade700),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final input = int.tryParse(controller.text) ?? 1;
+                final qty = input < 1 ? 1 : input;
+                Navigator.pop(context);
+                onConfirm(qty);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8A6B4F),
+              ),
+              child: const Text("OK", style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
       },
     );
