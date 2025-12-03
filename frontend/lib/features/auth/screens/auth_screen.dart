@@ -123,17 +123,17 @@ class _AuthScreenState extends State<AuthScreen>
                       duration: const Duration(milliseconds: 300),
                       transitionBuilder:
                           (Widget child, Animation<double> animation) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.0, 0.2),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          ),
-                        );
-                      },
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.0, 0.2),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
                       child: Text(
                         _isLogin ? 'Masuk Sekarang' : 'Mulai Sekarang',
                         key: ValueKey<bool>(_isLogin),
@@ -178,7 +178,9 @@ class _AuthScreenState extends State<AuthScreen>
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.1),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -191,17 +193,18 @@ class _AuthScreenState extends State<AuthScreen>
                           Row(
                             children: [
                               Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isLogin = true;
-                                  });
-                                },
-                                behavior: HitTestBehavior.opaque,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isLogin = true;
+                                    });
+                                  },
+                                  behavior: HitTestBehavior.opaque,
                                   child: Center(
                                     child: AnimatedDefaultTextStyle(
-                                      duration:
-                                          const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: _isLogin
@@ -218,17 +221,18 @@ class _AuthScreenState extends State<AuthScreen>
                                 ),
                               ),
                               Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isLogin = false;
-                                  });
-                                },
-                                behavior: HitTestBehavior.opaque,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isLogin = false;
+                                    });
+                                  },
+                                  behavior: HitTestBehavior.opaque,
                                   child: Center(
                                     child: AnimatedDefaultTextStyle(
-                                      duration:
-                                          const Duration(milliseconds: 300),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: !_isLogin
@@ -257,14 +261,17 @@ class _AuthScreenState extends State<AuthScreen>
                       switchOutCurve: Curves.easeIn,
                       transitionBuilder:
                           (Widget child, Animation<double> animation) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.05, 0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: FadeTransition(opacity: animation, child: child),
-                        );
-                      },
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.05, 0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
                       child: _isLogin
                           ? const LoginForm(key: ValueKey('login'))
                           : const RegisterForm(key: ValueKey('register')),

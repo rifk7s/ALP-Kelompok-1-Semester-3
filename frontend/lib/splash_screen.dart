@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   bool _isDotCenter = false;
   bool _isExiting = false;
-  
+
   late AnimationController _exitController;
   late Animation<double> _circleScaleAnimation;
   late Animation<double> _logoFadeAnimation;
@@ -22,13 +22,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Exit animation controller
     _exitController = AnimationController(
       duration: const Duration(milliseconds: 700),
       vsync: this,
     );
-    
+
     // Circle expands to fill screen (96px -> ~screen size)
     // Calculate scale to cover screen: roughly 4-5x is enough for most screens
     _circleScaleAnimation = Tween<double>(begin: 1.0, end: 5.0).animate(
@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
         curve: const Interval(0.0, 0.8, curve: Curves.easeInOutCubic),
       ),
     );
-    
+
     // Logo fades out as circle expands (faster than scale)
     _logoFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
         curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
       ),
     );
-    
+
     // Background syncs - not needed visually but helps transition
     _backgroundFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -53,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
         curve: const Interval(0.6, 1.0, curve: Curves.easeInOut),
       ),
     );
-    
+
     _startAnimation();
   }
 
@@ -70,14 +70,14 @@ class _SplashScreenState extends State<SplashScreen>
       setState(() {
         _isDotCenter = true;
       });
-      
+
       // Wait for dot animation, then start exit sequence
       Future.delayed(const Duration(milliseconds: 600), () {
         if (!mounted) return;
         setState(() {
           _isExiting = true;
         });
-        
+
         // Start exit animation
         _exitController.forward().then((_) {
           if (!mounted) return;
@@ -97,24 +97,18 @@ class _SplashScreenState extends State<SplashScreen>
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           // Scale up slightly from 0.95 to 1.0 for a subtle "emerge" effect
           final scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
           );
-          
+
           // Fade in
           final fadeAnimation = CurvedAnimation(
             parent: animation,
             curve: Curves.easeOut,
           );
-          
+
           return FadeTransition(
             opacity: fadeAnimation,
-            child: ScaleTransition(
-              scale: scaleAnimation,
-              child: child,
-            ),
+            child: ScaleTransition(scale: scaleAnimation, child: child),
           );
         },
       ),
@@ -175,7 +169,8 @@ class _SplashScreenState extends State<SplashScreen>
                     AnimatedPositioned(
                       duration: const Duration(milliseconds: 500),
                       curve: const Cubic(.47, -1.26, .36, 1),
-                      left: (MediaQuery.of(context).size.width / 2) -
+                      left:
+                          (MediaQuery.of(context).size.width / 2) -
                           12 -
                           (_isDotCenter ? 0 : 80),
                       child: AnimatedOpacity(

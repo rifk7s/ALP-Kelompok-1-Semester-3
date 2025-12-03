@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/search_screen.dart';
 import 'package:frontend/features/auth/screens/notification_screen.dart';
 import 'package:frontend/features/auth/screens/hpp_screen.dart';
@@ -149,7 +150,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -430,10 +431,10 @@ Widget kategoriItem(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.fromLTRB(3, 3, 16, 3),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF8A6B4F) : const Color(0xFFFFD29A),
+        color: isSelected ? AppColors.primary : AppColors.accent,
         borderRadius: BorderRadius.circular(40),
         border: Border.all(
-          color: isSelected ? const Color(0xFF8A6B4F) : Colors.transparent,
+          color: isSelected ? AppColors.primary : Colors.transparent,
         ),
       ),
       child: Row(

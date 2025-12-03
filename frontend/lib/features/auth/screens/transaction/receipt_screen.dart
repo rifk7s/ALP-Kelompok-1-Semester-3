@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class ReceiptPage extends StatelessWidget {
   final int total;
@@ -8,13 +10,20 @@ class ReceiptPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
+    String formatRupiah(int number) {
+      final f = NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: 'Rp ',
+        decimalDigits: 0,
+      );
+      return f.format(number);
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Struk Pembayaran"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -25,48 +34,106 @@ class ReceiptPage extends StatelessWidget {
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(blurRadius: 6, color: Colors.black.withValues(alpha: 0.08)),
+                BoxShadow(
+                  blurRadius: 6,
+                  color: Colors.black.withValues(alpha: 0.07),
+                  offset: const Offset(0, 3),
+                ),
               ],
             ),
             child: Column(
               children: [
-                Icon(Icons.receipt_long, size: 70, color: brown),
-                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long_rounded,
+                    size: 50,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
                 const Text(
                   "Pembayaran Berhasil",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 6),
+
                 Text(
                   "Order ID: $orderId",
-                  style: const TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey, fontSize: 13.5),
                 ),
 
-                const Divider(height: 30),
+                const SizedBox(height: 20),
 
-                _row("Total Pembayaran", "Rp $total", brown),
+                _dashedDivider(),
+
+                const SizedBox(height: 16),
+
+                _detailRow(
+                  "Total Pembayaran",
+                  formatRupiah(total),
+                  AppColors.primary,
+                ),
                 const SizedBox(height: 10),
 
-                _row("Metode", "Transfer BCA", brown),
+                _detailRow(
+                  "Metode Pembayaran",
+                  "Transfer Bank (BCA)",
+                  AppColors.primary,
+                ),
                 const SizedBox(height: 10),
 
-                _row("Status", "Berhasil", Colors.green),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Status", style: TextStyle(fontSize: 15)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        "Berhasil",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 30),
+
+                Text(
+                  "Terima kasih telah melakukan pembayaran!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5),
+                ),
               ],
             ),
           ),
 
           const SizedBox(height: 30),
 
-          // Tombol kembali ke home
           SizedBox(
             height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: brown,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -76,7 +143,11 @@ class ReceiptPage extends StatelessWidget {
               },
               child: const Text(
                 "Kembali ke Home",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -85,16 +156,42 @@ class ReceiptPage extends StatelessWidget {
     );
   }
 
-  Widget _row(String title, String value, Color color) {
+  Widget _detailRow(String title, String value, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title),
+        Text(title, style: const TextStyle(fontSize: 15)),
         Text(
           value,
-          style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontSize: 15,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _dashedDivider() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final dashWidth = 6.0;
+        final dashHeight = 1.2;
+        final dashCount = (constraints.maxWidth / (dashWidth * 1.8)).floor();
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(
+            dashCount,
+            (_) => Container(
+              width: dashWidth,
+              height: dashHeight,
+              color: Colors.grey.shade300,
+            ),
+          ),
+        );
+      },
     );
   }
 }

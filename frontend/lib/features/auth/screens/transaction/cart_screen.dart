@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/transaction/checkout_screen.dart';
 import 'package:frontend/features/auth/screens/product_detail_screen.dart';
 
 class CartItem {
   final String name;
-  final int price;
   final int pricePerKg;
   int qty;
   final String image;
@@ -12,12 +13,13 @@ class CartItem {
 
   CartItem({
     required this.name,
-    required this.price,
+    required this.pricePerKg,
     required this.qty,
     required this.image,
-    required this.pricePerKg,
     this.selected = false,
   });
+
+  int get totalPrice => pricePerKg * qty;
 }
 
 class CartPage extends StatefulWidget {
@@ -28,19 +30,17 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final Color brown = const Color(0xFF8A6B4F);
+  final formatter = NumberFormat.decimalPattern("id");
 
   List<CartItem> cart = [
     CartItem(
       name: "Gabah Kering",
-      price: 325000,
       pricePerKg: 6500,
       qty: 1,
       image: "assets/images/gabah.jpg",
     ),
     CartItem(
       name: "Jagung Pipilan",
-      price: 126000,
       pricePerKg: 4200,
       qty: 2,
       image: "assets/images/gabah.jpg",
@@ -73,15 +73,11 @@ class _CartPageState extends State<CartPage> {
 
   bool selectAll = false;
 
-  int get totalPrice {
-    return cart
-        .where((item) => item.selected)
-        .fold(0, (t, item) => t + (item.price * item.qty));
-  }
+  int get totalPrice => cart
+      .where((item) => item.selected)
+      .fold(0, (t, item) => t + item.totalPrice);
 
-  int get totalSelectedItems {
-    return cart.where((item) => item.selected).length;
-  }
+  int get totalSelectedItems => cart.where((item) => item.selected).length;
 
   void toggleSelectAll() {
     setState(() {
@@ -102,13 +98,15 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  String formatRupiah(int price) => "Rp ${formatter.format(price)}";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Keranjang"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -117,28 +115,33 @@ class _CartPageState extends State<CartPage> {
           children: [
             if (cart.isEmpty)
               const Padding(
-                padding: EdgeInsets.all(20),
-                child: Center(child: Text("Keranjang kosong")),
+                padding: EdgeInsets.all(30),
+                child: Center(
+                  child: Text(
+                    "Keranjang masih kosong",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
               )
             else
               ListView.builder(
-                itemCount: cart.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
+                itemCount: cart.length,
                 itemBuilder: (context, i) {
                   final item = cart[i];
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 14),
+                    margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
                         BoxShadow(
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                          color: Colors.black12,
+                          blurRadius: 6,
+                          color: Colors.black.withValues(alpha: 0.08),
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -146,23 +149,20 @@ class _CartPageState extends State<CartPage> {
                       children: [
                         Checkbox(
                           value: item.selected,
-                          onChanged: (v) {
-                            setState(() {
-                              item.selected = v ?? false;
-                            });
-                          },
+                          activeColor: AppColors.primary,
+                          onChanged: (v) =>
+                              setState(() => item.selected = v ?? false),
                         ),
 
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             item.image,
-                            width: 60,
-                            height: 60,
+                            width: 65,
+                            height: 65,
                             fit: BoxFit.cover,
                           ),
                         ),
-
                         const SizedBox(width: 12),
 
                         Expanded(
@@ -172,19 +172,24 @@ class _CartPageState extends State<CartPage> {
                               Text(
                                 item.name,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
 
                               Text(
-                                "Rp ${item.price}",
-                                style: TextStyle(color: brown),
+                                formatRupiah(item.totalPrice),
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
-                              const SizedBox(height: 4),
 
+                              const SizedBox(height: 4),
                               Text(
-                                "Harga per kg: Rp ${item.pricePerKg}",
+                                "Harga per kg: ${formatRupiah(item.pricePerKg)}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
@@ -194,18 +199,27 @@ class _CartPageState extends State<CartPage> {
                           ),
                         ),
 
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => changeQty(i, item.qty - 1),
-                              icon: const Icon(Icons.remove),
-                            ),
-                            Text("${item.qty}"),
-                            IconButton(
-                              onPressed: () => changeQty(i, item.qty + 1),
-                              icon: const Icon(Icons.add),
-                            ),
-                          ],
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1EBE3),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => changeQty(i, item.qty - 1),
+                                icon: const Icon(Icons.remove, size: 18),
+                              ),
+                              Text(
+                                "${item.qty}",
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                              IconButton(
+                                onPressed: () => changeQty(i, item.qty + 1),
+                                icon: const Icon(Icons.add, size: 18),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -215,7 +229,6 @@ class _CartPageState extends State<CartPage> {
 
             const SizedBox(height: 20),
 
-            // SECTION: Rekomendasi
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Align(
@@ -227,18 +240,18 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
 
             GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: rekomendasi.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 14,
-                crossAxisSpacing: 14,
-                childAspectRatio: 0.70,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.74,
               ),
               itemBuilder: (context, i) {
                 final p = rekomendasi[i];
@@ -253,44 +266,43 @@ class _CartPageState extends State<CartPage> {
               },
             ),
 
-            const SizedBox(height: 120),
+            const SizedBox(height: 130),
           ],
         ),
       ),
 
-      // -------------------------------
-      // 🔥 NEW FOOTER — CART CRA STYLE
-      // -------------------------------
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 6),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+            ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // CHECKBOX + TOTAL ITEM
             Row(
               children: [
-                Checkbox(value: selectAll, onChanged: (v) => toggleSelectAll()),
+                Checkbox(
+                  value: selectAll,
+                  activeColor: AppColors.primary,
+                  onChanged: (v) => toggleSelectAll(),
+                ),
                 const Text("Pilih Semua"),
                 const Spacer(),
                 Text(
-                  "$totalSelectedItems Item dipilih",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  "$totalSelectedItems item dipilih",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
 
             const SizedBox(height: 12),
 
-            // TOTAL + BUTTON
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -302,25 +314,22 @@ class _CartPageState extends State<CartPage> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Rp $totalPrice",
-                      style: TextStyle(
+                      formatRupiah(totalPrice),
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                        color: brown,
                       ),
                     ),
                   ],
                 ),
 
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.38,
+                  width: MediaQuery.of(context).size.width * 0.40,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brown,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 14,
-                        horizontal: 20,
-                      ),
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -381,7 +390,7 @@ Widget productCard({
               category: "Produk",
               variety: "Varietas",
               harvestDate: "20 November 2025",
-              description: "Produk rekomendasi dari PanenKi.",
+              description: "Produk rekomendasi PanenKi.",
             ),
           ),
         );
@@ -390,16 +399,20 @@ Widget productCard({
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
+          BoxShadow(
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.10),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
             child: Image.asset(
               image,
               height: 120,
@@ -415,12 +428,11 @@ Widget productCard({
                 Text(
                   name,
                   style: const TextStyle(
-                    fontSize: 14,
                     fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 6),
-
                 Text(
                   price,
                   style: const TextStyle(
@@ -429,13 +441,11 @@ Widget productCard({
                   ),
                 ),
                 const SizedBox(height: 6),
-
                 Text(
                   "Stok: $stock",
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(height: 6),
-
                 Row(
                   children: [
                     const Icon(
@@ -447,11 +457,11 @@ Widget productCard({
                     Expanded(
                       child: Text(
                         location,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

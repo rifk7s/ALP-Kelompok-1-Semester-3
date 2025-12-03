@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/transaction/waiting_payment_screen.dart';
 import 'cart_screen.dart';
 
@@ -20,18 +22,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
   String shippingMethod = "Reguler";
   String estimatedArrival = "2–4 hari";
 
+  final NumberFormat rupiah = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
+
   @override
   Widget build(BuildContext context) {
-    final brown = const Color(0xFF8A6B4F);
+    int subtotal = widget.cart.fold(
+      0,
+      (t, item) => t + (item.pricePerKg * item.qty),
+    );
 
-    int subtotal = widget.total;
     int totalAkhir = subtotal + ongkir + biayaLayanan;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F4EC),
+      backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
         title: const Text("Checkout"),
-        backgroundColor: brown,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
 
@@ -47,15 +57,55 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.location_on, size: 26, color: brown),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          selectedAddress,
-                          style: const TextStyle(fontSize: 15, height: 1.4),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: AppColors.primary,
+                          size: 28,
                         ),
                       ),
-                      TextButton(onPressed: () {}, child: const Text("Ubah")),
+                      const SizedBox(width: 14),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Vivian Wijaya",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {},
+                                  child: const Text("Ubah"),
+                                ),
+                              ],
+                            ),
+
+                            Text(
+                              "0812-3456-7890",
+                              style: TextStyle(color: Colors.grey.shade700),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Text(
+                              selectedAddress,
+                              style: const TextStyle(height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -68,17 +118,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   (item) => _box(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             item.image,
-                            width: 60,
-                            height: 60,
+                            width: 70,
+                            height: 70,
                             fit: BoxFit.cover,
                           ),
                         ),
                         const SizedBox(width: 14),
+
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,19 +142,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   fontSize: 15,
                                 ),
                               ),
+
                               const SizedBox(height: 4),
+
                               Text(
                                 "Jumlah: x${item.qty}",
-                                style: const TextStyle(color: Colors.grey),
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              Text(
+                                "Harga: ${rupiah.format(item.pricePerKg)} /kg",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
                             ],
                           ),
                         ),
+
                         Text(
-                          "Rp ${item.price * item.qty}",
-                          style: TextStyle(
-                            color: brown,
+                          rupiah.format(item.pricePerKg * item.qty),
+                          style: const TextStyle(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w700,
+                            fontSize: 15,
                           ),
                         ),
                       ],
@@ -117,9 +183,39 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 _box(
                   child: Row(
                     children: [
-                      Icon(Icons.account_balance_wallet, color: brown),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet,
+                          color: AppColors.primary,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: Text(paymentMethod)),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Metode Pembayaran",
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              paymentMethod,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       TextButton(onPressed: () {}, child: const Text("Ubah")),
                     ],
                   ),
@@ -137,6 +233,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         initialValue: shippingMethod,
                         decoration: InputDecoration(
                           labelText: "Metode Pengiriman",
+                          labelStyle: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -177,9 +276,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                       Row(
                         children: [
-                          Icon(Icons.local_shipping, size: 20, color: brown),
-                          const SizedBox(width: 6),
-                          Text("Estimasi tiba: $estimatedArrival"),
+                          const Icon(
+                            Icons.local_shipping,
+                            size: 22,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Estimasi tiba: $estimatedArrival",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ],
                       ),
                     ],
@@ -193,15 +299,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 _box(
                   child: Column(
                     children: [
-                      _row("Subtotal", "Rp $subtotal"),
-                      _row("Ongkos Kirim", "Rp $ongkir"),
-                      _row("Biaya Layanan", "Rp $biayaLayanan"),
-                      const Divider(height: 24, thickness: 0.7),
+                      _row("Subtotal", rupiah.format(subtotal)),
+                      _row("Ongkos Kirim", rupiah.format(ongkir)),
+                      _row("Biaya Layanan", rupiah.format(biayaLayanan)),
+                      const Divider(height: 26, thickness: 0.8),
                       _row(
                         "Total Pembayaran",
-                        "Rp $totalAkhir",
+                        rupiah.format(totalAkhir),
                         bold: true,
-                        color: brown,
+                        color: AppColors.primary,
                       ),
                     ],
                   ),
@@ -228,13 +334,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
           ),
 
-          // ===================== FOOTER =====================
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.07), blurRadius: 6),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 6,
+                ),
               ],
             ),
             child: Row(
@@ -248,20 +356,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Rp $totalAkhir",
-                      style: TextStyle(
+                      rupiah.format(totalAkhir),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
-                        color: brown,
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
                 ),
+
                 SizedBox(
                   width: 150,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brown,
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -289,8 +398,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
     );
   }
-
-  // ================= reusable widgets =================
 
   Widget _sectionHeader(String title) {
     return Padding(

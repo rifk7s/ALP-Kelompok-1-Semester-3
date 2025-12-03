@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -11,10 +12,10 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
+        backgroundColor: AppColors.surface,
         elevation: 1,
         centerTitle: true,
         title: const Text(
@@ -67,7 +68,7 @@ class _NotificationPageState extends State<NotificationPage> {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(color: Color(0xFFFFFBF0)),
+      decoration: const BoxDecoration(color: AppColors.surface),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,7 +80,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   color: const Color(0xFFFFEDE7),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: const Color(0xFF8A6B4F), size: 22),
+                child: Icon(icon, color: AppColors.primary, size: 22),
               ),
 
               const SizedBox(width: 14),

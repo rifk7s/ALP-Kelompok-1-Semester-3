@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/auth/screens/notification_screen.dart';
+import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
 import 'chat_detail_page.dart';
 
 class ContactPage extends StatefulWidget {
@@ -63,16 +66,15 @@ class _ContactPageState extends State<ContactPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-              width: double.infinity,
-              color: const Color(0xFFFFFBF0),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              color: AppColors.surface,
               child: Stack(
+                alignment: Alignment.center,
                 children: [
                   const Center(
                     child: Text(
@@ -83,14 +85,33 @@ class _ContactPageState extends State<ContactPage> {
                       ),
                     ),
                   ),
-                  const Positioned(
+                  Positioned(
                     right: 0,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.shopping_cart_outlined),
-                        SizedBox(width: 12),
-                        Icon(Icons.notifications_outlined),
+                        IconButton(
+                          icon: const Icon(Icons.shopping_cart_outlined),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CartPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.notifications_outlined),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotificationPage(),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -136,15 +157,43 @@ class _ContactPageState extends State<ContactPage> {
                         style: TextStyle(color: Colors.black54),
                       ),
                     )
-                  : ListView.builder(
+                  : ListView.separated(
                       itemCount: _filteredChats.length,
+                      separatorBuilder: (_, __) => const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xFFEDEDED),
+                      ),
                       itemBuilder: (context, index) {
                         final chat = _filteredChats[index];
-                        return chatItem(
-                          name: chat['name']!,
-                          message: chat['message']!,
-                          time: chat['time']!,
-                          image: chat['image']!,
+                        return ListTile(
+                          leading: CircleAvatar(
+                            radius: 28,
+                            backgroundImage: AssetImage(chat['image']!),
+                          ),
+                          title: Text(
+                            chat['name']!,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(chat['message']!),
+                          trailing: Text(
+                            chat['time']!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatDetailPage(
+                                  name: chat['name']!,
+                                  image: chat['image']!,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -152,40 +201,6 @@ class _ContactPageState extends State<ContactPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget chatItem({
-    required String name,
-    required String message,
-    required String time,
-    required String image,
-  }) {
-    return Column(
-      children: [
-        ListTile(
-          leading: CircleAvatar(radius: 28, backgroundImage: AssetImage(image)),
-          title: Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(message),
-          trailing: Text(
-            time,
-            style: const TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatDetailPage(name: name, image: image),
-              ),
-            );
-          },
-        ),
-
-        const Divider(height: 1, thickness: 1, color: Color(0xFFEDEDED)),
-      ],
     );
   }
 }

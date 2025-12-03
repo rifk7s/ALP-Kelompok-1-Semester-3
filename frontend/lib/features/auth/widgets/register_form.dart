@@ -18,38 +18,25 @@ class _RegisterFormState extends State<RegisterForm> {
       children: [
         const Text(
           'Nama',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
-          decoration: const InputDecoration(
-            hintText: 'Masukkan Nama Lengkap',
-          ),
+          decoration: const InputDecoration(hintText: 'Masukkan Nama Lengkap'),
         ),
         const SizedBox(height: 16),
         const Text(
           'Nomor HP',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
-          decoration: const InputDecoration(
-            hintText: 'Masukkan Nomor HP',
-          ),
+          decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
         ),
         const SizedBox(height: 16),
         const Text(
           'Atur Kata Sandi',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -72,16 +59,11 @@ class _RegisterFormState extends State<RegisterForm> {
         const SizedBox(height: 16),
         const Text(
           'Alamat',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
-          decoration: const InputDecoration(
-            hintText: 'Masukkan Alamat',
-          ),
+          decoration: const InputDecoration(hintText: 'Masukkan Alamat'),
         ),
         const SizedBox(height: 24),
         ElevatedButton(

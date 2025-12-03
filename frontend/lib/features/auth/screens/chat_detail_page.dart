@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String name;
@@ -132,9 +133,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF0),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         titleSpacing: 0,
         title: Row(
@@ -273,7 +274,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                   onTap: sendMessage,
                   child: const CircleAvatar(
                     radius: 22,
-                    backgroundColor: Color(0xFF8A6B4F),
+                    backgroundColor: AppColors.primary,
                     child: Icon(Icons.send, color: Colors.white),
                   ),
                 ),

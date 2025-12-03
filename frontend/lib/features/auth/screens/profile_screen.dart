@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
 
-// IMPORT PAGE
 import 'package:frontend/features/auth/screens/setting_screen.dart';
 import 'package:frontend/features/auth/screens/help_screen.dart';
+import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,7 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8A6B4F),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
@@ -124,11 +125,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    // 🔵 TRANSAKSI (masih kosong onTapnya)
-                    profileCard('Transaksi', Icons.description_outlined, () {}),
+                    profileCard('Transaksi', Icons.description_outlined, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TransactionHistoryPage(),
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 12),
 
-                    // 🔵 PENGATURAN (SUDAH TERHUBUNG)
                     profileCard('Pengaturan', Icons.settings_outlined, () {
                       Navigator.push(
                         context,
@@ -137,7 +143,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     }),
                     const SizedBox(height: 12),
 
-                    // 🔵 BANTUAN (SUDAH TERHUBUNG)
                     profileCard('Bantuan', Icons.help_outline, () {
                       Navigator.push(
                         context,
@@ -210,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              backgroundColor: const Color(0xFFFFFBF0),
+              backgroundColor: AppColors.surface,
               child: Container(
                 width: 260,
                 height: 170,
@@ -249,17 +254,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 88,
                             height: 31,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFFBF0),
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: const Color(0xFF886800),
-                              ),
+                              border: Border.all(color: AppColors.primary),
                             ),
                             alignment: Alignment.center,
                             child: const Text(
                               "Ya",
                               style: TextStyle(
-                                color: Color(0xFF8A6B4F),
+                                color: AppColors.primary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -275,7 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 88,
                             height: 31,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8A6B4F),
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             alignment: Alignment.center,
@@ -301,7 +304,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // 🔥 UPDATE: profileCard sekarang ada parameter onTap
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
     return Card(
       elevation: 2,
