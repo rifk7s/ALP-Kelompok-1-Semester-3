@@ -20,8 +20,6 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Delay 2 detik lalu ke receipt page
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       Navigator.pushReplacement(

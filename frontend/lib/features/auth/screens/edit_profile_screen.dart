@@ -54,14 +54,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     backgroundImage: AssetImage("assets/images/profile.png"),
                   ),
 
-                  // Ikon pensil
                   Positioned(
                     bottom: -4,
                     right: -4,
                     child: GestureDetector(
-                      onTap: () {
-                        // aksi ganti foto
-                      },
+                      onTap: () {},
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(

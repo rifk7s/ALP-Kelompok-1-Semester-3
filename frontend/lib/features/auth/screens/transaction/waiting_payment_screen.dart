@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'success_payment_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
@@ -20,8 +21,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
   @override
   void initState() {
     super.initState();
-
-    // Auto navigate ke success payment setelah 3 detik
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -35,12 +34,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
       );
     });
 
-    // Timer countdown tampilan
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (remainingTime.inSeconds > 0) {
-        setState(() {
-          remainingTime -= const Duration(seconds: 1);
-        });
+        setState(() => remainingTime -= const Duration(seconds: 1));
       } else {
         timer.cancel();
       }
@@ -54,8 +50,17 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
   }
 
   String formatTime(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+    String two(int n) => n.toString().padLeft(2, '0');
+    return "${two(d.inMinutes.remainder(60))}:${two(d.inSeconds.remainder(60))}";
+  }
+
+  String formatCurrency(int number) {
+    final f = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return f.format(number);
   }
 
   @override
@@ -65,69 +70,62 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F4EC),
       appBar: AppBar(
-        title: const Text("Menunggu Pembayaran"),
         backgroundColor: brown,
         foregroundColor: Colors.white,
+        title: const Text("Menunggu Pembayaran"),
+        elevation: 0,
       ),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: _boxDecoration(),
+          _section(
             child: Row(
               children: [
-                Icon(Icons.pending_actions, color: brown, size: 34),
+                Icon(Icons.hourglass_top_rounded, size: 40, color: brown),
                 const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Menunggu Pembayaran",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.timer, size: 16, color: Colors.red),
-                        const SizedBox(width: 6),
-                        Text(
-                          "Batas waktu: ${formatTime(remainingTime)}",
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                          ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Menunggu Pembayaran",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: _boxDecoration(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Total Pembayaran",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "Rp ${widget.totalPayment}",
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: brown,
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.timer,
+                              color: Colors.red,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Sisa waktu: ${formatTime(remainingTime)}",
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -136,50 +134,114 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
 
           const SizedBox(height: 20),
 
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: _boxDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          _section(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  "Transfer ke",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  "Total Pembayaran",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
-                _infoRow("Bank", "BCA"),
-                _infoRow("No. Rekening", "1234566"),
-                _infoRow("A.n", "Bumdes Desa Sengka"),
+                Text(
+                  formatCurrency(widget.totalPayment),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: brown,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ],
             ),
           ),
 
           const SizedBox(height: 20),
 
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: _boxDecoration(),
-            child: _infoRow("Nomor Pesanan", orderId),
+          _section(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Transfer ke Rekening",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                _infoRow("Bank", "BCA"),
+                _infoRow("No. Rekening", "1234566"),
+                _infoRow("A.n", "Bumdes Desa Sengka"),
+
+                const SizedBox(height: 14),
+                Divider(),
+
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Icon(Icons.copy_rounded, color: brown),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Salin No. Rekening",
+                      style: TextStyle(
+                        color: brown,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(Icons.chevron_right, color: brown),
+                  ],
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 20),
+
+          _section(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Nomor Pesanan",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    orderId,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
 
-  // UI Helpers
-  BoxDecoration _boxDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          blurRadius: 6,
-          color: Colors.black.withValues(alpha: 0.08),
-          offset: const Offset(0, 3),
-        ),
-      ],
+  Widget _section({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 

@@ -40,6 +40,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   ];
 
   String _filter = 'all';
+  String _search = '';
 
   Future<void> _refresh() async {
     await Future.delayed(const Duration(milliseconds: 600));
@@ -49,8 +50,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   }
 
   List<Map<String, dynamic>> get _filteredTransactions {
-    if (_filter == 'all') return _transactions;
-    return _transactions.where((t) => t['status'] == _filter).toList();
+    final list = _filter == 'all'
+        ? _transactions
+        : _transactions.where((t) => t['status'] == _filter).toList();
+
+    if (_search.trim().isEmpty) return list;
+
+    final q = _search.toLowerCase();
+    return list.where((t) {
+      return (t['id'] as String).toLowerCase().contains(q) ||
+          (t['title'] as String).toLowerCase().contains(q) ||
+          (t['amount'] as String).toLowerCase().contains(q);
+    }).toList();
   }
 
   Color _statusColor(String status) {
@@ -86,6 +97,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
+        final status = trx['status'] as String;
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -100,11 +112,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Chip(
-                    label: Text(_localizedStatus(trx['status'])),
-                    backgroundColor: _statusColor(
-                      trx['status'],
-                    ).withValues(alpha:0.15),
-                    labelStyle: TextStyle(color: _statusColor(trx['status'])),
+                    label: Text(_localizedStatus(status)),
+                    backgroundColor: _statusColor(status).withOpacity(0.12),
+                    labelStyle: TextStyle(color: _statusColor(status)),
                   ),
                 ],
               ),
@@ -134,13 +144,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                 style: const TextStyle(fontSize: 15),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Tutup'),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Tutup'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  if (status == 'pending')
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Lihat Instruksi'),
+                      ),
+                    ),
+                ],
               ),
+              const SizedBox(height: 8),
             ],
           ),
         );
@@ -150,50 +174,73 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Container(
         color: const Color(0xFFFFFBF0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
-            const Text(
-              'Riwayat Transaksi',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(height: 4),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                const Center(
+                  child: Text(
+                    "Riwayat Transaksi",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    onPressed: _refresh,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Segarkan',
+                  ),
+                ),
+              ],
             ),
+
             const SizedBox(height: 8),
 
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Cari ID, judul, atau jumlah...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (v) => setState(() => _search = v),
+            ),
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
                 children: [
-                  ChoiceChip(
-                    label: const Text('Semua'),
-                    selected: _filter == 'all',
-                    onSelected: (_) => setState(() => _filter = 'all'),
-                  ),
+                  _buildFilterChip('all', 'Semua'),
                   const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('Selesai'),
-                    selected: _filter == 'completed',
-                    onSelected: (_) => setState(() => _filter = 'completed'),
-                  ),
+                  _buildFilterChip('completed', 'Selesai'),
                   const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('Menunggu'),
-                    selected: _filter == 'pending',
-                    onSelected: (_) => setState(() => _filter = 'pending'),
-                  ),
+                  _buildFilterChip('pending', 'Menunggu'),
                   const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('Dibatalkan'),
-                    selected: _filter == 'canceled',
-                    onSelected: (_) => setState(() => _filter = 'canceled'),
-                  ),
+                  _buildFilterChip('canceled', 'Dibatalkan'),
                 ],
               ),
             ),
+
             const SizedBox(height: 12),
 
             Expanded(
@@ -202,65 +249,151 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                 child: _filteredTransactions.isEmpty
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          SizedBox(height: 60),
-                          Center(child: Text('Tidak ada transaksi')),
+                        children: [
+                          const SizedBox(height: 60),
+                          Column(
+                            children: [
+                              Icon(
+                                Icons.history,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Tidak ada transaksi',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: _refresh,
+                                child: const Text('Muat ulang'),
+                              ),
+                            ],
+                          ),
                         ],
                       )
-                    : ListView.builder(
+                    : ListView.separated(
                         physics: const BouncingScrollPhysics(),
                         itemCount: _filteredTransactions.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
                         itemBuilder: (context, index) {
                           final trx = _filteredTransactions[index];
+                          final status = trx['status'] as String;
+                          final color = _statusColor(status);
+
                           return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 20.0, end: 0.0),
+                            tween: Tween(begin: 10.0, end: 0.0),
                             duration: Duration(
-                              milliseconds: 350 + (index * 50),
+                              milliseconds: 300 + (index * 30),
                             ),
                             builder: (context, value, child) {
                               return Transform.translate(
                                 offset: Offset(0, value),
                                 child: Opacity(
-                                  opacity: 1 - (value / 40),
+                                  opacity: 1 - (value / 20),
                                   child: child,
                                 ),
                               );
                             },
-                            child: Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              child: ListTile(
-                                onTap: () => _showDetails(trx),
-                                leading: CircleAvatar(
-                                  backgroundColor: _statusColor(
-                                    trx['status'],
-                                  ).withValues(alpha:0.12),
-                                  child: Icon(
-                                    trx['status'] == 'completed'
-                                        ? Icons.check_circle
-                                        : trx['status'] == 'pending'
-                                        ? Icons.hourglass_top
-                                        : Icons.cancel,
-                                    color: _statusColor(trx['status']),
-                                  ),
+                            child: GestureDetector(
+                              onTap: () => _showDetails(trx),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
                                 ),
-                                title: Text(trx['title']),
-                                subtitle: Text(trx['date']),
-                                trailing: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      trx['amount'],
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                    Container(
+                                      width: 6,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      _localizedStatus(trx['status']),
-                                      style: TextStyle(
-                                        color: _statusColor(trx['status']),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            trx['title'],
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                trx['id'],
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              const Icon(
+                                                Icons.calendar_today,
+                                                size: 12,
+                                                color: Colors.grey,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                trx['date'],
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          trx['amount'],
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            _localizedStatus(status),
+                                            style: TextStyle(
+                                              color: color,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -274,6 +407,21 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterChip(String key, String label) {
+    final selected = _filter == key;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _filter = key),
+      selectedColor: Colors.brown[100],
+      backgroundColor: Colors.white,
+      labelStyle: TextStyle(
+        color: selected ? Colors.brown[800] : Colors.black87,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
     );
   }
 }

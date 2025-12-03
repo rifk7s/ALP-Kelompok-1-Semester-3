@@ -3,9 +3,9 @@ import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
 
-// IMPORT PAGE
 import 'package:frontend/features/auth/screens/setting_screen.dart';
 import 'package:frontend/features/auth/screens/help_screen.dart';
+import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -124,11 +124,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    // 🔵 TRANSAKSI (masih kosong onTapnya)
-                    profileCard('Transaksi', Icons.description_outlined, () {}),
+                    profileCard('Transaksi', Icons.description_outlined, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TransactionHistoryPage(),
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 12),
 
-                    // 🔵 PENGATURAN (SUDAH TERHUBUNG)
                     profileCard('Pengaturan', Icons.settings_outlined, () {
                       Navigator.push(
                         context,
@@ -137,7 +142,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     }),
                     const SizedBox(height: 12),
 
-                    // 🔵 BANTUAN (SUDAH TERHUBUNG)
                     profileCard('Bantuan', Icons.help_outline, () {
                       Navigator.push(
                         context,
@@ -301,7 +305,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // 🔥 UPDATE: profileCard sekarang ada parameter onTap
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
     return Card(
       elevation: 2,
