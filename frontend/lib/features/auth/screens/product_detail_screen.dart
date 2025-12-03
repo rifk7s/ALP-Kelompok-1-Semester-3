@@ -177,7 +177,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.brown.withOpacity(0.08), blurRadius: 10),
+          BoxShadow(color: Colors.brown.withValues(alpha: 0.08), blurRadius: 10),
         ],
       ),
       child: Row(
@@ -504,7 +504,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.brown.withOpacity(0.25),
+              color: Colors.brown.withValues(alpha: 0.25),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -530,7 +530,7 @@ class SectionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.brown.withOpacity(0.08), blurRadius: 10),
+          BoxShadow(color: Colors.brown.withValues(alpha: 0.08), blurRadius: 10),
         ],
       ),
       child: Column(

@@ -61,7 +61,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: brown.withOpacity(0.12),
+                          color: brown.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(Icons.location_on, color: brown, size: 28),
@@ -183,7 +183,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: brown.withOpacity(0.12),
+                          color: brown.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(Icons.account_balance_wallet, color: brown),
@@ -224,7 +224,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<String>(
-                        value: shippingMethod,
+                        initialValue: shippingMethod,
                         decoration: InputDecoration(
                           labelText: "Metode Pengiriman",
                           labelStyle: const TextStyle(
@@ -329,7 +329,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 6),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 6),
               ],
             ),
             child: Row(
@@ -410,7 +410,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         boxShadow: [
           BoxShadow(
             blurRadius: 6,
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             offset: const Offset(0, 3),
           ),
         ],

@@ -113,7 +113,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                   ),
                   Chip(
                     label: Text(_localizedStatus(status)),
-                    backgroundColor: _statusColor(status).withOpacity(0.12),
+                    backgroundColor: _statusColor(status).withValues(alpha: 0.12),
                     labelStyle: TextStyle(color: _statusColor(status)),
                   ),
                 ],
@@ -174,7 +174,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     return Material(
       color: const Color(0xFFFFFBF0),
       child: SafeArea(
@@ -304,7 +304,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: Colors.black.withValues(alpha: 0.04),
                                       blurRadius: 8,
                                     ),
                                   ],
@@ -380,7 +380,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                             vertical: 6,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: color.withOpacity(0.12),
+                                            color: color.withValues(alpha: 0.12),
                                             borderRadius: BorderRadius.circular(
                                               20,
                                             ),

@@ -39,7 +39,7 @@ class ReceiptPage extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   blurRadius: 6,
-                  color: Colors.black.withOpacity(0.07),
+                  color: Colors.black.withValues(alpha: 0.07),
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -49,7 +49,7 @@ class ReceiptPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: brown.withOpacity(0.15),
+                    color: brown.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

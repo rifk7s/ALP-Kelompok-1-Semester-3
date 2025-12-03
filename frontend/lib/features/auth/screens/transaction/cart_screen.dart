@@ -140,7 +140,7 @@ class _CartPageState extends State<CartPage> {
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 6,
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           offset: const Offset(0, 3),
                         ),
                       ],
@@ -276,7 +276,7 @@ class _CartPageState extends State<CartPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8),
           ],
         ),
         child: Column(
@@ -401,7 +401,7 @@ Widget productCard({
           BoxShadow(
             blurRadius: 6,
             offset: const Offset(0, 3),
-            color: Colors.black.withOpacity(0.10),
+            color: Colors.black.withValues(alpha: 0.10),
           ),
         ],
       ),
