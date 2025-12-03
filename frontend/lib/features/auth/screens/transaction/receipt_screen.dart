@@ -77,10 +77,18 @@ class ReceiptPage extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                _detailRow("Total Pembayaran", formatRupiah(total), AppColors.primary),
+                _detailRow(
+                  "Total Pembayaran",
+                  formatRupiah(total),
+                  AppColors.primary,
+                ),
                 const SizedBox(height: 10),
 
-                _detailRow("Metode Pembayaran", "Transfer Bank (BCA)", AppColors.primary),
+                _detailRow(
+                  "Metode Pembayaran",
+                  "Transfer Bank (BCA)",
+                  AppColors.primary,
+                ),
                 const SizedBox(height: 10),
 
                 Row(

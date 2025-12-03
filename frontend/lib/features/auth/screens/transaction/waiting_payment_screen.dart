@@ -81,7 +81,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
           _section(
             child: Row(
               children: [
-                const Icon(Icons.hourglass_top_rounded, size: 40, color: AppColors.primary),
+                const Icon(
+                  Icons.hourglass_top_rounded,
+                  size: 40,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(

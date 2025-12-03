@@ -31,9 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     width: 162,
                     height: 163,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
                     child: ClipOval(
                       child: Image.asset(
                         'assets/images/logo.png',
@@ -113,11 +111,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               onTap: () {
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
                                 );
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 child: const Center(
                                   child: Text(
                                     'Masuk',
@@ -205,7 +207,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: 'Masukkan Kata Sandi',
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: AppColors.textSecondary,
                           ),
                           onPressed: () {

@@ -47,7 +47,11 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
                 shape: BoxShape.circle,
                 color: AppColors.primaryLight,
               ),
-              child: const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 90),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.primary,
+                size: 90,
+              ),
             ),
             const SizedBox(height: 20),
             const Text(

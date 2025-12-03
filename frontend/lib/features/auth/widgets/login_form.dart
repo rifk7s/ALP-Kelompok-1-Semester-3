@@ -100,10 +100,7 @@ class _LoginFormState extends State<LoginForm> {
             const SizedBox(height: 8),
             const Text(
               'Login untuk melanjutkan',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),

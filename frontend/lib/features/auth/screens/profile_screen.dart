@@ -256,9 +256,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: AppColors.primary,
-                              ),
+                              border: Border.all(color: AppColors.primary),
                             ),
                             alignment: Alignment.center,
                             child: const Text(

@@ -63,7 +63,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.location_on, color: AppColors.primary, size: 28),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: AppColors.primary,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 14),
 
@@ -185,7 +189,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.account_balance_wallet, color: AppColors.primary),
+                        child: const Icon(
+                          Icons.account_balance_wallet,
+                          color: AppColors.primary,
+                        ),
                       ),
                       const SizedBox(width: 12),
 
@@ -269,7 +276,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                       Row(
                         children: [
-                          const Icon(Icons.local_shipping, size: 22, color: AppColors.primary),
+                          const Icon(
+                            Icons.local_shipping,
+                            size: 22,
+                            color: AppColors.primary,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             "Estimasi tiba: $estimatedArrival",
@@ -328,7 +339,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 6),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 6,
+                ),
               ],
             ),
             child: Row(

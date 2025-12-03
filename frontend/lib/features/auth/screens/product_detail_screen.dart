@@ -177,9 +177,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),
       child: Row(
         children: [
@@ -213,7 +211,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               );
             },
-            child: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+            child: const Icon(
+              Icons.chat_bubble_outline,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),
@@ -314,11 +315,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           },
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primaryLight,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Text(
                               tempQty.toString(),
@@ -438,14 +444,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  void _showQtyInputDialog(BuildContext context, int currentQty, Function(int) onConfirm) {
+  void _showQtyInputDialog(
+    BuildContext context,
+    int currentQty,
+    Function(int) onConfirm,
+  ) {
     final controller = TextEditingController(text: currentQty.toString());
-    
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           title: const Text(
             "Masukkan Jumlah",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -458,13 +470,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             decoration: InputDecoration(
               hintText: "Jumlah",
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
               ),
             ),
           ),
@@ -530,9 +548,7 @@ class SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
