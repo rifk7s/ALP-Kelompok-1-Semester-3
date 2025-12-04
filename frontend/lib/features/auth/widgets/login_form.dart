@@ -123,7 +123,7 @@ class _LoginFormState extends State<LoginForm> {
           onPressed: () {},
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -149,7 +149,7 @@ class _LoginFormState extends State<LoginForm> {
           label: const Text('Masuk menggunakan Facebook'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

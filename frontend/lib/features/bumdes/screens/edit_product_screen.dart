@@ -72,9 +72,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     if (!mounted) return;
     if (picked.isNotEmpty) {
       if (images.length + picked.length > 5) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Maksimal 5 foto")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
         return;
       }
       setState(() {

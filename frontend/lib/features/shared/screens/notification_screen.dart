@@ -77,7 +77,7 @@ class _NotificationPageState extends State<NotificationPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFEDE7),
+                  color: AppColors.notificationCard,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 22),
@@ -119,7 +119,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
 
           const SizedBox(height: 12),
-          Container(height: 1, color: Color(0xFFE9DAC7)),
+          Container(height: 1, color: AppColors.notificationDivider),
         ],
       ),
     );

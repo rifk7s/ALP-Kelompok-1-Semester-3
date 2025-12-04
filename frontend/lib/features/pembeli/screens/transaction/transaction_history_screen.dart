@@ -20,7 +20,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       'seller': 'BUMDes Desa Sengka',
       'products': [
         {'name': 'Gabah Kering', 'qty': 50, 'image': 'assets/images/gabah.jpg'},
-        {'name': 'Jagung Pipilan', 'qty': 30, 'image': 'assets/images/gabah.jpg'},
+        {
+          'name': 'Jagung Pipilan',
+          'qty': 30,
+          'image': 'assets/images/gabah.jpg',
+        },
       ],
       'total': 501000,
       'status': 'pending',
@@ -31,7 +35,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       'id': '#ORD-2025-002',
       'seller': 'BUMDes Desa Sengka',
       'products': [
-        {'name': 'Gabah Kering', 'qty': 100, 'image': 'assets/images/gabah.jpg'},
+        {
+          'name': 'Gabah Kering',
+          'qty': 100,
+          'image': 'assets/images/gabah.jpg',
+        },
       ],
       'total': 650000,
       'status': 'processing',
@@ -42,7 +50,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       'id': '#ORD-2025-003',
       'seller': 'BUMDes Desa Sengka',
       'products': [
-        {'name': 'Padi Ciherang', 'qty': 25, 'image': 'assets/images/gabah.jpg'},
+        {
+          'name': 'Padi Ciherang',
+          'qty': 25,
+          'image': 'assets/images/gabah.jpg',
+        },
       ],
       'total': 200000,
       'status': 'completed',
@@ -67,10 +79,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   String _formatRupiah(int amount) {
-    return 'Rp ${amount.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
-        )}';
+    return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
   }
 
   @override
@@ -126,8 +135,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               status == 'pending'
                   ? Icons.payment_outlined
                   : status == 'processing'
-                      ? Icons.local_shipping_outlined
-                      : Icons.check_circle_outline,
+                  ? Icons.local_shipping_outlined
+                  : Icons.check_circle_outline,
               size: 64,
               color: Colors.grey[400],
             ),
@@ -136,8 +145,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               status == 'pending'
                   ? 'Tidak ada pesanan yang belum dibayar'
                   : status == 'processing'
-                      ? 'Tidak ada pesanan yang sedang diproses'
-                      : 'Belum ada pesanan selesai',
+                  ? 'Tidak ada pesanan yang sedang diproses'
+                  : 'Belum ada pesanan selesai',
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -180,7 +189,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: _getStatusColor(status).withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -200,10 +211,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 const Spacer(),
                 Text(
                   order['id'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -255,10 +263,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       const SizedBox(height: 4),
                       Text(
                         '${products.fold(0, (sum, p) => sum + (p['qty'] as int))} kg',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -427,9 +432,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => WaitingPaymentPage(
-                      totalPayment: order['total'],
-                    ),
+                    builder: (_) =>
+                        WaitingPaymentPage(totalPayment: order['total']),
                   ),
                 );
               },

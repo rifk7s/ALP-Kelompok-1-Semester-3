@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFFE8DCC6),
+                            color: AppColors.logoPlaceholder,
                             child: const Icon(
                               Icons.agriculture,
                               size: 50,
@@ -257,7 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFE0E0E0)),
+                        border: Border.all(color: AppColors.border),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(

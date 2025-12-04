@@ -150,7 +150,7 @@ class _ContactPageState extends State<ContactPage> {
                       separatorBuilder: (_, __) => const Divider(
                         height: 1,
                         thickness: 1,
-                        color: Color(0xFFEDEDED),
+                        color: AppColors.divider,
                       ),
                       itemBuilder: (context, index) {
                         final chat = _filteredChats[index];

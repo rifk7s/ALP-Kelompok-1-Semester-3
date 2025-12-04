@@ -154,7 +154,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                           _showLogoutConfirmationDialog(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD81B1B),
+                          backgroundColor: AppColors.danger,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -303,7 +303,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
     return Card(
       elevation: 2,
-      color: const Color(0xFFFFE7C0),
+      color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(icon, color: Colors.black87),

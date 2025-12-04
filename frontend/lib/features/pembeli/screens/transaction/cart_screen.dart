@@ -265,7 +265,7 @@ class _CartPageState extends State<CartPage> {
 
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1EBE3),
+                            color: AppColors.cartQtyBackground,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -285,7 +285,9 @@ class _CartPageState extends State<CartPage> {
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: AppColors.primary.withValues(alpha: 0.3),
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
                                     ),
                                   ),
                                   child: Text(

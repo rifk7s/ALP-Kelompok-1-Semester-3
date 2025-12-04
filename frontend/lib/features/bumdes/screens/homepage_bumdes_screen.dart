@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 import 'upload_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'petani/manage_screen.dart';
@@ -14,7 +15,7 @@ class HomePageBumdes extends StatelessWidget {
     const horizontalPadding = 20.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -151,7 +152,7 @@ class HomePageBumdes extends StatelessWidget {
 
       floatingActionButton: FloatingActionButton(
         heroTag: null,
-        backgroundColor: const Color(0xFF8A6B4F),
+        backgroundColor: AppColors.primary,
         onPressed: () {
           Navigator.push(
             context,
@@ -189,7 +190,7 @@ class HomePageBumdes extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 30, color: const Color(0xFF8A6B4F)),
+            Icon(icon, size: 30, color: AppColors.primary),
             const SizedBox(height: 12),
             Text(
               title,

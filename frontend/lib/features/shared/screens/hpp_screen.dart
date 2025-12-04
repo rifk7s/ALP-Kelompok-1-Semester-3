@@ -34,7 +34,7 @@ class HppPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF7C896),
+                  color: AppColors.hppHeader,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -258,7 +258,7 @@ class HppPage extends StatelessWidget {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFF6D7A8),
+        color: AppColors.hppCard,
         borderRadius: BorderRadius.circular(14),
       ),
       child: const Icon(

@@ -33,7 +33,7 @@ class SettingsPage extends StatelessWidget {
   Widget _settingItem(String title, IconData icon) {
     return Card(
       elevation: 2,
-      color: const Color(0xFFFFE7C0),
+      color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(icon, color: Colors.black87),

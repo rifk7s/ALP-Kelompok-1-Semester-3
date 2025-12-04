@@ -170,7 +170,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF8A6B4F),
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -193,7 +193,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 1,
@@ -220,7 +220,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   icon: const Icon(Icons.add_a_photo),
                   label: const Text("Upload Foto"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8A6B4F),
+                    backgroundColor: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -450,7 +450,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 showSuccessPopup();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8A6B4F),
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

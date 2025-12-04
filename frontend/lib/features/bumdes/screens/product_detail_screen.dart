@@ -33,7 +33,7 @@ class ProductDetailPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Color(0xFF8A6B4F)),
+            icon: const Icon(Icons.edit, color: AppColors.primary),
             onPressed: () async {
               final result = await Navigator.push<Map<String, dynamic>>(
                 context,
@@ -67,8 +67,9 @@ class ProductDetailPage extends StatelessWidget {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                               ),
                               child: const Text("Batal"),
                             ),
@@ -85,8 +86,9 @@ class ProductDetailPage extends StatelessWidget {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                               ),
                               child: const Text("Hapus"),
                             ),
@@ -131,18 +133,18 @@ class ProductDetailPage extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: product['images'] != null && product['images'].isNotEmpty
           ? (product['images'][0] is File
-              ? Image.file(
-                  product['images'][0],
-                  height: 230,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                )
-              : Image.asset(
-                  product['images'][0],
-                  height: 230,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ))
+                ? Image.file(
+                    product['images'][0],
+                    height: 230,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    product['images'][0],
+                    height: 230,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ))
           : Image.asset(
               "assets/images/gabah.jpg",
               height: 230,

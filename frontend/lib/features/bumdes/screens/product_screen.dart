@@ -171,7 +171,7 @@ class _ProductPageState extends State<ProductPage> {
 
       floatingActionButton: FloatingActionButton(
         heroTag: "addProdukFab",
-        backgroundColor: const Color(0xFF8A6B4F),
+        backgroundColor: AppColors.primary,
         onPressed: () {
           Navigator.push(
             context,
@@ -259,13 +259,13 @@ class _ProductPageState extends State<ProductPage> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFFEFEFEF),
+                  color: AppColors.imagePlaceholder,
                   image: product['images'].isNotEmpty
                       ? DecorationImage(
                           image: product['images'][0] is File
                               ? FileImage(product['images'][0])
                               : AssetImage(product['images'][0])
-                                  as ImageProvider,
+                                    as ImageProvider,
                           fit: BoxFit.cover,
                         )
                       : null,

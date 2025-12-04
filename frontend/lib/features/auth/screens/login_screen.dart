@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFFE8DCC6),
+                            color: AppColors.logoPlaceholder,
                             child: const Icon(
                               Icons.agriculture,
                               size: 50,
@@ -280,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: const Text('Masuk menggunakan Google'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        side: const BorderSide(color: AppColors.border),
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -298,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: const Text('Masuk menggunakan Facebook'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        side: const BorderSide(color: AppColors.border),
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

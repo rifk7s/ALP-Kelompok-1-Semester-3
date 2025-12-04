@@ -137,7 +137,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFFFE7C0),
+            fillColor: AppColors.cardBackground,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 15,
               vertical: 12,

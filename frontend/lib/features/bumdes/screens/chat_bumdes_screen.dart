@@ -190,8 +190,8 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                     ),
                     decoration: BoxDecoration(
                       color: fromMe
-                          ? const Color(0xFFDCB285)
-                          : const Color(0xFFFFEDBD),
+                          ? AppColors.chatBubbleSent
+                          : AppColors.chatBubbleReceived,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(18),
                         topRight: const Radius.circular(18),
@@ -230,7 +230,9 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: const BoxDecoration(color: Color(0xFFFFF1CB)),
+            decoration: const BoxDecoration(
+              color: AppColors.chatInputBackground,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -240,7 +242,7 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFEEC5),
+                      color: AppColors.chatInputField,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(

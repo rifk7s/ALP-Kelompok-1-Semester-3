@@ -295,7 +295,7 @@ class _HomePageState extends State<HomePage> {
                         child: const Text(
                           "Hapus Filter",
                           style: TextStyle(
-                            color: Color(0xFFD81B1B),
+                            color: AppColors.danger,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -449,7 +449,7 @@ Widget kategoriItem(
           Text(
             title,
             style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF505050),
+              color: isSelected ? Colors.white : AppColors.textDark,
               fontWeight: FontWeight.w500,
               fontSize: 12,
             ),
