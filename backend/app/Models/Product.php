@@ -30,6 +30,16 @@ class Product extends Model
         'category_id',
     ];
 
+    public function carts(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItems::class);
+    }
+
     public function productImages(): HasMany
     {
         return $this->hasMany(ProductImage::class);
