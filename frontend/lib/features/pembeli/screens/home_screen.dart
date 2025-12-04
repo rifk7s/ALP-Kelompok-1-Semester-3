@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/search_screen.dart';
-import 'package:frontend/features/auth/screens/notification_screen.dart';
-import 'package:frontend/features/auth/screens/hpp_screen.dart';
-import 'package:frontend/features/auth/screens/product_detail_screen.dart';
-import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
+import 'package:frontend/features/pembeli/screens/search_screen.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'package:frontend/features/shared/screens/hpp_screen.dart';
+import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

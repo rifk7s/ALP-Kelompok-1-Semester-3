@@ -33,7 +33,7 @@ class ProductDetailPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: const Color(0xFF8A6B4F)),
+            icon: const Icon(Icons.edit, color: Color(0xFF8A6B4F)),
             onPressed: () async {
               final result = await Navigator.push<Map<String, dynamic>>(
                 context,

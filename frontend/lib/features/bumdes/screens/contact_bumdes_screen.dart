@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/notification_screen.dart';
-import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
-import 'chat_detail_page.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'chat_bumdes_screen.dart';
 
-class ContactPage extends StatefulWidget {
-  const ContactPage({super.key});
+class ContactBumdesPage extends StatefulWidget {
+  const ContactBumdesPage({super.key});
 
   @override
-  State<ContactPage> createState() => _ContactPageState();
+  State<ContactBumdesPage> createState() => _ContactBumdesPageState();
 }
 
-class _ContactPageState extends State<ContactPage> {
+class _ContactBumdesPageState extends State<ContactBumdesPage> {
   final TextEditingController _searchController = TextEditingController();
   late List<Map<String, String>> _allChats;
   late List<Map<String, String>> _filteredChats;
@@ -21,13 +20,29 @@ class _ContactPageState extends State<ContactPage> {
     super.initState();
     _allChats = [
       {
-        'name': 'BUMDes Desa Sengka',
+        'name': 'Pembeli 1',
         'message': 'Oke besok saya kirim ya',
         'time': '19.20',
         'image': 'assets/images/logo.png',
       },
+      {
+        'name': 'Pembeli 2',
+        'message': 'Baik kak, sudah diterima',
+        'time': '18.04',
+        'image': 'assets/images/logo.png',
+      },
+      {
+        'name': 'Pembeli 3',
+        'message': 'Siap ditunggu',
+        'time': '16.55',
+        'image': 'assets/images/logo.png',
+      },
     ];
     _filteredChats = List.from(_allChats);
+
+    _searchController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -79,23 +94,12 @@ class _ContactPageState extends State<ContactPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.shopping_cart_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CartPage(),
-                              ),
-                            );
-                          },
-                        ),
-                        IconButton(
                           icon: const Icon(Icons.notifications_outlined),
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const NotificationPage(),
+                                builder: (_) => const NotificationPage(),
                               ),
                             );
                           },
@@ -108,38 +112,35 @@ class _ContactPageState extends State<ContactPage> {
             ),
 
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              margin: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                height: 45,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _filterChats,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: "Cari",
-                    border: InputBorder.none,
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              _filterChats('');
-                            },
-                          )
-                        : null,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _filterChats,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: 'Cari',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(100),
+                    borderSide: BorderSide.none,
                   ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _filterChats('');
+                          },
+                        )
+                      : null,
                 ),
               ),
             ),
 
             Expanded(
               child: _filteredChats.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         'Tidak ada chat',
                         style: TextStyle(color: Colors.black54),
@@ -175,7 +176,7 @@ class _ContactPageState extends State<ContactPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ChatDetailPage(
+                                builder: (_) => ChatBumdesPage(
                                   name: chat['name']!,
                                   image: chat['image']!,
                                 ),

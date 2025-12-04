@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
-import 'package:frontend/start_page.dart';
-import 'package:frontend/start_page_bumdes.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});

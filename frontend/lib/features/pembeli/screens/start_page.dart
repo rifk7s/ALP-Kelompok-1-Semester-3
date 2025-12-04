@@ -3,10 +3,10 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/contact_screen.dart';
-import 'package:frontend/features/auth/screens/home_screen.dart';
-import 'package:frontend/features/auth/screens/profile_screen.dart';
-import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
+import 'package:frontend/features/shared/screens/contact_screen.dart';
+import 'package:frontend/features/pembeli/screens/home_screen.dart';
+import 'package:frontend/features/pembeli/screens/profile_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
-// import 'package:frontend/features/auth/screens/home_screen.dart';
-import 'package:frontend/start_page.dart';
-import 'package:frontend/start_page_bumdes.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/transaction/checkout_screen.dart';
-import 'package:frontend/features/auth/screens/product_detail_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
+import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 
 class CartItem {
   final String name;
@@ -99,6 +99,70 @@ class _CartPageState extends State<CartPage> {
   }
 
   String formatRupiah(int price) => "Rp ${formatter.format(price)}";
+
+  void _showQtyInputDialog(int index, int currentQty) {
+    final controller = TextEditingController(text: currentQty.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          title: const Text(
+            "Masukkan Jumlah (kg)",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+              hintText: "Jumlah",
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Batal",
+                style: TextStyle(color: AppColors.primary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final input = int.tryParse(controller.text) ?? 1;
+                final qty = input < 1 ? 1 : input;
+                Navigator.pop(context);
+                changeQty(index, qty);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: const Text("OK", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,9 +274,28 @@ class _CartPageState extends State<CartPage> {
                                 onPressed: () => changeQty(i, item.qty - 1),
                                 icon: const Icon(Icons.remove, size: 18),
                               ),
-                              Text(
-                                "${item.qty}",
-                                style: const TextStyle(fontSize: 15),
+                              GestureDetector(
+                                onTap: () => _showQtyInputDialog(i, item.qty),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: AppColors.primary.withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "${item.qty}",
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                               IconButton(
                                 onPressed: () => changeQty(i, item.qty + 1),

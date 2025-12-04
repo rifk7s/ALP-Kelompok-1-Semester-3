@@ -62,8 +62,9 @@ class _ProductPageState extends State<ProductPage> {
       if (_searchQuery.isNotEmpty &&
           !p["nama"].toString().toLowerCase().contains(
             _searchQuery.toLowerCase(),
-          ))
+          )) {
         return false;
+      }
       return true;
     }).toList();
     return temp;
@@ -245,7 +246,7 @@ class _ProductPageState extends State<ProductPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),

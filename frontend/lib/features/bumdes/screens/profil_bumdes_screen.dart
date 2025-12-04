@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
-
-import 'package:frontend/features/auth/screens/bumdes/product_screen.dart';
-import 'package:frontend/features/auth/screens/bumdes/edit_profile_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/screens/edit_profile_bumdes_screen.dart';
 
 class ProfileBumdesPage extends StatefulWidget {
   const ProfileBumdesPage({super.key});

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/transaction/receipt_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
 
 class SuccessPaymentScreen extends StatefulWidget {
   final int total;

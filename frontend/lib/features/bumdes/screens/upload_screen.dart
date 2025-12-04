@@ -94,8 +94,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     }
 
     final picked = await _picker.pickMultiImage();
+    if (!mounted) return;
 
-    if (picked != null) {
+    if (picked.isNotEmpty) {
       if (selectedImages.length + picked.length > 5) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Total foto tidak boleh lebih dari 5")),
@@ -169,7 +170,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF8A6B4F),
+              color: Color(0xFF8A6B4F),
             ),
           ),
           const SizedBox(height: 12),
@@ -287,7 +288,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
                 inputLabel("Nama Petani *"),
                 DropdownButtonFormField(
-                  value: selectedPetani,
+                  initialValue: selectedPetani,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.person),
@@ -301,7 +302,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
                 inputLabel("Kategori *"),
                 DropdownButtonFormField(
-                  value: selectedKategori,
+                  initialValue: selectedKategori,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.category),
@@ -338,7 +339,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 if (selectedKategori == "Gabah") ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField(
-                    value: selectedVarietas,
+                    initialValue: selectedVarietas,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),

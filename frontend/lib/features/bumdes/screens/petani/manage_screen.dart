@@ -77,7 +77,7 @@ class KelolaPetaniScreen extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.orangeAccent.withOpacity(0.85),
+                        color: Colors.orangeAccent.withValues(alpha: 0.85),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/product_detail_screen.dart';
+import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});

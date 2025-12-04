@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/start_page.dart';
+import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

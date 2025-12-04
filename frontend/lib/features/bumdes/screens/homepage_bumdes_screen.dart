@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'upload_screen.dart';
-import 'package:frontend/features/auth/screens/notification_screen.dart';
-import 'manage_screen.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'petani/manage_screen.dart';
 
 class HomePageBumdes extends StatelessWidget {
   final VoidCallback? onProductTap;

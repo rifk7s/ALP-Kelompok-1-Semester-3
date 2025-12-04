@@ -69,15 +69,16 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
   Future pickImages() async {
     final picked = await picker.pickMultiImage(imageQuality: 70);
+    if (!mounted) return;
     if (picked.isNotEmpty) {
       if (images.length + picked.length > 5) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Maksimal 5 foto")),
+        );
         return;
       }
       setState(() {
-        images.addAll(picked.map((e) => File(e.path)).toList());
+        images.addAll(picked.map((e) => File(e.path)));
       });
     }
   }
@@ -149,7 +150,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     ),
                   ],
                 );
-              }).toList(),
+              }),
               if (images.length < 5)
                 GestureDetector(
                   onTap: pickImages,
@@ -169,7 +170,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
           const Text("⭐ Kontributor Petani: *"),
           DropdownButtonFormField<String>(
-            value: selectedPetani,
+            initialValue: selectedPetani,
             items: petani
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
@@ -195,7 +196,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
           const Text("Kategori *"),
           DropdownButtonFormField<String>(
-            value: selectedKategori,
+            initialValue: selectedKategori,
             items: kategori
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
@@ -223,7 +224,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           if (selectedKategori == "Gabah") ...[
             const Text("Varietas *"),
             DropdownButtonFormField<String>(
-              value: selectedVarietas,
+              initialValue: selectedVarietas,
               items: varietasGabah
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
