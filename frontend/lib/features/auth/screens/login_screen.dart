@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
 // import 'package:frontend/features/auth/screens/home_screen.dart';
 import 'package:frontend/start_page.dart';
+import 'package:frontend/start_page_bumdes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -251,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                const StartPage(), // PERBAIKAN
+                                const StartPageBumdes(), // PERBAIKAN
                           ),
                         );
                       },

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/start_page.dart';
+import 'package:frontend/start_page_bumdes.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -93,7 +94,7 @@ class _LoginFormState extends State<LoginForm> {
           children: [
             ElevatedButton(
               onPressed: () {
-                context.pushReplacementSmooth(const StartPage());
+                context.pushReplacementSmooth(const StartPageBumdes());
               },
               child: const Text('Masuk'),
             ),
