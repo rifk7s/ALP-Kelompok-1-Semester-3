@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'upload_screen.dart';
 import 'product_detail_screen.dart';
@@ -260,7 +261,10 @@ class _ProductPageState extends State<ProductPage> {
                   color: const Color(0xFFEFEFEF),
                   image: product['images'].isNotEmpty
                       ? DecorationImage(
-                          image: FileImage(product['images'][0]),
+                          image: product['images'][0] is File
+                              ? FileImage(product['images'][0])
+                              : AssetImage(product['images'][0])
+                                  as ImageProvider,
                           fit: BoxFit.cover,
                         )
                       : null,

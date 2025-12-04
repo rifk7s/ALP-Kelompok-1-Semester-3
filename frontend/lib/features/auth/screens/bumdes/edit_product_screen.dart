@@ -47,7 +47,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     _lokasiController.text = widget.data['lokasi'] ?? "";
 
     if (widget.data['images'] != null) {
-      images = List<File>.from(widget.data['images']);
+      for (var img in widget.data['images']) {
+        if (img is File) {
+          images.add(img);
+        }
+      }
     }
 
     if (selectedPetani != null && !petani.contains(selectedPetani)) {

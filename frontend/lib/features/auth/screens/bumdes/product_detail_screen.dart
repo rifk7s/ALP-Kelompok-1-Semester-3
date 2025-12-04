@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'edit_product_screen.dart';
@@ -55,21 +56,43 @@ class ProductDetailPage extends StatelessWidget {
                   content: const Text(
                     "Apakah Anda yakin ingin menghapus produk ini?",
                   ),
+                  actionsAlignment: MainAxisAlignment.spaceEvenly,
                   actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Batal"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        onDelete();
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: const Text("Hapus"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              child: const Text("Batal"),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                onDelete();
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              child: const Text("Hapus"),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -107,12 +130,19 @@ class ProductDetailPage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: product['images'] != null && product['images'].isNotEmpty
-          ? Image.file(
-              product['images'][0],
-              height: 230,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            )
+          ? (product['images'][0] is File
+              ? Image.file(
+                  product['images'][0],
+                  height: 230,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                )
+              : Image.asset(
+                  product['images'][0],
+                  height: 230,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ))
           : Image.asset(
               "assets/images/gabah.jpg",
               height: 230,
