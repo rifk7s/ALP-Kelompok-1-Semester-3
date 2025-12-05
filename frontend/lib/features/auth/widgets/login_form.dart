@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
-import 'package:frontend/start_page.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -93,7 +93,7 @@ class _LoginFormState extends State<LoginForm> {
           children: [
             ElevatedButton(
               onPressed: () {
-                context.pushReplacementSmooth(const StartPage());
+                context.pushReplacementSmooth(const StartPageBumdes());
               },
               child: const Text('Masuk'),
             ),
@@ -123,7 +123,7 @@ class _LoginFormState extends State<LoginForm> {
           onPressed: () {},
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -149,7 +149,7 @@ class _LoginFormState extends State<LoginForm> {
           label: const Text('Masuk menggunakan Facebook'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

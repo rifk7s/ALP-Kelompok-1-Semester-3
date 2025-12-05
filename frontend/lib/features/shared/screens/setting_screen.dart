@@ -24,10 +24,6 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 10),
           _settingItem("Keamanan Akun", Icons.lock_outline),
           const SizedBox(height: 10),
-          _settingItem("Bahasa", Icons.language_outlined),
-          const SizedBox(height: 10),
-          _settingItem("Privasi", Icons.privacy_tip_outlined),
-          const SizedBox(height: 10),
           _settingItem("Tentang Aplikasi", Icons.info_outline),
         ],
       ),
@@ -37,7 +33,7 @@ class SettingsPage extends StatelessWidget {
   Widget _settingItem(String title, IconData icon) {
     return Card(
       elevation: 2,
-      color: const Color(0xFFFFE7C0),
+      color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(icon, color: Colors.black87),

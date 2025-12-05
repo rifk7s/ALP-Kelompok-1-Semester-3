@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
-import 'package:frontend/features/auth/screens/edit_profile_screen.dart';
+import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
 
-import 'package:frontend/features/auth/screens/setting_screen.dart';
-import 'package:frontend/features/auth/screens/help_screen.dart';
-import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
+import 'package:frontend/features/shared/screens/setting_screen.dart';
+import 'package:frontend/features/shared/screens/help_screen.dart';
+import 'package:frontend/features/shared/screens/hpp_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -125,12 +126,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    profileCard('Transaksi', Icons.description_outlined, () {
+                    profileCard('Pesanan Saya', Icons.description_outlined, () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const TransactionHistoryPage(),
                         ),
+                      );
+                    }),
+                    const SizedBox(height: 12),
+
+                    profileCard('Harga HPP', Icons.price_change_outlined, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HppPage()),
                       );
                     }),
                     const SizedBox(height: 12),
@@ -158,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           _showLogoutConfirmationDialog(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD81B1B),
+                          backgroundColor: AppColors.danger,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -307,7 +316,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
     return Card(
       elevation: 2,
-      color: const Color(0xFFFFE7C0),
+      color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(icon, color: Colors.black87),

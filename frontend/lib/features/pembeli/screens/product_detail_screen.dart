@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/chat_detail_page.dart';
-import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
+import 'package:frontend/features/shared/screens/chat_detail_page.dart';
+import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String name;

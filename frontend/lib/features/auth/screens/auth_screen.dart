@@ -84,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen>
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFFE8DCC6),
+                            color: AppColors.logoPlaceholder,
                             child: const Icon(
                               Icons.agriculture,
                               size: 50,

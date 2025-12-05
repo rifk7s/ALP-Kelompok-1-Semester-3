@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/notification_screen.dart';
-import 'package:frontend/features/auth/screens/transaction/cart_screen.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'chat_detail_page.dart';
 
 class ContactPage extends StatefulWidget {
@@ -21,21 +21,9 @@ class _ContactPageState extends State<ContactPage> {
     super.initState();
     _allChats = [
       {
-        'name': 'Pembeli 1',
+        'name': 'BUMDes Desa Sengka',
         'message': 'Oke besok saya kirim ya',
         'time': '19.20',
-        'image': 'assets/images/logo.png',
-      },
-      {
-        'name': 'Pembeli 2',
-        'message': 'Baik kak, sudah diterima',
-        'time': '18.04',
-        'image': 'assets/images/logo.png',
-      },
-      {
-        'name': 'Pembeli 3',
-        'message': 'Siap ditunggu',
-        'time': '16.55',
         'image': 'assets/images/logo.png',
       },
     ];
@@ -162,7 +150,7 @@ class _ContactPageState extends State<ContactPage> {
                       separatorBuilder: (_, __) => const Divider(
                         height: 1,
                         thickness: 1,
-                        color: Color(0xFFEDEDED),
+                        color: AppColors.divider,
                       ),
                       itemBuilder: (context, index) {
                         final chat = _filteredChats[index];

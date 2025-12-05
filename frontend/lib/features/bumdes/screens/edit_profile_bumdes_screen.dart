@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 
-class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({super.key});
+class EditProfileBumdesPage extends StatefulWidget {
+  const EditProfileBumdesPage({super.key});
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  State<EditProfileBumdesPage> createState() => _EditProfileBumdesPageState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
+class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
   final TextEditingController nameController = TextEditingController(
-    text: "Gabriel",
+    text: "Vivian",
   );
   final TextEditingController phoneController = TextEditingController(
     text: "0813-5635-3033",
@@ -137,7 +137,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFFFE7C0),
+            fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 15,
               vertical: 12,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -67,7 +69,9 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            context.pushReplacementSmooth(const StartPage());
+          },
           child: const Text('Daftar Sebagai Pembeli'),
         ),
         const SizedBox(height: 24),
@@ -89,7 +93,7 @@ class _RegisterFormState extends State<RegisterForm> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE0E0E0)),
+            border: Border.all(color: AppColors.border),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(

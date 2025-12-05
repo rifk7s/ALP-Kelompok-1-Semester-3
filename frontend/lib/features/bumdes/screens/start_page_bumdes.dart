@@ -3,26 +3,26 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/contact_screen.dart';
-import 'package:frontend/features/auth/screens/home_screen.dart';
-import 'package:frontend/features/auth/screens/profile_screen.dart';
-import 'package:frontend/features/auth/screens/transaction_history_screen.dart';
+import 'package:frontend/features/bumdes/screens/homepage_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/screens/product_screen.dart';
+import 'package:frontend/features/bumdes/screens/contact_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/screens/profil_bumdes_screen.dart';
 
-class StartPage extends StatefulWidget {
-  const StartPage({super.key});
+class StartPageBumdes extends StatefulWidget {
+  const StartPageBumdes({super.key});
 
   @override
-  State<StartPage> createState() => _StartPageState();
+  State<StartPageBumdes> createState() => _StartPageBumdesState();
 }
 
-class _StartPageState extends State<StartPage> {
+class _StartPageBumdesState extends State<StartPageBumdes> {
   int _page = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
-    TransactionHistoryPage(),
-    ContactPage(),
-    ProfilePage(),
+    HomePageBumdes(),
+    ProductPage(),
+    ContactBumdesPage(),
+    ProfileBumdesPage(),
   ];
 
   @override
@@ -57,7 +57,7 @@ class _StartPageState extends State<StartPage> {
               _page == 1 ? Icons.receipt : Icons.receipt_outlined,
               color: Colors.white,
             ),
-            label: _page == 1 ? 'Transaksi' : '',
+            label: _page == 1 ? 'Produk' : '',
             labelStyle: const TextStyle(color: Colors.white),
           ),
           CurvedNavigationBarItem(

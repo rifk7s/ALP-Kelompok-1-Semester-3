@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/transaction/waiting_payment_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'cart_screen.dart';
 
 class CheckoutPage extends StatefulWidget {
