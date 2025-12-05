@@ -44,7 +44,7 @@ class _ProductPageState extends State<ProductPage> {
       "nama": "Padi Ciherang",
       "jumlah": "0",
       "harga": "Rp 6.900/kg",
-      "petani": "Pak Budi",
+      "petani": "Abdul Rahman",
       "kategori": "Gabah",
       "varietas": "Pertiwi",
       "tanggalPanen": DateTime.now(),
@@ -88,7 +88,7 @@ class _ProductPageState extends State<ProductPage> {
                         child: Text(
                           "Produk Saya",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

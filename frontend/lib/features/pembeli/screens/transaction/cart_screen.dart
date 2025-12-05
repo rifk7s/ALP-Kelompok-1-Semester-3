@@ -169,9 +169,17 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
-        title: const Text("Keranjang"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        elevation: 1,
+        centerTitle: true,
+        title: const Text(
+          "Keranjang",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
       ),
 
       body: SingleChildScrollView(

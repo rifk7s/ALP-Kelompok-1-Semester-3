@@ -219,13 +219,6 @@ class ProductDetailPage extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {},
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              color: AppColors.primary,
-            ),
-          ),
         ],
       ),
     );

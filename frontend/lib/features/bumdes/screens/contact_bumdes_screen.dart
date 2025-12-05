@@ -83,7 +83,7 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                     child: Text(
                       "Pesan",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
