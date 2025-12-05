@@ -4,7 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 class OrderTrackingPage extends StatefulWidget {
   final Map<String, dynamic> order;
 
-  OrderTrackingPage({super.key, required this.order});
+  const OrderTrackingPage({super.key, required this.order});
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingPageState();
@@ -65,7 +65,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -123,7 +123,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     widget.order['timestamps'],
                     index == _stages.length - 1,
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -163,7 +163,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                       boxShadow: isCurrent
                           ? [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.4),
+                                color: AppColors.primary.withValues(alpha: 0.4),
                                 blurRadius: 12,
                                 spreadRadius: 2,
                               ),

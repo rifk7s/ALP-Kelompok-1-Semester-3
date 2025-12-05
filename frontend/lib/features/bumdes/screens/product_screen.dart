@@ -84,6 +84,13 @@ class _ProductPageState extends State<ProductPage> {
                   Stack(
                     alignment: Alignment.center,
                     children: [
+                      Positioned(
+                        left: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
                       const Center(
                         child: Text(
                           "Produk Saya",
@@ -172,13 +179,14 @@ class _ProductPageState extends State<ProductPage> {
       floatingActionButton: FloatingActionButton(
         heroTag: "addProdukFab",
         backgroundColor: AppColors.primary,
+        elevation: 4,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const UploadProdukScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 32),
+        child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),
     );
   }
