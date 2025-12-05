@@ -7,6 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\ChatListController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -22,6 +24,12 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
+    Route::post('/chat/send', [ChatMessageController::class, 'sendMessage']);
+    Route::get('/chat/{chatId}', [ChatMessageController::class, 'getMessages']);
+    Route::delete('/chat/{chatId}/message/{messageId}', [ChatMessageController::class, 'deleteMessage']);
+    Route::get('/chat/list', [ChatListController::class, 'getChatList']);
+    Route::post('/chat/create', [ChatListController::class, 'createChat']);
+    Route::delete('/chat/{chatId}', [ChatListController::class, 'deleteChat']);
 });
 
 /*

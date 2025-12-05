@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "997174017818",
+    "project_id": "panenki-980c7",
+    "storage_bucket": "panenki-980c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997174017818:android:06986d400d8cc351e136a3",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEvGZOVzH-2GD4IIfe7vBObVQz8BYG5HU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
