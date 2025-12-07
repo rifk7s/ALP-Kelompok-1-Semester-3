@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -468,7 +472,26 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => OrderTrackingPage(
+                      order: {
+                        'id': '#ORD-2025-001',
+                        'seller': 'BUMDes Desa Sengka',
+                        'productImage': 'assets/images/gabah.jpg',
+                        'statusText': 'Dikemas',
+                        'timestamps': {
+                          'Pesanan Dibuat': '1 Des 2025, 10:00',
+                          'Dikemas': '2 Des 2025, 08:00',
+                          'Dikirim': '3 Des 2025, 14:00',
+                        },
+                      },
+                    ),
+                  ),
+                );
+              },
               style: elevatedStyle,
               child: const Text('Lihat Detail'),
             ),
@@ -482,7 +505,15 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ReceiptPage(orderId: order['id'], total: order['total']),
+                ),
+              );
+            },
             style: outlineStyle,
             child: const Text('Lihat Detail'),
           ),
@@ -490,7 +521,31 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              List<CartItem> cartItems = (order['products'] as List).map((p) {
+                return CartItem(
+                  name: p['name'],
+                  pricePerKg:
+                      p['price'] ??
+                      0, // jika price tidak ada di order, bisa set default
+                  qty: p['qty'],
+                  image: p['image'],
+                );
+              }).toList();
+
+              int totalPayment = cartItems.fold(
+                0,
+                (sum, item) => sum + (item.pricePerKg * item.qty),
+              );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      CheckoutPage(cart: cartItems, total: totalPayment),
+                ),
+              );
+            },
             style: elevatedStyle,
             child: const Text('Beli Lagi'),
           ),

@@ -10,27 +10,44 @@ class AppColors {
   static const Color surface = Color(0xFFFFFBF0); // Cream background
   static const Color surfaceAlt = Color(0xFFF9F4EC); // Alternative cream
 
+  // Base colors
+  static const Color white = Colors.white;
+  static const Color black = Colors.black;
+
   // Text colors
   static const Color textPrimary = Color(0xFF000000);
   static const Color textSecondary = Colors.grey;
   static const Color textDark = Color(0xFF505050);
+  static const Color textLight = Color(0xDD000000); // black87
+  static const Color textMuted = Color(0x8A000000); // black54
+
+  // Grey variants
+  static const Color grey = Colors.grey;
+  static const Color greyLight = Color(0xFFE0E0E0); // grey.shade300
+  static const Color greyMedium = Color(0xFF9E9E9E); // grey.shade500
+  static const Color greyDark = Color(0xFF616161); // grey.shade700
 
   // Input & border colors
   static const Color inputBackground = Color(0xFFF5F6F9);
   static const Color border = Color(0xFFE0E0E0);
   static const Color divider = Color(0xFFEDEDED);
 
+  // Shadow & overlay colors
+  static const Color shadowLight = Color(0x1F000000); // black12
+  static const Color shadowMedium = Color(0x42000000); // black26
+  static const Color overlay = Color(0x8A000000); // black54
+
   // Accent colors
-  static const Color white = Colors.white;
   static const Color accent = Color(0xFFFFD29A); // Light orange accent
   static const Color cardBackground = Color(0xFFFFE7C0); // Card/profile card bg
   static const Color logoPlaceholder = Color(0xFFE8DCC6); // Logo placeholder bg
+  static const Color transparent = Colors.transparent;
 
   // Semantic colors
   static const Color danger = Color(0xFFD81B1B); // Logout, delete, error
-  static const Color success = Colors.green;
-  static const Color warning = Colors.orange;
-  static const Color info = Colors.blue;
+  static const Color success = Color(0xFF4CAF50); // Green
+  static const Color warning = Color(0xFFFF9800); // Orange
+  static const Color info = Color(0xFF2196F3); // Blue
 
   // Chat colors
   static const Color chatBubbleSent = Color(0xFFDCB285);

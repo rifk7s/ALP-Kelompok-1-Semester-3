@@ -18,7 +18,7 @@ class HomePageBumdes extends StatelessWidget {
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: horizontalPadding,
@@ -71,31 +71,32 @@ class HomePageBumdes extends StatelessWidget {
                       runSpacing: 16,
                       children: [
                         _dashboardCard(
-                          icon: Icons.shopping_bag,
-                          title: 'Produk',
+                          icon: Icons.check_circle_outline,
+                          title: 'Produk Aktif',
                           value: '12',
                           width: cardWidth,
-                          onTap: onProductTap,
                         ),
                         _dashboardCard(
-                          icon: Icons.receipt,
+                          icon: Icons.monetization_on_outlined,
                           title: 'Transaksi',
+                          subtitle: 'Bulan Ini',
                           value: '23',
                           width: cardWidth,
-                          onTap: () {},
                         ),
                         _dashboardCard(
-                          icon: Icons.chat_bubble,
-                          title: 'Chat',
+                          icon: Icons.chat_bubble_outline,
+                          title: 'Chat Unread',
                           value: '3',
                           width: cardWidth,
+                          showArrow: true,
                           onTap: onChatTap,
                         ),
                         _dashboardCard(
-                          icon: Icons.people,
-                          title: 'Petani',
+                          icon: Icons.people_outline,
+                          title: 'Kelola Petani',
                           value: '5',
                           width: cardWidth,
+                          showArrow: true,
                           onTap: () {
                             Navigator.push(
                               context,
@@ -118,32 +119,39 @@ class HomePageBumdes extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                ListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                Column(
                   children: [
                     _activityCard(
-                      '📦 Order baru #ORD-2025-002',
-                      'Gabah 50kg - Rp 325.000',
-                      '2 jam lalu',
+                      icon: Icons.shopping_bag_outlined,
+                      iconColor: Colors.orange,
+                      title: 'Order baru #ORD-2025-002',
+                      subtitle: 'Gabah 50kg - Rp 325.000',
+                      time: '2 jam lalu',
+                      status: 'Menunggu',
+                      statusColor: Colors.orange,
                     ),
                     _activityCard(
-                      '📦 Order baru #ORD-2025-003',
-                      'Jagung 20kg - Rp 120.000',
-                      '3 jam lalu',
+                      icon: Icons.local_shipping_outlined,
+                      iconColor: Colors.blue,
+                      title: 'Pengiriman #ORD-2025-001',
+                      subtitle: 'Jagung 20kg - Rp 120.000',
+                      time: '3 jam lalu',
+                      status: 'Dikirim',
+                      statusColor: Colors.blue,
                     ),
                     _activityCard(
-                      '📦 Order baru #ORD-2025-002',
-                      'Gabah 50kg - Rp 325.000',
-                      '2 jam lalu',
-                    ),
-                    _activityCard(
-                      '📦 Order baru #ORD-2025-003',
-                      'Jagung 20kg - Rp 120.000',
-                      '3 jam lalu',
+                      icon: Icons.check_circle_outline,
+                      iconColor: Colors.green,
+                      title: 'Selesai #ORD-2025-000',
+                      subtitle: 'Gabah 30kg - Rp 195.000',
+                      time: '1 hari lalu',
+                      status: 'Selesai',
+                      statusColor: Colors.green,
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -153,13 +161,14 @@ class HomePageBumdes extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         backgroundColor: AppColors.primary,
+        elevation: 4,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => UploadProdukScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 32),
+        child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),
     );
   }
@@ -167,15 +176,18 @@ class HomePageBumdes extends StatelessWidget {
   Widget _dashboardCard({
     required IconData icon,
     required String title,
+    String? subtitle,
     required String value,
     required double width,
+    bool showArrow = false,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+        height: 130,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
@@ -190,16 +202,35 @@ class HomePageBumdes extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 30, color: AppColors.primary),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(icon, size: 28, color: AppColors.primary),
+                if (showArrow)
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey.shade400,
+                  ),
+              ],
             ),
-            const SizedBox(height: 6),
+            const Spacer(),
             Text(
               value,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle != null ? '$title · $subtitle' : title,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -207,28 +238,90 @@ class HomePageBumdes extends StatelessWidget {
     );
   }
 
-  Widget _activityCard(String title, String subtitle, String time) {
+  Widget _activityCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required String time,
+    required String status,
+    required Color statusColor,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2)),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 24),
           ),
-          const SizedBox(height: 5),
-          Text(subtitle),
-          const SizedBox(height: 6),
-          Text(time, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                time,
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+              ),
+            ],
+          ),
         ],
       ),
     );

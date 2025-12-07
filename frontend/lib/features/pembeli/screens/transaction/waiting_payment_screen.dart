@@ -69,10 +69,17 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text("Menunggu Pembayaran"),
-        elevation: 0,
+        backgroundColor: AppColors.surface,
+        elevation: 1,
+        centerTitle: true,
+        title: const Text(
+          "Menunggu Pembayaran",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
       ),
 
       body: ListView(

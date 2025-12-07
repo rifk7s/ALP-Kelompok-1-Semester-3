@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'upload_screen.dart';
 import 'product_detail_screen.dart';
-import 'package:frontend/core/theme/theme.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -44,7 +45,7 @@ class _ProductPageState extends State<ProductPage> {
       "nama": "Padi Ciherang",
       "jumlah": "0",
       "harga": "Rp 6.900/kg",
-      "petani": "Pak Budi",
+      "petani": "Abdul Rahman",
       "kategori": "Gabah",
       "varietas": "Pertiwi",
       "tanggalPanen": DateTime.now(),
@@ -84,11 +85,18 @@ class _ProductPageState extends State<ProductPage> {
                   Stack(
                     alignment: Alignment.center,
                     children: [
+                      Positioned(
+                        left: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
                       const Center(
                         child: Text(
                           "Produk Saya",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -97,7 +105,14 @@ class _ProductPageState extends State<ProductPage> {
                         right: 0,
                         child: IconButton(
                           icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationPage(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -172,13 +187,14 @@ class _ProductPageState extends State<ProductPage> {
       floatingActionButton: FloatingActionButton(
         heroTag: "addProdukFab",
         backgroundColor: AppColors.primary,
+        elevation: 4,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const UploadProdukScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 32),
+        child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),
     );
   }

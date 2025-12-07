@@ -156,10 +156,14 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -203,7 +207,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -253,11 +257,11 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                               onTap: () =>
                                   setState(() => selectedImages.removeAt(i)),
                               child: const CircleAvatar(
-                                backgroundColor: Colors.black54,
+                                backgroundColor: AppColors.textMuted,
                                 radius: 12,
                                 child: Icon(
                                   Icons.close,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   size: 16,
                                 ),
                               ),
@@ -324,7 +328,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       "ℹ️ HPP ${selectedKategori!}: Rp ${hpp[selectedKategori]}/kg",
-                      style: const TextStyle(color: Colors.blueGrey),
+                      style: const TextStyle(color: AppColors.textDark),
                     ),
                   ),
               ],
@@ -361,7 +365,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                      border: Border.all(color: AppColors.border),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -383,7 +387,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       masaSimpanNote!,
-                      style: const TextStyle(color: Colors.blueGrey),
+                      style: const TextStyle(color: AppColors.textDark),
                     ),
                   ),
 

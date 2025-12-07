@@ -83,8 +83,9 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                     child: Text(
                       "Pesan",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -124,9 +125,9 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.surface,
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
+                  ? IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () {
                             _searchController.clear();
@@ -143,7 +144,7 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                   ? const Center(
                       child: Text(
                         'Tidak ada chat',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: AppColors.textMuted),
                       ),
                     )
                   : ListView.separated(
@@ -164,12 +165,15 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                             chat['name']!,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text(chat['message']!),
+                          subtitle: Text(
+                            chat['message']!,
+                            style: const TextStyle(color: AppColors.textSecondary),
+                          ),
                           trailing: Text(
                             chat['time']!,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.black54,
+                              color: AppColors.textMuted,
                             ),
                           ),
                           onTap: () {

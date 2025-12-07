@@ -3,6 +3,10 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_profile_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/screens/product_screen.dart';
+
+import 'package:frontend/features/shared/screens/setting_screen.dart';
+import 'package:frontend/features/shared/screens/help_screen.dart';
 
 class ProfileBumdesPage extends StatefulWidget {
   const ProfileBumdesPage({super.key});
@@ -28,7 +32,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                     child: Text(
                       "Profil",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -122,28 +126,26 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                 child: Column(
                   children: [
                     profileCard('Produk', Icons.description_outlined, () {
-                      /*Navigator.push(
+                      Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const ProductPae(),
-                        ),
-                      );*/
+                        MaterialPageRoute(builder: (_) => const ProductPage()),
+                      );
                     }),
                     const SizedBox(height: 12),
 
                     profileCard('Pengaturan', Icons.settings_outlined, () {
-                      /*Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
-                      );*/
+                      );
                     }),
                     const SizedBox(height: 12),
 
                     profileCard('Bantuan', Icons.help_outline, () {
-                      /*Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const HelpPage()),
-                      );*/
+                      );
                     }),
                     const SizedBox(height: 25),
 

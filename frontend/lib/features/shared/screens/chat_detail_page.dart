@@ -148,7 +148,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 Text(
                   widget.name,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: AppColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -156,7 +156,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 const SizedBox(height: 2),
                 const Text(
                   "Online",
-                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -216,8 +219,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                             Icons.done_all,
                             size: 18,
                             color: msg["read"] == true
-                                ? Colors.blue
-                                : Colors.grey,
+                                ? AppColors.info
+                                : AppColors.textSecondary,
                           ),
                         ],
                       ],
@@ -250,7 +253,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         const Icon(
                           Icons.attach_file,
                           size: 22,
-                          color: Colors.black54,
+                          color: AppColors.textMuted,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -259,7 +262,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                             decoration: const InputDecoration(
                               hintText: "Balasan",
                               hintStyle: TextStyle(
-                                color: Colors.black87,
+                                color: AppColors.textLight,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -277,7 +280,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                   child: const CircleAvatar(
                     radius: 22,
                     backgroundColor: AppColors.primary,
-                    child: Icon(Icons.send, color: Colors.white),
+                    child: Icon(Icons.send, color: AppColors.white),
                   ),
                 ),
               ],

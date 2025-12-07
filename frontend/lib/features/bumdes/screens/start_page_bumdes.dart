@@ -18,11 +18,17 @@ class StartPageBumdes extends StatefulWidget {
 class _StartPageBumdesState extends State<StartPageBumdes> {
   int _page = 0;
 
-  final List<Widget> _pages = [
-    HomePageBumdes(),
-    ProductPage(),
-    ContactBumdesPage(),
-    ProfileBumdesPage(),
+  void _goToChat() {
+    setState(() {
+      _page = 2;
+    });
+  }
+
+  List<Widget> get _pages => [
+    HomePageBumdes(onChatTap: _goToChat),
+    const ProductPage(),
+    const ContactBumdesPage(),
+    const ProfileBumdesPage(),
   ];
 
   @override

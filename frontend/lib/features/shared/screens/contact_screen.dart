@@ -26,6 +26,12 @@ class _ContactPageState extends State<ContactPage> {
         'time': '19.20',
         'image': 'assets/images/logo.png',
       },
+      {
+        'name': 'Customer Service',
+        'message': 'Baik kami akan perbaiki segera',
+        'time': '19.10',
+        'image': 'assets/images/logo.png',
+      },
     ];
     _filteredChats = List.from(_allChats);
   }
@@ -68,7 +74,7 @@ class _ContactPageState extends State<ContactPage> {
                     child: Text(
                       "Pesan",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

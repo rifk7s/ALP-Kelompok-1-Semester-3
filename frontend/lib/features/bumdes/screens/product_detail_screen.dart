@@ -219,13 +219,6 @@ class ProductDetailPage extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {},
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              color: AppColors.primary,
-            ),
-          ),
         ],
       ),
     );
@@ -276,6 +269,7 @@ class SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,

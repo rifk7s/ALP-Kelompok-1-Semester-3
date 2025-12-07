@@ -156,7 +156,7 @@ class _CartPageState extends State<CartPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text("OK", style: TextStyle(color: Colors.white)),
+              child: const Text("OK", style: TextStyle(color: AppColors.white)),
             ),
           ],
         );
@@ -169,9 +169,17 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
-        title: const Text("Keranjang"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        elevation: 1,
+        centerTitle: true,
+        title: const Text(
+          "Keranjang",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textLight,
+          ),
+        ),
       ),
 
       body: SingleChildScrollView(
@@ -183,7 +191,10 @@ class _CartPageState extends State<CartPage> {
                 child: Center(
                   child: Text(
                     "Keranjang masih kosong",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               )
@@ -199,13 +210,13 @@ class _CartPageState extends State<CartPage> {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
-                        BoxShadow(
+                        const BoxShadow(
                           blurRadius: 6,
-                          color: Colors.black.withValues(alpha: 0.08),
-                          offset: const Offset(0, 3),
+                          color: AppColors.shadowLight,
+                          offset: Offset(0, 3),
                         ),
                       ],
                     ),
@@ -256,7 +267,7 @@ class _CartPageState extends State<CartPage> {
                                 "Harga per kg: ${formatRupiah(item.pricePerKg)}",
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -282,7 +293,7 @@ class _CartPageState extends State<CartPage> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
                                       color: AppColors.primary.withValues(
@@ -359,10 +370,10 @@ class _CartPageState extends State<CartPage> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+            const BoxShadow(
+              color: AppColors.shadowLight,
               blurRadius: 8,
             ),
           ],
@@ -438,7 +449,7 @@ class _CartPageState extends State<CartPage> {
                           },
                     child: const Text(
                       "Buat Pesanan",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppColors.white),
                     ),
                   ),
                 ),
@@ -483,13 +494,13 @@ Widget productCard({
     },
     child: Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             blurRadius: 6,
-            offset: const Offset(0, 3),
-            color: Colors.black.withValues(alpha: 0.10),
+            offset: Offset(0, 3),
+            color: AppColors.shadowLight,
           ),
         ],
       ),
@@ -525,14 +536,17 @@ Widget productCard({
                   Text(
                     price,
                     style: const TextStyle(
-                      color: Colors.red,
+                      color: AppColors.danger,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "Stok: $stock",
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const Spacer(),
                   Row(
@@ -540,7 +554,7 @@ Widget productCard({
                       const Icon(
                         Icons.location_on_outlined,
                         size: 14,
-                        color: Colors.grey,
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -549,7 +563,7 @@ Widget productCard({
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),
