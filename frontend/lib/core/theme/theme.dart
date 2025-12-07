@@ -41,6 +41,7 @@ class AppColors {
   static const Color accent = Color(0xFFFFD29A); // Light orange accent
   static const Color cardBackground = Color(0xFFFFE7C0); // Card/profile card bg
   static const Color logoPlaceholder = Color(0xFFE8DCC6); // Logo placeholder bg
+  static const Color transparent = Colors.transparent;
 
   // Semantic colors
   static const Color danger = Color(0xFFD81B1B); // Logout, delete, error

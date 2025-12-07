@@ -94,7 +94,7 @@ class _ReportPageState extends State<ReportPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -146,13 +146,13 @@ class _ReportPageState extends State<ReportPage> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                    const BoxShadow(
+                      color: AppColors.shadowLight,
                       blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
@@ -176,7 +176,7 @@ class _ReportPageState extends State<ReportPage> {
                         hintText: "Ceritakan masalah yang Anda alami...",
                         hintStyle: TextStyle(color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: AppColors.surface,
                         contentPadding: const EdgeInsets.all(14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),

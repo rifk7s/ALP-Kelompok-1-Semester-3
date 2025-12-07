@@ -230,17 +230,20 @@ class _HomePageState extends State<HomePage> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: Colors.black12),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
                       children: const [
-                        Icon(Icons.search, color: Colors.grey),
+                        Icon(Icons.search, color: AppColors.textSecondary),
                         SizedBox(width: 10),
                         Text(
                           "Gabah",
-                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 15,
+                          ),
                         ),
                       ],
                     ),
@@ -434,7 +437,7 @@ Widget kategoriItem(
         color: isSelected ? AppColors.primary : AppColors.accent,
         borderRadius: BorderRadius.circular(40),
         border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? AppColors.primary : AppColors.transparent,
         ),
       ),
       child: Row(
@@ -449,7 +452,7 @@ Widget kategoriItem(
           Text(
             title,
             style: TextStyle(
-              color: isSelected ? Colors.white : AppColors.textDark,
+              color: isSelected ? AppColors.white : AppColors.textDark,
               fontWeight: FontWeight.w500,
               fontSize: 12,
             ),
@@ -493,10 +496,14 @@ Widget productCard({
     },
     child: Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
+          const BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -530,14 +537,17 @@ Widget productCard({
                 Text(
                   price,
                   style: const TextStyle(
-                    color: Colors.red,
+                    color: AppColors.danger,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   "Stok: $stock",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -545,7 +555,7 @@ Widget productCard({
                     const Icon(
                       Icons.location_on_outlined,
                       size: 14,
-                      color: Colors.grey,
+                      color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -553,7 +563,7 @@ Widget productCard({
                         location,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'upload_screen.dart';
 import 'product_detail_screen.dart';
-import 'package:frontend/core/theme/theme.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -104,7 +105,14 @@ class _ProductPageState extends State<ProductPage> {
                         right: 0,
                         child: IconButton(
                           icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationPage(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
