@@ -4,6 +4,7 @@ import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_profile_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/product_screen.dart';
+import 'package:frontend/features/shared/screens/hpp_screen.dart';
 
 import 'package:frontend/features/shared/screens/setting_screen.dart';
 import 'package:frontend/features/shared/screens/help_screen.dart';
@@ -125,10 +126,18 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    profileCard('Produk', Icons.description_outlined, () {
+                    profileCard('Produk', Icons.inventory_2_outlined, () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const ProductPage()),
+                      );
+                    }),
+                    const SizedBox(height: 12),
+
+                    profileCard('Harga HPP', Icons.price_change_outlined, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HppPage()),
                       );
                     }),
                     const SizedBox(height: 12),

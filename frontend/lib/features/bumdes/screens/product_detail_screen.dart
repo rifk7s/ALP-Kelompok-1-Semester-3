@@ -112,11 +112,9 @@ class ProductDetailPage extends StatelessWidget {
               _productImage(),
               const SizedBox(height: 20),
               _productNameAndPrice(),
-              const SizedBox(height: 14),
-              _stockLabel(),
-              const SizedBox(height: 20),
-              _sellerCard(context),
-              const SizedBox(height: 28),
+              const SizedBox(height: 16),
+              _highlights(),
+              const SizedBox(height: 24),
               _specifications(),
               const SizedBox(height: 20),
               _additionalInfo(),
@@ -175,48 +173,72 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _stockLabel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        "Tersedia: ${product['jumlah']} kg",
-        style: const TextStyle(color: AppColors.white, fontSize: 12),
-      ),
+  Widget _highlights() {
+    return Row(
+      children: [
+        Expanded(
+          child: _highlightCard(
+            icon: Icons.storefront,
+            title: 'Petani',
+            value: product['petani'] ?? '-',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _highlightCard(
+            icon: Icons.scale_outlined,
+            title: 'Stok',
+            value: "${product['jumlah']} kg",
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _sellerCard(BuildContext context) {
+  Widget _highlightCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundImage: AssetImage("assets/images/profile.png"),
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product['petani'],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.primary),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
                 ),
-                Text(
-                  product['lokasi'],
-                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
