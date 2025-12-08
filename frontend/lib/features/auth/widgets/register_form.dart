@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -12,6 +13,85 @@ class RegisterForm extends StatefulWidget {
 
 class _RegisterFormState extends State<RegisterForm> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (_nameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _addressController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua field harus diisi')),
+      );
+      return;
+    }
+
+    if (_passwordController.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kata sandi minimal 8 karakter')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await AuthService.register(
+      name: _nameController.text,
+      phone: _phoneController.text,
+      password: _passwordController.text,
+      address: _addressController.text,
+      role: 'pembeli',
+    );
+
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+
+    if (result.success) {
+      // Auto-login setelah register berhasil
+      final loginResult = await AuthService.login(
+        phone: _phoneController.text,
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (loginResult.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil! Selamat datang.')),
+        );
+        context.pushReplacementSmooth(const StartPage());
+      } else {
+        // Register berhasil tapi login gagal - suruh login manual
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
+        );
+      }
+    } else {
+      String errorMsg = result.message ?? 'Registrasi gagal';
+      if (result.errors != null) {
+        final errors = result.errors!.values.expand((e) => e as List).join('\n');
+        errorMsg = errors;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMsg)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +104,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _nameController,
           decoration: const InputDecoration(hintText: 'Masukkan Nama Lengkap'),
         ),
         const SizedBox(height: 16),
@@ -33,6 +114,8 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _phoneController,
+          keyboardType: TextInputType.phone,
           decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
         ),
         const SizedBox(height: 16),
@@ -42,6 +125,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _passwordController,
           obscureText: !_isPasswordVisible,
           decoration: InputDecoration(
             hintText: 'Masukkan Kata Sandi',
@@ -65,14 +149,20 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _addressController,
+          maxLines: 2,
           decoration: const InputDecoration(hintText: 'Masukkan Alamat'),
         ),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {
-            context.pushReplacementSmooth(const StartPage());
-          },
-          child: const Text('Daftar Sebagai Pembeli'),
+          onPressed: _isLoading ? null : _handleRegister,
+          child: _isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : const Text('Daftar Sebagai Pembeli'),
         ),
         const SizedBox(height: 24),
         const Row(

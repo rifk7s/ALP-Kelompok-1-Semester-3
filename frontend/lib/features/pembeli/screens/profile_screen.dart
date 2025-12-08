@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
 
@@ -17,6 +19,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Map<String, dynamic>? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await StorageService.getUser();
+    if (mounted) {
+      setState(() => _user = user);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,52 +85,79 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(width: 18),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            (_user?['role'] ?? 'pembeli').toString().toUpperCase(),
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "Pembeli",
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 16,
+
+                        const SizedBox(height: 8),
+
+                        Text(
+                          _user?['name'] ?? 'User',
+                          style: const TextStyle(
+                            fontSize: 19,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      const Text(
-                        'Vivian',
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 16, color: AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              _user?['phone'] ?? '-',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
 
-                      const SizedBox(height: 4),
+                        const SizedBox(height: 6),
 
-                      const Text(
-                        '0813-5635-3033',
-                        style: TextStyle(fontSize: 13, color: AppColors.textLight),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      const Text(
-                        'Jl. Pettarani No. 30',
-                        style: TextStyle(fontSize: 13, color: AppColors.textLight),
-                      ),
-                    ],
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _user?['address'] ?? '-',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -247,16 +291,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             Navigator.of(context).pop();
-                            Future.delayed(
-                              const Duration(milliseconds: 100),
-                              () {
-                                if (!mounted) return;
-                                this.context.pushAndRemoveAllSmooth(
-                                  const AuthScreen(),
-                                );
-                              },
+                            await AuthService.logout();
+                            if (!mounted) return;
+                            this.context.pushAndRemoveAllSmooth(
+                              const AuthScreen(),
                             );
                           },
                           child: Container(
