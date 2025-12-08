@@ -62,10 +62,25 @@ class _RegisterFormState extends State<RegisterForm> {
     if (!mounted) return;
 
     if (result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message ?? 'Registrasi berhasil!')),
+      // Auto-login setelah register berhasil
+      final loginResult = await AuthService.login(
+        phone: _phoneController.text,
+        password: _passwordController.text,
       );
-      context.pushReplacementSmooth(const StartPage());
+
+      if (!mounted) return;
+
+      if (loginResult.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil! Selamat datang.')),
+        );
+        context.pushReplacementSmooth(const StartPage());
+      } else {
+        // Register berhasil tapi login gagal - suruh login manual
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
+        );
+      }
     } else {
       String errorMsg = result.message ?? 'Registrasi gagal';
       if (result.errors != null) {

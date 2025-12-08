@@ -1,19 +1,24 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'storage_service.dart';
+
+const Duration _timeout = Duration(seconds: 30);
 
 class AuthResult {
   final bool success;
   final String? message;
   final Map<String, dynamic>? user;
   final Map<String, dynamic>? errors;
+  final bool isUnauthorized; // Token expired/invalid
 
   AuthResult({
     required this.success,
     this.message,
     this.user,
     this.errors,
+    this.isUnauthorized = false,
   });
 }
 
@@ -42,7 +47,7 @@ class AuthService {
         Uri.parse('${ApiConfig.baseUrl}/auth/register'),
         headers: ApiConfig.headers(),
         body: jsonEncode(body),
-      );
+      ).timeout(_timeout);
 
       final data = jsonDecode(response.body);
 
@@ -64,6 +69,11 @@ class AuthService {
           message: data['message'] ?? 'Registrasi gagal',
         );
       }
+    } on TimeoutException {
+      return AuthResult(
+        success: false,
+        message: 'Koneksi timeout, coba lagi',
+      );
     } catch (e) {
       return AuthResult(
         success: false,
@@ -84,7 +94,7 @@ class AuthService {
           'phone': phone,
           'password': password,
         }),
-      );
+      ).timeout(_timeout);
 
       final data = jsonDecode(response.body);
 
@@ -117,6 +127,11 @@ class AuthService {
           message: data['message'] ?? 'Login gagal',
         );
       }
+    } on TimeoutException {
+      return AuthResult(
+        success: false,
+        message: 'Koneksi timeout, coba lagi',
+      );
     } catch (e) {
       return AuthResult(
         success: false,
@@ -155,21 +170,35 @@ class AuthService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        return AuthResult(success: false, message: 'Tidak ada token');
+        return AuthResult(
+          success: false,
+          message: 'Tidak ada token',
+          isUnauthorized: true,
+        );
       }
 
       final response = await http.get(
         Uri.parse('${ApiConfig.baseUrl}/me'),
         headers: ApiConfig.headers(token: token),
-      );
+      ).timeout(_timeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await StorageService.saveUser(data);
         return AuthResult(success: true, user: data);
+      } else if (response.statusCode == 401) {
+        // Token expired atau invalid - clear storage
+        await StorageService.clearAll();
+        return AuthResult(
+          success: false,
+          message: 'Sesi telah berakhir, silakan login kembali',
+          isUnauthorized: true,
+        );
       } else {
         return AuthResult(success: false, message: 'Gagal mendapatkan data user');
       }
+    } on TimeoutException {
+      return AuthResult(success: false, message: 'Koneksi timeout');
     } catch (e) {
       return AuthResult(success: false, message: 'Koneksi gagal: $e');
     }
