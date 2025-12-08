@@ -1,0 +1,177 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'api_config.dart';
+import 'storage_service.dart';
+
+class AuthResult {
+  final bool success;
+  final String? message;
+  final Map<String, dynamic>? user;
+  final Map<String, dynamic>? errors;
+
+  AuthResult({
+    required this.success,
+    this.message,
+    this.user,
+    this.errors,
+  });
+}
+
+class AuthService {
+  static Future<AuthResult> register({
+    required String name,
+    required String phone,
+    required String password,
+    required String address,
+    String role = 'pembeli',
+    String? email,
+  }) async {
+    try {
+      final body = {
+        'name': name,
+        'phone': phone,
+        'password': password,
+        'address': address,
+        'role': role,
+      };
+      if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/auth/register'),
+        headers: ApiConfig.headers(),
+        body: jsonEncode(body),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201) {
+        return AuthResult(
+          success: true,
+          message: data['message'] ?? 'Registrasi berhasil!',
+          user: data['user'],
+        );
+      } else if (response.statusCode == 422) {
+        return AuthResult(
+          success: false,
+          message: 'Validasi gagal',
+          errors: data['errors'],
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'] ?? 'Registrasi gagal',
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Koneksi gagal: $e',
+      );
+    }
+  }
+
+  static Future<AuthResult> login({
+    required String phone,
+    required String password,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/auth/login'),
+        headers: ApiConfig.headers(),
+        body: jsonEncode({
+          'phone': phone,
+          'password': password,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        await StorageService.saveToken(data['access_token']);
+        await StorageService.saveUser(data['user']);
+        if (data['firebase_custom_token'] != null) {
+          await StorageService.saveFirebaseToken(data['firebase_custom_token']);
+        }
+
+        return AuthResult(
+          success: true,
+          message: data['message'] ?? 'Login berhasil!',
+          user: data['user'],
+        );
+      } else if (response.statusCode == 401) {
+        return AuthResult(
+          success: false,
+          message: 'Nomor HP atau kata sandi salah',
+        );
+      } else if (response.statusCode == 422) {
+        return AuthResult(
+          success: false,
+          message: 'Validasi gagal',
+          errors: data['errors'],
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'] ?? 'Login gagal',
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Koneksi gagal: $e',
+      );
+    }
+  }
+
+  static Future<AuthResult> logout() async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        await StorageService.clearAll();
+        return AuthResult(success: true, message: 'Logout berhasil');
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/auth/logout'),
+        headers: ApiConfig.headers(token: token),
+      );
+
+      await StorageService.clearAll();
+
+      if (response.statusCode == 200) {
+        return AuthResult(success: true, message: 'Logout berhasil');
+      } else {
+        return AuthResult(success: true, message: 'Logout berhasil');
+      }
+    } catch (e) {
+      await StorageService.clearAll();
+      return AuthResult(success: true, message: 'Logout berhasil');
+    }
+  }
+
+  static Future<AuthResult> getMe() async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        return AuthResult(success: false, message: 'Tidak ada token');
+      }
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/me'),
+        headers: ApiConfig.headers(token: token),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await StorageService.saveUser(data);
+        return AuthResult(success: true, user: data);
+      } else {
+        return AuthResult(success: false, message: 'Gagal mendapatkan data user');
+      }
+    } catch (e) {
+      return AuthResult(success: false, message: 'Koneksi gagal: $e');
+    }
+  }
+}
