@@ -128,15 +128,15 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   Color _statusColor(String status) {
     switch (status) {
       case 'baru':
-        return Colors.orange;
+        return AppColors.warning;
       case 'dikemas':
         return AppColors.primary;
       case 'dikirim':
-        return Colors.blue;
+        return AppColors.info;
       case 'selesai':
-        return Colors.green;
+        return AppColors.success;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -267,13 +267,13 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -326,11 +326,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey[400]),
+          Icon(icon, size: 64, color: AppColors.grey400),
           const SizedBox(height: 12),
           const Text(
             'Belum ada transaksi untuk status ini',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -350,11 +350,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -383,7 +383,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                 const Spacer(),
                 Text(
                   order['id'] as String,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 12, color: AppColors.greyDark),
                 ),
               ],
             ),
@@ -418,7 +418,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       const SizedBox(height: 4),
                       Text(
                         '${order['qty']} kg • ${order['buyer']}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -445,7 +445,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                 Expanded(
                   child: Text(
                     order['address'] as String,
-                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ),
               ],
@@ -461,7 +461,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                 Expanded(
                   child: Text(
                     '${shipping['service']} • Resi ${shipping['resi']}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 12, color: AppColors.greyDark),
                   ),
                 ),
               ],
@@ -518,7 +518,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     ),
                     Text(
                       '${(_progress(status) * 100).round()}%',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: AppColors.grey600),
                     ),
                   ],
                 ),
@@ -528,18 +528,18 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                   child: LinearProgressIndicator(
                     minHeight: 8,
                     value: progress,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: AppColors.grey200,
                     valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
+                    Icon(Icons.schedule, size: 16, color: AppColors.grey600),
                     const SizedBox(width: 6),
                     Text(
                       (order['timestamps'] as Map<String, String>)[stageLabel] ?? '-',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                      style: TextStyle(fontSize: 12, color: AppColors.greyDark),
                     ),
                   ],
                 ),
@@ -572,7 +572,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                         onPressed: () => _openTracking(order),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.white,
                           minimumSize: const Size.fromHeight(48),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: buttonShape,

@@ -71,42 +71,42 @@ class _StartPageBumdesState extends State<StartPageBumdes> {
           CurvedNavigationBarItem(
             child: Icon(
               _page == 0 ? Icons.home : Icons.home_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 0 ? 'Beranda' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 1 ? Icons.inventory_2 : Icons.inventory_2_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 1 ? 'Produk' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 2 ? Icons.receipt_long : Icons.receipt_long_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 2 ? 'Transaksi' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 3 ? Icons.chat : Icons.chat_bubble_outline,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 3 ? 'Pesan' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 4 ? Icons.person : Icons.person_outline,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 4 ? 'Profil' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
         ],
 

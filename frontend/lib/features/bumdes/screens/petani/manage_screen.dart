@@ -25,7 +25,7 @@ class KelolaPetaniScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         actions: [
@@ -59,11 +59,11 @@ class KelolaPetaniScreen extends StatelessWidget {
               onTap: () {},
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: const [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: AppColors.shadowLight,
                       blurRadius: 6,
                       offset: Offset(0, 3),
                     ),
@@ -77,7 +77,7 @@ class KelolaPetaniScreen extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.orangeAccent.withValues(alpha: 0.85),
+                        color: AppColors.warningAccent.withValues(alpha: 0.85),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -85,7 +85,7 @@ class KelolaPetaniScreen extends StatelessWidget {
                         nama[0],
                         style: const TextStyle(
                           fontSize: 26,
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -107,7 +107,7 @@ class KelolaPetaniScreen extends StatelessWidget {
                     Text(
                       hp,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ],
                 ),

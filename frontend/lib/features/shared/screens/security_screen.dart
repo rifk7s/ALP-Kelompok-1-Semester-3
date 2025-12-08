@@ -16,7 +16,7 @@ class SecuritySettingsPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -63,7 +63,7 @@ class SecuritySettingsPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           child: Row(
             children: [
-              Icon(icon, color: Colors.black87),
+              Icon(icon, color: AppColors.textLight),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
@@ -74,7 +74,7 @@ class SecuritySettingsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
             ],
           ),
         ),

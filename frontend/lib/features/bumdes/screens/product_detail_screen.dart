@@ -28,7 +28,7 @@ class ProductDetailPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         actions: [
@@ -47,7 +47,7 @@ class ProductDetailPage extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: const Icon(Icons.delete, color: AppColors.danger),
             onPressed: () {
               showDialog(
                 context: context,
@@ -85,7 +85,7 @@ class ProductDetailPage extends StatelessWidget {
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.danger,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 12,
                                 ),
@@ -168,7 +168,7 @@ class ProductDetailPage extends StatelessWidget {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.red,
+            color: AppColors.danger,
           ),
         ),
       ],
@@ -184,7 +184,7 @@ class ProductDetailPage extends StatelessWidget {
       ),
       child: Text(
         "Tersedia: ${product['jumlah']} kg",
-        style: const TextStyle(color: Colors.white, fontSize: 12),
+        style: const TextStyle(color: AppColors.white, fontSize: 12),
       ),
     );
   }
@@ -193,7 +193,7 @@ class ProductDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),
@@ -214,7 +214,7 @@ class ProductDetailPage extends StatelessWidget {
                 ),
                 Text(
                   product['lokasi'],
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -272,7 +272,7 @@ class SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),

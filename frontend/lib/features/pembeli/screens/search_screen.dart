@@ -104,21 +104,21 @@ class _SearchPageState extends State<SearchPage> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
                   onPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
                   child: Container(
                     height: 45,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: Colors.black12, width: 1),
+                      border: Border.all(color: AppColors.shadowLight, width: 1),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: Colors.grey, size: 22),
+                        const Icon(Icons.search, color: AppColors.textSecondary, size: 22),
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
@@ -129,7 +129,7 @@ class _SearchPageState extends State<SearchPage> {
                             decoration: const InputDecoration(
                               hintText: "Cari produk...",
                               hintStyle: TextStyle(
-                                color: Colors.grey,
+                                color: AppColors.textSecondary,
                                 fontSize: 15,
                               ),
                               border: InputBorder.none,
@@ -144,7 +144,7 @@ class _SearchPageState extends State<SearchPage> {
                             },
                             child: const Icon(
                               Icons.close,
-                              color: Colors.grey,
+                              color: AppColors.textSecondary,
                               size: 20,
                             ),
                           ),
@@ -203,7 +203,7 @@ class _SearchPageState extends State<SearchPage> {
                           },
                           child: const Text(
                             "Hapus semua",
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: AppColors.danger),
                           ),
                         ),
                     ],
@@ -219,12 +219,12 @@ class _SearchPageState extends State<SearchPage> {
                                 title: Text(item),
                                 leading: const Icon(
                                   Icons.history,
-                                  color: Colors.grey,
+                                  color: AppColors.textSecondary,
                                 ),
                                 trailing: IconButton(
                                   icon: const Icon(
                                     Icons.close,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -243,7 +243,7 @@ class _SearchPageState extends State<SearchPage> {
                         : const Center(
                             child: Text(
                               "Belum ada pencarian",
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: AppColors.textSecondary),
                             ),
                           ),
                   ),
@@ -286,10 +286,10 @@ Widget productCard({
     },
     child: Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
+          BoxShadow(color: AppColors.shadowLight, blurRadius: 5, offset: Offset(0, 3)),
         ],
       ),
       child: Column(
@@ -320,14 +320,14 @@ Widget productCard({
                 Text(
                   price,
                   style: const TextStyle(
-                    color: Colors.red,
+                    color: AppColors.danger,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   "Stok: $stock",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -335,7 +335,7 @@ Widget productCard({
                     const Icon(
                       Icons.location_on_outlined,
                       size: 14,
-                      color: Colors.grey,
+                      color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -343,7 +343,7 @@ Widget productCard({
                         location,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

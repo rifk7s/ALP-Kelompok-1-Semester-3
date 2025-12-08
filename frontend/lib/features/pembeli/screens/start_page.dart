@@ -47,34 +47,34 @@ class _StartPageState extends State<StartPage> {
           CurvedNavigationBarItem(
             child: Icon(
               _page == 0 ? Icons.home : Icons.home_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 0 ? 'Beranda' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 1 ? Icons.receipt : Icons.receipt_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 1 ? 'Transaksi' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 2 ? Icons.chat : Icons.chat_bubble_outline,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 2 ? 'Pesan' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
               _page == 3 ? Icons.person : Icons.person_outline,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 3 ? 'Profil' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
         ],
 

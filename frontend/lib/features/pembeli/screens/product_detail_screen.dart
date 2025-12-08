@@ -150,7 +150,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.red,
+            color: AppColors.danger,
           ),
         ),
       ],
@@ -166,7 +166,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ),
       child: Text(
         "Tersedia: ${widget.stock}",
-        style: const TextStyle(color: Colors.white, fontSize: 12),
+        style: const TextStyle(color: AppColors.white, fontSize: 12),
       ),
     );
   }
@@ -175,7 +175,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),
@@ -196,7 +196,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
                 Text(
                   widget.location,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -225,10 +225,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: AppColors.shadowLight,
             blurRadius: 10,
             offset: Offset(0, -2),
           ),
@@ -248,7 +248,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: const Text(
             "+ Keranjang",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.white,
               fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
@@ -426,7 +426,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             child: const Text(
                               "Tambah",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -504,7 +504,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text("OK", style: TextStyle(color: Colors.white)),
+              child: const Text("OK", style: TextStyle(color: AppColors.white)),
+              
             ),
           ],
         );
@@ -529,7 +530,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
           ],
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: AppColors.white, size: 20),
       ),
     );
   }
@@ -546,7 +547,7 @@ class SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
       ),

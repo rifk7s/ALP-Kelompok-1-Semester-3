@@ -33,11 +33,11 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -69,7 +69,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
                         child: const Icon(
                           Icons.edit,
                           size: 18,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -103,7 +103,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
                   "Simpan Perubahan",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -128,7 +128,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         const SizedBox(height: 6),
@@ -137,7 +137,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 15,
               vertical: 12,

@@ -27,7 +27,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),

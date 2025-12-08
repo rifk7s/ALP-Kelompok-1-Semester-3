@@ -12,13 +12,13 @@ class HppPage extends StatelessWidget {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Harga Acuan HPP",
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.black,
             fontWeight: FontWeight.w700,
             fontSize: 20,
           ),
@@ -38,7 +38,7 @@ class HppPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: AppColors.black.withValues(alpha: 0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -64,7 +64,7 @@ class HppPage extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.15),
+                            color: AppColors.black.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: const Text(
@@ -146,7 +146,7 @@ class HppPage extends StatelessWidget {
                     child: const Text(
                       "Segarkan Data",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -182,11 +182,11 @@ class HppPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -213,13 +213,13 @@ class HppPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                    color: AppColors.danger,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   "Berlaku: $date",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -233,11 +233,11 @@ class HppPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),

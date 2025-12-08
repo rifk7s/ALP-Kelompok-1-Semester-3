@@ -119,7 +119,7 @@ class _ContactPageState extends State<ContactPage> {
               child: Container(
                 height: 45,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: TextField(
@@ -148,7 +148,7 @@ class _ContactPageState extends State<ContactPage> {
                   ? Center(
                       child: Text(
                         'Tidak ada chat',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: AppColors.textMuted),
                       ),
                     )
                   : ListView.separated(
@@ -174,7 +174,7 @@ class _ContactPageState extends State<ContactPage> {
                             chat['time']!,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.black54,
+                              color: AppColors.textMuted,
                             ),
                           ),
                           onTap: () {

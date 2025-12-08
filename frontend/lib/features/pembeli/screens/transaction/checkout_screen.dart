@@ -48,7 +48,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -102,7 +102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                             Text(
                               "0812-3456-7890",
-                              style: TextStyle(color: Colors.grey.shade700),
+                              style: TextStyle(color: AppColors.greyDark),
                             ),
 
                             const SizedBox(height: 8),
@@ -155,7 +155,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                               Text(
                                 "Jumlah: x${item.qty}",
-                                style: TextStyle(color: Colors.grey.shade600),
+                                style: TextStyle(color: AppColors.grey600),
                               ),
 
                               const SizedBox(height: 6),
@@ -164,7 +164,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 "Harga: ${rupiah.format(item.pricePerKg)} /kg",
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey.shade700,
+                                  color: AppColors.greyDark,
                                 ),
                               ),
                             ],
@@ -210,7 +210,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           children: [
                             Text(
                               "Metode Pembayaran",
-                              style: TextStyle(color: Colors.grey.shade600),
+                              style: TextStyle(color: AppColors.grey600),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -345,10 +345,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
+                  color: AppColors.black.withValues(alpha: 0.06),
                   blurRadius: 6,
                 ),
               ],
@@ -395,7 +395,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     },
                     child: const Text(
                       "Buat Pesanan",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppColors.white),
                     ),
                   ),
                 ),
@@ -415,7 +415,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          color: Colors.black87,
+          color: AppColors.textLight,
         ),
       ),
     );
@@ -426,12 +426,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
       margin: margin,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             blurRadius: 6,
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.black.withValues(alpha: 0.08),
             offset: const Offset(0, 3),
           ),
         ],

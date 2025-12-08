@@ -112,7 +112,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 'Datang ke kantor BUMDes:',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: AppColors.danger,
                 ),
               ),
               const SizedBox(height: 4),
