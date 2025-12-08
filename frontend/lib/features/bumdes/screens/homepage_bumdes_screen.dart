@@ -7,8 +7,14 @@ import 'petani/manage_screen.dart';
 class HomePageBumdes extends StatelessWidget {
   final VoidCallback? onProductTap;
   final VoidCallback? onChatTap;
+  final VoidCallback? onTransactionTap;
 
-  const HomePageBumdes({super.key, this.onProductTap, this.onChatTap});
+  const HomePageBumdes({
+    super.key,
+    this.onProductTap,
+    this.onChatTap,
+    this.onTransactionTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +81,8 @@ class HomePageBumdes extends StatelessWidget {
                           title: 'Produk Aktif',
                           value: '12',
                           width: cardWidth,
+                          showArrow: true,
+                          onTap: onProductTap,
                         ),
                         _dashboardCard(
                           icon: Icons.monetization_on_outlined,
@@ -82,6 +90,8 @@ class HomePageBumdes extends StatelessWidget {
                           subtitle: 'Bulan Ini',
                           value: '23',
                           width: cardWidth,
+                          showArrow: true,
+                          onTap: onTransactionTap,
                         ),
                         _dashboardCard(
                           icon: Icons.chat_bubble_outline,

@@ -4,6 +4,8 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -12,6 +14,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Intl.defaultLocale = 'id_ID';
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
 }
 
