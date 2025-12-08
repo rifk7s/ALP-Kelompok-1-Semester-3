@@ -118,20 +118,43 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                           ),
                         ),
 
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
 
-                        Text(
-                          _user?['phone'] ?? '-',
-                          style: const TextStyle(fontSize: 13, color: AppColors.textLight),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 16, color: AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              _user?['phone'] ?? '-',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
 
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
 
-                        Text(
-                          _user?['address'] ?? '-',
-                          style: const TextStyle(fontSize: 13, color: AppColors.textLight),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _user?['address'] ?? '-',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
