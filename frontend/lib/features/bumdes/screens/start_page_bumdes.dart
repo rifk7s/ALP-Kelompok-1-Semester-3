@@ -5,6 +5,7 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/bumdes/screens/homepage_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/product_screen.dart';
+import 'package:frontend/features/bumdes/screens/transaction_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/contact_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/profil_bumdes_screen.dart';
 
@@ -20,16 +21,33 @@ class _StartPageBumdesState extends State<StartPageBumdes> {
 
   void _goToChat() {
     setState(() {
+      _page = 3;
+    });
+  }
+
+  void _goToProduct() {
+    setState(() {
+      _page = 1;
+    });
+  }
+
+  void _goToTransaction() {
+    setState(() {
       _page = 2;
     });
   }
 
   List<Widget> get _pages => [
-    HomePageBumdes(onChatTap: _goToChat),
-    const ProductPage(),
-    const ContactBumdesPage(),
-    const ProfileBumdesPage(),
-  ];
+        HomePageBumdes(
+          onProductTap: _goToProduct,
+          onChatTap: _goToChat,
+          onTransactionTap: _goToTransaction,
+        ),
+        const ProductPage(),
+        const BumdesTransactionPage(),
+        const ContactBumdesPage(),
+        const ProfileBumdesPage(),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -53,34 +71,42 @@ class _StartPageBumdesState extends State<StartPageBumdes> {
           CurvedNavigationBarItem(
             child: Icon(
               _page == 0 ? Icons.home : Icons.home_outlined,
-              color: Colors.white,
+              color: AppColors.white,
             ),
             label: _page == 0 ? 'Beranda' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
-              _page == 1 ? Icons.receipt : Icons.receipt_outlined,
-              color: Colors.white,
+              _page == 1 ? Icons.inventory_2 : Icons.inventory_2_outlined,
+              color: AppColors.white,
             ),
             label: _page == 1 ? 'Produk' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
-              _page == 2 ? Icons.chat : Icons.chat_bubble_outline,
-              color: Colors.white,
+              _page == 2 ? Icons.receipt_long : Icons.receipt_long_outlined,
+              color: AppColors.white,
             ),
-            label: _page == 2 ? 'Pesan' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            label: _page == 2 ? 'Transaksi' : '',
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
           CurvedNavigationBarItem(
             child: Icon(
-              _page == 3 ? Icons.person : Icons.person_outline,
-              color: Colors.white,
+              _page == 3 ? Icons.chat : Icons.chat_bubble_outline,
+              color: AppColors.white,
             ),
-            label: _page == 3 ? 'Profil' : '',
-            labelStyle: const TextStyle(color: Colors.white),
+            label: _page == 3 ? 'Pesan' : '',
+            labelStyle: const TextStyle(color: AppColors.white),
+          ),
+          CurvedNavigationBarItem(
+            child: Icon(
+              _page == 4 ? Icons.person : Icons.person_outline,
+              color: AppColors.white,
+            ),
+            label: _page == 4 ? 'Profil' : '',
+            labelStyle: const TextStyle(color: AppColors.white),
           ),
         ],
 

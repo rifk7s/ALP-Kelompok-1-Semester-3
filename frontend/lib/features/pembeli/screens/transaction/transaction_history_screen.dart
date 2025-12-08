@@ -99,13 +99,13 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -142,7 +142,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   ? Icons.local_shipping_outlined
                   : Icons.check_circle_outline,
               size: 64,
-              color: Colors.grey[400],
+              color: AppColors.grey400,
             ),
             const SizedBox(height: 12),
             Text(
@@ -151,7 +151,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   : status == 'processing'
                   ? 'Tidak ada pesanan yang sedang diproses'
                   : 'Belum ada pesanan selesai',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -175,11 +175,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -215,7 +215,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 const Spacer(),
                 Text(
                   order['id'],
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -267,7 +267,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       const SizedBox(height: 4),
                       Text(
                         '${products.fold(0, (sum, p) => sum + (p['qty'] as int))} kg',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -289,7 +289,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total:', style: TextStyle(color: Colors.grey)),
+                const Text('Total:', style: TextStyle(color: AppColors.textSecondary)),
                 Text(
                   _formatRupiah(order['total']),
                   style: const TextStyle(
@@ -318,18 +318,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.orange.shade50,
+          color: AppColors.warningLight,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            Icon(Icons.timer, size: 18, color: Colors.orange.shade700),
+            Icon(Icons.timer, size: 18, color: AppColors.warningDark),
             const SizedBox(width: 8),
             Text(
               'Batas: ${order['deadline']} (${order['timeLeft']})',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.orange.shade700,
+                color: AppColors.warningDark,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -347,29 +347,29 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         children: [
           Row(
             children: [
-              Icon(Icons.check_circle, size: 16, color: Colors.green.shade600),
+              Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
               const SizedBox(width: 6),
               const Text(
                 'Pembayaran Lunas',
-                style: TextStyle(fontSize: 12, color: Colors.green),
+                style: TextStyle(fontSize: 12, color: AppColors.success),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(Icons.local_shipping, size: 16, color: Colors.blue.shade600),
+              Icon(Icons.local_shipping, size: 16, color: AppColors.infoDark),
               const SizedBox(width: 6),
               Text(
                 order['statusDetail'],
-                style: const TextStyle(fontSize: 12, color: Colors.blue),
+                style: const TextStyle(fontSize: 12, color: AppColors.info),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Estimasi Kirim: ${order['estimateShip']}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 12, color: AppColors.grey600),
           ),
         ],
       ),
@@ -381,11 +381,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(Icons.check_circle, size: 16, color: Colors.green.shade600),
+          Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
           const SizedBox(width: 6),
           Text(
             'Diterima: ${order['receivedDate']}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 12, color: AppColors.grey600),
           ),
         ],
       ),
@@ -404,7 +404,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
     final elevatedStyle = ElevatedButton.styleFrom(
       backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.white,
       padding: const EdgeInsets.symmetric(vertical: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
@@ -557,13 +557,13 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return Colors.orange;
+        return AppColors.warning;
       case 'processing':
-        return Colors.blue;
+        return AppColors.info;
       case 'completed':
-        return Colors.green;
+        return AppColors.success;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 

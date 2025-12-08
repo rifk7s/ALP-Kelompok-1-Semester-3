@@ -30,7 +30,7 @@ class ReceiptPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -41,12 +41,12 @@ class ReceiptPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   blurRadius: 6,
-                  color: Colors.black.withValues(alpha: 0.07),
+                  color: AppColors.black.withValues(alpha: 0.07),
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -76,7 +76,7 @@ class ReceiptPage extends StatelessWidget {
 
                 Text(
                   "Order ID: $orderId",
-                  style: const TextStyle(color: Colors.grey, fontSize: 13.5),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13.5),
                 ),
 
                 const SizedBox(height: 20),
@@ -109,13 +109,13 @@ class ReceiptPage extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: AppColors.successLight,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Text(
                         "Berhasil",
                         style: TextStyle(
-                          color: Colors.green,
+                          color: AppColors.success,
                           fontWeight: FontWeight.bold,
                           fontSize: 13.5,
                         ),
@@ -129,7 +129,7 @@ class ReceiptPage extends StatelessWidget {
                 Text(
                   "Terima kasih telah melakukan pembayaran!",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5),
+                  style: TextStyle(color: AppColors.grey600, fontSize: 13.5),
                 ),
               ],
             ),
@@ -152,7 +152,7 @@ class ReceiptPage extends StatelessWidget {
               child: const Text(
                 "Kembali ke Home",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -195,7 +195,7 @@ class ReceiptPage extends StatelessWidget {
             (_) => Container(
               width: dashWidth,
               height: dashHeight,
-              color: Colors.grey.shade300,
+              color: AppColors.greyLight,
             ),
           ),
         );

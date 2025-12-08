@@ -23,9 +23,15 @@ class AppColors {
 
   // Grey variants
   static const Color grey = Colors.grey;
+  static const Color grey100 = Color(0xFFF5F5F5);
+  static const Color grey200 = Color(0xFFEEEEEE);
   static const Color greyLight = Color(0xFFE0E0E0); // grey.shade300
+  static const Color grey400 = Color(0xFFBDBDBD);
   static const Color greyMedium = Color(0xFF9E9E9E); // grey.shade500
+  static const Color grey600 = Color(0xFF757575);
   static const Color greyDark = Color(0xFF616161); // grey.shade700
+  static const Color grey800 = Color(0xFF424242);
+  static const Color blueGrey = Color(0xFF607D8B);
 
   // Input & border colors
   static const Color inputBackground = Color(0xFFF5F6F9);
@@ -45,9 +51,16 @@ class AppColors {
 
   // Semantic colors
   static const Color danger = Color(0xFFD81B1B); // Logout, delete, error
+  static const Color dangerLight = Color(0xFFFFEBEE);
   static const Color success = Color(0xFF4CAF50); // Green
+  static const Color successLight = Color(0xFFE8F5E9);
+  static const Color successDark = Color(0xFF43A047);
   static const Color warning = Color(0xFFFF9800); // Orange
+  static const Color warningLight = Color(0xFFFFF3E0);
+  static const Color warningDark = Color(0xFFF57C00);
+  static const Color warningAccent = Color(0xFFFFAB40);
   static const Color info = Color(0xFF2196F3); // Blue
+  static const Color infoDark = Color(0xFF1E88E5);
 
   // Chat colors
   static const Color chatBubbleSent = Color(0xFFDCB285);

@@ -7,8 +7,14 @@ import 'petani/manage_screen.dart';
 class HomePageBumdes extends StatelessWidget {
   final VoidCallback? onProductTap;
   final VoidCallback? onChatTap;
+  final VoidCallback? onTransactionTap;
 
-  const HomePageBumdes({super.key, this.onProductTap, this.onChatTap});
+  const HomePageBumdes({
+    super.key,
+    this.onProductTap,
+    this.onChatTap,
+    this.onTransactionTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +81,8 @@ class HomePageBumdes extends StatelessWidget {
                           title: 'Produk Aktif',
                           value: '12',
                           width: cardWidth,
+                          showArrow: true,
+                          onTap: onProductTap,
                         ),
                         _dashboardCard(
                           icon: Icons.monetization_on_outlined,
@@ -82,6 +90,8 @@ class HomePageBumdes extends StatelessWidget {
                           subtitle: 'Bulan Ini',
                           value: '23',
                           width: cardWidth,
+                          showArrow: true,
+                          onTap: onTransactionTap,
                         ),
                         _dashboardCard(
                           icon: Icons.chat_bubble_outline,
@@ -123,30 +133,30 @@ class HomePageBumdes extends StatelessWidget {
                   children: [
                     _activityCard(
                       icon: Icons.shopping_bag_outlined,
-                      iconColor: Colors.orange,
+                      iconColor: AppColors.warning,
                       title: 'Order baru #ORD-2025-002',
                       subtitle: 'Gabah 50kg - Rp 325.000',
                       time: '2 jam lalu',
                       status: 'Menunggu',
-                      statusColor: Colors.orange,
+                      statusColor: AppColors.warning,
                     ),
                     _activityCard(
                       icon: Icons.local_shipping_outlined,
-                      iconColor: Colors.blue,
+                      iconColor: AppColors.info,
                       title: 'Pengiriman #ORD-2025-001',
                       subtitle: 'Jagung 20kg - Rp 120.000',
                       time: '3 jam lalu',
                       status: 'Dikirim',
-                      statusColor: Colors.blue,
+                      statusColor: AppColors.info,
                     ),
                     _activityCard(
                       icon: Icons.check_circle_outline,
-                      iconColor: Colors.green,
+                      iconColor: AppColors.success,
                       title: 'Selesai #ORD-2025-000',
                       subtitle: 'Gabah 30kg - Rp 195.000',
                       time: '1 hari lalu',
                       status: 'Selesai',
-                      statusColor: Colors.green,
+                      statusColor: AppColors.success,
                     ),
                   ],
                 ),
@@ -189,11 +199,11 @@ class HomePageBumdes extends StatelessWidget {
         height: 130,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [
             BoxShadow(
-              color: Colors.black12,
+              color: AppColors.shadowLight,
               blurRadius: 7,
               offset: Offset(0, 3),
             ),
@@ -210,7 +220,7 @@ class HomePageBumdes extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: Colors.grey.shade400,
+                  color: AppColors.grey400,
                   ),
               ],
             ),
@@ -227,7 +237,7 @@ class HomePageBumdes extends StatelessWidget {
               subtitle != null ? '$title · $subtitle' : title,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: AppColors.grey600,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -251,11 +261,11 @@ class HomePageBumdes extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -288,7 +298,7 @@ class HomePageBumdes extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: AppColors.grey600,
                   ),
                 ),
               ],
@@ -318,7 +328,7 @@ class HomePageBumdes extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 time,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 11, color: AppColors.greyMedium),
               ),
             ],
           ),

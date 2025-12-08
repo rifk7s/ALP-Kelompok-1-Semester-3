@@ -19,7 +19,7 @@ class HelpPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -60,7 +60,7 @@ class HelpPage extends StatelessWidget {
       color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.black87),
+        leading: Icon(icon, color: AppColors.textLight),
         title: Text(
           title,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),

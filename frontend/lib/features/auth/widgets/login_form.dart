@@ -83,7 +83,7 @@ class _LoginFormState extends State<LoginForm> {
               onPressed: () {},
               child: const Text(
                 'Lupa Kata Sandi?',
-                style: TextStyle(color: Colors.blue),
+                style: TextStyle(color: AppColors.info),
               ),
             ),
           ],
@@ -145,7 +145,7 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 16),
         OutlinedButton.icon(
           onPressed: () {},
-          icon: const Icon(Icons.facebook, size: 24, color: Colors.blue),
+          icon: const Icon(Icons.facebook, size: 24, color: AppColors.info),
           label: const Text('Masuk menggunakan Facebook'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,

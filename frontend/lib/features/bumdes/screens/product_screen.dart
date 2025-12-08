@@ -123,7 +123,7 @@ class _ProductPageState extends State<ProductPage> {
                       hintText: "Cari produk...",
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.white,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 0,
@@ -206,9 +206,9 @@ class _ProductPageState extends State<ProductPage> {
       selected: selected,
       onSelected: (_) => setState(() => _filter = key),
       selectedColor: AppColors.primaryLight,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       labelStyle: TextStyle(
-        color: selected ? AppColors.primary : Colors.black87,
+        color: selected ? AppColors.primary : AppColors.textLight,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
     );
@@ -219,7 +219,7 @@ class _ProductPageState extends State<ProductPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 70, color: Colors.grey[400]),
+          Icon(Icons.inventory_2_outlined, size: 70, color: AppColors.grey400),
           const SizedBox(height: 12),
           const Text("Tidak ada produk", style: TextStyle(fontSize: 16)),
         ],
@@ -258,11 +258,11 @@ class _ProductPageState extends State<ProductPage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: AppColors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -299,11 +299,11 @@ class _ProductPageState extends State<ProductPage> {
             ),
             Text(
               "${product["jumlah"]} kg • ${product["harga"]}",
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             Text(
               "Petani: ${product["petani"]}",
-              style: const TextStyle(fontSize: 12, color: Colors.black87),
+              style: const TextStyle(fontSize: 12, color: AppColors.textLight),
             ),
           ],
         ),

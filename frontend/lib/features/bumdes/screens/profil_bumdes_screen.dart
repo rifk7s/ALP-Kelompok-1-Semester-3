@@ -82,7 +82,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                         child: const Text(
                           "BUMDes",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -103,14 +103,14 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
 
                       const Text(
                         '0813-5635-3033',
-                        style: TextStyle(fontSize: 13, color: Colors.black87),
+                        style: TextStyle(fontSize: 13, color: AppColors.textLight),
                       ),
 
                       const SizedBox(height: 4),
 
                       const Text(
                         'Jl. Pettarani No. 30',
-                        style: TextStyle(fontSize: 13, color: Colors.black87),
+                        style: TextStyle(fontSize: 13, color: AppColors.textLight),
                       ),
                     ],
                   ),
@@ -165,12 +165,12 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.logout, color: Colors.white),
+                            Icon(Icons.logout, color: AppColors.white),
                             SizedBox(width: 8),
                             Text(
                               'Keluar',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -196,7 +196,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
       context: context,
       barrierDismissible: true,
       barrierLabel: '',
-      barrierColor: Colors.black54,
+      barrierColor: AppColors.overlay,
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Container();
@@ -228,7 +228,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: AppColors.black,
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -283,7 +283,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                             child: const Text(
                               "Tidak",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -308,7 +308,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
       color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.black87),
+        leading: Icon(icon, color: AppColors.textLight),
         title: Text(
           title,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),

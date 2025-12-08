@@ -16,7 +16,7 @@ class AboutAppPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -61,7 +61,7 @@ class AboutAppPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
-                  Text("Versi: 1.0.0", style: TextStyle(color: Colors.grey)),
+                  Text("Versi: 1.0.0", style: TextStyle(color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -102,7 +102,7 @@ class AboutAppPage extends StatelessWidget {
           Center(
             child: Text(
               "© 2025 PanenKi' - All rights reserved.",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: AppColors.grey600, fontSize: 12),
             ),
           ),
         ],

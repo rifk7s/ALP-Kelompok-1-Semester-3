@@ -77,7 +77,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
       ),
@@ -112,7 +112,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                           horizontal: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: AppColors.dangerLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -120,14 +120,14 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                           children: [
                             const Icon(
                               Icons.timer,
-                              color: Colors.red,
+                              color: AppColors.danger,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               "Sisa waktu: ${formatTime(remainingTime)}",
                               style: const TextStyle(
-                                color: Colors.red,
+                                color: AppColors.danger,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13.5,
                               ),
@@ -216,7 +216,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: AppColors.grey100,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -241,11 +241,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.black.withValues(alpha: 0.08),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),

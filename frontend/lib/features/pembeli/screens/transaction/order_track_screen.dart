@@ -48,7 +48,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
         centerTitle: true,
         title: const Text(
           'Lacak Pesanan',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -61,11 +61,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: AppColors.black.withValues(alpha: 0.05),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -100,7 +100,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                               widget.order['id'] ?? '#ORD-XXXX-XXX',
                               style: const TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -141,7 +141,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
   ) {
     Color circleColor = completed || isCurrent
         ? AppColors.primary
-        : Colors.grey[300]!;
+        : AppColors.greyLight;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +171,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                           : [],
                     ),
                     child: completed || isCurrent
-                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        ? const Icon(Icons.check, size: 16, color: AppColors.white)
                         : null,
                   ),
                 );
@@ -183,7 +183,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                 height: 60,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [circleColor, Colors.grey[300]!],
+                    colors: [circleColor, AppColors.greyLight],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -203,8 +203,8 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                   style: TextStyle(
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
                     color: completed || isCurrent
-                        ? Colors.black87
-                        : Colors.grey[600],
+                        ? AppColors.textLight
+                        : AppColors.grey600,
                     fontSize: 15,
                   ),
                 ),
@@ -215,7 +215,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       timestamps[title]!,
-                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ),
               ],

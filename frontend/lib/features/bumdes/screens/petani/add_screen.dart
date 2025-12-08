@@ -22,11 +22,11 @@ class TambahPetaniScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -98,7 +98,7 @@ class TambahPetaniScreen extends StatelessWidget {
                   "Simpan",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -124,7 +124,7 @@ class TambahPetaniScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textLight,
           ),
         ),
         const SizedBox(height: 6),
@@ -134,7 +134,7 @@ class TambahPetaniScreen extends StatelessWidget {
           keyboardType: keyboard,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 15,
               vertical: 12,

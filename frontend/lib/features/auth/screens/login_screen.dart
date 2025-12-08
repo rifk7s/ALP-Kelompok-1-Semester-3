@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
+                                    color: AppColors.black.withValues(alpha: 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {},
                           child: const Text(
                             'Lupa Kata Sandi?',
-                            style: TextStyle(color: Colors.blue),
+                            style: TextStyle(color: AppColors.info),
                           ),
                         ),
                       ],
@@ -293,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: const Icon(
                         Icons.facebook,
                         size: 24,
-                        color: Colors.blue,
+                        color: AppColors.info,
                       ),
                       label: const Text('Masuk menggunakan Facebook'),
                       style: OutlinedButton.styleFrom(
