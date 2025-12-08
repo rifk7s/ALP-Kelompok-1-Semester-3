@@ -14,7 +14,7 @@ class Cart extends Model
      */
 
     protected $fillable = [
-        'quantity',
+        'quantity_kg',
 
         // Foreign keys
         'user_id',
