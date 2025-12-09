@@ -84,12 +84,17 @@ class ChatService {
         'lastMessage': text,
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastSenderId': userId,
+        'unreadCounts': {
+          userId: 0,
+          recipientId: 1,
+        },
       });
     } else {
       await chatRef.update({
         'lastMessage': text,
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastSenderId': userId,
+        'unreadCounts.$recipientId': FieldValue.increment(1),
       });
     }
 
@@ -130,6 +135,13 @@ class ChatService {
       if (markedCount > 0) {
         await batch.commit();
       }
+
+      await _firestore.collection('chats').doc(chatId).set(
+        {
+          'unreadCounts': {userId: 0},
+        },
+        SetOptions(merge: true),
+      );
     } catch (e) {
       debugPrint('markMessagesAsRead error: $e');
     }
@@ -163,9 +175,55 @@ class ChatService {
         'lastMessage': '',
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastSenderId': '',
+        'unreadCounts': {
+          userId: 0,
+          recipientId: 0,
+        },
       });
     }
 
     return chatId;
+  }
+
+  // Typing indicator methods
+  static Future<void> setTyping(String chatId, bool isTyping) async {
+    final userId = getCurrentUserId();
+    if (userId == null) return;
+
+    try {
+      await _firestore.collection('chats').doc(chatId).update({
+        'typing.$userId': isTyping,
+      });
+    } catch (e) {
+      debugPrint('setTyping error: $e');
+    }
+  }
+
+  static Stream<Map<String, bool>> getTypingStream(String chatId) {
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .snapshots()
+        .map((snapshot) {
+      final data = snapshot.data();
+      if (data == null || data['typing'] == null) {
+        return <String, bool>{};
+      }
+      final typing = data['typing'] as Map<String, dynamic>;
+      return typing.map((key, value) => MapEntry(key, value as bool));
+    });
+  }
+
+  static bool isOtherUserTyping(Map<String, bool> typingStatus) {
+    final userId = getCurrentUserId();
+    if (userId == null) return false;
+    
+    // Check if any other user is typing
+    for (final entry in typingStatus.entries) {
+      if (entry.key != userId && entry.value == true) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -193,6 +193,8 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                                 final otherImage = images[otherUserId] ?? '';
                                 final lastMessage = data['lastMessage'] ?? '';
                                 final lastTime = data['lastMessageTime'] as Timestamp?;
+                                final unreadCounts = (data['unreadCounts'] as Map<String, dynamic>? ?? {});
+                                final unread = (unreadCounts[_currentUserId] ?? 0) as int;
 
                                 return ListTile(
                                   leading: CircleAvatar(
@@ -213,12 +215,35 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                                       color: AppColors.textSecondary,
                                     ),
                                   ),
-                                  trailing: Text(
-                                    _formatTime(lastTime),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textMuted,
-                                    ),
+                                  trailing: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        _formatTime(lastTime),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                      if (unread > 0)
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 6),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            unread > 99 ? '99+' : unread.toString(),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   onTap: () {
                                     Navigator.push(

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/widgets/typing_indicator.dart' show TypingBubble;
 
 class ChatBumdesPage extends StatefulWidget {
   final String chatId;
@@ -25,6 +27,12 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
   final TextEditingController _msgController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   String? _currentUserId;
+  Timer? _typingTimer;
+  Timer? _hideTypingTimer;
+  bool _isTyping = false;
+  bool _otherUserTyping = false;
+  DateTime? _lastTypingEvent;
+  StreamSubscription? _typingSubscription;
 
   void scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -43,6 +51,71 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
     super.initState();
     _currentUserId = ChatService.getCurrentUserId();
     ChatService.markMessagesAsRead(widget.chatId);
+    _listenToTypingStatus();
+  }
+
+  @override
+  void dispose() {
+    _typingTimer?.cancel();
+    _hideTypingTimer?.cancel();
+    _typingSubscription?.cancel();
+    ChatService.setTyping(widget.chatId, false);
+    _msgController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _listenToTypingStatus() {
+    _typingSubscription = ChatService.getTypingStream(widget.chatId).listen((typingStatus) {
+      if (!mounted) return;
+
+      final otherStatus = typingStatus[widget.recipientId];
+      final now = DateTime.now();
+
+      if (otherStatus == true) {
+        _lastTypingEvent = now;
+        _hideTypingTimer?.cancel();
+        if (!_otherUserTyping) {
+          setState(() => _otherUserTyping = true);
+        }
+        return;
+      }
+
+      if (_lastTypingEvent == null) {
+        if (_otherUserTyping) setState(() => _otherUserTyping = false);
+        return;
+      }
+
+      final elapsed = now.difference(_lastTypingEvent!).inMilliseconds;
+      if (elapsed < 1200) {
+        _hideTypingTimer?.cancel();
+        _hideTypingTimer = Timer(Duration(milliseconds: 1200 - elapsed), () {
+          if (!mounted) return;
+          if (_otherUserTyping) setState(() => _otherUserTyping = false);
+        });
+        if (!_otherUserTyping) {
+          setState(() => _otherUserTyping = true);
+        }
+      } else {
+        _hideTypingTimer?.cancel();
+        if (_otherUserTyping) setState(() => _otherUserTyping = false);
+      }
+    });
+  }
+
+  void _onTextChanged(String text) {
+    if (text.isNotEmpty && !_isTyping) {
+      _isTyping = true;
+      ChatService.setTyping(widget.chatId, true);
+    }
+
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      if (_isTyping) {
+        _isTyping = false;
+        ChatService.setTyping(widget.chatId, false);
+      }
+    });
   }
 
   void sendMessage() async {
@@ -50,6 +123,12 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
     if (text.isEmpty) return;
 
     _msgController.clear();
+    
+    _typingTimer?.cancel();
+    if (_isTyping) {
+      _isTyping = false;
+      ChatService.setTyping(widget.chatId, false);
+    }
 
     await ChatService.sendMessage(
       chatId: widget.chatId,
@@ -102,7 +181,7 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: ChatService.getMessages(widget.chatId),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -125,23 +204,27 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                   );
                 }
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final doc = messages[index];
-                    final data = doc.data() as Map<String, dynamic>;
-                    final fromMe = data['senderId'] == _currentUserId;
-                    final text = data['text'] ?? '';
-                    final read = data['read'] ?? false;
+                const bottomPadding = TypingBubble.totalHeight + 16;
+
+                return Stack(
+                  children: [
+                    ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10).copyWith(bottom: bottomPadding),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final doc = messages[index];
+                        final data = doc.data() as Map<String, dynamic>;
+                        final fromMe = data['senderId'] == _currentUserId;
+                        final text = data['text'] ?? '';
+                        final read = data['read'] ?? false;
 
                     return Align(
                       alignment: fromMe
                           ? Alignment.centerRight
                           : Alignment.centerLeft,
                       child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 3),
+                        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 12),
                         padding: const EdgeInsets.symmetric(
                           vertical: 10,
                           horizontal: 14,
@@ -185,7 +268,28 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                         ),
                       ),
                     );
-                  },
+                      },
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 6,
+                      child: IgnorePointer(
+                        child: Visibility(
+                          visible: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          maintainSize: true,
+                          child: AnimatedOpacity(
+                            opacity: _otherUserTyping ? 1 : 0,
+                            duration: const Duration(milliseconds: 180),
+                            curve: Curves.easeInOut,
+                            child: const TypingBubble(key: ValueKey('typing-bubble')),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -219,6 +323,7 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                         Expanded(
                           child: TextField(
                             controller: _msgController,
+                            onChanged: _onTextChanged,
                             decoration: const InputDecoration(
                               hintText: "Balasan",
                               hintStyle: TextStyle(
