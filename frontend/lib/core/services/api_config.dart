@@ -1,8 +1,19 @@
+import 'dart:io';
+
 class ApiConfig {
-  // Untuk Android Emulator gunakan 10.0.2.2
-  // Untuk iOS Simulator gunakan 127.0.0.1
-  // Untuk physical device gunakan IP komputer (contoh: 192.168.x.x)
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  // Android Emulator: 10.0.2.2
+  // iOS/Physical device: IP komputer
+  // NOTE: Run backend with: php artisan serve --host=0.0.0.0 --port=8000
+  static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
+  static const String _iosDeviceUrl = 'http://10.1.50.240:8000/api';
+
+  static String get baseUrl {
+    if (Platform.isAndroid) {
+      return _androidEmulatorUrl;
+    } else {
+      return _iosDeviceUrl;
+    }
+  }
 
   static Map<String, String> headers({String? token}) {
     final headers = {
