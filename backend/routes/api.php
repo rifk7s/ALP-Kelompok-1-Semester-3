@@ -30,13 +30,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/list', [ChatListController::class, 'getChatList']);
     Route::post('/chat/create', [ChatListController::class, 'createChat']);
     Route::delete('/chat/{chatId}', [ChatListController::class, 'deleteChat']);
+    
+    /*
+        Profile Routes
+    */
+    Route::patch('profile/update', [ProfileController::class, 'update']);
+    Route::get('profile/me', [ProfileController::class, 'userrn']);
 });
-
-/*
-    Profile Routes
-*/
-Route::patch('profile/update', [ProfileController::class, 'update']);
-Route::get('profile/me', [ProfileController::class, 'userrn']);
 
 /*
     Product Routes

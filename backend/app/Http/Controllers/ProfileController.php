@@ -18,11 +18,13 @@ class ProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
+        $user = $request->user();
+        
         $validated = $request->validate([
             'name' => ['sometimes', 'max:255', 'string'],
-            'phone' => ['sometimes', 'max:15', 'string', 'unique:users', Rule::unique('users')->ignore($user->id)],
+            'phone' => ['sometimes', 'max:15', 'string', Rule::unique('users')->ignore($user->id)],
             'address' => 'sometimes|max:500',
         ]);
 

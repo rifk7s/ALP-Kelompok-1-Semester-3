@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
 
@@ -58,13 +59,29 @@ class _ProfilePageState extends State<ProfilePage> {
                   Positioned(
                     right: 0,
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        // Navigate to edit profile with current user data
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const EditProfilePage(),
+                            builder: (context) => EditProfilePage(
+                              initialProfile: _user != null
+                                  ? Profile(
+                                      id: _user!['id'] as int,
+                                      name: _user!['name'] as String,
+                                      phone: _user!['phone'] as String?,
+                                      address: _user!['address'] as String?,
+                                      email: _user!['email'] as String?,
+                                    )
+                                  : null,
+                            ),
                           ),
                         );
+                        
+                        // Reload user data if profile was updated
+                        if (result != null && mounted) {
+                          await _loadUser();
+                        }
                       },
                       child: const Icon(Icons.edit_outlined),
                     ),
