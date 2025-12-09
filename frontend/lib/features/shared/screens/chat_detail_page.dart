@@ -112,7 +112,11 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 final messages = snapshot.data?.docs ?? [];
                 
                 if (messages.isNotEmpty) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    scrollToBottom();
+                    // Mark messages as read whenever stream updates
+                    ChatService.markMessagesAsRead(widget.chatId);
+                  });
                 }
 
                 if (messages.isEmpty) {

@@ -206,12 +206,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           GestureDetector(
             onTap: () async {
               final bumdes = await BumdesService.getBumdesInfo();
+              if (!mounted) return;
               if (bumdes == null) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Gagal mendapatkan info BUMDes')),
-                  );
-                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Gagal mendapatkan info BUMDes')),
+                );
                 return;
               }
               final chatId = await ChatService.getOrCreateChat(
@@ -219,7 +218,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 recipientName: bumdes.name,
                 recipientImage: widget.image,
               );
-              if (chatId != null && context.mounted) {
+              if (!mounted) return;
+              if (chatId != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(

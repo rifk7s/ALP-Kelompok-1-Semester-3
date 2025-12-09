@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
@@ -36,7 +37,7 @@ class BumdesService {
         return _cachedBumdes;
       }
     } catch (e) {
-      print('BumdesService error: $e');
+      debugPrint('BumdesService error: $e');
     }
     return null;
   }

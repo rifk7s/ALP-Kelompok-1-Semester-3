@@ -427,25 +427,24 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             child: OutlinedButton(
               onPressed: () async {
                 final bumdes = await BumdesService.getBumdesInfo();
-                if (bumdes == null) return;
+                if (!mounted || bumdes == null) return;
                 final chatId = await ChatService.getOrCreateChat(
                   recipientId: bumdes.id,
                   recipientName: bumdes.name,
                   recipientImage: 'assets/images/logo.png',
                 );
-                if (chatId != null && context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatDetailPage(
-                        chatId: chatId,
-                        name: bumdes.name,
-                        image: 'assets/images/logo.png',
-                        recipientId: bumdes.id,
-                      ),
+                if (!mounted || chatId == null) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatDetailPage(
+                      chatId: chatId,
+                      name: bumdes.name,
+                      image: 'assets/images/logo.png',
+                      recipientId: bumdes.id,
                     ),
-                  );
-                }
+                  ),
+                );
               },
               style: outlineStyle,
               child: const Text('Chat BUMDes'),
@@ -478,25 +477,24 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             child: OutlinedButton(
               onPressed: () async {
                 final bumdes = await BumdesService.getBumdesInfo();
-                if (bumdes == null) return;
+                if (!mounted || bumdes == null) return;
                 final chatId = await ChatService.getOrCreateChat(
                   recipientId: bumdes.id,
                   recipientName: bumdes.name,
                   recipientImage: 'assets/images/logo.png',
                 );
-                if (chatId != null && context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatDetailPage(
-                        chatId: chatId,
-                        name: bumdes.name,
-                        image: 'assets/images/logo.png',
-                        recipientId: bumdes.id,
-                      ),
+                if (!mounted || chatId == null) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatDetailPage(
+                      chatId: chatId,
+                      name: bumdes.name,
+                      image: 'assets/images/logo.png',
+                      recipientId: bumdes.id,
                     ),
-                  );
-                }
+                  ),
+                );
               },
               style: outlineStyle,
               child: const Text('Chat BUMDes'),

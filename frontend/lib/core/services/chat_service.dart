@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'storage_service.dart';
 
 class ChatService {
@@ -9,17 +10,12 @@ class ChatService {
   static Future<bool> signInToFirebase() async {
     try {
       final firebaseToken = await StorageService.getFirebaseToken();
-      if (firebaseToken == null) {
-        print('ChatService: No Firebase token found');
-        return false;
-      }
+      if (firebaseToken == null) return false;
 
-      print('ChatService: Signing in with Firebase token...');
       await _auth.signInWithCustomToken(firebaseToken);
-      print('ChatService: Firebase sign-in success, uid: ${_auth.currentUser?.uid}');
       return true;
     } catch (e) {
-      print('ChatService: Firebase sign-in error: $e');
+      debugPrint('ChatService: Firebase sign-in error: $e');
       return false;
     }
   }
@@ -110,21 +106,33 @@ class ChatService {
     final userId = getCurrentUserId();
     if (userId == null) return;
 
-    final messagesRef = _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .where('senderId', isNotEqualTo: userId)
-        .where('read', isEqualTo: false);
+    try {
+      // Get all unread messages first, then filter client-side
+      final messagesRef = _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .where('read', isEqualTo: false);
 
-    final snapshot = await messagesRef.get();
-    final batch = _firestore.batch();
+      final snapshot = await messagesRef.get();
+      final batch = _firestore.batch();
+      int markedCount = 0;
 
-    for (var doc in snapshot.docs) {
-      batch.update(doc.reference, {'read': true});
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        // Only mark messages from OTHER users as read
+        if (data['senderId'] != userId) {
+          batch.update(doc.reference, {'read': true});
+          markedCount++;
+        }
+      }
+
+      if (markedCount > 0) {
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('markMessagesAsRead error: $e');
     }
-
-    await batch.commit();
   }
 
   static Future<String?> getOrCreateChat({
