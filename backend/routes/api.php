@@ -40,6 +40,21 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /*
+    BUMDes Info (for chat)
+*/
+Route::get('/bumdes', function () {
+    $bumdes = \App\Models\User::where('role', 'bumdes')->first();
+    if (!$bumdes) {
+        return response()->json(['message' => 'BUMDes not found'], 404);
+    }
+    return response()->json([
+        'id' => $bumdes->id,
+        'name' => $bumdes->name,
+        'phone' => $bumdes->phone,
+    ]);
+});
+
+/*
     Product Routes
 */
 Route::apiResource('/products/product', ProductController::class);
