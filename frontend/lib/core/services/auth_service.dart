@@ -97,7 +97,10 @@ class AuthService {
         await StorageService.saveToken(data['access_token']);
         await StorageService.saveUser(data['user']);
         if (data['firebase_custom_token'] != null) {
+          print('AuthService: Saving Firebase token');
           await StorageService.saveFirebaseToken(data['firebase_custom_token']);
+        } else {
+          print('AuthService: No firebase_custom_token in response');
         }
 
         return AuthResult(

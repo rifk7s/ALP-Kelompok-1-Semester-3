@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
@@ -423,16 +425,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      name: 'BUMDes Desa Sengka',
-                      image: 'assets/images/logo.png',
-                    ),
-                  ),
+              onPressed: () async {
+                final bumdes = await BumdesService.getBumdesInfo();
+                if (bumdes == null) return;
+                final chatId = await ChatService.getOrCreateChat(
+                  recipientId: bumdes.id,
+                  recipientName: bumdes.name,
+                  recipientImage: 'assets/images/logo.png',
                 );
+                if (chatId != null && context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatDetailPage(
+                        chatId: chatId,
+                        name: bumdes.name,
+                        image: 'assets/images/logo.png',
+                        recipientId: bumdes.id,
+                      ),
+                    ),
+                  );
+                }
               },
               style: outlineStyle,
               child: const Text('Chat BUMDes'),
@@ -463,16 +476,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      name: 'BUMDes Desa Sengka',
-                      image: 'assets/images/logo.png',
-                    ),
-                  ),
+              onPressed: () async {
+                final bumdes = await BumdesService.getBumdesInfo();
+                if (bumdes == null) return;
+                final chatId = await ChatService.getOrCreateChat(
+                  recipientId: bumdes.id,
+                  recipientName: bumdes.name,
+                  recipientImage: 'assets/images/logo.png',
                 );
+                if (chatId != null && context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatDetailPage(
+                        chatId: chatId,
+                        name: bumdes.name,
+                        image: 'assets/images/logo.png',
+                        recipientId: bumdes.id,
+                      ),
+                    ),
+                  );
+                }
               },
               style: outlineStyle,
               child: const Text('Chat BUMDes'),

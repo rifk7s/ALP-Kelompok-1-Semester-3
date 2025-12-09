@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 
@@ -241,14 +242,26 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     );
   }
 
-  void _openChat(Map<String, dynamic> order) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            ChatBumdesPage(name: order['buyer'], image: order['buyerImage']),
-      ),
+  void _openChat(Map<String, dynamic> order) async {
+    final recipientId = order['buyerId']?.toString() ?? 'buyer_${order['buyer']}';
+    final chatId = await ChatService.getOrCreateChat(
+      recipientId: recipientId,
+      recipientName: order['buyer'],
+      recipientImage: order['buyerImage'],
     );
+    if (chatId != null && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatBumdesPage(
+            chatId: chatId,
+            name: order['buyer'],
+            image: order['buyerImage'],
+            recipientId: recipientId,
+          ),
+        ),
+      );
+    }
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 
@@ -202,14 +204,34 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
           ),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      ChatDetailPage(name: widget.name, image: widget.image),
-                ),
+            onTap: () async {
+              final bumdes = await BumdesService.getBumdesInfo();
+              if (bumdes == null) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Gagal mendapatkan info BUMDes')),
+                  );
+                }
+                return;
+              }
+              final chatId = await ChatService.getOrCreateChat(
+                recipientId: bumdes.id,
+                recipientName: bumdes.name,
+                recipientImage: widget.image,
               );
+              if (chatId != null && context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatDetailPage(
+                      chatId: chatId,
+                      name: bumdes.name,
+                      image: widget.image,
+                      recipientId: bumdes.id,
+                    ),
+                  ),
+                );
+              }
             },
             child: const Icon(
               Icons.chat_bubble_outline,

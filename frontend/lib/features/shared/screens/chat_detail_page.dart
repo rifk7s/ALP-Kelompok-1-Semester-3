@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/chat_service.dart';
 
 class ChatDetailPage extends StatefulWidget {
+  final String chatId;
   final String name;
   final String image;
+  final String recipientId;
 
-  const ChatDetailPage({super.key, required this.name, required this.image});
+  const ChatDetailPage({
+    super.key,
+    required this.chatId,
+    required this.name,
+    required this.image,
+    required this.recipientId,
+  });
 
   @override
   State<ChatDetailPage> createState() => _ChatDetailPageState();
@@ -13,91 +23,8 @@ class ChatDetailPage extends StatefulWidget {
 
 class _ChatDetailPageState extends State<ChatDetailPage> {
   final TextEditingController _msgController = TextEditingController();
-
   final ScrollController _scrollController = ScrollController();
-
-  final List<Map<String, dynamic>> _messages = [
-    {
-      "fromMe": false,
-      "text":
-          "Selamat siang Pak. Kiriman gabahnya tadi sudah sampai. Saya cek satu-satu, dan kualitasnya bagus sekali. Bersih, kering, dan ukuran butirnya juga seragam.",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Alhamdulillah, terima kasih juga sudah membantu proses pengecekan.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text":
-          "Iya sama-sama Pak. Oh iya, untuk pembayaran panen kali ini, apakah bisa dilakukan minggu depan? Saya sedang ada kebutuhan mendesak.",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Bisa Pak, tidak masalah. Nanti saya sesuaikan jadwal pembayarannya.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text": "Terima kasih banyak Pak, sangat membantu sekali.",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Sama-sama Pak. Btw, berapa total berat panen yang dikirim kemarin?",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text":
-          "Sekitar 850 kilogram Pak. Itu sudah saya pisahkan yang kualitas premium dan yang standar.",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Baik, nanti saya catat di sistem PanenKu. Paling cepat sore sudah masuk semua datanya.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text":
-          "Siap Pak. Kalau untuk harga, masih tetap seperti kesepakatan bulan lalu kan?",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Iya Pak, masih sama. Tidak ada perubahan harga untuk gabah kualitas premium bulan ini.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text":
-          "Syukurlah. Soalnya beberapa petani tetangga bilang harga di tempat lain turun.",
-    },
-    {
-      "fromMe": true,
-      "text":
-          "Betul Pak, banyak yang turun. Tapi PanenKu kita usahakan tetap stabil biar petani tidak rugi.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text":
-          "Mantap sekali kalau begitu. Terima kasih sudah bantu kami terus Pak.",
-    },
-    {
-      "fromMe": true,
-      "text": "Sama-sama Pak. Kalau nanti ada panen tambahan kabari saja ya.",
-      "read": true,
-    },
-    {
-      "fromMe": false,
-      "text": "Siap Pak. Minggu depan kemungkinan ada tambahan sedikit.",
-    },
-    {"fromMe": true, "text": "Baik, saya tunggu kabarnya Pak.", "read": true},
-  ];
+  String? _currentUserId;
 
   void scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -114,18 +41,23 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   @override
   void initState() {
     super.initState();
-    scrollToBottom();
+    _currentUserId = ChatService.getCurrentUserId();
+    ChatService.markMessagesAsRead(widget.chatId);
   }
 
-  void sendMessage() {
+  void sendMessage() async {
     final text = _msgController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.add({"fromMe": true, "text": text, "read": false});
-    });
-
     _msgController.clear();
+
+    await ChatService.sendMessage(
+      chatId: widget.chatId,
+      text: text,
+      recipientId: widget.recipientId,
+      recipientName: widget.name,
+      recipientImage: widget.image,
+    );
 
     scrollToBottom();
   }
@@ -170,62 +102,89 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                final fromMe = msg["fromMe"];
+            child: StreamBuilder<QuerySnapshot>(
+              stream: ChatService.getMessages(widget.chatId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                return Align(
-                  alignment: fromMe
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 3),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 14,
+                final messages = snapshot.data?.docs ?? [];
+                
+                if (messages.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
+                }
+
+                if (messages.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Belum ada pesan',
+                      style: TextStyle(color: AppColors.textMuted),
                     ),
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.75,
-                    ),
-                    decoration: BoxDecoration(
-                      color: fromMe
-                          ? AppColors.chatBubbleSent
-                          : AppColors.chatBubbleReceived,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(18),
-                        topRight: const Radius.circular(18),
-                        bottomLeft: Radius.circular(fromMe ? 18 : 0),
-                        bottomRight: Radius.circular(fromMe ? 0 : 18),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            msg["text"],
-                            style: const TextStyle(fontSize: 15, height: 1.3),
+                  );
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final doc = messages[index];
+                    final data = doc.data() as Map<String, dynamic>;
+                    final fromMe = data['senderId'] == _currentUserId;
+                    final text = data['text'] ?? '';
+                    final read = data['read'] ?? false;
+
+                    return Align(
+                      alignment: fromMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 14,
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.75,
+                        ),
+                        decoration: BoxDecoration(
+                          color: fromMe
+                              ? AppColors.chatBubbleSent
+                              : AppColors.chatBubbleReceived,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(18),
+                            topRight: const Radius.circular(18),
+                            bottomLeft: Radius.circular(fromMe ? 18 : 0),
+                            bottomRight: Radius.circular(fromMe ? 0 : 18),
                           ),
                         ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                text,
+                                style: const TextStyle(fontSize: 15, height: 1.3),
+                              ),
+                            ),
 
-                        if (fromMe) ...[
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.done_all,
-                            size: 18,
-                            color: msg["read"] == true
-                                ? AppColors.info
-                                : AppColors.textSecondary,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                            if (fromMe) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.done_all,
+                                size: 18,
+                                color: read
+                                    ? AppColors.info
+                                    : AppColors.textSecondary,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
