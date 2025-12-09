@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
 
@@ -44,3 +45,14 @@ Route::get('profile/me', [ProfileController::class, 'userrn']);
 Route::apiResource('/products/product', ProductController::class);
 Route::apiResource('/products/categories', CategoryController::class);
 Route::apiResource('/products/product-images', ProductImageController::class);
+
+/*
+    Cart Routes
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('cart', [CartController::class, 'index']);
+    Route::post('cart', [CartController::class, 'store']);
+    Route::put('cart/{cart}', [CartController::class, 'update']);
+    Route::delete('cart/{cart}', [CartController::class, 'destroy']);
+    Route::delete('cart', [CartController::class, 'clear']);
+});
