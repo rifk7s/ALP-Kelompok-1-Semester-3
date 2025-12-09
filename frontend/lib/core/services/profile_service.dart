@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'api_config.dart';
 
 class Profile {
   final int id;
@@ -28,18 +29,13 @@ class Profile {
 }
 
 class ProfileService {
-  // Adjust this baseUrl as needed. For Android emulator use 10.0.2.2
-  // Note: Laravel dev server is listening on port 8001 in your environment.
-  static const String baseUrl = 'http://10.0.2.2:8001/api';
-
   final http.Client client;
 
   ProfileService({http.Client? client}) : client = client ?? http.Client();
 
   Future<Profile> fetchProfile({String? token}) async {
-    final uri = Uri.parse('$baseUrl/profile/me');
-    final headers = <String, String>{'Content-Type': 'application/json'};
-    if (token != null) headers['Authorization'] = 'Bearer $token';
+    final uri = Uri.parse('${ApiConfig.baseUrl}/profile/me');
+    final headers = ApiConfig.headers(token: token);
 
     final resp = await client.get(uri, headers: headers);
     if (resp.statusCode == 200) {
@@ -54,20 +50,12 @@ class ProfileService {
     String? token,
   }) async {
     try {
-      final uri = Uri.parse('$baseUrl/profile/update');
-      final headers = <String, String>{'Content-Type': 'application/json'};
-      if (token != null) headers['Authorization'] = 'Bearer $token';
-
-      print('Updating profile with data: $data');
-      print('Token present: ${token != null}');
-      print('Request URL: $uri');
+      final uri = Uri.parse('${ApiConfig.baseUrl}/profile/update');
+      final headers = ApiConfig.headers(token: token);
 
       final resp = await client
           .patch(uri, headers: headers, body: json.encode(data))
           .timeout(const Duration(seconds: 10));
-
-      print('Response status: ${resp.statusCode}');
-      print('Response body: ${resp.body}');
 
       if (resp.statusCode == 200) {
         final jsonBody = json.decode(resp.body) as Map<String, dynamic>;
@@ -82,7 +70,6 @@ class ProfileService {
       }
       throw Exception('Failed to update profile: Status ${resp.statusCode}, Body: ${resp.body}');
     } catch (e) {
-      print('Exception during update: $e');
       rethrow;
     }
   }

@@ -109,10 +109,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _saving ? null : () {
-                  print('BumDes Button tapped! Saving state: $_saving');
-                  _handleSave();
-                },
+                onPressed: _saving ? null : _handleSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -183,19 +180,12 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
   }
 
   Future<void> _handleSave() async {
-    print('========== BUMDES BUTTON CLICKED ==========');
-    print('Name: ${nameController.text}');
-    print('Phone: ${phoneController.text}');
-    print('Address: ${addressController.text}');
-    
     // Validate inputs
     if (nameController.text.trim().isEmpty) {
-      print('ERROR: Name is empty');
       _showError('Nama tidak boleh kosong');
       return;
     }
 
-    print('Validation passed, starting save...');
     setState(() => _saving = true);
     
     try {
@@ -207,8 +197,6 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
         return;
       }
 
-      print('Starting profile update...');
-      
       // Call API to update profile
       final updated = await _service.updateProfile(
         data: {
@@ -218,8 +206,6 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
         },
         token: token,
       );
-
-      print('Profile updated successfully');
 
       // Update cached user data in local storage
       final currentUser = await StorageService.getUser();
@@ -250,7 +236,6 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
       Navigator.pop(context, updated);
       
     } catch (e) {
-      print('Error updating profile: $e');
       if (!mounted) return;
       setState(() => _saving = false);
       _showError('Gagal memperbarui profil: ${e.toString()}');

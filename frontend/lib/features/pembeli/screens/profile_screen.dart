@@ -309,18 +309,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            print('Logout Ya button pressed');
                             // Cache the navigator before popping dialog
                             final navigator = Navigator.of(context);
-                            navigator.pop(); // Close dialog
+                            navigator.pop();
                             
-                            print('Calling logout...');
-                            final result = await AuthService.logout();
-                            print('Logout result: ${result.success}, ${result.message}');
+                            await AuthService.logout();
                             
                             if (!mounted) return;
                             
-                            // Navigate to auth screen and clear all previous routes
                             navigator.pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const AuthScreen()),
                               (route) => false,
