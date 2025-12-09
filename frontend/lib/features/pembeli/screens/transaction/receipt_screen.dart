@@ -76,7 +76,10 @@ class ReceiptPage extends StatelessWidget {
 
                 Text(
                   "Order ID: $orderId",
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13.5),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13.5,
+                  ),
                 ),
 
                 const SizedBox(height: 20),

@@ -151,7 +151,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   : status == 'processing'
                   ? 'Tidak ada pesanan yang sedang diproses'
                   : 'Belum ada pesanan selesai',
-              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -267,7 +270,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       const SizedBox(height: 4),
                       Text(
                         '${products.fold(0, (sum, p) => sum + (p['qty'] as int))} kg',
-                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey600,
+                        ),
                       ),
                     ],
                   ),
@@ -289,7 +295,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total:', style: TextStyle(color: AppColors.textSecondary)),
+                const Text(
+                  'Total:',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
                 Text(
                   _formatRupiah(order['total']),
                   style: const TextStyle(

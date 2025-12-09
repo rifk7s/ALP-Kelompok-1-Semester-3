@@ -220,25 +220,19 @@ class HomePageBumdes extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                  color: AppColors.grey400,
+                    color: AppColors.grey400,
                   ),
               ],
             ),
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle != null ? '$title · $subtitle' : title,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.grey600,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.grey600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -296,10 +290,7 @@ class HomePageBumdes extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.grey600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -308,10 +299,7 @@ class HomePageBumdes extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),

@@ -59,9 +59,9 @@ class _LoginFormState extends State<LoginForm> {
         context.pushReplacementSmooth(const StartPage());
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message ?? 'Login gagal')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message ?? 'Login gagal')));
     }
   }
 
@@ -78,9 +78,7 @@ class _LoginFormState extends State<LoginForm> {
         TextFormField(
           controller: _phoneController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            hintText: 'Masukkan Nomor HP',
-          ),
+          decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -150,7 +148,10 @@ class _LoginFormState extends State<LoginForm> {
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Text('Masuk'),
             ),

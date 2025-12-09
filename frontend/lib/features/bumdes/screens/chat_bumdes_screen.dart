@@ -215,9 +215,9 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
                           Icon(
                             Icons.done_all,
                             size: 18,
-                              color: msg["read"] == true
-                                  ? AppColors.info
-                                  : AppColors.textSecondary,
+                            color: msg["read"] == true
+                                ? AppColors.info
+                                : AppColors.textSecondary,
                           ),
                         ],
                       ],

@@ -107,7 +107,10 @@ class KelolaPetaniScreen extends StatelessWidget {
                     Text(
                       hp,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),

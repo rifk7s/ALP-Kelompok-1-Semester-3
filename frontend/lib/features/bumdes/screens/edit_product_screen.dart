@@ -94,7 +94,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: Offset(0, 2)),
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       child: Column(

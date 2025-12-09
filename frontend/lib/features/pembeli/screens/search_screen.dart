@@ -104,7 +104,10 @@ class _SearchPageState extends State<SearchPage> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: AppColors.textLight,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
@@ -113,12 +116,19 @@ class _SearchPageState extends State<SearchPage> {
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: AppColors.shadowLight, width: 1),
+                      border: Border.all(
+                        color: AppColors.shadowLight,
+                        width: 1,
+                      ),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: AppColors.textSecondary, size: 22),
+                        const Icon(
+                          Icons.search,
+                          color: AppColors.textSecondary,
+                          size: 22,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
@@ -289,7 +299,11 @@ Widget productCard({
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: AppColors.shadowLight, blurRadius: 5, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -327,7 +341,10 @@ Widget productCard({
                 const SizedBox(height: 6),
                 Text(
                   "Stok: $stock",
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Row(

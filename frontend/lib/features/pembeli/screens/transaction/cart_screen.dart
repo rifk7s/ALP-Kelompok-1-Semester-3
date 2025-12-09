@@ -372,10 +372,7 @@ class _CartPageState extends State<CartPage> {
         decoration: BoxDecoration(
           color: AppColors.surface,
           boxShadow: [
-            const BoxShadow(
-              color: AppColors.shadowLight,
-              blurRadius: 8,
-            ),
+            const BoxShadow(color: AppColors.shadowLight, blurRadius: 8),
           ],
         ),
         child: Column(

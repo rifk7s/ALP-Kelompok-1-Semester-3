@@ -30,9 +30,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       'statusText': 'Pesanan Dibuat',
       'address': 'Jl. Raya Sukamaju No. 12, Kendal',
       'notes': 'Pastikan packing rapat, kirim setelah jam 12.',
-      'timestamps': {
-        'Pesanan Dibuat': '7 Des 2025, 10:30',
-      },
+      'timestamps': {'Pesanan Dibuat': '7 Des 2025, 10:30'},
       'shipping': {'service': 'JNE Trucking', 'resi': 'PO-779921'},
     },
     {
@@ -208,8 +206,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
     final nextStatus = _statusFlow[currentStageIndex + 1];
     final updatedOrder = Map<String, dynamic>.from(_orders[index]);
-    final timestamps =
-        Map<String, String>.from(updatedOrder['timestamps'] as Map<String, String>);
+    final timestamps = Map<String, String>.from(
+      updatedOrder['timestamps'] as Map<String, String>,
+    );
 
     final nextStage = _stageLabel(nextStatus);
     timestamps[nextStage] = _formatNow();
@@ -246,10 +245,8 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChatBumdesPage(
-          name: order['buyer'],
-          image: order['buyerImage'],
-        ),
+        builder: (_) =>
+            ChatBumdesPage(name: order['buyer'], image: order['buyerImage']),
       ),
     );
   }
@@ -367,7 +364,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: statusColor.withValues(alpha: 0.12),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -418,7 +417,10 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       const SizedBox(height: 4),
                       Text(
                         '${order['qty']} kg • ${order['buyer']}',
-                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey600,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -440,12 +442,19 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on_outlined, size: 18, color: AppColors.primary),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     order['address'] as String,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textLight,
+                    ),
                   ),
                 ),
               ],
@@ -456,7 +465,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Row(
               children: [
-                const Icon(Icons.local_shipping_outlined, size: 18, color: AppColors.primary),
+                const Icon(
+                  Icons.local_shipping_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -538,7 +551,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     Icon(Icons.schedule, size: 16, color: AppColors.grey600),
                     const SizedBox(width: 6),
                     Text(
-                      (order['timestamps'] as Map<String, String>)[stageLabel] ?? '-',
+                      (order['timestamps']
+                              as Map<String, String>)[stageLabel] ??
+                          '-',
                       style: TextStyle(fontSize: 12, color: AppColors.greyDark),
                     ),
                   ],

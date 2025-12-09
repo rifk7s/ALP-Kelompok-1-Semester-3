@@ -139,7 +139,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.black.withValues(alpha: 0.05),
+                                    color: AppColors.black.withValues(
+                                      alpha: 0.05,
+                                    ),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),

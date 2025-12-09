@@ -127,7 +127,7 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                   filled: true,
                   fillColor: AppColors.surface,
                   suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
+                      ? IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () {
                             _searchController.clear();
@@ -167,7 +167,9 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                           ),
                           subtitle: Text(
                             chat['message']!,
-                            style: const TextStyle(color: AppColors.textSecondary),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           trailing: Text(
                             chat['time']!,

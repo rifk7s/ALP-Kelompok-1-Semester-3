@@ -20,7 +20,10 @@ class _NotificationPageState extends State<NotificationPage> {
         centerTitle: true,
         title: const Text(
           "Notifikasi",
-          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textLight),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textLight,
+          ),
         ),
       ),
 
@@ -102,15 +105,15 @@ class _NotificationPageState extends State<NotificationPage> {
                     const SizedBox(height: 4),
                     Text(
                       message,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.grey800,
-                      ),
+                      style: TextStyle(fontSize: 13, color: AppColors.grey800),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       time,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),

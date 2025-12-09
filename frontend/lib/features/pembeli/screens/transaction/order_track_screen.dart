@@ -48,7 +48,10 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
         centerTitle: true,
         title: const Text(
           'Lacak Pesanan',
-          style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.textLight,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: ListView(
@@ -171,7 +174,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                           : [],
                     ),
                     child: completed || isCurrent
-                        ? const Icon(Icons.check, size: 16, color: AppColors.white)
+                        ? const Icon(
+                            Icons.check,
+                            size: 16,
+                            color: AppColors.white,
+                          )
                         : null,
                   ),
                 );
@@ -215,7 +222,10 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       timestamps[title]!,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
               ],

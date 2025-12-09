@@ -219,7 +219,10 @@ class HppPage extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   "Berlaku: $date",
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),

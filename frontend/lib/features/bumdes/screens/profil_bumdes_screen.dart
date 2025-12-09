@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_profile_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/product_screen.dart';
@@ -58,13 +58,29 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                   Positioned(
                     right: 0,
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        // Navigate to edit profile with current user data
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const EditProfileBumdesPage(),
+                            builder: (context) => EditProfileBumdesPage(
+                              initialProfile: _user != null
+                                  ? Profile(
+                                      id: _user!['id'] as int,
+                                      name: _user!['name'] as String,
+                                      phone: _user!['phone'] as String?,
+                                      address: _user!['address'] as String?,
+                                      email: _user!['email'] as String?,
+                                    )
+                                  : null,
+                            ),
                           ),
                         );
+
+                        // Reload user data if profile was updated
+                        if (result != null && mounted) {
+                          await _loadUser();
+                        }
                       },
                       child: const Icon(Icons.edit_outlined),
                     ),
@@ -99,7 +115,9 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            (_user?['role'] ?? 'bumdes').toString().toUpperCase(),
+                            (_user?['role'] ?? 'bumdes')
+                                .toString()
+                                .toUpperCase(),
                             style: const TextStyle(
                               color: AppColors.white,
                               fontSize: 16,
@@ -122,7 +140,11 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
 
                         Row(
                           children: [
-                            const Icon(Icons.phone_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.phone_outlined,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               _user?['phone'] ?? '-',
@@ -140,7 +162,11 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -290,11 +316,19 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            Navigator.of(context).pop();
+                            // Cache the navigator before popping dialog
+                            final navigator = Navigator.of(context);
+                            navigator.pop();
+
                             await AuthService.logout();
+
                             if (!mounted) return;
-                            this.context.pushAndRemoveAllSmooth(
-                              const AuthScreen(),
+
+                            navigator.pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => const AuthScreen(),
+                              ),
+                              (route) => false,
                             );
                           },
                           child: Container(
