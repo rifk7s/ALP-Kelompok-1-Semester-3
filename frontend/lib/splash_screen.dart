@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   bool _isDotCenter = false;
   bool _isExiting = false;
+  String? _userRole;
 
   late AnimationController _exitController;
   late Animation<double> _circleScaleAnimation;
@@ -63,7 +67,10 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _startAnimation() {
+  void _startAnimation() async {
+    // Check for existing session while showing splash
+    _checkExistingSession();
+    
     // Entrance: dot moves to center
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
@@ -86,14 +93,27 @@ class _SplashScreenState extends State<SplashScreen>
       });
     });
   }
+  
+  Future<void> _checkExistingSession() async {
+    final result = await AuthService.getMe();
+    if (result.success && result.user != null) {
+      _userRole = result.user!['role'];
+      // Sign in to Firebase if token exists
+      await ChatService.signInToFirebase();
+    }
+  }
 
   void _navigateToHome() {
+    // Route based on user role
+    final Widget targetPage = _userRole == 'bumdes' 
+        ? const StartPageBumdes() 
+        : const StartPage();
+    
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const StartPage(),
+        pageBuilder: (context, animation, secondaryAnimation) => targetPage,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           // Scale up slightly from 0.95 to 1.0 for a subtle "emerge" effect
           final scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
