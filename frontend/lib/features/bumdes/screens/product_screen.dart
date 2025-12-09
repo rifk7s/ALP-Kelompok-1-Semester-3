@@ -299,7 +299,10 @@ class _ProductPageState extends State<ProductPage> {
             ),
             Text(
               "${product["jumlah"]} kg • ${product["harga"]}",
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
             Text(
               "Petani: ${product["petani"]}",

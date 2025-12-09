@@ -61,7 +61,10 @@ class AboutAppPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
-                  Text("Versi: 1.0.0", style: TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    "Versi: 1.0.0",
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                 ],
               ),
             ),

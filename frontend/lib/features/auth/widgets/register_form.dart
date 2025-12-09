@@ -34,9 +34,9 @@ class _RegisterFormState extends State<RegisterForm> {
         _phoneController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _addressController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field harus diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi')));
       return;
     }
 
@@ -84,12 +84,14 @@ class _RegisterFormState extends State<RegisterForm> {
     } else {
       String errorMsg = result.message ?? 'Registrasi gagal';
       if (result.errors != null) {
-        final errors = result.errors!.values.expand((e) => e as List).join('\n');
+        final errors = result.errors!.values
+            .expand((e) => e as List)
+            .join('\n');
         errorMsg = errors;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMsg)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMsg)));
     }
   }
 
@@ -160,7 +162,10 @@ class _RegisterFormState extends State<RegisterForm> {
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : const Text('Daftar Sebagai Pembeli'),
         ),

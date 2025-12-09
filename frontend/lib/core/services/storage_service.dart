@@ -51,7 +51,7 @@ class StorageService {
     // Clear secure storage
     await _secureStorage.delete(key: _tokenKey);
     await _secureStorage.delete(key: _firebaseTokenKey);
-    
+
     // Clear shared preferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);

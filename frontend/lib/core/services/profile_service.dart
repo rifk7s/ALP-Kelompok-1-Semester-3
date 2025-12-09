@@ -65,10 +65,13 @@ class ProfileService {
         throw Exception('Unauthorized: Token invalid atau expired');
       } else if (resp.statusCode == 422) {
         final jsonBody = json.decode(resp.body) as Map<String, dynamic>;
-        final errors = jsonBody['errors'] ?? jsonBody['message'] ?? 'Validation failed';
+        final errors =
+            jsonBody['errors'] ?? jsonBody['message'] ?? 'Validation failed';
         throw Exception('Validation error: $errors');
       }
-      throw Exception('Failed to update profile: Status ${resp.statusCode}, Body: ${resp.body}');
+      throw Exception(
+        'Failed to update profile: Status ${resp.statusCode}, Body: ${resp.body}',
+      );
     } catch (e) {
       rethrow;
     }

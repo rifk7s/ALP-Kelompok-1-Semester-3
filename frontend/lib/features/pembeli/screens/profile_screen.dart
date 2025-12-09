@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
@@ -77,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         );
-                        
+
                         // Reload user data if profile was updated
                         if (result != null && mounted) {
                           await _loadUser();
@@ -116,7 +115,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            (_user?['role'] ?? 'pembeli').toString().toUpperCase(),
+                            (_user?['role'] ?? 'pembeli')
+                                .toString()
+                                .toUpperCase(),
                             style: const TextStyle(
                               color: AppColors.white,
                               fontSize: 16,
@@ -139,7 +140,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         Row(
                           children: [
-                            const Icon(Icons.phone_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.phone_outlined,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               _user?['phone'] ?? '-',
@@ -157,7 +162,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -312,13 +321,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Cache the navigator before popping dialog
                             final navigator = Navigator.of(context);
                             navigator.pop();
-                            
+
                             await AuthService.logout();
-                            
+
                             if (!mounted) return;
-                            
+
                             navigator.pushAndRemoveUntil(
-                              MaterialPageRoute(builder: (context) => const AuthScreen()),
+                              MaterialPageRoute(
+                                builder: (context) => const AuthScreen(),
+                              ),
                               (route) => false,
                             );
                           },

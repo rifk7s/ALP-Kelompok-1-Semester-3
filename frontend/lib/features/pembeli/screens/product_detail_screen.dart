@@ -505,7 +505,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 backgroundColor: AppColors.primary,
               ),
               child: const Text("OK", style: TextStyle(color: AppColors.white)),
-              
             ),
           ],
         );

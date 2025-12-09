@@ -181,7 +181,9 @@ class _ReportPageState extends State<ReportPage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: AppColors.textSecondary.withValues(alpha: 0.3),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(

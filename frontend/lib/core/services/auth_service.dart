@@ -43,11 +43,13 @@ class AuthService {
         body['email'] = email;
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/register'),
-        headers: ApiConfig.headers(),
-        body: jsonEncode(body),
-      ).timeout(_timeout);
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/auth/register'),
+            headers: ApiConfig.headers(),
+            body: jsonEncode(body),
+          )
+          .timeout(_timeout);
 
       final data = jsonDecode(response.body);
 
@@ -70,15 +72,9 @@ class AuthService {
         );
       }
     } on TimeoutException {
-      return AuthResult(
-        success: false,
-        message: 'Koneksi timeout, coba lagi',
-      );
+      return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
     } catch (e) {
-      return AuthResult(
-        success: false,
-        message: 'Koneksi gagal: $e',
-      );
+      return AuthResult(success: false, message: 'Koneksi gagal: $e');
     }
   }
 
@@ -87,14 +83,13 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/login'),
-        headers: ApiConfig.headers(),
-        body: jsonEncode({
-          'phone': phone,
-          'password': password,
-        }),
-      ).timeout(_timeout);
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/auth/login'),
+            headers: ApiConfig.headers(),
+            body: jsonEncode({'phone': phone, 'password': password}),
+          )
+          .timeout(_timeout);
 
       final data = jsonDecode(response.body);
 
@@ -128,15 +123,9 @@ class AuthService {
         );
       }
     } on TimeoutException {
-      return AuthResult(
-        success: false,
-        message: 'Koneksi timeout, coba lagi',
-      );
+      return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
     } catch (e) {
-      return AuthResult(
-        success: false,
-        message: 'Koneksi gagal: $e',
-      );
+      return AuthResult(success: false, message: 'Koneksi gagal: $e');
     }
   }
 
@@ -177,10 +166,12 @@ class AuthService {
         );
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/me'),
-        headers: ApiConfig.headers(token: token),
-      ).timeout(_timeout);
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}/me'),
+            headers: ApiConfig.headers(token: token),
+          )
+          .timeout(_timeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -195,7 +186,10 @@ class AuthService {
           isUnauthorized: true,
         );
       } else {
-        return AuthResult(success: false, message: 'Gagal mendapatkan data user');
+        return AuthResult(
+          success: false,
+          message: 'Gagal mendapatkan data user',
+        );
       }
     } on TimeoutException {
       return AuthResult(success: false, message: 'Koneksi timeout');

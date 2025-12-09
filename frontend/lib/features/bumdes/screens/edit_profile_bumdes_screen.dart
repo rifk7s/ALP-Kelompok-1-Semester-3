@@ -5,7 +5,7 @@ import 'package:frontend/core/services/storage_service.dart';
 
 class EditProfileBumdesPage extends StatefulWidget {
   final Profile? initialProfile;
-  
+
   const EditProfileBumdesPage({super.key, this.initialProfile});
 
   @override
@@ -16,7 +16,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  
+
   final ProfileService _service = ProfileService();
   bool _saving = false;
 
@@ -187,10 +187,10 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
     }
 
     setState(() => _saving = true);
-    
+
     try {
       final token = await StorageService.getToken();
-      
+
       if (token == null) {
         setState(() => _saving = false);
         _showError('Sesi telah berakhir, silakan login kembali');
@@ -217,9 +217,9 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
       }
 
       if (!mounted) return;
-      
+
       setState(() => _saving = false);
-      
+
       // Show success and return updated profile
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -228,13 +228,12 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
           duration: Duration(seconds: 2),
         ),
       );
-      
+
       // Wait a bit for user to see the success message
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       if (!mounted) return;
       Navigator.pop(context, updated);
-      
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -244,10 +243,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 }

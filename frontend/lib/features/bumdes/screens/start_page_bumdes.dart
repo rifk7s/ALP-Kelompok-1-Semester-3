@@ -38,16 +38,16 @@ class _StartPageBumdesState extends State<StartPageBumdes> {
   }
 
   List<Widget> get _pages => [
-        HomePageBumdes(
-          onProductTap: _goToProduct,
-          onChatTap: _goToChat,
-          onTransactionTap: _goToTransaction,
-        ),
-        const ProductPage(),
-        const BumdesTransactionPage(),
-        const ContactBumdesPage(),
-        const ProfileBumdesPage(),
-      ];
+    HomePageBumdes(
+      onProductTap: _goToProduct,
+      onChatTap: _goToChat,
+      onTransactionTap: _goToTransaction,
+    ),
+    const ProductPage(),
+    const BumdesTransactionPage(),
+    const ContactBumdesPage(),
+    const ProfileBumdesPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
