@@ -308,7 +308,9 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                         GestureDetector(
                           onTap: () async {
                             print('Logout Ya button pressed');
-                            Navigator.of(context).pop(); // Close dialog
+                            // Cache the navigator before popping dialog
+                            final navigator = Navigator.of(context);
+                            navigator.pop(); // Close dialog
                             
                             print('Calling logout...');
                             final result = await AuthService.logout();
@@ -317,7 +319,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                             if (!mounted) return;
                             
                             // Navigate to auth screen and clear all previous routes
-                            Navigator.of(context).pushAndRemoveUntil(
+                            navigator.pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const AuthScreen()),
                               (route) => false,
                             );
