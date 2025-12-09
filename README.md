@@ -102,6 +102,13 @@ php artisan serve
 
 The API will be available at `http://127.0.0.1:8000`.
 
+> [!IMPORTANT]
+> For testing on iOS Simulator or Android Emulator, run the server with network binding:
+> ```bash
+> php artisan serve --host=0.0.0.0 --port=8000
+> ```
+> This allows mobile devices/emulators to connect to your local backend via your machine's IP address.
+
 #### Frontend App
 
 Open a new terminal and start the Flutter app:
