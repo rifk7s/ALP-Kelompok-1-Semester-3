@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/profile_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
 
 class EditProfileBumdesPage extends StatefulWidget {
-  const EditProfileBumdesPage({super.key});
+  final Profile? initialProfile;
+  
+  const EditProfileBumdesPage({super.key, this.initialProfile});
 
   @override
   State<EditProfileBumdesPage> createState() => _EditProfileBumdesPageState();
 }
 
 class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
-  final TextEditingController nameController = TextEditingController(
-    text: "Vivian",
-  );
-  final TextEditingController phoneController = TextEditingController(
-    text: "0813-5635-3033",
-  );
-  final TextEditingController addressController = TextEditingController(
-    text: "Jl. Pettarani No. 30",
-  );
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  
+  final ProfileService _service = ProfileService();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load initial profile data if provided
+    if (widget.initialProfile != null) {
+      nameController.text = widget.initialProfile!.name;
+      phoneController.text = widget.initialProfile!.phone ?? '';
+      addressController.text = widget.initialProfile!.address ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +109,9 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
+                onPressed: _saving ? null : () {
+                  print('BumDes Button tapped! Saving state: $_saving');
+                  _handleSave();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -99,14 +120,23 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text(
-                  "Simpan Perubahan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _saving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Simpan Perubahan",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -149,6 +179,90 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _handleSave() async {
+    print('========== BUMDES BUTTON CLICKED ==========');
+    print('Name: ${nameController.text}');
+    print('Phone: ${phoneController.text}');
+    print('Address: ${addressController.text}');
+    
+    // Validate inputs
+    if (nameController.text.trim().isEmpty) {
+      print('ERROR: Name is empty');
+      _showError('Nama tidak boleh kosong');
+      return;
+    }
+
+    print('Validation passed, starting save...');
+    setState(() => _saving = true);
+    
+    try {
+      final token = await StorageService.getToken();
+      
+      if (token == null) {
+        setState(() => _saving = false);
+        _showError('Sesi telah berakhir, silakan login kembali');
+        return;
+      }
+
+      print('Starting profile update...');
+      
+      // Call API to update profile
+      final updated = await _service.updateProfile(
+        data: {
+          'name': nameController.text.trim(),
+          'phone': phoneController.text.trim(),
+          'address': addressController.text.trim(),
+        },
+        token: token,
+      );
+
+      print('Profile updated successfully');
+
+      // Update cached user data in local storage
+      final currentUser = await StorageService.getUser();
+      if (currentUser != null) {
+        currentUser['name'] = updated.name;
+        currentUser['phone'] = updated.phone;
+        currentUser['address'] = updated.address;
+        await StorageService.saveUser(currentUser);
+      }
+
+      if (!mounted) return;
+      
+      setState(() => _saving = false);
+      
+      // Show success and return updated profile
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profil berhasil diperbarui'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      // Wait a bit for user to see the success message
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (!mounted) return;
+      Navigator.pop(context, updated);
+      
+    } catch (e) {
+      print('Error updating profile: $e');
+      if (!mounted) return;
+      setState(() => _saving = false);
+      _showError('Gagal memperbarui profil: ${e.toString()}');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
     );
   }
 }
