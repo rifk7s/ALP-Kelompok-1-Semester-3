@@ -66,7 +66,7 @@ class _AuthScreenState extends State<AuthScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: AppColors.white.withValues(alpha: 0.3),
                               blurRadius: _glowAnimation.value,
                               spreadRadius: _glowAnimation.value / 2,
                             ),
@@ -84,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen>
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFFE8DCC6),
+                            color: AppColors.logoPlaceholder,
                             child: const Icon(
                               Icons.agriculture,
                               size: 50,
@@ -178,7 +178,7 @@ class _AuthScreenState extends State<AuthScreen>
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
+                                      color: AppColors.black.withValues(
                                         alpha: 0.1,
                                       ),
                                       blurRadius: 4,

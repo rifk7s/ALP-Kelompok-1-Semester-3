@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
-import 'package:frontend/start_page.dart';
+import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -14,6 +16,54 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
+  bool _isLoading = false;
+
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nomor HP dan kata sandi harus diisi')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await AuthService.login(
+      phone: _phoneController.text,
+      password: _passwordController.text,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.message ?? 'Login berhasil!')),
+      );
+
+      final role = result.user?['role'] ?? 'pembeli';
+      if (role == 'bumdes') {
+        context.pushReplacementSmooth(const StartPageBumdes());
+      } else {
+        context.pushReplacementSmooth(const StartPage());
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.message ?? 'Login gagal')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +71,15 @@ class _LoginFormState extends State<LoginForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Email/Nomor HP',
+          'Nomor HP',
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _phoneController,
+          keyboardType: TextInputType.phone,
           decoration: const InputDecoration(
-            hintText: 'Masukkan Email atau Nomor HP',
+            hintText: 'Masukkan Nomor HP',
           ),
         ),
         const SizedBox(height: 16),
@@ -37,6 +89,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _passwordController,
           obscureText: !_isPasswordVisible,
           decoration: InputDecoration(
             hintText: 'Masukkan Kata Sandi',
@@ -83,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
               onPressed: () {},
               child: const Text(
                 'Lupa Kata Sandi?',
-                style: TextStyle(color: Colors.blue),
+                style: TextStyle(color: AppColors.info),
               ),
             ),
           ],
@@ -92,10 +145,14 @@ class _LoginFormState extends State<LoginForm> {
         Column(
           children: [
             ElevatedButton(
-              onPressed: () {
-                context.pushReplacementSmooth(const StartPage());
-              },
-              child: const Text('Masuk'),
+              onPressed: _isLoading ? null : _handleLogin,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Masuk'),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -123,7 +180,7 @@ class _LoginFormState extends State<LoginForm> {
           onPressed: () {},
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -145,11 +202,11 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 16),
         OutlinedButton.icon(
           onPressed: () {},
-          icon: const Icon(Icons.facebook, size: 24, color: Colors.blue),
+          icon: const Icon(Icons.facebook, size: 24, color: AppColors.info),
           label: const Text('Masuk menggunakan Facebook'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            side: const BorderSide(color: AppColors.border),
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

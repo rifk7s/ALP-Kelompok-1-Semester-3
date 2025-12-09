@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
-// import 'package:frontend/features/auth/screens/home_screen.dart';
-import 'package:frontend/start_page.dart';
+import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFFE8DCC6),
+                            color: AppColors.logoPlaceholder,
                             child: const Icon(
                               Icons.agriculture,
                               size: 50,
@@ -116,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
+                                    color: AppColors.black.withValues(alpha: 0.05),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -239,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {},
                           child: const Text(
                             'Lupa Kata Sandi?',
-                            style: TextStyle(color: Colors.blue),
+                            style: TextStyle(color: AppColors.info),
                           ),
                         ),
                       ],
@@ -251,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                const StartPage(), // PERBAIKAN
+                                const StartPageBumdes(), // PERBAIKAN
                           ),
                         );
                       },
@@ -281,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: const Text('Masuk menggunakan Google'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        side: const BorderSide(color: AppColors.border),
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -294,12 +293,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: const Icon(
                         Icons.facebook,
                         size: 24,
-                        color: Colors.blue,
+                        color: AppColors.info,
                       ),
                       label: const Text('Masuk menggunakan Facebook'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        side: const BorderSide(color: AppColors.border),
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

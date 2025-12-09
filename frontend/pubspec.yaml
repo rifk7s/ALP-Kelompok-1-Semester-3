@@ -37,7 +37,16 @@ dependencies:
   cupertino_icons: ^1.0.8
   curved_labeled_navigation_bar: ^2.0.6
   intl: ^0.18.1
-  
+  image_picker: ^0.8.7+5
+  firebase_core: ^4.2.1
+  cloud_firestore: ^6.1.0
+  firebase_auth: ^6.1.2
+  flutter_dotenv: ^5.2.1
+  url_launcher: ^6.2.1
+  http: ^1.6.0
+  shared_preferences: ^2.5.3
+  flutter_secure_storage: ^9.2.4
+
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +73,7 @@ flutter:
   assets:
     - assets/images/
     - assets/svgs/
+    - .env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

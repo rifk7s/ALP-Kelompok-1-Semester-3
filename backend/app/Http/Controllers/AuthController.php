@@ -8,6 +8,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 // use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Kreait\Firebase\Auth as FirebaseAuth;
+use Kreait\Firebase\Factory;
 
 class AuthController extends Controller
 {
@@ -41,11 +43,20 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $factory = (new Factory)
+            ->withServiceAccount(base_path(env('FIREBASE_CREDENTIALS')))
+            ->withProjectId(env('FIREBASE_PROJECT_ID'));
+
+        $firebaseAuth = $factory->createAuth();
+
+        $firebaseCustomToken = $firebaseAuth->createCustomToken((string) $user->id);
+
         return response()->json([
             'message'     => 'Login success!',
             'access_token'=> $token,
             'token_type'  => 'Bearer',
             'user'        => $user,
+            'firebase_custom_token' => $firebaseCustomToken->toString(),
         ]);
     }
 
