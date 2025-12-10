@@ -12,9 +12,9 @@ class ProductContributionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = ProductContribution::with('product', 'petani_data');
+        $query = ProductContribution::with('product', 'petani');
         return response()->json($query->get());
     }
 
@@ -23,7 +23,7 @@ class ProductContributionController extends Controller
      */
     public function store(ProductContributionRequest $request)
     {
-        $productContribution = ProductContribution::create([
+        $contribution = ProductContribution::create([
             'contributed_kg' => $request->contributed_kg,
             'remaining_kg' => $request->remaining_kg,
             'entry_date' => $request->entry_date,
@@ -33,46 +33,59 @@ class ProductContributionController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Category created successfully!',
-            'category' => $productContribution
+            'message' => 'Product contribution created successfully!',
+            'category' => $contribution
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ProductContribution $productContribution)
+    public function show(ProductContribution $contribution)
     {
-        $productContribution->load('product', 'petani_data');
-        return response()->json($productContribution);
+        // $productContribution->load('product', 'petani');
+        // return response()->json($productContribution);
+
+        // $productContribution = ProductContribution::with('product', 'petani')
+        // ->findOrFail($productContribution->id);
+    
+        // return response()->json($productContribution);
+
+        // return response()->json($productContribution->load('product', 'petani'));
+
+        // return response()->json($productContribution);
+
+        return response()->json(
+            ProductContribution::with('product', 'petani')->findOrFail($contribution->id)
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductContributionRequest $request, ProductContribution $productContribution)
+    public function update(UpdateProductContributionRequest $request, ProductContribution $contribution)
     {
-        $productContribution->update([
-            'contributed_kg' => $request->contributed_kg ?? $productContribution->contributed_kg,
-            'remaining_kg' => $request->remaining_kg ?? $productContribution->remaining_kg,
-            'entry_date' => $request->entry_date ?? $productContribution->entry_date,
-            'harvest_date' => $request->harvest_date ?? $productContribution->harvest_date,
-            'product_id' => $request->product_id ?? $productContribution->product_id,
-            'petani_id' => $request->petani_id ?? $productContribution
+        $contribution->update([
+            'contributed_kg' => $request->contributed_kg ?? $contribution->contributed_kg,
+            'remaining_kg' => $request->remaining_kg ?? $contribution->remaining_kg,
+            'entry_date' => $request->entry_date ?? $contribution->entry_date,
+            'harvest_date' => $request->harvest_date ?? $contribution->harvest_date,
+            'product_id' => $request->product_id ?? $contribution->product_id,
+            'petani_id' => $request->petani_id ?? $contribution->petani_id
         ]);
 
         return response()->json([
             'message' => 'Product Contribution updated successfully!',
-            'product_contribution' => $productContribution
+            'product_contribution' => $contribution
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProductContribution $productContribution)
+    public function destroy(ProductContribution $contribution)
     {
-        $productContribution->delete();
+        $contribution->delete();
 
         return response()->json([
             'message' => 'Product Contribution deleted successfully!'

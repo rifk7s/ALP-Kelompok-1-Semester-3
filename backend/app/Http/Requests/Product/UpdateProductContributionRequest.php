@@ -24,8 +24,8 @@ class UpdateProductContributionRequest extends FormRequest
         return [
             'contributed_kg' => ['sometimes', 'numeric', 'min:0.1'],
             'remaining_kg' => ['sometimes', 'numeric', 'min:0'],
-            'entry_date' => ['sometimes', 'date'],
-            'harvest_date' => ['sometimes', 'date', 'after_or_equal:entry_date'],
+            'entry_date' => ['sometimes', 'date', 'after_or_equal:harvest_date'],
+            'harvest_date' => ['sometimes', 'date'],
             'product_id' => ['sometimes', 'exists:products,id'],
             'petani_id' => ['sometimes', 'exists:petani_data,id'],
         ];

@@ -24,8 +24,8 @@ class ProductContributionRequest extends FormRequest
         return [
             'contributed_kg' => ['required', 'numeric', 'min:0.1'],
             'remaining_kg' => ['required', 'numeric', 'min:0'],
-            'entry_date' => ['required', 'date'],
-            'harvest_date' => ['required', 'date', 'after_or_equal:entry_date'],
+            'entry_date' => ['required', 'date', 'after_or_equal:harvest_date'],
+            'harvest_date' => ['required', 'date'],
             'product_id' => ['required', 'exists:products,id'],
             'petani_id' => ['required', 'exists:petani_data,id'],
         ];
