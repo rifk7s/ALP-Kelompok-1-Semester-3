@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ProductContribution;
 use App\Http\Requests\Product\ProductContributionRequest;
+use App\Http\Requests\Product\UpdateProductContributionRequest; 
 
 class ProductContributionController extends Controller
 {
@@ -49,7 +50,7 @@ class ProductContributionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductContributionRequest $request, ProductContribution $productContribution)
+    public function update(UpdateProductContributionRequest $request, ProductContribution $productContribution)
     {
         $productContribution->update([
             'contributed_kg' => $request->contributed_kg ?? $productContribution->contributed_kg,
