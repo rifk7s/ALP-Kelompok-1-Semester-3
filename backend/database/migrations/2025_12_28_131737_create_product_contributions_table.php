@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('entry_date');
             $table->date('harvest_date');
             $table->timestamps();
-            //Git branch saya brokey
+            //Git branch saya broke
 
             // Foreign keys
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
