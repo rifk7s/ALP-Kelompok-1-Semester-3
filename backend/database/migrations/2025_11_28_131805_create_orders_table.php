@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('shipping_address');
             $table->dateTime('payment_deadline')->nullable();
             $table->date('estimated_delivery')->nullable();
-            $table->foreignId('buyer_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -32,7 +32,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('buyer_id');
+            $table->dropConstrainedForeignId('user_id');
         });
 
         Schema::dropIfExists('orders');
