@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('product_contributions', function (Blueprint $table) {
             $table->id();
+            $table->decimal('contributed_kg', 10, 2);
+            $table->decimal('remaining_kg', 10, 2);
+            $table->date('entry_date');
+            $table->date('harvest_date');
             $table->timestamps();
+            
+
+            // Foreign keys
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('petani_id')->constrained('petani_data')->onDelete('cascade');
         });
     }
 
@@ -22,6 +31,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('product_contributions', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('product_id');
+            $table->dropConstrainedForeignId('petani_id');
+        });
+
         Schema::dropIfExists('product_contributions');
     }
 };
