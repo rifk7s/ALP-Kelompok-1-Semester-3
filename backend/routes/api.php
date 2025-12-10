@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
+use App\Http\Controllers\PetaniDataController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -37,6 +38,12 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::patch('profile/update', [ProfileController::class, 'update']);
     Route::get('profile/me', [ProfileController::class, 'userrn']);
+
+    /*
+        Petani Data Routes (BUMDes only)
+    */
+    Route::apiResource('petani-data', PetaniDataController::class);
+    Route::patch('petani-data/{petaniData}/toggle-active', [PetaniDataController::class, 'toggleActive']);
 });
 
 /*
