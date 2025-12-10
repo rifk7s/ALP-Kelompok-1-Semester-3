@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductContributionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\CartController;
@@ -67,6 +68,7 @@ Route::get('/bumdes', function () {
 Route::apiResource('/products/product', ProductController::class);
 Route::apiResource('/products/categories', CategoryController::class);
 Route::apiResource('/products/product-images', ProductImageController::class);
+Route::apiResource('/products/contributions', ProductContributionController::class);
 
 /*
     Cart Routes
