@@ -4,7 +4,7 @@ namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProductContribution extends FormRequest
+class ProductContributionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,12 @@ class ProductContribution extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'contributed_kg' => ['required', 'numeric', 'min:0.1'],
+            'remaining_kg' => ['required', 'numeric', 'min:0'],
+            'entry_date' => ['required', 'date'],
+            'harvest_date' => ['required', 'date', 'after_or_equal:entry_date'],
+            'product_id' => ['required', 'exists:products,id'],
+            'petani_id' => ['required', 'exists:petani_data,id'],
         ];
     }
 }
