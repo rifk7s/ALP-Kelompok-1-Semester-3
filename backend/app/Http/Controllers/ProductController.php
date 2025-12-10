@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductContribution;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 
@@ -30,7 +31,7 @@ class ProductController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
-        // $product = Product::create($request->all());
+        // Create the product
         $product = Product::create([
             'name' => $request->name,
             'variety' => $request->variety,
@@ -38,11 +39,23 @@ class ProductController extends Controller
             'storage_days' => $request->storage_days,
             'price_per_kg' => $request->price_per_kg,
             'stock_kg' => $request->stock_kg,
-            'sold_kg' => $request->sold_kg,
+            'sold_kg' => 0,
             'description' => $request->description,
             'status' => 'active',
             'category_id' => $request->category_id,
         ]);
+
+        // Create product contribution if petani_id is provided
+        if ($request->has('petani_id') && $request->petani_id) {
+            ProductContribution::create([
+                'product_id' => $product->id,
+                'petani_id' => $request->petani_id,
+                'contributed_kg' => $request->stock_kg,
+                'remaining_kg' => $request->stock_kg,
+                'entry_date' => now(),
+                'harvest_date' => $request->harvest_date,
+            ]);
+        }
 
         return response()->json([
             'message' => 'Product created successfully!',
