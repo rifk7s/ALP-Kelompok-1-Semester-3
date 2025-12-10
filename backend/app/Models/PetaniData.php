@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PetaniData extends Model
 {
@@ -24,4 +25,9 @@ class PetaniData extends Model
         'address',
         'is_active',
     ];
+
+    public function productContributions(): HasMany
+    {
+        return $this->hasMany(ProductContribution::class);
+    }
 }
