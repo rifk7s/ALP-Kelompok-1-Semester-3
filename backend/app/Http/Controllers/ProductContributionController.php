@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ProductContribution;
-use App\Http\Requests\Product\ProductContributionRequest;
+use App\Http\Requests\Product\CreateProductContributionRequest;
 use App\Http\Requests\Product\UpdateProductContributionRequest; 
 
 class ProductContributionController extends Controller
@@ -21,7 +21,7 @@ class ProductContributionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductContributionRequest $request)
+    public function store(CreateProductContributionRequest $request)
     {
         $contribution = ProductContribution::create([
             'contributed_kg' => $request->contributed_kg,
