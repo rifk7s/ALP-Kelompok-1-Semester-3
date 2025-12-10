@@ -1,14 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
 
-class TambahPetaniScreen extends StatelessWidget {
+class TambahPetaniScreen extends StatefulWidget {
   const TambahPetaniScreen({super.key});
+
+  @override
+  State<TambahPetaniScreen> createState() => _TambahPetaniScreenState();
+}
+
+class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
+  final _petaniService = PetaniService();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     final namaController = TextEditingController();
     final hpController = TextEditingController();
     final alamatController = TextEditingController();
+
+    Future<void> handleSave() async {
+      final nama = namaController.text.trim();
+      final hp = hpController.text.trim();
+      final alamat = alamatController.text.trim();
+
+      if (nama.isEmpty) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Gagal"),
+            content: const Text("Nama petani wajib diisi."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        // Get token from storage
+        final token = await StorageService.getToken();
+        if (token == null) {
+          throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        }
+
+        print('🔑 Token: ${token.substring(0, 20)}...');
+
+        // Prepare data
+        final data = {
+          'name': nama,
+          if (hp.isNotEmpty) 'phone': hp,
+          if (alamat.isNotEmpty) 'address': alamat,
+        };
+
+        // Call API
+        final newPetani = await _petaniService.createPetani(
+          data: data,
+          token: token,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show success dialog
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Berhasil"),
+            content: Text("Petani \"${newPetani.name}\" berhasil ditambahkan."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context, true); // Return to manage screen with success flag
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Error"),
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -51,42 +155,7 @@ class TambahPetaniScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  final nama = namaController.text.trim();
-                  if (nama.isEmpty) {
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("Gagal"),
-                        content: const Text("Nama petani wajib diisi."),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("OK"),
-                          ),
-                        ],
-                      ),
-                    );
-                    return;
-                  }
-
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text("Berhasil"),
-                      content: Text("Petani \"$nama\" berhasil ditambahkan."),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                          child: const Text("OK"),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                onPressed: _isLoading ? null : handleSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -94,14 +163,23 @@ class TambahPetaniScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text(
-                  "Simpan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Simpan",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ],
