@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductContributionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
 use App\Http\Controllers\PetaniDataController;
@@ -79,4 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('cart/{cart}', [CartController::class, 'update']);
     Route::delete('cart/{cart}', [CartController::class, 'destroy']);
     Route::delete('cart', [CartController::class, 'clear']);
+});
+
+/*
+    Order Routes
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    // Order routes
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
 });
