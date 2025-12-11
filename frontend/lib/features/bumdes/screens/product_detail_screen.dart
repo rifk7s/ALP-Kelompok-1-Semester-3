@@ -1,19 +1,39 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
+import 'package:intl/intl.dart';
 import 'edit_product_screen.dart';
 
-class ProductDetailPage extends StatelessWidget {
+final NumberFormat rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: "Rp ",
+  decimalDigits: 0,
+);
+
+class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
   final Function(Map<String, dynamic>) onUpdate;
-  final Function() onDelete;
 
   const ProductDetailPage({
     super.key,
     required this.product,
     required this.onUpdate,
-    required this.onDelete,
   });
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  late Map<String, dynamic> currentProduct;
+
+  @override
+  void initState() {
+    super.initState();
+    currentProduct = widget.product;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,74 +58,26 @@ class ProductDetailPage extends StatelessWidget {
               final result = await Navigator.push<Map<String, dynamic>>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => EditProdukScreen(data: product),
+                  builder: (_) => EditProdukScreen(product: currentProduct),
                 ),
               );
               if (result != null) {
-                onUpdate(result);
+                setState(() {
+                  currentProduct = result;
+                });
+                widget.onUpdate(result);
               }
             },
           ),
           IconButton(
             icon: const Icon(Icons.delete, color: AppColors.danger),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Konfirmasi Hapus"),
-                  content: const Text(
-                    "Apakah Anda yakin ingin menghapus produk ini?",
-                  ),
-                  actionsAlignment: MainAxisAlignment.spaceEvenly,
-                  actions: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: const Text("Batal"),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                onDelete();
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.danger,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: const Text("Hapus"),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -117,6 +89,8 @@ class ProductDetailPage extends StatelessWidget {
               const SizedBox(height: 24),
               _specifications(),
               const SizedBox(height: 20),
+              _contributors(),
+              const SizedBox(height: 20),
               _additionalInfo(),
               const SizedBox(height: 50),
             ],
@@ -126,45 +100,129 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Konfirmasi Hapus"),
+        content: Text(
+          "Apakah Anda yakin ingin menghapus produk ${currentProduct['name']}?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text("Hapus"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await _deleteProduct(context);
+    }
+  }
+
+  Future<void> _deleteProduct(BuildContext context) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
+
+      await ProductService.deleteProduct(
+        productId: currentProduct['id'],
+        token: token,
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produk berhasil dihapus'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Return true to indicate deletion
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus produk: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget _productImage() {
+    final imagePath =
+        currentProduct['product_images'] != null &&
+            (currentProduct['product_images'] as List).isNotEmpty
+        ? currentProduct['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: product['images'] != null && product['images'].isNotEmpty
-          ? (product['images'][0] is File
-                ? Image.file(
-                    product['images'][0],
-                    height: 230,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    product['images'][0],
-                    height: 230,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ))
-          : Image.asset(
-              "assets/images/gabah.jpg",
+      borderRadius: BorderRadius.circular(16),
+      child: imageUrl.isNotEmpty
+          ? Image.network(
+              imageUrl,
               height: 230,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 230,
+                  width: double.infinity,
+                  color: AppColors.imagePlaceholder,
+                  child: const Icon(
+                    Icons.image,
+                    size: 80,
+                    color: AppColors.textMuted,
+                  ),
+                );
+              },
+            )
+          : Container(
+              height: 230,
+              width: double.infinity,
+              color: AppColors.imagePlaceholder,
+              child: const Icon(
+                Icons.image,
+                size: 80,
+                color: AppColors.textMuted,
+              ),
             ),
     );
   }
 
   Widget _productNameAndPrice() {
+    final pricePerKg = double.parse(currentProduct['price_per_kg'].toString());
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          product['nama'],
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          currentProduct['name'],
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
-          product['harga'],
+          '${rupiah.format(pricePerKg)}/kg',
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.danger,
           ),
@@ -174,21 +232,30 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _highlights() {
+    final stockKg = double.parse(currentProduct['stock_kg'].toString());
+
+    // Get contributor count
+    int contributorCount = 0;
+    if (currentProduct['product_contributions'] != null) {
+      contributorCount =
+          (currentProduct['product_contributions'] as List).length;
+    }
+
     return Row(
       children: [
         Expanded(
           child: _highlightCard(
-            icon: Icons.storefront,
-            title: 'Petani',
-            value: product['petani'] ?? '-',
+            icon: Icons.people_outline,
+            title: 'Kontributor',
+            value: '$contributorCount Petani',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _highlightCard(
-            icon: Icons.scale_outlined,
+            icon: Icons.inventory_2_outlined,
             title: 'Stok',
-            value: "${product['jumlah']} kg",
+            value: "${stockKg.toStringAsFixed(0)} kg",
           ),
         ),
       ],
@@ -201,31 +268,24 @@ class ProductDetailPage extends StatelessWidget {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: AppColors.warningAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.primary),
+              Icon(icon, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -233,12 +293,12 @@ class ProductDetailPage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -247,35 +307,170 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _specifications() {
+    final categoryName = currentProduct['category'] != null
+        ? currentProduct['category']['name']
+        : '-';
+    final variety = currentProduct['variety'] ?? '-';
+
     return SectionCard(
       title: "Spesifikasi Produk",
       children: [
         InfoRow(
           icon: Icons.category_outlined,
           label: "Kategori",
-          value: product['kategori'],
+          value: categoryName,
         ),
-        InfoRow(
-          icon: Icons.qr_code_2_outlined,
-          label: "Varietas",
-          value: product['varietas'],
-        ),
-        InfoRow(
-          icon: Icons.date_range_outlined,
-          label: "Tanggal Panen",
-          value: product['tanggalPanen'].toString().split(' ')[0],
+        InfoRow(icon: Icons.grass_outlined, label: "Varietas", value: variety),
+      ],
+    );
+  }
+
+  Widget _contributors() {
+    if (currentProduct['product_contributions'] == null ||
+        (currentProduct['product_contributions'] as List).isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final contributions = currentProduct['product_contributions'] as List;
+
+    return SectionCard(
+      title: "Kontributor Petani",
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxHeight: 250),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: contributions.length,
+            itemBuilder: (context, index) {
+              final contrib = contributions[index];
+              final petaniName = contrib['petani']?['name'] ?? 'Unknown';
+              final contributedKg =
+                  contrib['contributed_kg']?.toString() ?? '0';
+              final harvestDate = contrib['harvest_date'] ?? '-';
+              final formattedDate = _formatDate(harvestDate);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            petaniName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today,
+                                size: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Panen: $formattedDate',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '$contributedKg kg',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
   }
 
+  String _formatDate(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(isoString);
+      const months = [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
+      ];
+      return '${date.day} ${months[date.month]} ${date.year}';
+    } catch (e) {
+      return '-';
+    }
+  }
+
   Widget _additionalInfo() {
+    final description = currentProduct['description'] ?? "-";
+
     return SectionCard(
       title: "Info Tambahan",
       children: [
         Text(
-          product['info'] ?? "-",
-          style: const TextStyle(fontSize: 14, height: 1.4),
+          description,
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
@@ -292,18 +487,28 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
           ),
           const SizedBox(height: 12),
           ...children,
@@ -328,13 +533,25 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.primary),
+          Icon(icon, size: 16, color: AppColors.primary),
           const SizedBox(width: 8),
-          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
-          Expanded(child: Text(value)),
+          Text(
+            "$label: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+            ),
+          ),
         ],
       ),
     );

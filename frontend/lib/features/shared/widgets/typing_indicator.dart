@@ -76,10 +76,7 @@ class _TypingBubbleState extends State<TypingBubble>
 }
 
 class _PulsingDot extends StatelessWidget {
-  const _PulsingDot({
-    required this.controller,
-    required this.offset,
-  });
+  const _PulsingDot({required this.controller, required this.offset});
 
   final AnimationController controller;
   final double offset;
@@ -97,10 +94,7 @@ class _PulsingDot extends StatelessWidget {
 
         return Opacity(
           opacity: opacity.clamp(0.0, 1.0),
-          child: Transform.scale(
-            scale: scale,
-            child: child,
-          ),
+          child: Transform.scale(scale: scale, child: child),
         );
       },
       child: Container(
