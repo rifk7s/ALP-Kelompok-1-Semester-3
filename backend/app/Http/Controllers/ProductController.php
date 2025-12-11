@@ -151,6 +151,30 @@ class ProductController extends Controller
                     'harvest_date' => $request->harvest_date ?? $product->harvest_date,
                 ]);
             }
+        } elseif ($request->has('petani_id') && $request->petani_id) {
+            // Backward compatibility - Update product contribution if petani_id is provided
+            // Find existing contribution or create new one
+            $contribution = ProductContribution::where('product_id', $product->id)->first();
+            
+            if ($contribution) {
+                // Update existing contribution
+                $contribution->update([
+                    'petani_id' => $request->petani_id,
+                    'contributed_kg' => $request->stock_kg ?? $contribution->contributed_kg,
+                    'remaining_kg' => $request->stock_kg ?? $contribution->remaining_kg,
+                    'harvest_date' => $request->harvest_date ?? $contribution->harvest_date,
+                ]);
+            } else {
+                // Create new contribution if none exists
+                ProductContribution::create([
+                    'product_id' => $product->id,
+                    'petani_id' => $request->petani_id,
+                    'contributed_kg' => $request->stock_kg ?? $product->stock_kg,
+                    'remaining_kg' => $request->stock_kg ?? $product->stock_kg,
+                    'entry_date' => now(),
+                    'harvest_date' => $request->harvest_date ?? $product->harvest_date,
+                ]);
+            }
         }
 
         // Handle image deletions
