@@ -9,13 +9,28 @@ class ChatService {
 
   static Future<bool> signInToFirebase() async {
     try {
+      // Check if already signed in
+      if (_auth.currentUser != null) {
+        debugPrint('ChatService: Already signed in');
+        return true;
+      }
+
       final firebaseToken = await StorageService.getFirebaseToken();
-      if (firebaseToken == null) return false;
+      if (firebaseToken == null) {
+        debugPrint('ChatService: No Firebase token found');
+        return false;
+      }
 
       await _auth.signInWithCustomToken(firebaseToken);
+      debugPrint('ChatService: Successfully signed in to Firebase');
       return true;
     } catch (e) {
       debugPrint('ChatService: Firebase sign-in error: $e');
+      // If token is invalid, clear it so it can be refreshed on next login
+      if (e.toString().contains('invalid-custom-token')) {
+        debugPrint('ChatService: Clearing invalid token');
+        await StorageService.deleteFirebaseToken();
+      }
       return false;
     }
   }

@@ -46,6 +46,11 @@ class StorageService {
     return await _secureStorage.read(key: _firebaseTokenKey);
   }
 
+  // Delete Firebase token khusus (untuk invalid token case)
+  static Future<void> deleteFirebaseToken() async {
+    await _secureStorage.delete(key: _firebaseTokenKey);
+  }
+
   // Clear semua data saat logout
   static Future<void> clearAll() async {
     // Clear secure storage
