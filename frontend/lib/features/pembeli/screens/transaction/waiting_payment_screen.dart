@@ -6,47 +6,29 @@ import 'success_payment_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int totalPayment;
+  final String? orderNumber;
 
-  const WaitingPaymentPage({super.key, required this.totalPayment});
+  const WaitingPaymentPage({
+    super.key, 
+    required this.totalPayment,
+    this.orderNumber,
+  });
 
   @override
   State<WaitingPaymentPage> createState() => _WaitingPaymentPageState();
 }
 
 class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
-  Duration remainingTime = const Duration(minutes: 30);
-  late Timer timer;
-
-  String orderId = "INV-${DateTime.now().millisecondsSinceEpoch}";
+  late String orderId;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SuccessPaymentScreen(
-            total: widget.totalPayment,
-            orderId: orderId,
-          ),
-        ),
-      );
-    });
-
-    timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (remainingTime.inSeconds > 0) {
-        setState(() => remainingTime -= const Duration(seconds: 1));
-      } else {
-        timer.cancel();
-      }
-    });
+    orderId = widget.orderNumber ?? "INV-${DateTime.now().millisecondsSinceEpoch}";
   }
 
   @override
   void dispose() {
-    timer.cancel();
     super.dispose();
   }
 
@@ -106,33 +88,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.dangerLight,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.timer,
-                              color: AppColors.danger,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "Sisa waktu: ${formatTime(remainingTime)}",
-                              style: const TextStyle(
-                                color: AppColors.danger,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13.5,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        "Silakan selesaikan pembayaran Anda",
+                        style: TextStyle(
+                          color: AppColors.grey600,
+                          fontSize: 13.5,
                         ),
                       ),
                     ],

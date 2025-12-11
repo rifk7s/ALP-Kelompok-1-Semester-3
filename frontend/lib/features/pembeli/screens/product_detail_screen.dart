@@ -4,6 +4,7 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +26,22 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int tempQty = 1;
+  int cartItemCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCartCount();
+  }
+
+  Future<void> _loadCartCount() async {
+    final cart = await CartService.getCart();
+    if (cart != null && mounted) {
+      setState(() {
+        cartItemCount = cart['item_count'] ?? 0;
+      });
+    }
+  }
 
   int get parsedPrice {
     final pricePerKg = double.parse(widget.product['price_per_kg'].toString());
@@ -154,27 +171,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               },
             ),
             // Badge counter
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                child: const Text(
-                  '2',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+            if (cartItemCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
                   ),
-                  textAlign: TextAlign.center,
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    cartItemCount > 99 ? '99+' : cartItemCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ],
@@ -599,11 +617,30 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.pop(context);
 
-                              // Show Shopee-style floating overlay
-                              _showAddedToCartOverlay(context, tempQty);
+                              // Add to cart via backend
+                              final success = await CartService.addToCart(
+                                productId: widget.product['id'],
+                                quantityKg: tempQty.toDouble(),
+                              );
+
+                              if (success) {
+                                // Reload cart count
+                                await _loadCartCount();
+                                // Show success overlay
+                                if (mounted) {
+                                  _showAddedToCartOverlay(context, tempQty);
+                                }
+                              } else {
+                                if (mounted) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Gagal menambahkan ke keranjang',
+                                  );
+                                }
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,

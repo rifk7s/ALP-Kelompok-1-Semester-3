@@ -553,20 +553,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              List<CartItem> cartItems = (order['products'] as List).map((p) {
-                return CartItem(
-                  name: p['name'],
-                  pricePerKg:
-                      p['price'] ??
-                      0, // jika price tidak ada di order, bisa set default
-                  qty: p['qty'],
-                  image: p['image'],
-                );
-              }).toList();
+              List<Map<String, dynamic>> cartItems = (order['products'] as List).map((p) {
+                return {
+                  'id': p['id'] ?? 0,
+                  'quantity_kg': p['qty']?.toString() ?? '1',
+                  'product': {
+                    'name': p['name'] ?? '',
+                    'price_per_kg': p['price']?.toString() ?? '0',
+                    'product_images': [
+                      {'image_path': p['image'] ?? ''}
+                    ],
+                  },
+                };
+              }).toList().cast<Map<String, dynamic>>();
 
               int totalPayment = cartItems.fold(
                 0,
-                (sum, item) => sum + (item.pricePerKg * item.qty),
+                (sum, item) {
+                  final qty = double.parse(item['quantity_kg'].toString());
+                  final price = double.parse(item['product']['price_per_kg'].toString());
+                  return sum + (qty * price).toInt();
+                },
               );
 
               Navigator.push(
