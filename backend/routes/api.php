@@ -13,6 +13,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
 use App\Http\Controllers\PetaniDataController;
+use App\Http\Controllers\HppPriceController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -70,6 +71,7 @@ Route::apiResource('/products/product', ProductController::class);
 Route::apiResource('/products/categories', CategoryController::class);
 Route::apiResource('/products/product-images', ProductImageController::class);
 Route::apiResource('/products/contributions', ProductContributionController::class);
+Route::apiResource('/products/hpp-prices', HppPriceController::class);
 
 /*
     Cart Routes

@@ -20,8 +20,8 @@ return new class extends Migration
             $table->decimal('price_per_kg');
             $table->decimal('stock_kg');
             $table->decimal('sold_kg')->default(0);
-            $table->text('description');
-            $table->enum('status', ['active', 'sold_out']);
+            $table->text('description')->nullable();
+            $table->enum('status', ['active', 'sold_out'])->default('active');
 
             $table->timestamps();
         });

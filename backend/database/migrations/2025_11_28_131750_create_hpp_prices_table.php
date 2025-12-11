@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('hpp_prices', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->string('variety');
+            $table->decimal('price_per_kg', 10, 2);
+            $table->string('source')->nullable();
+            $table->date('effective_date');
             $table->timestamps();
         });
     }
