@@ -73,7 +73,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         });
 
         // Show success dialog
-        if (!mounted) return;
+        if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -102,7 +102,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
           _isLoading = false;
         });
 
-        if (!mounted) return;
+        if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
