@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
@@ -264,10 +265,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               final bumdes = await BumdesService.getBumdesInfo();
               if (!mounted) return;
               if (bumdes == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Gagal mendapatkan info BUMDes'),
-                  ),
+                SnackBarHelper.showInfo(
+                  context,
+                  'Gagal mendapatkan info BUMDes',
                 );
                 return;
               }
@@ -515,35 +515,23 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.pop(context);
 
-                              showDialog(
+                              await DialogManager.showAlert(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text("Berhasil!"),
-                                  content: Text(
-                                    "${widget.product['name'] ?? 'Produk'} × $tempQty ditambahkan ke keranjang.",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("OK"),
+                                title: "Berhasil!",
+                                content: "${widget.product['name'] ?? 'Produk'} × $tempQty ditambahkan ke keranjang.",
+                                confirmText: "Lihat Keranjang",
+                                cancelText: "OK",
+                                onConfirm: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const CartPage(),
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const CartPage(),
-                                          ),
-                                        );
-                                      },
-                                      child: const Text("Lihat Keranjang"),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               );
                             },
                             style: ElevatedButton.styleFrom(

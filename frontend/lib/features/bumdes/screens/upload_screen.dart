@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
@@ -54,6 +55,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   bool isLoading = true;
   bool isSubmitting = false;
+  
   @override
   void initState() {
     super.initState();
@@ -123,12 +125,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading data: $e'),
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        SnackBarHelper.showError(context, 'Error loading data: $e');
       }
     }
   }
@@ -188,16 +185,12 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   Future<void> submitProduct() async {
     // Validation
     if (_namaProdukController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nama produk harus diisi')));
+      SnackBarHelper.showError(context, 'Nama produk harus diisi');
       return;
     }
 
     if (petaniContributors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tambahkan minimal 1 kontributor petani')),
-      );
+      SnackBarHelper.showError(context, 'Tambahkan minimal 1 kontributor petani');
       return;
     }
 
@@ -209,44 +202,34 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     final stockKg =
         double.tryParse(_jumlahController.text.replaceAll(',', '.')) ?? 0;
     if (stockKg > 0 && (totalContributions - stockKg).abs() > 0.01) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Total kontribusi (${totalContributions.toStringAsFixed(2)} kg) harus sama dengan stok (${stockKg.toStringAsFixed(2)} kg)',
-          ),
-        ),
+      SnackBarHelper.showError(
+        context,
+        'Total kontribusi (${totalContributions.toStringAsFixed(2)} kg) harus sama dengan stok (${stockKg.toStringAsFixed(2)} kg)',
       );
       return;
     }
 
     if (_jumlahController.text.isEmpty || stockKg <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Jumlah stok harus diisi dan lebih dari 0'),
-        ),
+      SnackBarHelper.showError(
+        context,
+        'Jumlah stok harus diisi dan lebih dari 0',
       );
       return;
     }
 
     if (selectedKategoriId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih kategori terlebih dahulu')),
-      );
+      SnackBarHelper.showError(context, 'Pilih kategori terlebih dahulu');
       return;
     }
 
     if (_jumlahController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Jumlah stok harus diisi')));
+      SnackBarHelper.showError(context, 'Jumlah stok harus diisi');
       return;
     }
 
     final price = getPriceForSelection();
     if (price == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Harga tidak ditemukan')));
+      SnackBarHelper.showError(context, 'Harga tidak ditemukan');
       return;
     }
 
@@ -286,18 +269,14 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        SnackBarHelper.showError(context, 'Error: $e');
       }
     }
   }
 
   Future<void> pickImages() async {
     if (selectedImages.length >= 5) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
+      SnackBarHelper.showError(context, "Maksimal 5 foto");
       return;
     }
 
@@ -306,9 +285,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
     if (picked.isNotEmpty) {
       if (selectedImages.length + picked.length > 5) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Total foto tidak boleh lebih dari 5")),
-        );
+        SnackBarHelper.showError(context, "Total foto tidak boleh lebih dari 5");
       }
 
       setState(() {
@@ -463,23 +440,18 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   onPressed: () {
                     final kg = double.tryParse(editKgController.text);
                     if (kg == null || kg <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Masukkan jumlah kg yang valid'),
-                        ),
+                      SnackBarHelper.showError(
+                        context,
+                        'Masukkan jumlah kg yang valid',
                       );
                       return;
                     }
                     if (editPetaniId == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pilih petani')),
-                      );
+                      SnackBarHelper.showError(context, 'Pilih petani');
                       return;
                     }
                     if (editHarvestDate == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pilih tanggal panen')),
-                      );
+                      SnackBarHelper.showError(context, 'Pilih tanggal panen');
                       return;
                     }
 
@@ -963,22 +935,19 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                           width: 56,
                           child: ElevatedButton(
                             onPressed: () {
+                              // Validation dengan early return
                               if (selectedPetaniId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Pilih petani terlebih dahulu',
-                                    ),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Pilih petani terlebih dahulu',
                                 );
                                 return;
                               }
 
                               if (selectedHarvestDate == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Pilih tanggal panen'),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Pilih tanggal panen',
                                 );
                                 return;
                               }
@@ -987,12 +956,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                                 _kontribusiController.text,
                               );
                               if (kg == null || kg <= 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Masukkan jumlah kg yang valid',
-                                    ),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Masukkan jumlah kg yang valid',
                                 );
                                 return;
                               }

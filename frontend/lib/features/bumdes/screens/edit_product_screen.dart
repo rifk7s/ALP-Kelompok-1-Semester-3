@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
@@ -227,18 +228,16 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   }
 
   Future<void> submitUpdate() async {
+    if (isSubmitting) return;
+    
     // Validation
     if (_namaProdukController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nama produk harus diisi')));
+      SnackBarHelper.showError(context, 'Nama produk harus diisi');
       return;
     }
 
     if (petaniContributors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tambahkan minimal 1 kontributor petani')),
-      );
+      SnackBarHelper.showError(context, 'Tambahkan minimal 1 kontributor petani');
       return;
     }
 
@@ -250,44 +249,34 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     final stockKg =
         double.tryParse(_jumlahController.text.replaceAll(',', '.')) ?? 0;
     if (stockKg > 0 && (totalContributions - stockKg).abs() > 0.01) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Total kontribusi (${totalContributions.toStringAsFixed(2)} kg) harus sama dengan stok (${stockKg.toStringAsFixed(2)} kg)',
-          ),
-        ),
+      SnackBarHelper.showError(
+        context,
+        'Total kontribusi (${totalContributions.toStringAsFixed(2)} kg) harus sama dengan stok (${stockKg.toStringAsFixed(2)} kg)',
       );
       return;
     }
 
     if (selectedKategoriId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih kategori terlebih dahulu')),
-      );
+      SnackBarHelper.showError(context, 'Pilih kategori terlebih dahulu');
       return;
     }
 
     if (tanggalPanen == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Pilih tanggal panen')));
+      SnackBarHelper.showError(context, 'Pilih tanggal panen');
       return;
     }
 
     if (_jumlahController.text.isEmpty || stockKg <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Jumlah stok harus diisi dan lebih dari 0'),
-        ),
+      SnackBarHelper.showError(
+        context,
+        'Jumlah stok harus diisi dan lebih dari 0',
       );
       return;
     }
 
     final price = getPriceForSelection();
     if (price == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Harga tidak ditemukan')));
+      SnackBarHelper.showError(context, 'Harga tidak ditemukan');
       return;
     }
 
@@ -1123,21 +1112,17 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               if (selectedPetaniId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Pilih petani terlebih dahulu',
-                                    ),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Pilih petani terlebih dahulu',
                                 );
                                 return;
                               }
 
                               if (selectedHarvestDate == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Pilih tanggal panen'),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Pilih tanggal panen',
                                 );
                                 return;
                               }
@@ -1146,12 +1131,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                 _kontribusiController.text,
                               );
                               if (kg == null || kg <= 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Masukkan jumlah kg yang valid',
-                                    ),
-                                  ),
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Masukkan jumlah kg yang valid',
                                 );
                                 return;
                               }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
@@ -31,77 +32,69 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   Future<void> _handleRegister() async {
+    if (_isLoading) return;
+    
     if (_nameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _addressController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi')));
+      SnackBarHelper.showError(context, 'Semua field harus diisi');
       return;
     }
 
     if (_passwordController.text.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kata sandi minimal 8 karakter')),
-      );
+      SnackBarHelper.showError(context, 'Kata sandi minimal 8 karakter');
       return;
     }
 
     setState(() => _isLoading = true);
-    
-    // Show immediate feedback with API URL
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Connecting to ${ApiConfig.baseUrl}...'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
 
-    final result = await AuthService.register(
-      name: _nameController.text,
-      phone: _phoneController.text,
-      password: _passwordController.text,
-      address: _addressController.text,
-      role: 'pembeli',
-    );
-
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-
-    if (result.success) {
-      // Auto-login setelah register berhasil
-      final loginResult = await AuthService.login(
+    try {
+      final result = await AuthService.register(
+        name: _nameController.text,
         phone: _phoneController.text,
         password: _passwordController.text,
+        address: _addressController.text,
+        role: 'pembeli',
       );
 
       if (!mounted) return;
 
-      if (loginResult.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi berhasil! Selamat datang.')),
+      if (result.success) {
+        // Auto-login setelah register berhasil
+        final loginResult = await AuthService.login(
+          phone: _phoneController.text,
+          password: _passwordController.text,
         );
-        context.pushReplacementSmooth(const StartPage());
+
+        if (!mounted) return;
+
+        if (loginResult.success) {
+          SnackBarHelper.showSuccess(
+            context,
+            'Registrasi berhasil! Selamat datang.',
+          );
+          context.pushReplacementSmooth(const StartPage());
+        } else {
+          SnackBarHelper.showInfo(
+            context,
+            'Registrasi berhasil! Silakan login.',
+          );
+        }
       } else {
-        // Register berhasil tapi login gagal - suruh login manual
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
-        );
+        String errorMsg = result.message ?? 'Registrasi gagal';
+        if (result.errors != null) {
+          final errors = result.errors!.values
+              .expand((e) => e as List)
+              .join('\n');
+          errorMsg = errors;
+        }
+        SnackBarHelper.showError(context, errorMsg);
       }
-    } else {
-      String errorMsg = result.message ?? 'Registrasi gagal';
-      if (result.errors != null) {
-        final errors = result.errors!.values
-            .expand((e) => e as List)
-            .join('\n');
-        errorMsg = errors;
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMsg)));
     }
   }
 

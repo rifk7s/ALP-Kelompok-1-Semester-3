@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
@@ -44,9 +45,7 @@ class _SearchPageState extends State<SearchPage> {
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
+        SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
       }
     }
   }

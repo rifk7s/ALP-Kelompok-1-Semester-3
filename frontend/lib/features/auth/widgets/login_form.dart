@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
@@ -29,39 +30,45 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future<void> _handleLogin() async {
+    if (_isLoading) return;
+    
     if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nomor HP dan kata sandi harus diisi')),
-      );
+      SnackBarHelper.showError(context, 'Nomor HP dan kata sandi harus diisi');
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final result = await AuthService.login(
-      phone: _phoneController.text,
-      password: _passwordController.text,
-    );
-
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-
-    if (result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message ?? 'Login berhasil!')),
+    try {
+      final result = await AuthService.login(
+        phone: _phoneController.text,
+        password: _passwordController.text,
       );
 
-      final role = result.user?['role'] ?? 'pembeli';
-      if (role == 'bumdes') {
-        context.pushReplacementSmooth(const StartPageBumdes());
+      if (!mounted) return;
+
+      if (result.success) {
+        SnackBarHelper.showSuccess(
+          context,
+          result.message ?? 'Login berhasil!',
+        );
+
+        final role = result.user?['role'] ?? 'pembeli';
+        if (role == 'bumdes') {
+          context.pushReplacementSmooth(const StartPageBumdes());
+        } else {
+          context.pushReplacementSmooth(const StartPage());
+        }
       } else {
-        context.pushReplacementSmooth(const StartPage());
+        SnackBarHelper.showError(
+          context,
+          result.message ?? 'Login gagal',
+        );
       }
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.message ?? 'Login gagal')));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
