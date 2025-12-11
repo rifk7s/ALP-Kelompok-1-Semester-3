@@ -25,6 +25,7 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int tempQty = 1;
+  int _lastQtyChangeClick = 0;
 
   int get parsedPrice {
     final pricePerKg = double.parse(widget.product['price_per_kg'].toString());
@@ -369,8 +370,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   void _openQtyDialog() {
     tempQty = 1;
+    int lastClick = 0;
 
-    showDialog(
+    DialogManager.show(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -433,6 +435,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _qtyButton(Icons.remove, () {
+                          // Debounce: 200ms cooldown
+                          final now = DateTime.now().millisecondsSinceEpoch;
+                          if (now - lastClick < 200) return;
+                          lastClick = now;
+                          
                           if (tempQty > 1) {
                             setStateDialog(() => tempQty--);
                           }
@@ -466,6 +473,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ),
                         _qtyButton(Icons.add, () {
+                          // Debounce: 200ms cooldown
+                          final now = DateTime.now().millisecondsSinceEpoch;
+                          if (now - lastClick < 200) return;
+                          lastClick = now;
+                          
                           setStateDialog(() => tempQty++);
                         }),
                       ],
@@ -569,7 +581,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   ) {
     final controller = TextEditingController(text: currentQty.toString());
 
-    showDialog(
+    DialogManager.show(
       context: context,
       builder: (context) {
         return AlertDialog(

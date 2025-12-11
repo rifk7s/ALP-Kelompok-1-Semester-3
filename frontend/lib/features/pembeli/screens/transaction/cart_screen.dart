@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
@@ -51,6 +52,7 @@ class _CartPageState extends State<CartPage> {
 
   List<Map<String, dynamic>> rekomendasi = [];
   bool isLoadingRecommendations = true;
+  int _lastQtyChangeClick = 0;
 
   @override
   void initState() {
@@ -89,6 +91,13 @@ class _CartPageState extends State<CartPage> {
   }
 
   void changeQty(int index, int newQty) {
+    // Debounce: Prevent spam clicks (300ms cooldown)
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastQtyChangeClick < 300) {
+      return; // Ignore rapid clicks
+    }
+    _lastQtyChangeClick = now;
+    
     setState(() {
       if (newQty <= 0) {
         cart.removeAt(index);
@@ -103,7 +112,7 @@ class _CartPageState extends State<CartPage> {
   void _showQtyInputDialog(int index, int currentQty) {
     final controller = TextEditingController(text: currentQty.toString());
 
-    showDialog(
+    DialogManager.show(
       context: context,
       builder: (context) {
         return AlertDialog(
