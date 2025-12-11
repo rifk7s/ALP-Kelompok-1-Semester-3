@@ -39,7 +39,6 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   final _namaProdukController = TextEditingController();
   final _hargaController = TextEditingController();
   final _masaSimpanController = TextEditingController();
-  final _lokasiController = TextEditingController();
   final _infoTambahanController = TextEditingController();
 
   String? masaSimpanNote;
@@ -1131,16 +1130,6 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                inputLabel("Lokasi Produk *"),
-                TextField(
-                  controller: _lokasiController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.location_on),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
                 inputLabel("Info Tambahan"),
                 TextField(
                   maxLines: 3,

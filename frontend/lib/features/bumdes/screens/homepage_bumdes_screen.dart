@@ -3,8 +3,11 @@ import 'package:frontend/core/theme/theme.dart';
 import 'upload_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'petani/manage_screen.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
 
-class HomePageBumdes extends StatelessWidget {
+class HomePageBumdes extends StatefulWidget {
   final VoidCallback? onProductTap;
   final VoidCallback? onChatTap;
   final VoidCallback? onTransactionTap;
@@ -15,6 +18,53 @@ class HomePageBumdes extends StatelessWidget {
     this.onChatTap,
     this.onTransactionTap,
   });
+
+  @override
+  State<HomePageBumdes> createState() => _HomePageBumdesState();
+}
+
+class _HomePageBumdesState extends State<HomePageBumdes> {
+  int activeProductCount = 0;
+  int petaniCount = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final token = await StorageService.getToken();
+      
+      // Fetch products and count those with stock > 0
+      final products = await ProductService.getProducts();
+      final activeProducts = products.where((p) {
+        final stock = p['stock_kg'];
+        if (stock is num) return stock > 0;
+        if (stock is String) {
+          final stockNum = double.tryParse(stock) ?? 0;
+          return stockNum > 0;
+        }
+        return false;
+      }).length;
+
+      // Fetch petani count
+      final petaniList = await PetaniService().fetchAllPetani(token: token ?? '');
+      
+      setState(() {
+        activeProductCount = activeProducts;
+        petaniCount = petaniList.length;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading dashboard data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,10 +129,10 @@ class HomePageBumdes extends StatelessWidget {
                         _dashboardCard(
                           icon: Icons.check_circle_outline,
                           title: 'Produk Aktif',
-                          value: '12',
+                          value: isLoading ? '-' : '$activeProductCount',
                           width: cardWidth,
                           showArrow: true,
-                          onTap: onProductTap,
+                          onTap: widget.onProductTap,
                         ),
                         _dashboardCard(
                           icon: Icons.monetization_on_outlined,
@@ -91,7 +141,7 @@ class HomePageBumdes extends StatelessWidget {
                           value: '23',
                           width: cardWidth,
                           showArrow: true,
-                          onTap: onTransactionTap,
+                          onTap: widget.onTransactionTap,
                         ),
                         _dashboardCard(
                           icon: Icons.chat_bubble_outline,
@@ -99,12 +149,12 @@ class HomePageBumdes extends StatelessWidget {
                           value: '3',
                           width: cardWidth,
                           showArrow: true,
-                          onTap: onChatTap,
+                          onTap: widget.onChatTap,
                         ),
                         _dashboardCard(
                           icon: Icons.people_outline,
                           title: 'Kelola Petani',
-                          value: '5',
+                          value: isLoading ? '-' : '$petaniCount',
                           width: cardWidth,
                           showArrow: true,
                           onTap: () {

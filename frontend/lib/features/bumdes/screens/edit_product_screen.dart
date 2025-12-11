@@ -42,7 +42,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   final _namaProdukController = TextEditingController();
   final _hargaController = TextEditingController();
   final _masaSimpanController = TextEditingController();
-  final _lokasiController = TextEditingController();
   final _infoTambahanController = TextEditingController();
 
   DateTime? tanggalPanen;
@@ -1301,16 +1300,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                inputLabel("Lokasi Produk *"),
-                TextField(
-                  controller: _lokasiController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.location_on),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
                 inputLabel("Info Tambahan"),
                 TextField(
                   maxLines: 3,
