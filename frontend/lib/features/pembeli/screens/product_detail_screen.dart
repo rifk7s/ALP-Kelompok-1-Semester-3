@@ -2,33 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
+import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
+import 'package:intl/intl.dart';
+
+final NumberFormat rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: "Rp ",
+  decimalDigits: 0,
+);
 
 class ProductDetailPage extends StatefulWidget {
-  final String name;
-  final String price;
-  final String stock;
-  final String image;
-  final String sellerName;
-  final String location;
-  final String category;
-  final String variety;
-  final String harvestDate;
-  final String description;
+  final Map<String, dynamic> product;
 
   const ProductDetailPage({
     super.key,
-    required this.name,
-    required this.price,
-    required this.stock,
-    required this.image,
-    required this.sellerName,
-    required this.location,
-    required this.category,
-    required this.variety,
-    required this.harvestDate,
-    required this.description,
+    required this.product,
   });
 
   @override
@@ -39,8 +29,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int tempQty = 1;
 
   int get parsedPrice {
-    final numeric = widget.price.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(numeric) ?? 0;
+    final pricePerKg = double.parse(widget.product['price_per_kg'].toString());
+    return pricePerKg.toInt();
+  }
+
+  double get stockKg {
+    return double.parse(widget.product['stock_kg'].toString());
   }
 
   @override
@@ -70,30 +64,53 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   InfoRow(
                     icon: Icons.category_outlined,
                     label: "Kategori",
-                    value: widget.category,
+                    value: widget.product['category']?['name'] ?? '-',
                   ),
                   InfoRow(
                     icon: Icons.qr_code_2_outlined,
                     label: "Varietas",
-                    value: widget.variety,
+                    value: widget.product['variety'] ?? '-',
                   ),
                   InfoRow(
                     icon: Icons.date_range_outlined,
                     label: "Tanggal Panen",
-                    value: widget.harvestDate,
+                    value: _formatDate(widget.product['harvest_date']),
                   ),
                 ],
               ),
 
               const SizedBox(height: 20),
-              SectionCard(
-                title: "Info Tambahan",
-                children: [
-                  Text(
-                    widget.description,
-                    style: const TextStyle(fontSize: 14, height: 1.4),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Info Tambahan",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 100,
+                      child: SingleChildScrollView(
+                        child: Text(
+                          widget.product['description'] ?? '-',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            height: 1.5,
+                            color: AppColors.textLight,
+                          ),
+                          textAlign: TextAlign.justify,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 80),
@@ -127,14 +144,43 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Widget _productImage() {
+    final imagePath = widget.product['product_images'] != null &&
+            (widget.product['product_images'] as List).isNotEmpty
+        ? widget.product['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: Image.asset(
-        widget.image,
-        height: 230,
-        width: double.infinity,
-        fit: BoxFit.cover,
-      ),
+      child: imageUrl.isNotEmpty
+          ? Image.network(
+              imageUrl,
+              height: 230,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 230,
+                  width: double.infinity,
+                  color: AppColors.imagePlaceholder,
+                  child: const Icon(
+                    Icons.image,
+                    size: 80,
+                    color: AppColors.textMuted,
+                  ),
+                );
+              },
+            )
+          : Container(
+              height: 230,
+              width: double.infinity,
+              color: AppColors.imagePlaceholder,
+              child: const Icon(
+                Icons.image,
+                size: 80,
+                color: AppColors.textMuted,
+              ),
+            ),
     );
   }
 
@@ -143,12 +189,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.name,
+          widget.product['name'],
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
         Text(
-          widget.price,
+          '${rupiah.format(parsedPrice)}/kg',
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -167,13 +213,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        "Tersedia: ${widget.stock}",
+        "Tersedia: ${stockKg.toStringAsFixed(0)}kg",
         style: const TextStyle(color: AppColors.white, fontSize: 12),
       ),
     );
   }
 
   Widget _sellerCard() {
+    final imagePath = widget.product['product_images'] != null &&
+            (widget.product['product_images'] as List).isNotEmpty
+        ? widget.product['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -185,19 +237,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         children: [
           const CircleAvatar(
             radius: 22,
-            backgroundImage: AssetImage("assets/images/profile.png"),
+            backgroundImage: AssetImage("assets/images/logo.png"),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.sellerName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                const Text(
+                  "BUMDes",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  widget.location,
+                  "Sengka, Gowa",
                   style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
@@ -216,7 +268,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               final chatId = await ChatService.getOrCreateChat(
                 recipientId: bumdes.id,
                 recipientName: bumdes.name,
-                recipientImage: widget.image,
+                recipientImage: imageUrl.isNotEmpty ? imageUrl : "assets/images/logo.png",
               );
               if (!mounted) return;
               if (chatId != null) {
@@ -226,7 +278,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     builder: (_) => ChatDetailPage(
                       chatId: chatId,
                       name: bumdes.name,
-                      image: widget.image,
+                      image: imageUrl.isNotEmpty ? imageUrl : "assets/images/logo.png",
                       recipientId: bumdes.id,
                     ),
                   ),
@@ -241,6 +293,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ],
       ),
     );
+  }
+
+  String _formatDate(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(isoString);
+      const months = [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des'
+      ];
+      return '${date.day} ${months[date.month]} ${date.year}';
+    } catch (e) {
+      return '-';
+    }
   }
 
   Widget _bottomBar() {
@@ -300,7 +377,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.name,
+                      widget.product['name'] ?? 'Produk',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 18,
@@ -312,11 +389,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(14),
-                      child: Image.asset(
-                        widget.image,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
+                      child: widget.product['image'] != null
+                          ? Image.network(
+                              ApiConfig.getImageUrl(widget.product['image']),
+                              height: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 100,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                                );
+                              },
+                            )
+                          : Container(
+                              height: 100,
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                            ),
                     ),
 
                     const SizedBox(height: 20),
@@ -415,7 +505,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 builder: (context) => AlertDialog(
                                   title: const Text("Berhasil!"),
                                   content: Text(
-                                    "${widget.name} × $tempQty ditambahkan ke keranjang.",
+                                    "${widget.product['name'] ?? 'Produk'} × $tempQty ditambahkan ke keranjang.",
                                   ),
                                   actions: [
                                     TextButton(
