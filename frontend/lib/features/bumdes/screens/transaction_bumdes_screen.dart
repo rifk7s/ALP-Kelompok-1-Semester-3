@@ -243,7 +243,8 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   }
 
   void _openChat(Map<String, dynamic> order) async {
-    final recipientId = order['buyerId']?.toString() ?? 'buyer_${order['buyer']}';
+    final recipientId =
+        order['buyerId']?.toString() ?? 'buyer_${order['buyer']}';
     final chatId = await ChatService.getOrCreateChat(
       recipientId: recipientId,
       recipientName: order['buyer'],

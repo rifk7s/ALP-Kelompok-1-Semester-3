@@ -74,20 +74,12 @@ class ChatService {
     if (!chatDoc.exists) {
       await chatRef.set({
         'participants': [userId, recipientId],
-        'participantNames': {
-          userId: senderName,
-          recipientId: recipientName,
-        },
-        'participantImages': {
-          recipientId: recipientImage ?? '',
-        },
+        'participantNames': {userId: senderName, recipientId: recipientName},
+        'participantImages': {recipientId: recipientImage ?? ''},
         'lastMessage': text,
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastSenderId': userId,
-        'unreadCounts': {
-          userId: 0,
-          recipientId: 1,
-        },
+        'unreadCounts': {userId: 0, recipientId: 1},
       });
     } else {
       await chatRef.update({
@@ -136,12 +128,9 @@ class ChatService {
         await batch.commit();
       }
 
-      await _firestore.collection('chats').doc(chatId).set(
-        {
-          'unreadCounts': {userId: 0},
-        },
-        SetOptions(merge: true),
-      );
+      await _firestore.collection('chats').doc(chatId).set({
+        'unreadCounts': {userId: 0},
+      }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('markMessagesAsRead error: $e');
     }
@@ -165,20 +154,12 @@ class ChatService {
 
       await chatRef.set({
         'participants': [userId, recipientId],
-        'participantNames': {
-          userId: senderName,
-          recipientId: recipientName,
-        },
-        'participantImages': {
-          recipientId: recipientImage ?? '',
-        },
+        'participantNames': {userId: senderName, recipientId: recipientName},
+        'participantImages': {recipientId: recipientImage ?? ''},
         'lastMessage': '',
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastSenderId': '',
-        'unreadCounts': {
-          userId: 0,
-          recipientId: 0,
-        },
+        'unreadCounts': {userId: 0, recipientId: 0},
       });
     }
 
@@ -200,11 +181,9 @@ class ChatService {
   }
 
   static Stream<Map<String, bool>> getTypingStream(String chatId) {
-    return _firestore
-        .collection('chats')
-        .doc(chatId)
-        .snapshots()
-        .map((snapshot) {
+    return _firestore.collection('chats').doc(chatId).snapshots().map((
+      snapshot,
+    ) {
       final data = snapshot.data();
       if (data == null || data['typing'] == null) {
         return <String, bool>{};
@@ -217,7 +196,7 @@ class ChatService {
   static bool isOtherUserTyping(Map<String, bool> typingStatus) {
     final userId = getCurrentUserId();
     if (userId == null) return false;
-    
+
     // Check if any other user is typing
     for (final entry in typingStatus.entries) {
       if (entry.key != userId && entry.value == true) {

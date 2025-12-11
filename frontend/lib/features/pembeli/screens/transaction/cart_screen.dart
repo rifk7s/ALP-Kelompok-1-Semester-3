@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 
@@ -47,29 +49,27 @@ class _CartPageState extends State<CartPage> {
     ),
   ];
 
-  List<Map<String, String>> rekomendasi = [
-    {
-      'name': 'Padi Ciherang',
-      'price': 'Rp 8.000/kg',
-      'stock': '150kg',
-      'location': 'Maros',
-      'image': 'assets/images/gabah.jpg',
-    },
-    {
-      'name': 'Jagung Manis',
-      'price': 'Rp 10.000/kg',
-      'stock': '40kg',
-      'location': 'Gowa',
-      'image': 'assets/images/gabah.jpg',
-    },
-    {
-      'name': 'Cabe Merah Segar',
-      'price': 'Rp 25.000/kg',
-      'stock': '30kg',
-      'location': 'Sengka, Gowa',
-      'image': 'assets/images/gabah.jpg',
-    },
-  ];
+  List<Map<String, dynamic>> rekomendasi = [];
+  bool isLoadingRecommendations = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    setState(() => isLoadingRecommendations = true);
+    try {
+      final products = await ProductService.getProducts();
+      setState(() {
+        rekomendasi = products.take(3).toList().cast<Map<String, dynamic>>();
+        isLoadingRecommendations = false;
+      });
+    } catch (e) {
+      setState(() => isLoadingRecommendations = false);
+    }
+  }
 
   bool selectAll = false;
 
@@ -351,14 +351,7 @@ class _CartPageState extends State<CartPage> {
               ),
               itemBuilder: (context, i) {
                 final p = rekomendasi[i];
-                return productCard(
-                  name: p['name']!,
-                  price: p['price']!,
-                  stock: p['stock']!,
-                  location: p['location']!,
-                  image: p['image']!,
-                  context: context,
-                );
+                return productCard(product: p, context: context);
               },
             ),
 
@@ -460,11 +453,7 @@ class _CartPageState extends State<CartPage> {
 }
 
 Widget productCard({
-  required String name,
-  required String price,
-  required String stock,
-  required String location,
-  required String image,
+  required Map<String, dynamic> product,
   BuildContext? context,
 }) {
   return GestureDetector(
@@ -473,18 +462,7 @@ Widget productCard({
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ProductDetailPage(
-              name: name,
-              price: price,
-              stock: stock,
-              image: image,
-              sellerName: "BUMDes",
-              location: location,
-              category: "Produk",
-              variety: "Varietas",
-              harvestDate: "20 November 2025",
-              description: "Produk rekomendasi PanenKi.",
-            ),
+            builder: (_) => ProductDetailPage(product: product),
           ),
         );
       }
@@ -506,12 +484,33 @@ Widget productCard({
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: Image.asset(
-              image,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: product['image'] != null
+                ? Image.network(
+                    ApiConfig.getImageUrl(product['image']),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 120,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    height: 120,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
           Expanded(
             child: Padding(
@@ -521,7 +520,7 @@ Widget productCard({
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    name,
+                    product['name'] ?? 'Produk',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -531,7 +530,11 @@ Widget productCard({
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    price,
+                    NumberFormat.currency(
+                      locale: 'id',
+                      symbol: 'Rp ',
+                      decimalDigits: 0,
+                    ).format(product['price'] ?? 0),
                     style: const TextStyle(
                       color: AppColors.danger,
                       fontWeight: FontWeight.bold,
@@ -539,26 +542,26 @@ Widget productCard({
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Stok: $stock",
+                    "Stok: ${product['stock_kg'] ?? 0}kg",
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const Spacer(),
-                  Row(
+                  const Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on_outlined,
                         size: 14,
                         color: AppColors.textSecondary,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          location,
+                          "Sengka, Gowa",
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),

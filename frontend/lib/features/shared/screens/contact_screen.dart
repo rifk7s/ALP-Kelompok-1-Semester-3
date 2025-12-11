@@ -46,7 +46,9 @@ class _ContactPageState extends State<ContactPage> {
     if (timestamp == null) return '';
     final date = timestamp.toDate();
     final now = DateTime.now();
-    if (date.day == now.day && date.month == now.month && date.year == now.year) {
+    if (date.day == now.day &&
+        date.month == now.month &&
+        date.year == now.year) {
       return DateFormat('HH.mm').format(date);
     }
     return DateFormat('dd/MM').format(date);
@@ -119,7 +121,8 @@ class _ContactPageState extends State<ContactPage> {
                 ),
                 child: TextField(
                   controller: _searchController,
-                  onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                  onChanged: (value) =>
+                      setState(() => _searchQuery = value.toLowerCase()),
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
                     hintText: "Cari",
@@ -142,138 +145,170 @@ class _ContactPageState extends State<ContactPage> {
               child: !_isInitialized
                   ? const Center(child: CircularProgressIndicator())
                   : _currentUserId == null
-                      ? const Center(
-                          child: Text(
-                            'Silakan login untuk melihat pesan',
-                            style: TextStyle(color: AppColors.textMuted),
+                  ? const Center(
+                      child: Text(
+                        'Silakan login untuk melihat pesan',
+                        style: TextStyle(color: AppColors.textMuted),
+                      ),
+                    )
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: ChatService.getChatRooms(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Belum ada chat',
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
+                          );
+                        }
+
+                        final chats = snapshot.data!.docs.where((doc) {
+                          if (_searchQuery.isEmpty) return true;
+                          final data = doc.data() as Map<String, dynamic>;
+                          final names =
+                              data['participantNames']
+                                  as Map<String, dynamic>? ??
+                              {};
+                          final otherName = names.entries
+                              .firstWhere(
+                                (e) => e.key != _currentUserId,
+                                orElse: () => MapEntry('', ''),
+                              )
+                              .value
+                              .toString()
+                              .toLowerCase();
+                          return otherName.contains(_searchQuery);
+                        }).toList();
+
+                        if (chats.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Tidak ada chat ditemukan',
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          itemCount: chats.length,
+                          separatorBuilder: (_, __) => const Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: AppColors.divider,
                           ),
-                        )
-                      : StreamBuilder<QuerySnapshot>(
-                          stream: ChatService.getChatRooms(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
+                          itemBuilder: (context, index) {
+                            final doc = chats[index];
+                            final data = doc.data() as Map<String, dynamic>;
+                            final names =
+                                data['participantNames']
+                                    as Map<String, dynamic>? ??
+                                {};
+                            final images =
+                                data['participantImages']
+                                    as Map<String, dynamic>? ??
+                                {};
+                            final participants = List<String>.from(
+                              data['participants'] ?? [],
+                            );
 
-                            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                              return const Center(
-                                child: Text(
-                                  'Belum ada chat',
-                                  style: TextStyle(color: AppColors.textMuted),
-                                ),
-                              );
-                            }
+                            final otherUserId = participants.firstWhere(
+                              (id) => id != _currentUserId,
+                              orElse: () => '',
+                            );
+                            final otherName = names[otherUserId] ?? 'User';
+                            final otherImage = images[otherUserId] ?? '';
+                            final lastMessage = data['lastMessage'] ?? '';
+                            final lastTime =
+                                data['lastMessageTime'] as Timestamp?;
+                            final unreadCounts =
+                                (data['unreadCounts']
+                                    as Map<String, dynamic>? ??
+                                {});
+                            final unread =
+                                (unreadCounts[_currentUserId] ?? 0) as int;
 
-                            final chats = snapshot.data!.docs.where((doc) {
-                              if (_searchQuery.isEmpty) return true;
-                              final data = doc.data() as Map<String, dynamic>;
-                              final names = data['participantNames'] as Map<String, dynamic>? ?? {};
-                              final otherName = names.entries
-                                  .firstWhere((e) => e.key != _currentUserId, orElse: () => MapEntry('', ''))
-                                  .value
-                                  .toString()
-                                  .toLowerCase();
-                              return otherName.contains(_searchQuery);
-                            }).toList();
-
-                            if (chats.isEmpty) {
-                              return const Center(
-                                child: Text(
-                                  'Tidak ada chat ditemukan',
-                                  style: TextStyle(color: AppColors.textMuted),
-                                ),
-                              );
-                            }
-
-                            return ListView.separated(
-                              itemCount: chats.length,
-                              separatorBuilder: (_, __) => const Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: AppColors.divider,
+                            return ListTile(
+                              leading: CircleAvatar(
+                                radius: 28,
+                                backgroundImage:
+                                    otherImage.isNotEmpty &&
+                                        !otherImage.startsWith('assets/')
+                                    ? NetworkImage(otherImage)
+                                    : const AssetImage('assets/images/logo.png')
+                                          as ImageProvider,
                               ),
-                              itemBuilder: (context, index) {
-                                final doc = chats[index];
-                                final data = doc.data() as Map<String, dynamic>;
-                                final names = data['participantNames'] as Map<String, dynamic>? ?? {};
-                                final images = data['participantImages'] as Map<String, dynamic>? ?? {};
-                                final participants = List<String>.from(data['participants'] ?? []);
-                                
-                                final otherUserId = participants.firstWhere(
-                                  (id) => id != _currentUserId,
-                                  orElse: () => '',
-                                );
-                                final otherName = names[otherUserId] ?? 'User';
-                                final otherImage = images[otherUserId] ?? '';
-                                final lastMessage = data['lastMessage'] ?? '';
-                                final lastTime = data['lastMessageTime'] as Timestamp?;
-                                final unreadCounts = (data['unreadCounts'] as Map<String, dynamic>? ?? {});
-                                final unread = (unreadCounts[_currentUserId] ?? 0) as int;
-
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    radius: 28,
-                                    backgroundImage: otherImage.isNotEmpty && !otherImage.startsWith('assets/')
-                                        ? NetworkImage(otherImage)
-                                        : const AssetImage('assets/images/logo.png') as ImageProvider,
+                              title: Text(
+                                otherName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                lastMessage,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    _formatTime(lastTime),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textMuted,
+                                    ),
                                   ),
-                                  title: Text(
-                                    otherName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text(
-                                    lastMessage,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        _formatTime(lastTime),
+                                  if (unread > 0)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        unread > 99 ? '99+' : unread.toString(),
                                         style: const TextStyle(
+                                          color: Colors.white,
                                           fontSize: 12,
-                                          color: AppColors.textMuted,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      if (unread > 0)
-                                        Container(
-                                          margin: const EdgeInsets.only(top: 6),
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            unread > 99 ? '99+' : unread.toString(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
+                                    ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatDetailPage(
+                                      chatId: doc.id,
+                                      name: otherName,
+                                      image: otherImage.isNotEmpty
+                                          ? otherImage
+                                          : 'assets/images/logo.png',
+                                      recipientId: otherUserId,
+                                    ),
                                   ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatDetailPage(
-                                          chatId: doc.id,
-                                          name: otherName,
-                                          image: otherImage.isNotEmpty ? otherImage : 'assets/images/logo.png',
-                                          recipientId: otherUserId,
-                                        ),
-                                      ),
-                                    );
-                                  },
                                 );
                               },
                             );
                           },
-                        ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
