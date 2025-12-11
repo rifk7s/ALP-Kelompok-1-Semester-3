@@ -298,30 +298,6 @@ class _HppPageState extends State<HppPage> {
     );
   }
 
-  Widget _buildItemInfo({required String text}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildIconBox(),
-          const SizedBox(width: 14),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
-        ],
-      ),
-    );
-  }
-
   Widget _buildIconBox() {
     return Container(
       width: 50,
