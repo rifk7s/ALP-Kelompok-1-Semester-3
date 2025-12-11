@@ -45,13 +45,18 @@ class AuthService {
         body['email'] = email;
       }
 
+      final url = '${ApiConfig.baseUrl}/auth/register';
+      print('📱 Register: Attempting to connect to $url');
+      
       final response = await http
           .post(
-            Uri.parse('${ApiConfig.baseUrl}/auth/register'),
+            Uri.parse(url),
             headers: ApiConfig.headers(),
             body: jsonEncode(body),
           )
           .timeout(_timeout);
+
+      print('✅ Register: Got response with status ${response.statusCode}');
 
       final data = jsonDecode(response.body);
 
@@ -74,8 +79,10 @@ class AuthService {
         );
       }
     } on TimeoutException {
+      print('❌ Register: Connection timeout - Backend not reachable at ${ApiConfig.baseUrl}');
       return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
     } catch (e) {
+      print('❌ Register: Connection failed - $e');
       return AuthResult(success: false, message: 'Koneksi gagal: $e');
     }
   }
