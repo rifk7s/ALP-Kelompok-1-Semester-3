@@ -15,12 +15,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
-  List<String> searchHistory = [
-    "Gabah Kering",
-    "Jagung Pipilan",
-    "Padi Ciherang",
-    "Cabe Merah",
-  ];
+  List<String> searchHistory = [];
 
   List<String> filteredHistory = [];
   List<Map<String, dynamic>> searchResults = [];
@@ -59,27 +54,50 @@ class _SearchPageState extends State<SearchPage> {
       if (query.isEmpty) {
         searchResults = [];
       } else {
+        // Search in product name, category, and variety
         searchResults = _allProducts
-            .where(
-              (p) => (p['name'] as String).toLowerCase().contains(
-                query.toLowerCase(),
-              ),
-            )
+            .where((p) {
+              final name = (p['name'] as String? ?? '').toLowerCase();
+              final category = (p['category']?['name'] as String? ?? '').toLowerCase();
+              final variety = (p['variety'] as String? ?? '').toLowerCase();
+              final searchLower = query.toLowerCase();
+              
+              return name.contains(searchLower) ||
+                     category.contains(searchLower) ||
+                     variety.contains(searchLower);
+            })
             .toList();
       }
     });
   }
 
-  void _addToHistory(String query) {
+  void _executeSearch(String query) {
     if (query.isEmpty) return;
-    if (!searchHistory.contains(query)) {
-      searchHistory.insert(0, query);
-    } else {
-      searchHistory.remove(query);
-      searchHistory.insert(0, query);
-    }
-    _controller.clear();
-    _onSearchChanged('');
+    
+    setState(() {
+      // Add to history
+      if (!searchHistory.contains(query)) {
+        searchHistory.insert(0, query);
+      } else {
+        searchHistory.remove(query);
+        searchHistory.insert(0, query);
+      }
+    });
+    
+    // Perform search
+    _onSearchChanged(query);
+  }
+
+  void _selectHistoryItem(String item) {
+    setState(() {
+      _controller.text = item;
+      // Move to top of history
+      if (searchHistory.contains(item)) {
+        searchHistory.remove(item);
+        searchHistory.insert(0, item);
+      }
+    });
+    _onSearchChanged(item);
   }
 
   @override
@@ -129,7 +147,7 @@ class _SearchPageState extends State<SearchPage> {
                             controller: _controller,
                             autofocus: true,
                             onChanged: _onSearchChanged,
-                            onSubmitted: _addToHistory,
+                            onSubmitted: _executeSearch,
                             decoration: const InputDecoration(
                               hintText: "Cari produk...",
                               hintStyle: TextStyle(
@@ -231,8 +249,7 @@ class _SearchPageState extends State<SearchPage> {
                                   },
                                 ),
                                 onTap: () {
-                                  _addToHistory(item);
-                                  _onSearchChanged(item);
+                                  _selectHistoryItem(item);
                                 },
                               );
                             },
@@ -292,6 +309,7 @@ Widget productCard({
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         height: 120,
+                        width: double.infinity,
                         color: Colors.grey[300],
                         child: const Icon(
                           Icons.image,
@@ -303,6 +321,7 @@ Widget productCard({
                   )
                 : Container(
                     height: 120,
+                    width: double.infinity,
                     color: Colors.grey[300],
                     child: const Icon(
                       Icons.image,

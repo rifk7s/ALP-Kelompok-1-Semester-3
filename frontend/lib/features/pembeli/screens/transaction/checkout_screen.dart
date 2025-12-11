@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/services/profile_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
-import 'cart_screen.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final List<CartItem> cart;
+  final List<Map<String, dynamic>> cart;
   final int total;
 
   const CheckoutPage({super.key, required this.cart, required this.total});
@@ -15,7 +18,10 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  String selectedAddress = "Jl. Mawar No. 12, Makassar";
+  Profile? userProfile;
+  bool isLoadingProfile = true;
+  bool isCreatingOrder = false;
+  
   String paymentMethod = "Transfer Bank (BCA)";
   int ongkir = 15000;
   int biayaLayanan = 2500;
@@ -29,10 +35,76 @@ class _CheckoutPageState extends State<CheckoutPage> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    setState(() => isLoadingProfile = true);
+    try {
+      final token = await StorageService.getToken();
+      final profile = await ProfileService().fetchProfile(token: token);
+      setState(() {
+        userProfile = profile;
+        isLoadingProfile = false;
+      });
+    } catch (e) {
+      setState(() => isLoadingProfile = false);
+    }
+  }
+
+  String _formatPhoneNumber(String? phone) {
+    if (phone == null || phone.isEmpty) return '-';
+    // Format: 0812-3456-7890
+    if (phone.length >= 4) {
+      return phone.substring(0, 4) + '-' + phone.substring(4);
+    }
+    return phone;
+  }
+
+  Future<void> _createOrder() async {
+    if (isCreatingOrder) return;
+    
+    setState(() => isCreatingOrder = true);
+    
+    try {
+      final order = await OrderService.createOrder(
+        shippingAddress: userProfile?.address,
+      );
+      
+      if (order != null && mounted) {
+        // Navigate to waiting payment screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => WaitingPaymentPage(
+              orderNumber: order['order_number'] ?? '',
+              totalPayment: order['total'] ?? 0,
+            ),
+          ),
+        );
+      } else if (mounted) {
+        SnackBarHelper.showError(context, 'Gagal membuat pesanan');
+        setState(() => isCreatingOrder = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBarHelper.showError(context, 'Terjadi kesalahan');
+        setState(() => isCreatingOrder = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     int subtotal = widget.cart.fold(
       0,
-      (t, item) => t + (item.pricePerKg * item.qty),
+      (t, item) {
+        final qty = double.parse(item['quantity_kg'].toString());
+        final price = double.parse(item['product']['price_per_kg'].toString());
+        return t + (qty * price).toInt();
+      },
     );
 
     int totalAkhir = subtotal + ongkir + biayaLayanan;
@@ -80,39 +152,38 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       const SizedBox(width: 14),
 
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  "Vivian Wijaya",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                        child: isLoadingProfile
+                            ? const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CircularProgressIndicator(),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userProfile?.name ?? 'User',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: const Text("Ubah"),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(height: 4),
 
-                            Text(
-                              "0812-3456-7890",
-                              style: TextStyle(color: AppColors.greyDark),
-                            ),
+                                  Text(
+                                    _formatPhoneNumber(userProfile?.phone),
+                                    style: TextStyle(color: AppColors.greyDark),
+                                  ),
 
-                            const SizedBox(height: 8),
+                                  const SizedBox(height: 8),
 
-                            Text(
-                              selectedAddress,
-                              style: const TextStyle(height: 1.4),
-                            ),
-                          ],
-                        ),
+                                  Text(
+                                    userProfile?.address ?? 'Alamat belum diatur',
+                                    style: const TextStyle(height: 1.4),
+                                  ),
+                                ],
+                              ),
                       ),
                     ],
                   ),
@@ -130,54 +201,73 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            item.image,
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                          ),
+                        child: () {
+                          final product = item['product'];
+                          final imagePath = product['product_images'] != null &&
+                                  (product['product_images'] as List).isNotEmpty
+                              ? product['product_images'][0]['image_path']
+                              : null;
+                          
+                          return imagePath != null
+                              ? Image.network(
+                                  'http://localhost:8000/storage/$imagePath',
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 70,
+                                      height: 70,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.image, size: 30),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  width: 70,
+                                  height: 70,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image, size: 30),
+                                );
+                        }(),
+                      ),
+                      const SizedBox(width: 14),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['product']['name'] ?? 'Produk',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              "Jumlah: x${double.parse(item['quantity_kg'].toString()).toStringAsFixed(0)}",
+                              style: TextStyle(color: AppColors.grey600),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Text(
+                              "Harga: ${rupiah.format(double.parse(item['product']['price_per_kg'].toString()).toInt())} /kg",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.greyDark,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
+                      ),
 
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "Jumlah: x${item.qty}",
-                                style: TextStyle(color: AppColors.grey600),
-                              ),
-
-                              const SizedBox(height: 6),
-
-                              Text(
-                                "Harga: ${rupiah.format(item.pricePerKg)} /kg",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.greyDark,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        Text(
-                          rupiah.format(item.pricePerKg * item.qty),
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
+                      Text(
+                        rupiah.format((double.parse(item['quantity_kg'].toString()) * 
+                            double.parse(item['product']['price_per_kg'].toString())).toInt()),
                         ),
                       ],
                     ),
@@ -223,8 +313,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ],
                         ),
                       ),
-
-                      TextButton(onPressed: () {}, child: const Text("Ubah")),
                     ],
                   ),
                 ),
