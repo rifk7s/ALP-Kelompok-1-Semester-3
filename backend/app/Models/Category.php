@@ -23,4 +23,9 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function hppPrices(): HasMany
+    {
+        return $this->hasMany(HppPrice::class);
+    }
 }

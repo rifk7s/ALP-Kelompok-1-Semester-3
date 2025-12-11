@@ -104,3 +104,6 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/orders/{order}', [AdminController::class, 'show']);
     Route::post('/orders/{order}/confirm-payment', [AdminController::class, 'confirmPayment']);
 });
+
+// HPP Panel Routes for testing without auth
+Route::apiResource('/prices', HppPriceController::class);
