@@ -14,6 +14,7 @@ use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
 use App\Http\Controllers\PetaniDataController;
 use App\Http\Controllers\HppPriceController;
+use App\Http\Controllers\AdminController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -93,4 +94,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+});
+
+/*
+    Admin Routes (BUMDes only)
+*/
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/orders', [AdminController::class, 'index']);
+    Route::get('/orders/{order}', [AdminController::class, 'show']);
+    Route::post('/orders/{order}/confirm-payment', [AdminController::class, 'confirmPayment']);
 });

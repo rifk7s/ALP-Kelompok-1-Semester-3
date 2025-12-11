@@ -19,8 +19,11 @@ class AdminController extends Controller
             ], 403);
         }
 
+        // Filter by status if provided, default to pending_payment
+        $status = $request->input('status', 'pending_payment');
+        
         $orders = Order::with(['buyer', 'orderItems.product'])
-                    ->where('status', 'pending_payment')
+                    ->where('status', $status)
                     ->orderBy('created_at', 'desc')
                     ->get();
 
@@ -30,7 +33,7 @@ class AdminController extends Controller
     /**
      * Confirm order payment
      */
-    public function confirmOrderPayment(Request $request, Order $order)
+    public function confirmPayment(Request $request, Order $order)
     {
         // Check if user is bumdes
         if ($request->user()->role !== 'bumdes') {
@@ -60,10 +63,19 @@ class AdminController extends Controller
     /**
      * Display the specified resource.
      */
-    // public function show(string $id)
-    // {
-    //     //
-    // }
+    public function show(Request $request, Order $order)
+    {
+        // Check if user is bumdes
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $order->load(['orderItems.product', 'payments']);
+
+        return response()->json($order);
+    }
 
     /**
      * Update the specified resource in storage.
