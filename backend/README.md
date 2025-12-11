@@ -7,6 +7,46 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Setup Instructions
+
+After cloning the repository, follow these steps to set up the backend:
+
+1. Install dependencies:
+   ```bash
+   composer install
+   ```
+
+2. Copy environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+
+4. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+
+5. Seed the database with initial data:
+   ```bash
+   php artisan db:seed --class=CategorySeeder
+   php artisan db:seed --class=HppPriceSeeder
+   ```
+
+6. Create storage symlink:
+   ```bash
+   php artisan storage:link
+   ```
+
+7. Start the development server:
+   ```bash
+   php artisan serve --host=0.0.0.0
+   ```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
