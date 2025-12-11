@@ -7,9 +7,7 @@ class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
 
   Future<void> _contactCS() async {
-    final uri = Uri.parse(
-      'mailto:support@panenki.com?subject=Bantuan%20PanenKi',
-    );
+    final uri = Uri.parse('mailto:support@panenki.com?subject=Bantuan%20PanenKi\'');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
