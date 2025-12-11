@@ -53,8 +53,6 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
           throw Exception('Token tidak ditemukan. Silakan login kembali.');
         }
 
-        print('🔑 Token: ${token.substring(0, 20)}...');
-
         // Prepare data
         final data = {
           'name': nama,
@@ -75,6 +73,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         });
 
         // Show success dialog
+        if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -83,7 +82,9 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
             actions: [
               TextButton(
                 onPressed: () {
+                  if (!context.mounted) return;
                   Navigator.pop(context); // Close dialog
+                  if (!context.mounted) return;
                   Navigator.pop(
                     context,
                     true,
@@ -101,6 +102,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
           _isLoading = false;
         });
 
+        if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -108,7 +110,10 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
             content: Text(e.toString().replaceAll('Exception: ', '')),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                },
                 child: const Text("OK"),
               ),
             ],

@@ -162,18 +162,33 @@ class ProductService {
         request.fields['_method'] = 'PUT';
 
         // Add product data
-        if (name != null) request.fields['name'] = name;
-        if (categoryId != null)
+        if (name != null) {
+          request.fields['name'] = name;
+        }
+        if (categoryId != null) {
           request.fields['category_id'] = categoryId.toString();
-        if (variety != null) request.fields['variety'] = variety;
-        if (harvestDate != null) request.fields['harvest_date'] = harvestDate;
-        if (storageDays != null)
+        }
+        if (variety != null) {
+          request.fields['variety'] = variety;
+        }
+        if (harvestDate != null) {
+          request.fields['harvest_date'] = harvestDate;
+        }
+        if (storageDays != null) {
           request.fields['storage_days'] = storageDays.toString();
-        if (pricePerKg != null)
+        }
+        if (pricePerKg != null) {
           request.fields['price_per_kg'] = pricePerKg.toString();
-        if (stockKg != null) request.fields['stock_kg'] = stockKg.toString();
-        if (description != null) request.fields['description'] = description;
-        if (status != null) request.fields['status'] = status;
+        }
+        if (stockKg != null) {
+          request.fields['stock_kg'] = stockKg.toString();
+        }
+        if (description != null) {
+          request.fields['description'] = description;
+        }
+        if (status != null) {
+          request.fields['status'] = status;
+        }
 
         // Add petani contributors
         if (petaniContributors != null && petaniContributors.isNotEmpty) {

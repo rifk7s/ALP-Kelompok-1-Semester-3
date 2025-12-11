@@ -12,7 +12,7 @@ class ApiConfig {
 
   static String get baseUrl {
     final url = Platform.isAndroid ? _androidEmulatorUrl : _iosDeviceUrl;
-    print('🌐 API Config: Using base URL: $url');
+
     return url;
   }
 

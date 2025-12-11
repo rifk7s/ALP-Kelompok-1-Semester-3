@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
@@ -49,9 +50,7 @@ class _HomePageState extends State<HomePage> {
         isLoadingCategories = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading categories: $e')));
+        SnackBarHelper.showError(context, 'Error loading categories: $e');
       }
     }
   }
@@ -79,9 +78,7 @@ class _HomePageState extends State<HomePage> {
         isLoadingProducts = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading products: $e')));
+        SnackBarHelper.showError(context, 'Error loading products: $e');
       }
     }
   }

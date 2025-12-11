@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
@@ -51,6 +52,7 @@ class _CartPageState extends State<CartPage> {
 
   List<Map<String, dynamic>> rekomendasi = [];
   bool isLoadingRecommendations = true;
+  int _lastQtyChangeClick = 0;
 
   @override
   void initState() {
@@ -89,6 +91,13 @@ class _CartPageState extends State<CartPage> {
   }
 
   void changeQty(int index, int newQty) {
+    // Debounce: Prevent spam clicks (300ms cooldown)
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastQtyChangeClick < 300) {
+      return; // Ignore rapid clicks
+    }
+    _lastQtyChangeClick = now;
+
     setState(() {
       if (newQty <= 0) {
         cart.removeAt(index);
@@ -103,7 +112,7 @@ class _CartPageState extends State<CartPage> {
   void _showQtyInputDialog(int index, int currentQty) {
     final controller = TextEditingController(text: currentQty.toString());
 
-    showDialog(
+    DialogManager.show(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -484,33 +493,43 @@ Widget productCard({
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: product['image'] != null
-                ? Image.network(
-                    ApiConfig.getImageUrl(product['image']),
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 120,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.image,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
-                  )
-                : Container(
-                    height: 120,
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.image,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  ),
+            child: () {
+              // Get image from product_images array
+              final imagePath =
+                  product['product_images'] != null &&
+                      (product['product_images'] as List).isNotEmpty
+                  ? product['product_images'][0]['image_path']
+                  : null;
+              final imageUrl = ApiConfig.getImageUrl(imagePath);
+
+              return imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 120,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.image,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      height: 120,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.image,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    );
+            }(),
           ),
           Expanded(
             child: Padding(
@@ -534,10 +553,24 @@ Widget productCard({
                       locale: 'id',
                       symbol: 'Rp ',
                       decimalDigits: 0,
-                    ).format(product['price'] ?? 0),
+                    ).format(
+                      (product['price_per_kg'] != null
+                          ? double.parse(
+                              product['price_per_kg'].toString(),
+                            ).toInt()
+                          : 0),
+                    ),
                     style: const TextStyle(
                       color: AppColors.danger,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    "per kg",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
