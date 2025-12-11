@@ -2,47 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Upload payment proof for an order
      */
-    public function index()
+    public function uploadProof(Request $request, $orderId)
     {
-        //
-    }
+        $request->validate([
+            'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:5120', // 5MB max
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // Find the order and verify it belongs to the user
+        $order = Order::where('id', $orderId)
+            ->where('buyer_id', auth()->id())
+            ->firstOrFail();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        // Find the payment record for this order
+        $payment = Payment::where('order_id', $order->id)->firstOrFail();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Delete old image if exists
+        if ($payment->proof_image && Storage::disk('public')->exists($payment->proof_image)) {
+            Storage::disk('public')->delete($payment->proof_image);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        // Store the new image
+        $imagePath = $request->file('proof_image')->store('payment_proofs', 'public');
+
+        // Update payment record
+        $payment->update([
+            'proof_image' => $imagePath,
+            'status' => 'pending', // Keep as pending until admin confirms
+        ]);
+
+        return response()->json([
+            'message' => 'Payment proof uploaded successfully',
+            'payment' => $payment,
+        ], 200);
     }
 }

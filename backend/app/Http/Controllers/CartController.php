@@ -15,7 +15,7 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $cart = Cart::where('user_id', $request->user()->id)
-                    ->with('product')
+                    ->with(['product.productImages', 'product.category'])
                     ->get();
 
         $subtotal = $cart->sum(function ($item) {
@@ -63,7 +63,7 @@ class CartController extends Controller
             ]);
         }
 
-        $cart->load('product');
+        $cart->load(['product.productImages', 'product.category']);
 
         return response()->json([
             'message' => 'Item added to cart successfully!',
@@ -95,7 +95,7 @@ class CartController extends Controller
             'quantity_kg' => $request->quantity_kg,
         ]);
 
-        $cart->load('product');
+        $cart->load(['product.productImages', 'product.category']);
 
         return response()->json([
             'message' => 'Cart item updated successfully!',
