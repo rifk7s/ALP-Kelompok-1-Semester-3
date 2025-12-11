@@ -82,3 +82,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('cart/{cart}', [CartController::class, 'destroy']);
     Route::delete('cart', [CartController::class, 'clear']);
 });
+
+Route::apiResource('/prices', HppPriceController::class);
