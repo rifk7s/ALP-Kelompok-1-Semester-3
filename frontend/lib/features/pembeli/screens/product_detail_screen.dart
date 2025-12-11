@@ -25,7 +25,6 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int tempQty = 1;
-  int _lastQtyChangeClick = 0;
 
   int get parsedPrice {
     final pricePerKg = double.parse(widget.product['price_per_kg'].toString());
@@ -80,6 +79,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
               const SizedBox(height: 20),
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: AppColors.white,
@@ -100,17 +100,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 100,
-                      child: SingleChildScrollView(
-                        child: Text(
-                          widget.product['description'] ?? '-',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            height: 1.5,
-                            color: AppColors.textLight,
-                          ),
-                          textAlign: TextAlign.justify,
+                      width: double.infinity,
+                      child: Text(
+                        widget.product['description'] ?? 'Tidak ada informasi tambahan.',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.6,
+                          color: AppColors.textLight,
                         ),
+                        textAlign: TextAlign.justify,
                       ),
                     ),
                   ],
@@ -142,7 +140,45 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
           ),
         ),
-        const SizedBox(width: 40),
+        // Icon Keranjang seperti Shopee
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                );
+              },
+            ),
+            // Badge counter
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: const Text(
+                  '2',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -397,39 +433,51 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(14),
-                      child: widget.product['image'] != null
-                          ? Image.network(
-                              ApiConfig.getImageUrl(widget.product['image']),
-                              height: 100,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  height: 100,
-                                  color: Colors.grey[300],
-                                  child: const Icon(
-                                    Icons.image,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  ),
-                                );
-                              },
-                            )
-                          : Container(
-                              height: 100,
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.image,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                            ),
+                      child: () {
+                        // Get image from product_images like main detail page
+                        final imagePath = widget.product['product_images'] != null &&
+                            (widget.product['product_images'] as List).isNotEmpty
+                            ? widget.product['product_images'][0]['image_path']
+                            : null;
+                        final imageUrl = ApiConfig.getImageUrl(imagePath);
+                        
+                        return imageUrl.isNotEmpty
+                            ? Image.network(
+                                imageUrl,
+                                height: 180,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 180,
+                                    width: double.infinity,
+                                    color: Colors.grey[300],
+                                    child: const Icon(
+                                      Icons.image,
+                                      size: 60,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
+                              )
+                            : Container(
+                                height: 180,
+                                width: double.infinity,
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.image,
+                                  size: 60,
+                                  color: Colors.grey,
+                                ),
+                              );
+                      }(),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -453,22 +501,42 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
+                              horizontal: 24,
+                              vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.3),
+                                color: AppColors.primary.withValues(alpha: 0.5),
+                                width: 2,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: Text(
-                              tempQty.toString(),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  tempQty.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.edit,
+                                  size: 16,
+                                  color: AppColors.primary.withValues(alpha: 0.7),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -527,24 +595,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () async {
+                            onPressed: () {
                               Navigator.pop(context);
-
-                              await DialogManager.showAlert(
-                                context: context,
-                                title: "Berhasil!",
-                                content: "${widget.product['name'] ?? 'Produk'} × $tempQty ditambahkan ke keranjang.",
-                                confirmText: "Lihat Keranjang",
-                                cancelText: "OK",
-                                onConfirm: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const CartPage(),
-                                    ),
-                                  );
-                                },
-                              );
+                              
+                              // Show Shopee-style floating overlay
+                              _showAddedToCartOverlay(context, tempQty);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -581,7 +636,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   ) {
     final controller = TextEditingController(text: currentQty.toString());
 
-    DialogManager.show(
+    // Use showDialog directly for nested dialog (not DialogManager)
+    showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -662,6 +718,72 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Icon(icon, color: AppColors.white, size: 20),
       ),
     );
+  }
+
+  // Shopee-style floating overlay
+  void _showAddedToCartOverlay(BuildContext context, int qty) {
+    final overlay = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height * 0.35,
+        left: MediaQuery.of(context).size.width * 0.25,
+        right: MediaQuery.of(context).size.width * 0.25,
+        child: Material(
+          color: Colors.transparent,
+          child: TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween<double>(begin: 0, end: 1),
+            builder: (context, double value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.scale(
+                  scale: value,
+                  child: child,
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.green,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Ditambahkan ke keranjang",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlay);
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      overlay.remove();
+    });
   }
 }
 
