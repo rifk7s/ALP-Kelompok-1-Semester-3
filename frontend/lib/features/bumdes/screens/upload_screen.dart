@@ -821,7 +821,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                         const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

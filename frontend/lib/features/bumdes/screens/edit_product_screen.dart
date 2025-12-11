@@ -994,7 +994,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                         const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
