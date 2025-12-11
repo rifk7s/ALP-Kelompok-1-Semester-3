@@ -5,6 +5,16 @@ import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/category_service.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:intl/intl.dart';
+
+final NumberFormat rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: "Rp ",
+  decimalDigits: 0,
+);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,137 +24,66 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _selectedCategory = '';
+  int? _selectedCategoryId;
+  List<dynamic> categories = [];
+  List<dynamic> products = [];
+  bool isLoadingCategories = true;
+  bool isLoadingProducts = true;
 
-  final Map<String, List<Map<String, String>>> _productsByCategory = {
-    'Buah': [
-      {
-        'name': 'Apel Segar',
-        'price': 'Rp 15.000/kg',
-        'stock': '50kg',
-        'location': 'Sengka, Gowa',
-      },
-      {
-        'name': 'Mangga Harum',
-        'price': 'Rp 12.000/kg',
-        'stock': '75kg',
-        'location': 'Makassar',
-      },
-    ],
-    'Gabah': [
-      {
-        'name': 'Gabah Kering Giling',
-        'price': 'Rp 6.500/kg',
-        'stock': '100kg',
-        'location': 'Sengka, Gowa',
-      },
-      {
-        'name': 'Gabah Basah',
-        'price': 'Rp 5.500/kg',
-        'stock': '120kg',
-        'location': 'Bone',
-      },
-    ],
-    'Sayur': [
-      {
-        'name': 'Tomat Segar',
-        'price': 'Rp 8.000/kg',
-        'stock': '60kg',
-        'location': 'Maros',
-      },
-      {
-        'name': 'Kubis Hijau',
-        'price': 'Rp 5.000/kg',
-        'stock': '90kg',
-        'location': 'Takalar',
-      },
-    ],
-    'Jagung': [
-      {
-        'name': 'Jagung Manis',
-        'price': 'Rp 10.000/kg',
-        'stock': '40kg',
-        'location': 'Sengka, Gowa',
-      },
-      {
-        'name': 'Jagung Pakan',
-        'price': 'Rp 7.000/kg',
-        'stock': '200kg',
-        'location': 'Wajo',
-      },
-    ],
-    'Padi': [
-      {
-        'name': 'Padi Ciherang',
-        'price': 'Rp 8.000/kg',
-        'stock': '150kg',
-        'location': 'Maros',
-      },
-      {
-        'name': 'Padi Cisadane',
-        'price': 'Rp 7.500/kg',
-        'stock': '180kg',
-        'location': 'Takalar',
-      },
-    ],
-    'Cabe': [
-      {
-        'name': 'Cabe Merah Segar',
-        'price': 'Rp 25.000/kg',
-        'stock': '30kg',
-        'location': 'Sengka, Gowa',
-      },
-      {
-        'name': 'Cabe Rawit',
-        'price': 'Rp 35.000/kg',
-        'stock': '20kg',
-        'location': 'Gowa',
-      },
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    loadCategories();
+    loadProducts();
+  }
 
-  List<Map<String, String>> get _filteredProducts {
-    if (_selectedCategory.isEmpty) {
-      return [
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-        {
-          'name': 'Gabah Kering Giling',
-          'price': 'Rp 6.500/kg',
-          'stock': '100kg',
-          'location': 'sengka, Gowa',
-        },
-      ];
+  Future<void> loadCategories() async {
+    try {
+      final data = await CategoryService.getCategories();
+      setState(() {
+        categories = data;
+        isLoadingCategories = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingCategories = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading categories: $e')));
+      }
     }
-    return _productsByCategory[_selectedCategory] ?? [];
+  }
+
+  Future<void> loadProducts({int? categoryId}) async {
+    setState(() {
+      isLoadingProducts = true;
+    });
+    try {
+      final data = await ProductService.getProducts(categoryId: categoryId);
+
+      // Sort: active products first, sold_out at bottom
+      data.sort((a, b) {
+        if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
+        if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
+        return 0;
+      });
+
+      setState(() {
+        products = data;
+        isLoadingProducts = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingProducts = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading products: $e')));
+      }
+    }
   }
 
   @override
@@ -172,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(width: 10),
                         const Text(
-                          "PanenKi",
+                          "PanenKi'",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -288,12 +227,13 @@ class _HomePageState extends State<HomePage> {
                         fontSize: 17,
                       ),
                     ),
-                    if (_selectedCategory.isNotEmpty)
+                    if (_selectedCategoryId != null)
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedCategory = '';
+                            _selectedCategoryId = null;
                           });
+                          loadProducts();
                         },
                         child: const Text(
                           "Hapus Filter",
@@ -310,73 +250,38 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 12),
 
-              SizedBox(
-                height: 45,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    kategoriItem("Buah", "assets/images/gabah.jpg", () {
-                      setState(() {
-                        _selectedCategory = _selectedCategory == 'Buah'
-                            ? ''
-                            : 'Buah';
-                      });
-                    }, _selectedCategory == 'Buah'),
-                    kategoriItem(
-                      "Gabah",
-                      "assets/images/gabah.jpg",
-                      () {
-                        setState(() {
-                          _selectedCategory = _selectedCategory == 'Gabah'
-                              ? ''
-                              : 'Gabah';
-                        });
-                      },
-                      _selectedCategory == 'Gabah',
+              isLoadingCategories
+                  ? const Center(child: CircularProgressIndicator())
+                  : SizedBox(
+                      height: 45,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          final isSelected =
+                              _selectedCategoryId == category['id'];
+                          return kategoriItem(
+                            category['name'],
+                            "assets/images/gabah.jpg",
+                            () {
+                              setState(() {
+                                if (_selectedCategoryId == category['id']) {
+                                  _selectedCategoryId = null;
+                                  loadProducts();
+                                } else {
+                                  _selectedCategoryId = category['id'];
+                                  loadProducts(categoryId: category['id']);
+                                }
+                              });
+                            },
+                            isSelected,
+                          );
+                        },
+                      ),
                     ),
-                    kategoriItem(
-                      "Sayur",
-                      "assets/images/gabah.jpg",
-                      () {
-                        setState(() {
-                          _selectedCategory = _selectedCategory == 'Sayur'
-                              ? ''
-                              : 'Sayur';
-                        });
-                      },
-                      _selectedCategory == 'Sayur',
-                    ),
-                    kategoriItem(
-                      "Jagung",
-                      "assets/images/gabah.jpg",
-                      () {
-                        setState(() {
-                          _selectedCategory = _selectedCategory == 'Jagung'
-                              ? ''
-                              : 'Jagung';
-                        });
-                      },
-                      _selectedCategory == 'Jagung',
-                    ),
-                    kategoriItem("Padi", "assets/images/gabah.jpg", () {
-                      setState(() {
-                        _selectedCategory = _selectedCategory == 'Padi'
-                            ? ''
-                            : 'Padi';
-                      });
-                    }, _selectedCategory == 'Padi'),
-                    kategoriItem("Cabe", "assets/images/gabah.jpg", () {
-                      setState(() {
-                        _selectedCategory = _selectedCategory == 'Cabe'
-                            ? ''
-                            : 'Cabe';
-                      });
-                    }, _selectedCategory == 'Cabe'),
-                  ],
-                ),
-              ),
 
               const SizedBox(height: 25),
 
@@ -390,28 +295,43 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 12),
 
-              GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _filteredProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 14,
-                  crossAxisSpacing: 14,
-                  childAspectRatio: 0.70,
-                ),
-                itemBuilder: (context, index) {
-                  final product = _filteredProducts[index];
-                  return productCard(
-                    context: context,
-                    name: product['name']!,
-                    price: product['price']!,
-                    stock: product['stock']!,
-                    location: product['location']!,
-                  );
-                },
-              ),
+              isLoadingProducts
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : products.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Center(
+                        child: Text(
+                          'Tidak ada produk tersedia',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: products.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 14,
+                            childAspectRatio: 0.70,
+                          ),
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return productCard(context: context, product: product);
+                      },
+                    ),
 
               const SizedBox(height: 30),
             ],
@@ -464,116 +384,166 @@ Widget kategoriItem(
 }
 
 Widget productCard({
-  required String name,
-  required String price,
-  required String stock,
-  required String location,
-  String image = "assets/images/gabah.jpg",
+  required Map<String, dynamic> product,
   BuildContext? context,
 }) {
+  final isSoldOut = product['status'] == 'sold_out';
+  final stockKg = double.parse(product['stock_kg'].toString());
+  final pricePerKg = double.parse(product['price_per_kg'].toString());
+  final imagePath =
+      product['product_images'] != null &&
+          (product['product_images'] as List).isNotEmpty
+      ? product['product_images'][0]['image_path']
+      : null;
+  final imageUrl = ApiConfig.getImageUrl(imagePath);
+
   return GestureDetector(
     onTap: () {
-      if (context != null) {
+      if (context != null && !isSoldOut) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(
-              name: name,
-              price: price,
-              stock: stock,
-              image: image,
-              sellerName: "BUMDes",
-              location: location,
-              category: "Gabah",
-              variety: "Pandan Wangi",
-              harvestDate: "20 November 2025",
-              description:
-                  "Dengan kadar air 40%, gabah telah melewati tahap pengeringan optimal sehingga lebih stabil dan cocok untuk penyimpanan jangka menengah.",
-            ),
+            builder: (context) => ProductDetailPage(product: product),
           ),
         );
       }
     },
-    child: Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          const BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+    child: Opacity(
+      opacity: isSoldOut ? 0.5 : 1.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSoldOut ? Colors.grey[300] : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            const BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 5,
+              offset: Offset(0, 3),
             ),
-            child: Image.asset(
-              image,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  price,
-                  style: const TextStyle(
-                    color: AppColors.danger,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "Stok: $stock",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: AppColors.textSecondary,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 120,
+                          width: double.infinity,
+                          color: AppColors.imagePlaceholder,
+                          child: const Icon(
+                            Icons.image,
+                            size: 40,
+                            color: AppColors.textMuted,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      height: 120,
+                      width: double.infinity,
+                      color: AppColors.imagePlaceholder,
+                      child: const Icon(
+                        Icons.image,
+                        size: 40,
+                        color: AppColors.textMuted,
+                      ),
                     ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        location,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'],
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isSoldOut ? Colors.grey[700] : AppColors.textDark,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${rupiah.format(pricePerKg.toInt())}/kg',
+                    style: TextStyle(
+                      color: isSoldOut ? Colors.grey[600] : AppColors.danger,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Stok: ${stockKg.toStringAsFixed(0)}kg",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSoldOut
+                          ? Colors.grey[600]
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: isSoldOut
+                            ? Colors.grey[600]
+                            : AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          "Sengka, Gowa",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSoldOut
+                                ? Colors.grey[600]
+                                : AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                  if (isSoldOut) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'STOK HABIS',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
                       ),
                     ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

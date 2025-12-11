@@ -44,7 +44,7 @@ class HomePageBumdes extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          "PanenKi",
+                          "PanenKi'",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

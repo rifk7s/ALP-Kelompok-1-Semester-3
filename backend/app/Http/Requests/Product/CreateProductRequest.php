@@ -24,7 +24,7 @@ class CreateProductRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'variety' => ['required', 'string', 'max:255'],
-            'harvest_date' => ['required', 'date'],
+            'harvest_date' => ['nullable', 'date'],
             'storage_days' => ['required', 'integer', 'min:0'],
             'price_per_kg' => ['required', 'numeric', 'min:0'],
             'stock_kg' => ['required', 'numeric', 'min:0'],
@@ -35,6 +35,10 @@ class CreateProductRequest extends FormRequest
             'petani_id' => ['nullable', 'exists:petani_data,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'petani_contributors' => ['nullable', 'array'],
+            'petani_contributors.*.petani_id' => ['required', 'exists:petani_data,id'],
+            'petani_contributors.*.contributed_kg' => ['required', 'numeric', 'min:0.01'],
+            'petani_contributors.*.harvest_date' => ['required', 'date'],
         ];
     }
 }

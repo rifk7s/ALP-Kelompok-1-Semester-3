@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/features/shared/widgets/typing_indicator.dart' show TypingBubble;
+import 'package:frontend/features/shared/widgets/typing_indicator.dart'
+    show TypingBubble;
 
 class ChatDetailPage extends StatefulWidget {
   final String chatId;
@@ -67,7 +68,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   void _listenToTypingStatus() {
-    _typingSubscription = ChatService.getTypingStream(widget.chatId).listen((typingStatus) {
+    _typingSubscription = ChatService.getTypingStream(widget.chatId).listen((
+      typingStatus,
+    ) {
       if (!mounted) return;
 
       final otherStatus = typingStatus[widget.recipientId];
@@ -126,7 +129,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     if (text.isEmpty) return;
 
     _msgController.clear();
-    
+
     // Stop typing indicator
     _typingTimer?.cancel();
     if (_isTyping) {
@@ -188,12 +191,13 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: ChatService.getMessages(widget.chatId),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 final messages = snapshot.data?.docs ?? [];
-                
+
                 if (messages.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     scrollToBottom();
@@ -217,7 +221,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                   children: [
                     ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10).copyWith(bottom: bottomPadding),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 0,
+                        vertical: 10,
+                      ).copyWith(bottom: bottomPadding),
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final doc = messages[index];
@@ -226,55 +233,62 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         final text = data['text'] ?? '';
                         final read = data['read'] ?? false;
 
-                    return Align(
-                      alignment: fromMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 12),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 14,
-                        ),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.75,
-                        ),
-                        decoration: BoxDecoration(
-                          color: fromMe
-                              ? AppColors.chatBubbleSent
-                              : AppColors.chatBubbleReceived,
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(18),
-                            topRight: const Radius.circular(18),
-                            bottomLeft: Radius.circular(fromMe ? 18 : 0),
-                            bottomRight: Radius.circular(fromMe ? 0 : 18),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                text,
-                                style: const TextStyle(fontSize: 15, height: 1.3),
+                        return Align(
+                          alignment: fromMe
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 3,
+                              horizontal: 12,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 14,
+                            ),
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.75,
+                            ),
+                            decoration: BoxDecoration(
+                              color: fromMe
+                                  ? AppColors.chatBubbleSent
+                                  : AppColors.chatBubbleReceived,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(18),
+                                topRight: const Radius.circular(18),
+                                bottomLeft: Radius.circular(fromMe ? 18 : 0),
+                                bottomRight: Radius.circular(fromMe ? 0 : 18),
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    text,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
 
-                            if (fromMe) ...[
-                              const SizedBox(width: 6),
-                              Icon(
-                                Icons.done_all,
-                                size: 18,
-                                color: read
-                                    ? AppColors.info
-                                    : AppColors.textSecondary,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    );
+                                if (fromMe) ...[
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.done_all,
+                                    size: 18,
+                                    color: read
+                                        ? AppColors.info
+                                        : AppColors.textSecondary,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
                     Positioned(
@@ -291,7 +305,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                             opacity: _otherUserTyping ? 1 : 0,
                             duration: const Duration(milliseconds: 180),
                             curve: Curves.easeInOut,
-                            child: const TypingBubble(key: ValueKey('typing-bubble')),
+                            child: const TypingBubble(
+                              key: ValueKey('typing-bubble'),
+                            ),
                           ),
                         ),
                       ),

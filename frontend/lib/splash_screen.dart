@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
   void _startAnimation() async {
     // Check for existing session while showing splash
     _checkExistingSession();
-    
+
     // Entrance: dot moves to center
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen>
       });
     });
   }
-  
+
   Future<void> _checkExistingSession() async {
     final result = await AuthService.getMe();
     if (result.success && result.user != null) {
@@ -105,10 +105,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigateToHome() {
     // Route based on user role
-    final Widget targetPage = _userRole == 'bumdes' 
-        ? const StartPageBumdes() 
+    final Widget targetPage = _userRole == 'bumdes'
+        ? const StartPageBumdes()
         : const StartPage();
-    
+
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

@@ -33,11 +33,20 @@ class ProductController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
+        // Determine harvest date - use first contributor's date or provided date or current date
+        $harvestDate = $request->harvest_date;
+        if (!$harvestDate && $request->has('petani_contributors') && is_array($request->petani_contributors) && count($request->petani_contributors) > 0) {
+            $harvestDate = $request->petani_contributors[0]['harvest_date'] ?? now();
+        }
+        if (!$harvestDate) {
+            $harvestDate = now();
+        }
+        
         // Create the product
         $product = Product::create([
             'name' => $request->name,
             'variety' => $request->variety,
-            'harvest_date' => $request->harvest_date,
+            'harvest_date' => $harvestDate,
             'storage_days' => $request->storage_days,
             'price_per_kg' => $request->price_per_kg,
             'stock_kg' => $request->stock_kg,
@@ -47,15 +56,28 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
         ]);
 
-        // Create product contribution if petani_id is provided
-        if ($request->has('petani_id') && $request->petani_id) {
+        // Create product contribution(s)
+        if ($request->has('petani_contributors') && is_array($request->petani_contributors)) {
+            // Multiple petani contributors - FIFO order is preserved by array index
+            foreach ($request->petani_contributors as $index => $contributor) {
+                ProductContribution::create([
+                    'product_id' => $product->id,
+                    'petani_id' => $contributor['petani_id'],
+                    'contributed_kg' => $contributor['contributed_kg'],
+                    'remaining_kg' => $contributor['contributed_kg'],
+                    'entry_date' => now()->addSeconds($index), // Add seconds to maintain FIFO order
+                    'harvest_date' => $contributor['harvest_date'] ?? $request->harvest_date ?? now(),
+                ]);
+            }
+        } elseif ($request->has('petani_id') && $request->petani_id) {
+            // Backward compatibility - single petani
             ProductContribution::create([
                 'product_id' => $product->id,
                 'petani_id' => $request->petani_id,
                 'contributed_kg' => $request->stock_kg,
                 'remaining_kg' => $request->stock_kg,
                 'entry_date' => now(),
-                'harvest_date' => $request->harvest_date,
+                'harvest_date' => $request->harvest_date ?? now(),
             ]);
         }
 
@@ -107,8 +129,30 @@ class ProductController extends Controller
             'category_id' => $request->category_id ?? $product->category_id,
         ]);
 
-        // Update product contribution if petani_id is provided
-        if ($request->has('petani_id') && $request->petani_id) {
+        // Update product contributions if petani_contributors is provided
+        if ($request->has('petani_contributors')) {
+            // Delete existing contributions
+            ProductContribution::where('product_id', $product->id)->delete();
+            
+            // Create new contributions with FIFO ordering
+            $contributors = $request->input('petani_contributors');
+            $baseDate = \Carbon\Carbon::parse($request->harvest_date ?? $product->harvest_date);
+            
+            foreach ($contributors as $index => $contributor) {
+                // Add seconds to ensure FIFO order even on same harvest date
+                $entryDate = $baseDate->copy()->addSeconds($index);
+                
+                ProductContribution::create([
+                    'product_id' => $product->id,
+                    'petani_id' => $contributor['petani_id'],
+                    'contributed_kg' => $contributor['contributed_kg'],
+                    'remaining_kg' => $contributor['contributed_kg'],
+                    'entry_date' => $entryDate,
+                    'harvest_date' => $request->harvest_date ?? $product->harvest_date,
+                ]);
+            }
+        } elseif ($request->has('petani_id') && $request->petani_id) {
+            // Backward compatibility - Update product contribution if petani_id is provided
             // Find existing contribution or create new one
             $contribution = ProductContribution::where('product_id', $product->id)->first();
             

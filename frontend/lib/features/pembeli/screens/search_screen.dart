@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 
 class SearchPage extends StatefulWidget {
@@ -19,12 +22,33 @@ class _SearchPageState extends State<SearchPage> {
   ];
 
   List<String> filteredHistory = [];
-  List<Map<String, String>> searchResults = [];
+  List<Map<String, dynamic>> searchResults = [];
+  List<Map<String, dynamic>> _allProducts = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     filteredHistory = List.from(searchHistory);
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() => isLoading = true);
+    try {
+      final products = await ProductService.getProducts();
+      setState(() {
+        _allProducts = products.cast<Map<String, dynamic>>();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
+      }
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -38,7 +62,9 @@ class _SearchPageState extends State<SearchPage> {
       } else {
         searchResults = _allProducts
             .where(
-              (p) => p['name']!.toLowerCase().contains(query.toLowerCase()),
+              (p) => (p['name'] as String).toLowerCase().contains(
+                query.toLowerCase(),
+              ),
             )
             .toList();
       }
@@ -56,37 +82,6 @@ class _SearchPageState extends State<SearchPage> {
     _controller.clear();
     _onSearchChanged('');
   }
-
-  final List<Map<String, String>> _allProducts = [
-    {
-      'name': 'Gabah Kering',
-      'price': 'Rp 6.500/kg',
-      'stock': '100kg',
-      'location': 'Sengka, Gowa',
-      'image': 'assets/images/gabah.jpg',
-    },
-    {
-      'name': 'Jagung Pipilan',
-      'price': 'Rp 4.200/kg',
-      'stock': '200kg',
-      'location': 'Bone',
-      'image': 'assets/images/gabah.jpg',
-    },
-    {
-      'name': 'Padi Ciherang',
-      'price': 'Rp 8.000/kg',
-      'stock': '150kg',
-      'location': 'Maros',
-      'image': 'assets/images/gabah.jpg',
-    },
-    {
-      'name': 'Cabe Merah Segar',
-      'price': 'Rp 25.000/kg',
-      'stock': '30kg',
-      'location': 'Gowa',
-      'image': 'assets/images/gabah.jpg',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -180,14 +175,7 @@ class _SearchPageState extends State<SearchPage> {
                 itemCount: searchResults.length,
                 itemBuilder: (context, index) {
                   final p = searchResults[index];
-                  return productCard(
-                    context: context,
-                    name: p['name']!,
-                    price: p['price']!,
-                    stock: p['stock']!,
-                    location: p['location']!,
-                    image: p['image']!,
-                  );
+                  return productCard(context: context, product: p);
                 },
               )
             : Column(
@@ -265,11 +253,7 @@ class _SearchPageState extends State<SearchPage> {
 }
 
 Widget productCard({
-  required String name,
-  required String price,
-  required String stock,
-  required String location,
-  String image = "assets/images/gabah.jpg",
+  required Map<String, dynamic> product,
   BuildContext? context,
 }) {
   return GestureDetector(
@@ -278,18 +262,7 @@ Widget productCard({
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(
-              name: name,
-              price: price,
-              stock: stock,
-              image: image,
-              sellerName: "BUMDes",
-              location: location,
-              category: "Produk",
-              variety: "Varietas",
-              harvestDate: "20 November 2025",
-              description: "Deskripsi produk contoh dari PanenKi.",
-            ),
+            builder: (context) => ProductDetailPage(product: product),
           ),
         );
       }
@@ -311,12 +284,33 @@ Widget productCard({
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
-              image,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: product['image'] != null
+                ? Image.network(
+                    ApiConfig.getImageUrl(product['image']),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 120,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    height: 120,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(10),
@@ -324,7 +318,7 @@ Widget productCard({
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  product['name'] ?? 'Produk',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -332,7 +326,11 @@ Widget productCard({
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  price,
+                  NumberFormat.currency(
+                    locale: 'id',
+                    symbol: 'Rp ',
+                    decimalDigits: 0,
+                  ).format(product['price'] ?? 0),
                   style: const TextStyle(
                     color: AppColors.danger,
                     fontWeight: FontWeight.bold,
@@ -340,7 +338,7 @@ Widget productCard({
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "Stok: $stock",
+                  "Stok: ${product['stock_kg'] ?? 0}kg",
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -355,10 +353,10 @@ Widget productCard({
                       color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 4),
-                    Expanded(
+                    const Expanded(
                       child: Text(
-                        location,
-                        style: const TextStyle(
+                        "Sengka, Gowa",
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),

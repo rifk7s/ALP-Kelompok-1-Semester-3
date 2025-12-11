@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -48,6 +49,15 @@ class _RegisterFormState extends State<RegisterForm> {
     }
 
     setState(() => _isLoading = true);
+    
+    // Show immediate feedback with API URL
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Connecting to ${ApiConfig.baseUrl}...'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
 
     final result = await AuthService.register(
       name: _nameController.text,
