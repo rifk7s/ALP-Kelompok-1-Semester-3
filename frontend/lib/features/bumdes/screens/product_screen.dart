@@ -1,9 +1,17 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:intl/intl.dart';
 import 'upload_screen.dart';
 import 'product_detail_screen.dart';
+
+final NumberFormat rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: "Rp ",
+  decimalDigits: 0,
+);
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -15,64 +23,73 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   String _filter = "all";
   String _searchQuery = "";
+  List<dynamic> products = [];
+  bool isLoading = true;
 
-  final List<Map<String, dynamic>> products = [
-    {
-      "nama": "Gabah Kering",
-      "jumlah": "30",
-      "harga": "Rp 6.500/kg",
-      "petani": "Pak Jono",
-      "kategori": "Gabah",
-      "varietas": "Ciherang",
-      "tanggalPanen": DateTime.now(),
-      "info": "",
-      "lokasi": "",
-      "images": ["assets/images/gabah.jpg"],
-    },
-    {
-      "nama": "Jagung Manis",
-      "jumlah": 50,
-      "harga": "Rp 7.000/kg",
-      "petani": "Bu Rani",
-      "kategori": "Jagung",
-      "varietas": "",
-      "tanggalPanen": DateTime.now(),
-      "info": "",
-      "lokasi": "",
-      "images": ["assets/images/gabah.jpg"],
-    },
-    {
-      "nama": "Padi Ciherang",
-      "jumlah": "0",
-      "harga": "Rp 6.900/kg",
-      "petani": "Abdul Rahman",
-      "kategori": "Gabah",
-      "varietas": "Pertiwi",
-      "tanggalPanen": DateTime.now(),
-      "info": "",
-      "lokasi": "",
-      "images": ["assets/images/gabah.jpg"],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    loadProducts();
+  }
 
-  List<Map<String, dynamic>> get filteredProducts {
-    List<Map<String, dynamic>> temp = products.where((p) {
-      final jumlahInt = int.parse(p["jumlah"].toString());
-      if (_filter == "available" && jumlahInt <= 0) return false;
-      if (_filter == "empty" && jumlahInt > 0) return false;
+  Future<void> loadProducts() async {
+    try {
+      final data = await ProductService.getProducts();
+      setState(() {
+        products = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading products: $e')),
+        );
+      }
+    }
+  }
+
+  List<dynamic> get filteredProducts {
+    List<dynamic> temp = products.where((p) {
+      final status = p['status'].toString();
+      
+      // Filter by stock status
+      if (_filter == "available" && status == 'sold_out') return false;
+      if (_filter == "empty" && status == 'active') return false;
+      
+      // Filter by search query
       if (_searchQuery.isNotEmpty &&
-          !p["nama"].toString().toLowerCase().contains(
+          !p["name"].toString().toLowerCase().contains(
             _searchQuery.toLowerCase(),
           )) {
         return false;
       }
       return true;
     }).toList();
+    
+    // Sort: active products first, sold_out at bottom
+    temp.sort((a, b) {
+      if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
+      if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
+      return 0;
+    });
+    
     return temp;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -231,9 +248,28 @@ class _ProductPageState extends State<ProductPage> {
     required BuildContext context,
     required Map<String, dynamic> product,
   }) {
+    final isSoldOut = product['status'] == 'sold_out';
+    final stockKg = double.parse(product['stock_kg'].toString());
+    final pricePerKg = double.parse(product['price_per_kg'].toString());
+    final imagePath = product['product_images'] != null && 
+                     (product['product_images'] as List).isNotEmpty
+        ? product['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+    
+    // Get petani name from product contributions
+    String petaniName = "BUMDes";
+    if (product['product_contributions'] != null && 
+        (product['product_contributions'] as List).isNotEmpty) {
+      final firstContribution = (product['product_contributions'] as List)[0];
+      if (firstContribution['petani'] != null) {
+        petaniName = firstContribution['petani']['name'];
+      }
+    }
+
     return GestureDetector(
       onTap: () async {
-        await Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ProductDetailPage(
@@ -241,74 +277,144 @@ class _ProductPageState extends State<ProductPage> {
               onUpdate: (updatedProduct) {
                 setState(() {
                   final index = products.indexWhere(
-                    (p) => p["nama"] == product["nama"],
+                    (p) => p["id"] == product["id"],
                   );
                   if (index != -1) products[index] = updatedProduct;
-                });
-              },
-              onDelete: () {
-                setState(() {
-                  products.removeWhere((p) => p["nama"] == product["nama"]);
                 });
               },
             ),
           ),
         );
+        
+        // If product was deleted, refresh the list
+        if (result == true) {
+          loadProducts();
+        }
       },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AppColors.imagePlaceholder,
-                  image: product['images'].isNotEmpty
-                      ? DecorationImage(
-                          image: product['images'][0] is File
-                              ? FileImage(product['images'][0])
-                              : AssetImage(product['images'][0])
-                                    as ImageProvider,
-                          fit: BoxFit.cover,
+      child: Opacity(
+        opacity: isSoldOut ? 0.5 : 1.0,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSoldOut ? Colors.grey[300] : AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withValues(alpha: 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Product Image
+              Expanded(
+                flex: 3,
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.imagePlaceholder,
+                    image: imageUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: imageUrl.isEmpty
+                      ? const Icon(
+                          Icons.image,
+                          size: 40,
+                          color: AppColors.textMuted,
                         )
                       : null,
                 ),
-                child: product['images'].isEmpty
-                    ? const Icon(Icons.image, size: 40)
-                    : null,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              product["nama"],
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              "${product["jumlah"]} kg • ${product["harga"]}",
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
+              
+              // Product Info
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product name
+                    Text(
+                      product["name"],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isSoldOut ? Colors.grey[700] : AppColors.textDark,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    
+                    // Stock • Price
+                    Row(
+                      children: [
+                        Text(
+                          "${stockKg.toStringAsFixed(0)} kg",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          " • ",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          rupiah.format(pricePerKg.toInt()),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    
+                    // Petani name
+                    Text(
+                      "Petani: $petaniName",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isSoldOut ? Colors.grey[600] : AppColors.textLight,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    // Status badge for sold out
+                    if (isSoldOut) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red[100],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'STOK HABIS',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red[700],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-            Text(
-              "Petani: ${product["petani"]}",
-              style: const TextStyle(fontSize: 12, color: AppColors.textLight),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

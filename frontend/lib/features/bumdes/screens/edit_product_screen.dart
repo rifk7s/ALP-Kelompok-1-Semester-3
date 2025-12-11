@@ -3,6 +3,12 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/category_service.dart';
+import 'package:frontend/core/services/hpp_price_service.dart';
+import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -11,9 +17,9 @@ final NumberFormat rupiah = NumberFormat.currency(
 );
 
 class EditProdukScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic> product;
 
-  const EditProdukScreen({super.key, required this.data});
+  const EditProdukScreen({super.key, required this.product});
 
   @override
   State<EditProdukScreen> createState() => _EditProdukScreenState();
@@ -21,69 +27,358 @@ class EditProdukScreen extends StatefulWidget {
 
 class _EditProdukScreenState extends State<EditProdukScreen> {
   String? selectedPetani;
+  int? selectedPetaniId;
   String? selectedKategori;
+  int? selectedKategoriId;
   String? selectedVarietas;
-  DateTime? selectedTanggalPanen;
 
   final _jumlahController = TextEditingController();
   final _namaProdukController = TextEditingController();
   final _hargaController = TextEditingController();
   final _masaSimpanController = TextEditingController();
-  final _infoTambahanController = TextEditingController();
   final _lokasiController = TextEditingController();
+  final _infoTambahanController = TextEditingController();
 
-  final ImagePicker picker = ImagePicker();
-  List<File> images = [];
+  DateTime? tanggalPanen;
+  String? masaSimpanNote;
 
-  final Map<String, int> hpp = {"Gabah": 6500, "Jagung": 5000};
-  final List<String> petaniList = [
-    "Abdul Rahman",
-    "Budi Santoso",
-    "Pak Jono",
-    "Bu Rani",
-  ];
-  final List<String> varietasGabah = ["Ciherang", "Pertiwi"];
+  final ImagePicker _picker = ImagePicker();
+  List<File> selectedImages = [];
+  List<Map<String, dynamic>> existingImages = []; // Images from database
+  List<int> imagesToDelete = []; // IDs of images to delete
 
+  // Data from backend
+  List<dynamic> categories = [];
+  List<PetaniData> petaniList = [];
+  List<dynamic> hppPrices = [];
+  Map<String, List<String>> varietiesByCategory = {};
+  
+  bool isLoading = true;
+  bool isSubmitting = false;
   @override
   void initState() {
     super.initState();
+    loadData();
 
-    selectedPetani = widget.data['petani'];
-    selectedKategori = widget.data['kategori'];
-    selectedVarietas = widget.data['varietas'];
-    selectedTanggalPanen = widget.data['tanggalPanen'];
+    _hargaController.addListener(() {
+      final text = _hargaController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (text.isNotEmpty) {
+        final formatted = rupiah.format(int.parse(text));
+        if (formatted != _hargaController.text) {
+          _hargaController.value = TextEditingValue(
+            text: formatted,
+            selection: TextSelection.collapsed(offset: formatted.length),
+          );
+        }
+      }
+    });
+  }
 
-    _jumlahController.text = widget.data['jumlah'] ?? "";
-    _namaProdukController.text = widget.data['nama'] ?? "";
-    _hargaController.text = widget.data['harga'] ?? "";
-    _masaSimpanController.text = widget.data['masaSimpan'] ?? "";
-    _infoTambahanController.text = widget.data['info'] ?? "";
-    _lokasiController.text = widget.data['lokasi'] ?? "";
+  Future<void> loadData() async {
+    try {
+      final token = await StorageService.getToken();
 
-    if (widget.data['images'] != null) {
-      for (var img in widget.data['images']) {
-        if (img is File) images.add(img);
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
+
+      // Load categories
+      final categoriesData = await CategoryService.getCategories();
+      print('Categories loaded: ${categoriesData.length}');
+      
+      // Load petani data
+      final petaniData = await PetaniService().fetchAllPetani(token: token);
+      print('Petani loaded: ${petaniData.length}');
+      
+      // Load HPP prices
+      final hppData = await HppPriceService.getHppPrices();
+      print('HPP prices loaded: ${hppData.length}');
+
+      // Group varieties by category
+      Map<String, List<String>> varieties = {};
+      for (var hpp in hppData) {
+        String categoryName = hpp['category']['name'];
+        String variety = hpp['variety'];
+        
+        if (!varieties.containsKey(categoryName)) {
+          varieties[categoryName] = [];
+        }
+        if (!varieties[categoryName]!.contains(variety)) {
+          varieties[categoryName]!.add(variety);
+        }
+      }
+
+      setState(() {
+        categories = categoriesData;
+        petaniList = petaniData;
+        hppPrices = hppData;
+        varietiesByCategory = varieties;
+        isLoading = false;
+        
+        // Populate form with existing product data
+        _namaProdukController.text = widget.product['name'] ?? '';
+        _jumlahController.text = widget.product['stock_kg']?.toString() ?? '';
+        _masaSimpanController.text = widget.product['storage_days']?.toString() ?? '';
+        _infoTambahanController.text = widget.product['description'] ?? '';
+        
+        // Set category
+        if (widget.product['category_id'] != null) {
+          selectedKategoriId = widget.product['category_id'];
+          final category = categories.firstWhere((c) => c['id'] == selectedKategoriId, orElse: () => {});
+          if (category.isNotEmpty) {
+            selectedKategori = category['name'];
+          }
+        }
+        
+        // Set variety
+        selectedVarietas = widget.product['variety'];
+        
+        // Set harvest date
+        if (widget.product['harvest_date'] != null) {
+          tanggalPanen = DateTime.parse(widget.product['harvest_date']);
+        }
+        
+        // Set price
+        final price = getPriceForSelection();
+        if (price != null) {
+          _hargaController.text = rupiah.format(price.toInt());
+        }
+        
+        // Set petani from product contributions
+        if (widget.product['product_contributions'] != null && 
+            (widget.product['product_contributions'] as List).isNotEmpty) {
+          final contribution = widget.product['product_contributions'][0];
+          if (contribution['petani'] != null) {
+            selectedPetaniId = contribution['petani']['id'];
+            selectedPetani = contribution['petani']['name'];
+            // Set address if petani is found in the list
+            final petani = petaniData.firstWhere(
+              (p) => p.id == selectedPetaniId,
+              orElse: () => petaniData.first,
+            );
+            _lokasiController.text = petani.address ?? '';
+          }
+        }
+        
+        // Load existing images
+        if (widget.product['product_images'] != null) {
+          existingImages = List<Map<String, dynamic>>.from(
+            widget.product['product_images'].map((img) => {
+              'id': img['id'],
+              'image_path': img['image_path'],
+            }),
+          );
+        }
+      });
+      
+      print('Data loaded successfully!');
+    } catch (e) {
+      print('Error loading data: $e');
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading data: $e'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
   }
 
-  Future pickImages() async {
-    final picked = await picker.pickMultiImage(imageQuality: 70);
+  double? getPriceForSelection() {
+    if (selectedKategoriId == null) return null;
+    
+    for (var hpp in hppPrices) {
+      if (hpp['category_id'] == selectedKategoriId) {
+        // Check if variety matches (for categories with varieties like Gabah)
+        if (selectedVarietas != null && hpp['variety'] == selectedVarietas) {
+          return double.parse(hpp['price_per_kg'].toString());
+        }
+        // For categories without specific varieties or if no variety selected yet
+        if (selectedVarietas == null) {
+          return double.parse(hpp['price_per_kg'].toString());
+        }
+      }
+    }
+    return null;
+  }
 
+
+
+  Future<void> submitUpdate() async {
+    // Validation
+    if (_namaProdukController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nama produk harus diisi')),
+      );
+      return;
+    }
+
+    if (selectedPetaniId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih petani terlebih dahulu')),
+      );
+      return;
+    }
+
+    if (selectedKategoriId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih kategori terlebih dahulu')),
+      );
+      return;
+    }
+
+    if (tanggalPanen == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih tanggal panen')),
+      );
+      return;
+    }
+
+    if (_jumlahController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Jumlah stok harus diisi')),
+      );
+      return;
+    }
+
+    final price = getPriceForSelection();
+    if (price == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Harga tidak ditemukan')),
+      );
+      return;
+    }
+
+    setState(() {
+      isSubmitting = true;
+    });
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan');
+      }
+
+      // Determine variety - use selected variety or "Standard" if none
+      String variety = selectedVarietas ?? 'Standard';
+      
+      // Parse storage days, default to 0 if empty
+      int storageDays = int.tryParse(_masaSimpanController.text) ?? 0;
+
+      final response = await ProductService.updateProduct(
+        productId: widget.product['id'],
+        token: token,
+        name: _namaProdukController.text,
+        categoryId: selectedKategoriId!,
+        variety: variety,
+        harvestDate: tanggalPanen!.toIso8601String().split('T')[0],
+        storageDays: storageDays,
+        pricePerKg: price,
+        stockKg: double.parse(_jumlahController.text),
+        description: _infoTambahanController.text.isEmpty 
+            ? null 
+            : _infoTambahanController.text,
+        petaniId: selectedPetaniId,
+        newImages: selectedImages.isNotEmpty ? selectedImages : null,
+        imageIdsToDelete: imagesToDelete.isNotEmpty ? imagesToDelete : null,
+      );
+
+      setState(() {
+        isSubmitting = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produk berhasil diperbarui!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Return the updated product
+        Navigator.pop(context, response['product']);
+      }
+    } catch (e) {
+      setState(() {
+        isSubmitting = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> pickImages() async {
+    if (selectedImages.length >= 5) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
+      return;
+    }
+
+    final picked = await _picker.pickMultiImage();
     if (!mounted) return;
 
     if (picked.isNotEmpty) {
-      if (images.length + picked.length > 5) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
-        return;
+      if (selectedImages.length + picked.length > 5) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Total foto tidak boleh lebih dari 5")),
+        );
       }
 
       setState(() {
-        images.addAll(picked.map((e) => File(e.path)));
+        selectedImages.addAll(
+          picked.take(5 - selectedImages.length).map((e) => File(e.path)),
+        );
       });
     }
+  }
+
+  Future<void> pilihTanggalPanen() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null) {
+      tanggalPanen = picked;
+
+      int masa = int.tryParse(_masaSimpanController.text) ?? 0;
+      if (masa > 0) {
+        DateTime expired = picked.add(Duration(days: masa));
+        masaSimpanNote =
+            "ℹ️ Masa Simpan $masa hari (s/d ${expired.day} ${_bulan(expired.month)} ${expired.year})";
+      }
+      setState(() {});
+    }
+  }
+
+  String _bulan(int m) {
+    const b = [
+      "",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+    return b[m];
   }
 
   Widget sectionCard({required String title, required Widget child}) {
@@ -91,7 +386,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
@@ -129,39 +424,79 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     );
   }
 
-  void showSavedPopup() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            "Produk Diperbarui",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: const Text("Perubahan produk berhasil disimpan."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "OK",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 1,
+          centerTitle: true,
+          title: const Text(
+            "Kelola Data Petani",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
+            ),
+          ),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // Show error state if data failed to load
+    if (categories.isEmpty || hppPrices.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 1,
+          centerTitle: true,
+          title: const Text(
+            "Kelola Data Petani",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
+            ),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                'Gagal memuat data',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Silakan coba lagi'),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  loadData();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba Lagi'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -169,7 +504,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         elevation: 1,
         centerTitle: true,
         title: const Text(
-          "Edit Produk",
+          "Kelola Data Petani",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -180,7 +515,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // FOTO PRODUK
           sectionCard(
             title: "Foto Produk",
             child: Column(
@@ -196,34 +530,62 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                if (images.isNotEmpty)
+                // Display existing images from database
+                if (existingImages.isNotEmpty)
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: images.length,
+                    itemCount: existingImages.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
-                          crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
                         ),
                     itemBuilder: (_, i) {
+                      final image = existingImages[i];
+                      final isMarkedForDeletion = imagesToDelete.contains(image['id']);
+                      
                       return Stack(
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.file(images[i], fit: BoxFit.cover),
+                            child: Opacity(
+                              opacity: isMarkedForDeletion ? 0.3 : 1.0,
+                              child: Image.network(
+                                ApiConfig.getImageUrl(image['image_path']),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.broken_image),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                           Positioned(
                             right: 4,
                             top: 4,
                             child: InkWell(
-                              onTap: () => setState(() => images.removeAt(i)),
-                              child: const CircleAvatar(
-                                backgroundColor: AppColors.textMuted,
+                              onTap: () {
+                                setState(() {
+                                  if (isMarkedForDeletion) {
+                                    imagesToDelete.remove(image['id']);
+                                  } else {
+                                    imagesToDelete.add(image['id']);
+                                  }
+                                });
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: isMarkedForDeletion 
+                                    ? Colors.orange 
+                                    : AppColors.textMuted,
                                 radius: 12,
                                 child: Icon(
-                                  Icons.close,
+                                  isMarkedForDeletion ? Icons.undo : Icons.close,
                                   color: AppColors.white,
                                   size: 16,
                                 ),
@@ -234,11 +596,78 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                       );
                     },
                   ),
+                
+                // Display newly selected images
+                if (selectedImages.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: selectedImages.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                          ),
+                      itemBuilder: (_, i) {
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                selectedImages[i],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                            Positioned(
+                              right: 4,
+                              top: 4,
+                              child: InkWell(
+                                onTap: () =>
+                                    setState(() => selectedImages.removeAt(i)),
+                                child: const CircleAvatar(
+                                  backgroundColor: AppColors.textMuted,
+                                  radius: 12,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: AppColors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 4,
+                              top: 4,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'NEW',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
 
-          // INFORMASI UTAMA
           sectionCard(
             title: "Informasi Utama",
             child: Column(
@@ -254,37 +683,56 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                inputLabel("Kontributor Petani *"),
-                DropdownButtonFormField(
-                  initialValue: selectedPetani,
+                inputLabel("Nama Petani *"),
+                DropdownButtonFormField<int>(
+                  value: selectedPetaniId,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.person),
                   ),
                   items: petaniList
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .where((p) => p.isActive)
+                      .map((p) => DropdownMenuItem<int>(
+                            value: p.id,
+                            child: Text(p.name),
+                          ))
                       .toList(),
-                  onChanged: (v) => setState(() => selectedPetani = v),
+                  onChanged: (v) {
+                    setState(() {
+                      selectedPetaniId = v;
+                      final petani = petaniList.firstWhere((p) => p.id == v);
+                      selectedPetani = petani.name;
+                      _lokasiController.text = petani.address ?? '';
+                    });
+                  },
                 ),
-
                 const SizedBox(height: 14),
 
                 inputLabel("Kategori *"),
-                DropdownButtonFormField(
-                  initialValue: selectedKategori,
+                DropdownButtonFormField<int>(
+                  value: selectedKategoriId,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.category),
                   ),
-                  items: ["Gabah", "Jagung"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  items: categories
+                      .map((c) => DropdownMenuItem<int>(
+                            value: c['id'],
+                            child: Text(c['name']),
+                          ))
                       .toList(),
                   onChanged: (v) {
                     setState(() {
-                      selectedKategori = v;
-                      _hargaController.text = rupiah.format(
-                        hpp[selectedKategori]!,
-                      );
+                      selectedKategoriId = v;
+                      final category = categories.firstWhere((c) => c['id'] == v);
+                      selectedKategori = category['name'];
+                      selectedVarietas = null; // Reset variety
+                      
+                      // Update price based on category
+                      final price = getPriceForSelection();
+                      if (price != null) {
+                        _hargaController.text = rupiah.format(price.toInt());
+                      }
                     });
                   },
                 ),
@@ -293,57 +741,59 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      "ℹ️ HPP ${selectedKategori!}: Rp ${hpp[selectedKategori]}/kg",
-                      style: const TextStyle(color: AppColors.blueGrey),
+                      "ℹ️ HPP ${selectedKategori!}: Rp ${(getPriceForSelection() ?? 0).toInt()}/kg",
+                      style: const TextStyle(color: AppColors.textDark),
                     ),
                   ),
               ],
             ),
           ),
 
-          // DETAIL PRODUK
           sectionCard(
             title: "Detail Produk",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (selectedKategori == "Gabah") ...[
+                if (selectedKategori != null && 
+                    varietiesByCategory.containsKey(selectedKategori) &&
+                    varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
-                  DropdownButtonFormField(
-                    initialValue: selectedVarietas,
+                  DropdownButtonFormField<String>(
+                    value: selectedVarietas,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),
                     ),
-                    items: varietasGabah
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    items: varietiesByCategory[selectedKategori]!
+                        .map((v) => DropdownMenuItem<String>(
+                              value: v,
+                              child: Text(v),
+                            ))
                         .toList(),
-                    onChanged: (v) => setState(() => selectedVarietas = v),
+                    onChanged: (v) {
+                      setState(() {
+                        selectedVarietas = v;
+                        // Update price based on variety
+                        final price = getPriceForSelection();
+                        if (price != null) {
+                          _hargaController.text = rupiah.format(price.toInt());
+                        }
+                      });
+                    },
                   ),
                   const SizedBox(height: 14),
                 ],
 
                 inputLabel("Tanggal Panen *"),
                 InkWell(
-                  onTap: () async {
-                    final result = await showDatePicker(
-                      context: context,
-                      initialDate: selectedTanggalPanen ?? DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                    );
-
-                    if (result != null) {
-                      setState(() => selectedTanggalPanen = result);
-                    }
-                  },
+                  onTap: pilihTanggalPanen,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.grey),
+                      border: Border.all(color: AppColors.border),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -351,14 +801,23 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                         const Icon(Icons.calendar_today),
                         const SizedBox(width: 10),
                         Text(
-                          selectedTanggalPanen == null
+                          tanggalPanen == null
                               ? "Pilih tanggal"
-                              : "${selectedTanggalPanen!.day}/${selectedTanggalPanen!.month}/${selectedTanggalPanen!.year}",
+                              : "${tanggalPanen!.day} ${_bulan(tanggalPanen!.month)} ${tanggalPanen!.year}",
                         ),
                       ],
                     ),
                   ),
                 ),
+
+                if (masaSimpanNote != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      masaSimpanNote!,
+                      style: const TextStyle(color: AppColors.textDark),
+                    ),
+                  ),
 
                 const SizedBox(height: 14),
 
@@ -366,9 +825,16 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 TextField(
                   controller: _hargaController,
                   keyboardType: TextInputType.number,
+                  readOnly: true,
+                  enabled: false,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.price_change),
+                    filled: true,
+                    fillColor: Color(0xFFF5F5F5),
+                  ),
+                  style: const TextStyle(
+                    color: Colors.black54,
                   ),
                 ),
 
@@ -387,13 +853,12 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
             ),
           ),
 
-          // LAINNYA
           sectionCard(
             title: "Lainnya",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                inputLabel("Lokasi Produk"),
+                inputLabel("Lokasi Produk *"),
                 TextField(
                   controller: _lokasiController,
                   decoration: const InputDecoration(
@@ -417,11 +882,10 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
           const SizedBox(height: 10),
 
-          // TOMBOL SIMPAN
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: showSavedPopup,
+              onPressed: isSubmitting ? null : submitUpdate,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -429,10 +893,19 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                "SIMPAN PERUBAHAN",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      "SIMPAN PERUBAHAN",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
             ),
           ),
         ],

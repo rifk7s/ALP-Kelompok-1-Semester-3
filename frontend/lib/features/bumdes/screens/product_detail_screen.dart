@@ -1,18 +1,25 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
+import 'package:intl/intl.dart';
 import 'edit_product_screen.dart';
+
+final NumberFormat rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: "Rp ",
+  decimalDigits: 0,
+);
 
 class ProductDetailPage extends StatelessWidget {
   final Map<String, dynamic> product;
   final Function(Map<String, dynamic>) onUpdate;
-  final Function() onDelete;
 
   const ProductDetailPage({
     super.key,
     required this.product,
     required this.onUpdate,
-    required this.onDelete,
   });
 
   @override
@@ -38,7 +45,7 @@ class ProductDetailPage extends StatelessWidget {
               final result = await Navigator.push<Map<String, dynamic>>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => EditProdukScreen(data: product),
+                  builder: (_) => EditProdukScreen(product: product),
                 ),
               );
               if (result != null) {
@@ -48,64 +55,13 @@ class ProductDetailPage extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete, color: AppColors.danger),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Konfirmasi Hapus"),
-                  content: const Text(
-                    "Apakah Anda yakin ingin menghapus produk ini?",
-                  ),
-                  actionsAlignment: MainAxisAlignment.spaceEvenly,
-                  actions: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: const Text("Batal"),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                onDelete();
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.danger,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: const Text("Hapus"),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -126,45 +82,130 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Konfirmasi Hapus"),
+        content: Text(
+          "Apakah Anda yakin ingin menghapus produk ${product['name']}?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text("Hapus"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await _deleteProduct(context);
+    }
+  }
+
+  Future<void> _deleteProduct(BuildContext context) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
+
+      await ProductService.deleteProduct(
+        productId: product['id'],
+        token: token,
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produk berhasil dihapus'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Return true to indicate deletion
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus produk: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget _productImage() {
+    final imagePath = product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty
+        ? product['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: product['images'] != null && product['images'].isNotEmpty
-          ? (product['images'][0] is File
-                ? Image.file(
-                    product['images'][0],
-                    height: 230,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    product['images'][0],
-                    height: 230,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ))
-          : Image.asset(
-              "assets/images/gabah.jpg",
+      borderRadius: BorderRadius.circular(16),
+      child: imageUrl.isNotEmpty
+          ? Image.network(
+              imageUrl,
               height: 230,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 230,
+                  width: double.infinity,
+                  color: AppColors.imagePlaceholder,
+                  child: const Icon(
+                    Icons.image,
+                    size: 80,
+                    color: AppColors.textMuted,
+                  ),
+                );
+              },
+            )
+          : Container(
+              height: 230,
+              width: double.infinity,
+              color: AppColors.imagePlaceholder,
+              child: const Icon(
+                Icons.image,
+                size: 80,
+                color: AppColors.textMuted,
+              ),
             ),
     );
   }
 
   Widget _productNameAndPrice() {
+    final pricePerKg = double.parse(product['price_per_kg'].toString());
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          product['nama'],
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          product['name'],
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
-          product['harga'],
+          '${rupiah.format(pricePerKg)}/kg',
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.danger,
           ),
@@ -174,21 +215,33 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _highlights() {
+    final stockKg = double.parse(product['stock_kg'].toString());
+    
+    // Get petani name
+    String petaniName = "BUMDes";
+    if (product['product_contributions'] != null &&
+        (product['product_contributions'] as List).isNotEmpty) {
+      final firstContribution = (product['product_contributions'] as List)[0];
+      if (firstContribution['petani'] != null) {
+        petaniName = firstContribution['petani']['name'];
+      }
+    }
+    
     return Row(
       children: [
         Expanded(
           child: _highlightCard(
-            icon: Icons.storefront,
+            icon: Icons.person_outline,
             title: 'Petani',
-            value: product['petani'] ?? '-',
+            value: petaniName,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _highlightCard(
-            icon: Icons.scale_outlined,
+            icon: Icons.inventory_2_outlined,
             title: 'Stok',
-            value: "${product['jumlah']} kg",
+            value: "${stockKg.toStringAsFixed(0)} kg",
           ),
         ),
       ],
@@ -201,31 +254,24 @@ class ProductDetailPage extends StatelessWidget {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: AppColors.warningAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.primary),
+              Icon(icon, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -233,12 +279,12 @@ class ProductDetailPage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -247,35 +293,47 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _specifications() {
+    final categoryName = product['category'] != null 
+        ? product['category']['name'] 
+        : '-';
+    final variety = product['variety'] ?? '-';
+    final harvestDate = product['harvest_date'] ?? '-';
+
     return SectionCard(
       title: "Spesifikasi Produk",
       children: [
         InfoRow(
           icon: Icons.category_outlined,
           label: "Kategori",
-          value: product['kategori'],
+          value: categoryName,
         ),
         InfoRow(
-          icon: Icons.qr_code_2_outlined,
+          icon: Icons.grass_outlined,
           label: "Varietas",
-          value: product['varietas'],
+          value: variety,
         ),
         InfoRow(
-          icon: Icons.date_range_outlined,
+          icon: Icons.calendar_today_outlined,
           label: "Tanggal Panen",
-          value: product['tanggalPanen'].toString().split(' ')[0],
+          value: harvestDate,
         ),
       ],
     );
   }
 
   Widget _additionalInfo() {
+    final description = product['description'] ?? "-";
+    
     return SectionCard(
       title: "Info Tambahan",
       children: [
         Text(
-          product['info'] ?? "-",
-          style: const TextStyle(fontSize: 14, height: 1.4),
+          description,
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
@@ -292,18 +350,28 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
           ),
           const SizedBox(height: 12),
           ...children,
@@ -328,13 +396,28 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.primary),
+          Icon(icon, size: 16, color: AppColors.primary),
           const SizedBox(width: 8),
-          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
-          Expanded(child: Text(value)),
+          Text(
+            "$label: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
         ],
       ),
     );
