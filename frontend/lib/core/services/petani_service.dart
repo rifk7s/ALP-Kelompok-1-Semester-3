@@ -37,7 +37,6 @@ class PetaniService {
     final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
     final headers = ApiConfig.headers(token: token);
 
-    print('🌾 Fetching petani list from: $uri');
 
     final resp = await client
         .get(uri, headers: headers)
@@ -48,8 +47,6 @@ class PetaniService {
           },
         );
 
-    print('📦 Response status: ${resp.statusCode}');
-    print('📦 Response body: ${resp.body}');
 
     if (resp.statusCode == 200) {
       final jsonBody = json.decode(resp.body);
@@ -76,8 +73,6 @@ class PetaniService {
     final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
     final headers = ApiConfig.headers(token: token);
 
-    print('🌱 Creating petani with data: $data');
-    print('🌱 URL: $uri');
 
     final resp = await client
         .post(uri, headers: headers, body: json.encode(data))
@@ -88,8 +83,6 @@ class PetaniService {
           },
         );
 
-    print('✅ Response status: ${resp.statusCode}');
-    print('✅ Response body: ${resp.body}');
 
     if (resp.statusCode == 201) {
       final jsonBody = json.decode(resp.body);

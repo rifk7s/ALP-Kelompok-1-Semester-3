@@ -86,15 +86,12 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
       // Load categories
       final categoriesData = await CategoryService.getCategories();
-      print('Categories loaded: ${categoriesData.length}');
 
       // Load petani data
       final petaniData = await PetaniService().fetchAllPetani(token: token);
-      print('Petani loaded: ${petaniData.length}');
 
       // Load HPP prices
       final hppData = await HppPriceService.getHppPrices();
-      print('HPP prices loaded: ${hppData.length}');
 
       // Group varieties by category
       Map<String, List<String>> varieties = {};
@@ -118,9 +115,8 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         isLoading = false;
       });
 
-      print('Data loaded successfully!');
     } catch (e) {
-      print('Error loading data: $e');
+      debugPrint('Error loading data: $e');
       setState(() {
         isLoading = false;
       });

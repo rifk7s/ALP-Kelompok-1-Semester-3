@@ -53,7 +53,6 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
           throw Exception('Token tidak ditemukan. Silakan login kembali.');
         }
 
-        print('🔑 Token: ${token.substring(0, 20)}...');
 
         // Prepare data
         final data = {
