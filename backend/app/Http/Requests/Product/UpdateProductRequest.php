@@ -25,7 +25,7 @@ class UpdateProductRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'variety' => ['sometimes', 'string', 'max:255'],
-            'harvest_date' => ['sometimes', 'date', Rule::unique('products')->ignore($this->product->id)],
+            'harvest_date' => ['sometimes', 'date'],
             'storage_days' => ['sometimes', 'integer', 'min:0'],
             'price_per_kg' => ['sometimes', 'numeric', 'min:0'],
             'stock_kg' => ['sometimes', 'numeric', 'min:0'],

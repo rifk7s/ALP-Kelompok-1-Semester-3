@@ -205,11 +205,15 @@ class _ProductPageState extends State<ProductPage> {
         heroTag: "addProdukFab",
         backgroundColor: AppColors.primary,
         elevation: 4,
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const UploadProdukScreen()),
           );
+          // Reload products if a new product was added
+          if (result == true) {
+            loadProducts();
+          }
         },
         child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),
@@ -257,39 +261,30 @@ class _ProductPageState extends State<ProductPage> {
         : null;
     final imageUrl = ApiConfig.getImageUrl(imagePath);
     
-    // Get petani name from product contributions
-    String petaniName = "BUMDes";
-    if (product['product_contributions'] != null && 
-        (product['product_contributions'] as List).isNotEmpty) {
-      final firstContribution = (product['product_contributions'] as List)[0];
-      if (firstContribution['petani'] != null) {
-        petaniName = firstContribution['petani']['name'];
-      }
+    // Get number of contributors
+    int contributorCount = 0;
+    if (product['product_contributions'] != null) {
+      contributorCount = (product['product_contributions'] as List).length;
     }
 
     return GestureDetector(
       onTap: () async {
-        final result = await Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ProductDetailPage(
               product: product,
               onUpdate: (updatedProduct) {
-                setState(() {
-                  final index = products.indexWhere(
-                    (p) => p["id"] == product["id"],
-                  );
-                  if (index != -1) products[index] = updatedProduct;
-                });
+                // Reload entire list to get fresh data
+                loadProducts();
               },
             ),
           ),
         );
         
-        // If product was deleted, refresh the list
-        if (result == true) {
-          loadProducts();
-        }
+        // Reload products after returning from detail screen
+        // This handles both edit and delete operations
+        loadProducts();
       },
       child: Opacity(
         opacity: isSoldOut ? 0.5 : 1.0,
@@ -380,9 +375,9 @@ class _ProductPageState extends State<ProductPage> {
                     ),
                     const SizedBox(height: 4),
                     
-                    // Petani name
+                    // Number of contributors
                     Text(
-                      "Petani: $petaniName",
+                      "$contributorCount Petani",
                       style: TextStyle(
                         fontSize: 11,
                         color: isSoldOut ? Colors.grey[600] : AppColors.textLight,

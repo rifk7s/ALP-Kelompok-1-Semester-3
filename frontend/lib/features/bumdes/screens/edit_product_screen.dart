@@ -26,8 +26,13 @@ class EditProdukScreen extends StatefulWidget {
 }
 
 class _EditProdukScreenState extends State<EditProdukScreen> {
-  String? selectedPetani;
-  int? selectedPetaniId;
+  // Multiple petani contributors
+  List<Map<String, dynamic>> petaniContributors = [];
+  int? selectedPetaniId; // For dropdown
+  String? selectedPetani; // For dropdown
+  final _kontribusiController = TextEditingController();
+  DateTime? selectedHarvestDate; // For contributor harvest date
+  
   String? selectedKategori;
   int? selectedKategoriId;
   String? selectedVarietas;
@@ -58,6 +63,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   @override
   void initState() {
     super.initState();
+    _jumlahController.text = '0.00'; // Initialize with 0
     loadData();
 
     _hargaController.addListener(() {
@@ -144,20 +150,21 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           _hargaController.text = rupiah.format(price.toInt());
         }
         
-        // Set petani from product contributions
-        if (widget.product['product_contributions'] != null && 
-            (widget.product['product_contributions'] as List).isNotEmpty) {
-          final contribution = widget.product['product_contributions'][0];
-          if (contribution['petani'] != null) {
-            selectedPetaniId = contribution['petani']['id'];
-            selectedPetani = contribution['petani']['name'];
-            // Set address if petani is found in the list
-            final petani = petaniData.firstWhere(
-              (p) => p.id == selectedPetaniId,
-              orElse: () => petaniData.first,
-            );
-            _lokasiController.text = petani.address ?? '';
-          }
+        // Load all contributors from product contributions
+        if (widget.product['product_contributions'] != null) {
+          final contributions = widget.product['product_contributions'] as List;
+          petaniContributors = contributions.map((contrib) => {
+            'petani_id': contrib['petani']['id'],
+            'petani_name': contrib['petani']['name'],
+            'contributed_kg': double.parse(contrib['contributed_kg'].toString()),
+            'harvest_date': contrib['harvest_date'] ?? DateTime.now().toIso8601String().split('T')[0],
+          }).toList().cast<Map<String, dynamic>>();
+          
+          // Calculate total stock from contributions
+          final total = petaniContributors.fold<double>(
+            0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble(),
+          );
+          _jumlahController.text = total.toStringAsFixed(2);
         }
         
         // Load existing images
@@ -217,9 +224,21 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       return;
     }
 
-    if (selectedPetaniId == null) {
+    if (petaniContributors.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih petani terlebih dahulu')),
+        const SnackBar(content: Text('Tambahkan minimal 1 kontributor petani')),
+      );
+      return;
+    }
+    
+    // Validate total contributions match stock
+    final totalContributions = petaniContributors.fold<double>(
+      0, (sum, contrib) => sum + (contrib['contributed_kg'] as num).toDouble(),
+    );
+    final stockKg = double.tryParse(_jumlahController.text.replaceAll(',', '.')) ?? 0;
+    if (stockKg > 0 && (totalContributions - stockKg).abs() > 0.01) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Total kontribusi (${totalContributions.toStringAsFixed(2)} kg) harus sama dengan stok (${stockKg.toStringAsFixed(2)} kg)')),
       );
       return;
     }
@@ -238,9 +257,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       return;
     }
 
-    if (_jumlahController.text.isEmpty) {
+    if (_jumlahController.text.isEmpty || stockKg <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Jumlah stok harus diisi')),
+        const SnackBar(content: Text('Jumlah stok harus diisi dan lebih dari 0')),
       );
       return;
     }
@@ -282,7 +301,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         description: _infoTambahanController.text.isEmpty 
             ? null 
             : _infoTambahanController.text,
-        petaniId: selectedPetaniId,
+        petaniContributors: petaniContributors,
         newImages: selectedImages.isNotEmpty ? selectedImages : null,
         imageIdsToDelete: imagesToDelete.isNotEmpty ? imagesToDelete : null,
       );
@@ -341,26 +360,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     }
   }
 
-  Future<void> pilihTanggalPanen() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
 
-    if (picked != null) {
-      tanggalPanen = picked;
-
-      int masa = int.tryParse(_masaSimpanController.text) ?? 0;
-      if (masa > 0) {
-        DateTime expired = picked.add(Duration(days: masa));
-        masaSimpanNote =
-            "ℹ️ Masa Simpan $masa hari (s/d ${expired.day} ${_bulan(expired.month)} ${expired.year})";
-      }
-      setState(() {});
-    }
-  }
 
   String _bulan(int m) {
     const b = [
@@ -379,6 +379,177 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       "Des",
     ];
     return b[m];
+  }
+
+  String _formatDate(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(isoString);
+      return '${date.day} ${_bulan(date.month)} ${date.year}';
+    } catch (e) {
+      return '-';
+    }
+  }
+
+  Future<void> _editContributor(int index, Map<String, dynamic> contrib) async {
+    final TextEditingController editKgController = TextEditingController(
+      text: contrib['contributed_kg'].toString(),
+    );
+    int? editPetaniId = contrib['petani_id'];
+    String? editPetaniName = contrib['petani_name'];
+    DateTime? editHarvestDate;
+    
+    // Parse harvest date
+    try {
+      editHarvestDate = DateTime.parse(contrib['harvest_date']);
+    } catch (e) {
+      editHarvestDate = DateTime.now();
+    }
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Edit Kontributor'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Harvest date picker
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: editHarvestDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            editHarvestDate = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 10),
+                            Text(
+                              editHarvestDate == null
+                                  ? "Pilih tanggal panen"
+                                  : "${editHarvestDate!.day} ${_bulan(editHarvestDate!.month)} ${editHarvestDate!.year}",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Petani dropdown
+                    DropdownButtonFormField<int>(
+                      value: editPetaniId,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Petani',
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      items: petaniList
+                          .where((p) => p.isActive)
+                          .map((p) => DropdownMenuItem<int>(
+                                value: p.id,
+                                child: Text(p.name),
+                              ))
+                          .toList(),
+                      onChanged: (v) {
+                        setDialogState(() {
+                          editPetaniId = v;
+                          if (v != null) {
+                            final petani = petaniList.firstWhere((p) => p.id == v);
+                            editPetaniName = petani.name;
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Kg input
+                    TextField(
+                      controller: editKgController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Jumlah (kg)',
+                        prefixIcon: Icon(Icons.scale),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final kg = double.tryParse(editKgController.text);
+                    if (kg == null || kg <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Masukkan jumlah kg yang valid')),
+                      );
+                      return;
+                    }
+                    if (editPetaniId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pilih petani')),
+                      );
+                      return;
+                    }
+                    if (editHarvestDate == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pilih tanggal panen')),
+                      );
+                      return;
+                    }
+                    
+                    Navigator.pop(context, {
+                      'petani_id': editPetaniId!,
+                      'petani_name': editPetaniName!,
+                      'contributed_kg': kg,
+                      'harvest_date': editHarvestDate!.toIso8601String().split('T')[0],
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: const Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        petaniContributors[index] = result;
+        // Update total stock
+        final total = petaniContributors.fold<double>(
+          0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble(),
+        );
+        _jumlahController.text = total.toStringAsFixed(2);
+      });
+    }
   }
 
   Widget sectionCard({required String title, required Widget child}) {
@@ -541,6 +712,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                           crossAxisCount: 3,
                           mainAxisSpacing: 10,
                           crossAxisSpacing: 10,
+                          childAspectRatio: 1.0,
                         ),
                     itemBuilder: (_, i) {
                       final image = existingImages[i];
@@ -610,6 +782,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                             crossAxisCount: 3,
                             mainAxisSpacing: 10,
                             crossAxisSpacing: 10,
+                            childAspectRatio: 1.0,
                           ),
                       itemBuilder: (_, i) {
                         return Stack(
@@ -683,29 +856,276 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                inputLabel("Nama Petani *"),
-                DropdownButtonFormField<int>(
-                  value: selectedPetaniId,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                inputLabel("Kontributor Petani *"),
+                
+                // Display added contributors
+                if (petaniContributors.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Urutan FIFO (teratas dijual pertama):',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...petaniContributors.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final contrib = entry.value;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        contrib['petani_name'],
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${contrib['contributed_kg']} kg',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Panen: ${_formatDate(contrib['harvest_date'])}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textMuted,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: AppColors.primary, size: 20),
+                                  onPressed: () {
+                                    _editContributor(index, contrib);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: AppColors.danger, size: 20),
+                                  onPressed: () {
+                                    setState(() {
+                                      petaniContributors.removeAt(index);
+                                      // Update total stock
+                                      final total = petaniContributors.fold<double>(
+                                        0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble(),
+                                      );
+                                      _jumlahController.text = total.toStringAsFixed(2);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${petaniContributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble()).toStringAsFixed(2)} kg',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  items: petaniList
-                      .where((p) => p.isActive)
-                      .map((p) => DropdownMenuItem<int>(
-                            value: p.id,
-                            child: Text(p.name),
-                          ))
-                      .toList(),
-                  onChanged: (v) {
-                    setState(() {
-                      selectedPetaniId = v;
-                      final petani = petaniList.firstWhere((p) => p.id == v);
-                      selectedPetani = petani.name;
-                      _lokasiController.text = petani.address ?? '';
-                    });
-                  },
+                
+                // Add new contributor
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Harvest date picker
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            selectedHarvestDate = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 10),
+                            Text(
+                              selectedHarvestDate == null
+                                  ? "Pilih tanggal panen"
+                                  : "${selectedHarvestDate!.day} ${_bulan(selectedHarvestDate!.month)} ${selectedHarvestDate!.year}",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Petani, kg, and add button row
+                    Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<int>(
+                        value: selectedPetaniId,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person),
+                          hintText: 'Pilih Petani',
+                        ),
+                        items: petaniList
+                            .where((p) => p.isActive)
+                            .map((p) => DropdownMenuItem<int>(
+                                  value: p.id,
+                                  child: Text(p.name),
+                                ))
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            selectedPetaniId = v;
+                            if (v != null) {
+                              final petani = petaniList.firstWhere((p) => p.id == v);
+                              selectedPetani = petani.name;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _kontribusiController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'kg',
+                          prefixIcon: Icon(Icons.scale),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 56,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (selectedPetaniId == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Pilih petani terlebih dahulu')),
+                            );
+                            return;
+                          }
+                          
+                          if (selectedHarvestDate == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Pilih tanggal panen')),
+                            );
+                            return;
+                          }
+                          
+                          final kg = double.tryParse(_kontribusiController.text);
+                          if (kg == null || kg <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Masukkan jumlah kg yang valid')),
+                            );
+                            return;
+                          }
+                          
+                          setState(() {
+                            petaniContributors.add({
+                              'petani_id': selectedPetaniId!,
+                              'petani_name': selectedPetani!,
+                              'contributed_kg': kg,
+                              'harvest_date': selectedHarvestDate!.toIso8601String().split('T')[0],
+                            });
+                            
+                            // Update total stock
+                            final total = petaniContributors.fold<double>(
+                              0, (sum, contrib) => sum + (contrib['contributed_kg'] as num).toDouble(),
+                            );
+                            _jumlahController.text = total.toStringAsFixed(2);
+                            
+                            // Reset fields
+                            selectedPetaniId = null;
+                            selectedPetani = null;
+                            selectedHarvestDate = null;
+                            _kontribusiController.clear();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Icon(Icons.add),
+                      ),
+                    ),
+                  ],
                 ),
+                ],
+              ),
                 const SizedBox(height: 14),
 
                 inputLabel("Kategori *"),
@@ -737,11 +1157,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   },
                 ),
 
-                if (selectedKategori != null)
+                if (selectedKategori != null && getPriceForSelection() != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      "ℹ️ HPP ${selectedKategori!}: Rp ${(getPriceForSelection() ?? 0).toInt()}/kg",
+                      "ℹ️ HPP $selectedKategori: Rp ${getPriceForSelection()!.toInt()}/kg",
                       style: const TextStyle(color: AppColors.textDark),
                     ),
                   ),
@@ -784,43 +1204,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   const SizedBox(height: 14),
                 ],
 
-                inputLabel("Tanggal Panen *"),
-                InkWell(
-                  onTap: pilihTanggalPanen,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today),
-                        const SizedBox(width: 10),
-                        Text(
-                          tanggalPanen == null
-                              ? "Pilih tanggal"
-                              : "${tanggalPanen!.day} ${_bulan(tanggalPanen!.month)} ${tanggalPanen!.year}",
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                if (masaSimpanNote != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      masaSimpanNote!,
-                      style: const TextStyle(color: AppColors.textDark),
-                    ),
-                  ),
-
-                const SizedBox(height: 14),
-
                 inputLabel("Harga per Kg *"),
                 TextField(
                   controller: _hargaController,
@@ -844,9 +1227,17 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 TextField(
                   controller: _jumlahController,
                   keyboardType: TextInputType.number,
+                  readOnly: true,
+                  enabled: false,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.numbers),
+                    filled: true,
+                    fillColor: Color(0xFFF5F5F5),
+                    hintText: 'Auto-calculated from contributions',
+                  ),
+                  style: const TextStyle(
+                    color: Colors.black54,
                   ),
                 ),
               ],

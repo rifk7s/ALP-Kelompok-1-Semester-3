@@ -12,7 +12,7 @@ final NumberFormat rupiah = NumberFormat.currency(
   decimalDigits: 0,
 );
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
   final Function(Map<String, dynamic>) onUpdate;
 
@@ -21,6 +21,19 @@ class ProductDetailPage extends StatelessWidget {
     required this.product,
     required this.onUpdate,
   });
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  late Map<String, dynamic> currentProduct;
+
+  @override
+  void initState() {
+    super.initState();
+    currentProduct = widget.product;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +58,14 @@ class ProductDetailPage extends StatelessWidget {
               final result = await Navigator.push<Map<String, dynamic>>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => EditProdukScreen(product: product),
+                  builder: (_) => EditProdukScreen(product: currentProduct),
                 ),
               );
               if (result != null) {
-                onUpdate(result);
+                setState(() {
+                  currentProduct = result;
+                });
+                widget.onUpdate(result);
               }
             },
           ),
@@ -73,6 +89,8 @@ class ProductDetailPage extends StatelessWidget {
               const SizedBox(height: 24),
               _specifications(),
               const SizedBox(height: 20),
+              _contributors(),
+              const SizedBox(height: 20),
               _additionalInfo(),
               const SizedBox(height: 50),
             ],
@@ -88,7 +106,7 @@ class ProductDetailPage extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text("Konfirmasi Hapus"),
         content: Text(
-          "Apakah Anda yakin ingin menghapus produk ${product['name']}?",
+          "Apakah Anda yakin ingin menghapus produk ${currentProduct['name']}?",
         ),
         actions: [
           TextButton(
@@ -119,7 +137,7 @@ class ProductDetailPage extends StatelessWidget {
       }
 
       await ProductService.deleteProduct(
-        productId: product['id'],
+        productId: currentProduct['id'],
         token: token,
       );
 
@@ -147,9 +165,9 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _productImage() {
-    final imagePath = product['product_images'] != null &&
-            (product['product_images'] as List).isNotEmpty
-        ? product['product_images'][0]['image_path']
+    final imagePath = currentProduct['product_images'] != null &&
+            (currentProduct['product_images'] as List).isNotEmpty
+        ? currentProduct['product_images'][0]['image_path']
         : null;
     final imageUrl = ApiConfig.getImageUrl(imagePath);
 
@@ -188,13 +206,13 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _productNameAndPrice() {
-    final pricePerKg = double.parse(product['price_per_kg'].toString());
+    final pricePerKg = double.parse(currentProduct['price_per_kg'].toString());
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          product['name'],
+          currentProduct['name'],
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -215,25 +233,21 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _highlights() {
-    final stockKg = double.parse(product['stock_kg'].toString());
+    final stockKg = double.parse(currentProduct['stock_kg'].toString());
     
-    // Get petani name
-    String petaniName = "BUMDes";
-    if (product['product_contributions'] != null &&
-        (product['product_contributions'] as List).isNotEmpty) {
-      final firstContribution = (product['product_contributions'] as List)[0];
-      if (firstContribution['petani'] != null) {
-        petaniName = firstContribution['petani']['name'];
-      }
+    // Get contributor count
+    int contributorCount = 0;
+    if (currentProduct['product_contributions'] != null) {
+      contributorCount = (currentProduct['product_contributions'] as List).length;
     }
     
     return Row(
       children: [
         Expanded(
           child: _highlightCard(
-            icon: Icons.person_outline,
-            title: 'Petani',
-            value: petaniName,
+            icon: Icons.people_outline,
+            title: 'Kontributor',
+            value: '$contributorCount Petani',
           ),
         ),
         const SizedBox(width: 12),
@@ -293,11 +307,10 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _specifications() {
-    final categoryName = product['category'] != null 
-        ? product['category']['name'] 
+    final categoryName = currentProduct['category'] != null 
+        ? currentProduct['category']['name'] 
         : '-';
-    final variety = product['variety'] ?? '-';
-    final harvestDate = product['harvest_date'] ?? '-';
+    final variety = currentProduct['variety'] ?? '-';
 
     return SectionCard(
       title: "Spesifikasi Produk",
@@ -312,17 +325,144 @@ class ProductDetailPage extends StatelessWidget {
           label: "Varietas",
           value: variety,
         ),
-        InfoRow(
-          icon: Icons.calendar_today_outlined,
-          label: "Tanggal Panen",
-          value: harvestDate,
+      ],
+    );
+  }
+
+  Widget _contributors() {
+    if (currentProduct['product_contributions'] == null ||
+        (currentProduct['product_contributions'] as List).isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final contributions = currentProduct['product_contributions'] as List;
+
+    return SectionCard(
+      title: "Kontributor Petani",
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxHeight: 250),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: contributions.length,
+            itemBuilder: (context, index) {
+              final contrib = contributions[index];
+              final petaniName = contrib['petani']?['name'] ?? 'Unknown';
+              final contributedKg = contrib['contributed_kg']?.toString() ?? '0';
+              final harvestDate = contrib['harvest_date'] ?? '-';
+              final formattedDate = _formatDate(harvestDate);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            petaniName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today,
+                                size: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Panen: $formattedDate',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '$contributedKg kg',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
   }
 
+  String _formatDate(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(isoString);
+      const months = [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des'
+      ];
+      return '${date.day} ${months[date.month]} ${date.year}';
+    } catch (e) {
+      return '-';
+    }
+  }
+
   Widget _additionalInfo() {
-    final description = product['description'] ?? "-";
+    final description = currentProduct['description'] ?? "-";
     
     return SectionCard(
       title: "Info Tambahan",
