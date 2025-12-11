@@ -84,7 +84,10 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
-                  Navigator.pop(context, true); // Return to manage screen with success flag
+                  Navigator.pop(
+                    context,
+                    true,
+                  ); // Return to manage screen with success flag
                 },
                 child: const Text("OK"),
               ),

@@ -39,12 +39,14 @@ class PetaniService {
 
     print('🌾 Fetching petani list from: $uri');
 
-    final resp = await client.get(uri, headers: headers).timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        throw Exception('Request timeout - server tidak merespons');
-      },
-    );
+    final resp = await client
+        .get(uri, headers: headers)
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('Request timeout - server tidak merespons');
+          },
+        );
 
     print('📦 Response status: ${resp.statusCode}');
     print('📦 Response body: ${resp.body}');
@@ -53,7 +55,9 @@ class PetaniService {
       final jsonBody = json.decode(resp.body);
       if (jsonBody is Map && jsonBody.containsKey('data')) {
         final List<dynamic> dataList = jsonBody['data'] as List<dynamic>;
-        return dataList.map((item) => PetaniData.fromJson(item as Map<String, dynamic>)).toList();
+        return dataList
+            .map((item) => PetaniData.fromJson(item as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } else if (resp.statusCode == 401) {
@@ -61,7 +65,7 @@ class PetaniService {
     } else if (resp.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
-    
+
     throw Exception('Gagal memuat data petani: ${resp.statusCode}');
   }
 
@@ -75,16 +79,14 @@ class PetaniService {
     print('🌱 Creating petani with data: $data');
     print('🌱 URL: $uri');
 
-    final resp = await client.post(
-      uri,
-      headers: headers,
-      body: json.encode(data),
-    ).timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        throw Exception('Request timeout - server tidak merespons');
-      },
-    );
+    final resp = await client
+        .post(uri, headers: headers, body: json.encode(data))
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('Request timeout - server tidak merespons');
+          },
+        );
 
     print('✅ Response status: ${resp.statusCode}');
     print('✅ Response body: ${resp.body}');

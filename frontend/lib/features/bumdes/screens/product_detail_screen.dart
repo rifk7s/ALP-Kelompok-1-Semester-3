@@ -115,9 +115,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text("Hapus"),
           ),
         ],
@@ -165,7 +163,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Widget _productImage() {
-    final imagePath = currentProduct['product_images'] != null &&
+    final imagePath =
+        currentProduct['product_images'] != null &&
             (currentProduct['product_images'] as List).isNotEmpty
         ? currentProduct['product_images'][0]['image_path']
         : null;
@@ -207,7 +206,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _productNameAndPrice() {
     final pricePerKg = double.parse(currentProduct['price_per_kg'].toString());
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,13 +233,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _highlights() {
     final stockKg = double.parse(currentProduct['stock_kg'].toString());
-    
+
     // Get contributor count
     int contributorCount = 0;
     if (currentProduct['product_contributions'] != null) {
-      contributorCount = (currentProduct['product_contributions'] as List).length;
+      contributorCount =
+          (currentProduct['product_contributions'] as List).length;
     }
-    
+
     return Row(
       children: [
         Expanded(
@@ -307,8 +307,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Widget _specifications() {
-    final categoryName = currentProduct['category'] != null 
-        ? currentProduct['category']['name'] 
+    final categoryName = currentProduct['category'] != null
+        ? currentProduct['category']['name']
         : '-';
     final variety = currentProduct['variety'] ?? '-';
 
@@ -320,11 +320,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           label: "Kategori",
           value: categoryName,
         ),
-        InfoRow(
-          icon: Icons.grass_outlined,
-          label: "Varietas",
-          value: variety,
-        ),
+        InfoRow(icon: Icons.grass_outlined, label: "Varietas", value: variety),
       ],
     );
   }
@@ -348,7 +344,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             itemBuilder: (context, index) {
               final contrib = contributions[index];
               final petaniName = contrib['petani']?['name'] ?? 'Unknown';
-              final contributedKg = contrib['contributed_kg']?.toString() ?? '0';
+              final contributedKg =
+                  contrib['contributed_kg']?.toString() ?? '0';
               final harvestDate = contrib['harvest_date'] ?? '-';
               final formattedDate = _formatDate(harvestDate);
 
@@ -453,7 +450,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         'Sep',
         'Okt',
         'Nov',
-        'Des'
+        'Des',
       ];
       return '${date.day} ${months[date.month]} ${date.year}';
     } catch (e) {
@@ -463,7 +460,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _additionalInfo() {
     final description = currentProduct['description'] ?? "-";
-    
+
     return SectionCard(
       title: "Info Tambahan",
       children: [
@@ -552,10 +549,7 @@ class InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textDark,
-              ),
+              style: const TextStyle(fontSize: 13, color: AppColors.textDark),
             ),
           ),
         ],

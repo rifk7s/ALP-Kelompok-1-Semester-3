@@ -44,7 +44,7 @@ class ProductService {
   }) async {
     // Get token for authentication
     final token = await StorageService.getToken();
-    
+
     var request = http.MultipartRequest(
       'POST',
       Uri.parse('${ApiConfig.baseUrl}/products/product'),
@@ -66,21 +66,21 @@ class ProductService {
     request.fields['storage_days'] = storageDays.toString();
     request.fields['price_per_kg'] = pricePerKg.toString();
     request.fields['stock_kg'] = stockKg.toString();
-    
+
     if (description != null) {
       request.fields['description'] = description;
     }
-    
+
     // Handle multiple petani contributors
     if (petaniContributors != null && petaniContributors.isNotEmpty) {
       for (int i = 0; i < petaniContributors.length; i++) {
-        request.fields['petani_contributors[$i][petani_id]'] = 
+        request.fields['petani_contributors[$i][petani_id]'] =
             petaniContributors[i]['petani_id'].toString();
-        request.fields['petani_contributors[$i][contributed_kg]'] = 
+        request.fields['petani_contributors[$i][contributed_kg]'] =
             petaniContributors[i]['contributed_kg'].toString();
         // Include harvest date for each contributor
         if (petaniContributors[i]['harvest_date'] != null) {
-          request.fields['petani_contributors[$i][harvest_date]'] = 
+          request.fields['petani_contributors[$i][harvest_date]'] =
               petaniContributors[i]['harvest_date'].toString();
         }
       }
@@ -93,10 +93,7 @@ class ProductService {
     if (images != null) {
       for (var i = 0; i < images.length; i++) {
         request.files.add(
-          await http.MultipartFile.fromPath(
-            'images[$i]',
-            images[i].path,
-          ),
+          await http.MultipartFile.fromPath('images[$i]', images[i].path),
         );
       }
     }
@@ -166,27 +163,33 @@ class ProductService {
 
         // Add product data
         if (name != null) request.fields['name'] = name;
-        if (categoryId != null) request.fields['category_id'] = categoryId.toString();
+        if (categoryId != null)
+          request.fields['category_id'] = categoryId.toString();
         if (variety != null) request.fields['variety'] = variety;
         if (harvestDate != null) request.fields['harvest_date'] = harvestDate;
-        if (storageDays != null) request.fields['storage_days'] = storageDays.toString();
-        if (pricePerKg != null) request.fields['price_per_kg'] = pricePerKg.toString();
+        if (storageDays != null)
+          request.fields['storage_days'] = storageDays.toString();
+        if (pricePerKg != null)
+          request.fields['price_per_kg'] = pricePerKg.toString();
         if (stockKg != null) request.fields['stock_kg'] = stockKg.toString();
         if (description != null) request.fields['description'] = description;
         if (status != null) request.fields['status'] = status;
-        
+
         // Add petani contributors
         if (petaniContributors != null && petaniContributors.isNotEmpty) {
           for (int i = 0; i < petaniContributors.length; i++) {
-            request.fields['petani_contributors[$i][petani_id]'] = petaniContributors[i]['petani_id'].toString();
-            request.fields['petani_contributors[$i][contributed_kg]'] = petaniContributors[i]['contributed_kg'].toString();
+            request.fields['petani_contributors[$i][petani_id]'] =
+                petaniContributors[i]['petani_id'].toString();
+            request.fields['petani_contributors[$i][contributed_kg]'] =
+                petaniContributors[i]['contributed_kg'].toString();
           }
         }
 
         // Add image IDs to delete
         if (imageIdsToDelete != null && imageIdsToDelete.isNotEmpty) {
           for (int i = 0; i < imageIdsToDelete.length; i++) {
-            request.fields['delete_image_ids[$i]'] = imageIdsToDelete[i].toString();
+            request.fields['delete_image_ids[$i]'] = imageIdsToDelete[i]
+                .toString();
           }
         }
 
@@ -219,13 +222,17 @@ class ProductService {
         if (stockKg != null) data['stock_kg'] = stockKg;
         if (description != null) data['description'] = description;
         if (status != null) data['status'] = status;
-        
+
         // Add petani contributors
         if (petaniContributors != null && petaniContributors.isNotEmpty) {
-          data['petani_contributors'] = petaniContributors.map((contrib) => {
-            'petani_id': contrib['petani_id'],
-            'contributed_kg': contrib['contributed_kg'],
-          }).toList();
+          data['petani_contributors'] = petaniContributors
+              .map(
+                (contrib) => {
+                  'petani_id': contrib['petani_id'],
+                  'contributed_kg': contrib['contributed_kg'],
+                },
+              )
+              .toList();
         }
 
         final response = await http.put(

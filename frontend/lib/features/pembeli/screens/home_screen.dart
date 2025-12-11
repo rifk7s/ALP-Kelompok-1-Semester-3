@@ -49,9 +49,9 @@ class _HomePageState extends State<HomePage> {
         isLoadingCategories = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading categories: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading categories: $e')));
       }
     }
   }
@@ -62,14 +62,14 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       final data = await ProductService.getProducts(categoryId: categoryId);
-      
+
       // Sort: active products first, sold_out at bottom
       data.sort((a, b) {
         if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
         if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
         return 0;
       });
-      
+
       setState(() {
         products = data;
         isLoadingProducts = false;
@@ -79,9 +79,9 @@ class _HomePageState extends State<HomePage> {
         isLoadingProducts = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading products: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading products: $e')));
       }
     }
   }
@@ -261,7 +261,8 @@ class _HomePageState extends State<HomePage> {
                         itemCount: categories.length,
                         itemBuilder: (context, index) {
                           final category = categories[index];
-                          final isSelected = _selectedCategoryId == category['id'];
+                          final isSelected =
+                              _selectedCategoryId == category['id'];
                           return kategoriItem(
                             category['name'],
                             "assets/images/gabah.jpg",
@@ -302,37 +303,35 @@ class _HomePageState extends State<HomePage> {
                       ),
                     )
                   : products.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(40),
-                          child: Center(
-                            child: Text(
-                              'Tidak ada produk tersedia',
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 14,
-                              ),
-                            ),
+                  ? const Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Center(
+                        child: Text(
+                          'Tidak ada produk tersedia',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
                           ),
-                        )
-                      : GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: products.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: products.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 14,
                             childAspectRatio: 0.70,
                           ),
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            return productCard(
-                              context: context,
-                              product: product,
-                            );
-                          },
-                        ),
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return productCard(context: context, product: product);
+                      },
+                    ),
 
               const SizedBox(height: 30),
             ],
@@ -391,21 +390,20 @@ Widget productCard({
   final isSoldOut = product['status'] == 'sold_out';
   final stockKg = double.parse(product['stock_kg'].toString());
   final pricePerKg = double.parse(product['price_per_kg'].toString());
-  final imagePath = product['product_images'] != null && 
-                   (product['product_images'] as List).isNotEmpty
+  final imagePath =
+      product['product_images'] != null &&
+          (product['product_images'] as List).isNotEmpty
       ? product['product_images'][0]['image_path']
       : null;
   final imageUrl = ApiConfig.getImageUrl(imagePath);
-  
+
   return GestureDetector(
     onTap: () {
       if (context != null && !isSoldOut) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(
-              product: product,
-            ),
+            builder: (context) => ProductDetailPage(product: product),
           ),
         );
       }
@@ -490,7 +488,9 @@ Widget productCard({
                     "Stok: ${stockKg.toStringAsFixed(0)}kg",
                     style: TextStyle(
                       fontSize: 12,
-                      color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                      color: isSoldOut
+                          ? Colors.grey[600]
+                          : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -499,7 +499,9 @@ Widget productCard({
                       Icon(
                         Icons.location_on_outlined,
                         size: 14,
-                        color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                        color: isSoldOut
+                            ? Colors.grey[600]
+                            : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -507,7 +509,9 @@ Widget productCard({
                           "Sengka, Gowa",
                           style: TextStyle(
                             fontSize: 12,
-                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                            color: isSoldOut
+                                ? Colors.grey[600]
+                                : AppColors.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -517,7 +521,10 @@ Widget productCard({
                   if (isSoldOut) ...[
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red[100],
                         borderRadius: BorderRadius.circular(4),

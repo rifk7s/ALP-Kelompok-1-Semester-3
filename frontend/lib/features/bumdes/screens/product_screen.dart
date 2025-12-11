@@ -44,9 +44,9 @@ class _ProductPageState extends State<ProductPage> {
         isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading products: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading products: $e')));
       }
     }
   }
@@ -54,11 +54,11 @@ class _ProductPageState extends State<ProductPage> {
   List<dynamic> get filteredProducts {
     List<dynamic> temp = products.where((p) {
       final status = p['status'].toString();
-      
+
       // Filter by stock status
       if (_filter == "available" && status == 'sold_out') return false;
       if (_filter == "empty" && status == 'active') return false;
-      
+
       // Filter by search query
       if (_searchQuery.isNotEmpty &&
           !p["name"].toString().toLowerCase().contains(
@@ -68,14 +68,14 @@ class _ProductPageState extends State<ProductPage> {
       }
       return true;
     }).toList();
-    
+
     // Sort: active products first, sold_out at bottom
     temp.sort((a, b) {
       if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
       if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
       return 0;
     });
-    
+
     return temp;
   }
 
@@ -84,9 +84,7 @@ class _ProductPageState extends State<ProductPage> {
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppColors.surface,
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -255,12 +253,13 @@ class _ProductPageState extends State<ProductPage> {
     final isSoldOut = product['status'] == 'sold_out';
     final stockKg = double.parse(product['stock_kg'].toString());
     final pricePerKg = double.parse(product['price_per_kg'].toString());
-    final imagePath = product['product_images'] != null && 
-                     (product['product_images'] as List).isNotEmpty
+    final imagePath =
+        product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty
         ? product['product_images'][0]['image_path']
         : null;
     final imageUrl = ApiConfig.getImageUrl(imagePath);
-    
+
     // Get number of contributors
     int contributorCount = 0;
     if (product['product_contributions'] != null) {
@@ -281,7 +280,7 @@ class _ProductPageState extends State<ProductPage> {
             ),
           ),
         );
-        
+
         // Reload products after returning from detail screen
         // This handles both edit and delete operations
         loadProducts();
@@ -327,7 +326,7 @@ class _ProductPageState extends State<ProductPage> {
                       : null,
                 ),
               ),
-              
+
               // Product Info
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -340,13 +339,15 @@ class _ProductPageState extends State<ProductPage> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: isSoldOut ? Colors.grey[700] : AppColors.textDark,
+                        color: isSoldOut
+                            ? Colors.grey[700]
+                            : AppColors.textDark,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    
+
                     // Stock • Price
                     Row(
                       children: [
@@ -354,43 +355,54 @@ class _ProductPageState extends State<ProductPage> {
                           "${stockKg.toStringAsFixed(0)} kg",
                           style: TextStyle(
                             fontSize: 12,
-                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                            color: isSoldOut
+                                ? Colors.grey[600]
+                                : AppColors.textSecondary,
                           ),
                         ),
                         Text(
                           " • ",
                           style: TextStyle(
                             fontSize: 12,
-                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                            color: isSoldOut
+                                ? Colors.grey[600]
+                                : AppColors.textSecondary,
                           ),
                         ),
                         Text(
                           rupiah.format(pricePerKg.toInt()),
                           style: TextStyle(
                             fontSize: 12,
-                            color: isSoldOut ? Colors.grey[600] : AppColors.textSecondary,
+                            color: isSoldOut
+                                ? Colors.grey[600]
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    
+
                     // Number of contributors
                     Text(
                       "$contributorCount Petani",
                       style: TextStyle(
                         fontSize: 11,
-                        color: isSoldOut ? Colors.grey[600] : AppColors.textLight,
+                        color: isSoldOut
+                            ? Colors.grey[600]
+                            : AppColors.textLight,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    
+
                     // Status badge for sold out
                     if (isSoldOut) ...[
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red[100],
                           borderRadius: BorderRadius.circular(4),

@@ -16,10 +16,7 @@ final NumberFormat rupiah = NumberFormat.currency(
 class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
 
-  const ProductDetailPage({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailPage({super.key, required this.product});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -85,14 +82,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+                  boxShadow: [
+                    BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       "Info Tambahan",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -144,7 +146,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Widget _productImage() {
-    final imagePath = widget.product['product_images'] != null &&
+    final imagePath =
+        widget.product['product_images'] != null &&
             (widget.product['product_images'] as List).isNotEmpty
         ? widget.product['product_images'][0]['image_path']
         : null;
@@ -220,7 +223,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Widget _sellerCard() {
-    final imagePath = widget.product['product_images'] != null &&
+    final imagePath =
+        widget.product['product_images'] != null &&
             (widget.product['product_images'] as List).isNotEmpty
         ? widget.product['product_images'][0]['image_path']
         : null;
@@ -261,14 +265,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               if (!mounted) return;
               if (bumdes == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gagal mendapatkan info BUMDes')),
+                  const SnackBar(
+                    content: Text('Gagal mendapatkan info BUMDes'),
+                  ),
                 );
                 return;
               }
               final chatId = await ChatService.getOrCreateChat(
                 recipientId: bumdes.id,
                 recipientName: bumdes.name,
-                recipientImage: imageUrl.isNotEmpty ? imageUrl : "assets/images/logo.png",
+                recipientImage: imageUrl.isNotEmpty
+                    ? imageUrl
+                    : "assets/images/logo.png",
               );
               if (!mounted) return;
               if (chatId != null) {
@@ -278,7 +286,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     builder: (_) => ChatDetailPage(
                       chatId: chatId,
                       name: bumdes.name,
-                      image: imageUrl.isNotEmpty ? imageUrl : "assets/images/logo.png",
+                      image: imageUrl.isNotEmpty
+                          ? imageUrl
+                          : "assets/images/logo.png",
                       recipientId: bumdes.id,
                     ),
                   ),
@@ -312,7 +322,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         'Sep',
         'Okt',
         'Nov',
-        'Des'
+        'Des',
       ];
       return '${date.day} ${months[date.month]} ${date.year}';
     } catch (e) {
@@ -398,14 +408,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 return Container(
                                   height: 100,
                                   color: Colors.grey[300],
-                                  child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                                  child: const Icon(
+                                    Icons.image,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
                                 );
                               },
                             )
                           : Container(
                               height: 100,
                               color: Colors.grey[300],
-                              child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                              child: const Icon(
+                                Icons.image,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
                             ),
                     ),
 

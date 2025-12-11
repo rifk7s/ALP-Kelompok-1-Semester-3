@@ -351,10 +351,7 @@ class _CartPageState extends State<CartPage> {
               ),
               itemBuilder: (context, i) {
                 final p = rekomendasi[i];
-                return productCard(
-                  product: p,
-                  context: context,
-                );
+                return productCard(product: p, context: context);
               },
             ),
 
@@ -465,9 +462,7 @@ Widget productCard({
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ProductDetailPage(
-              product: product,
-            ),
+            builder: (_) => ProductDetailPage(product: product),
           ),
         );
       }
@@ -499,14 +494,22 @@ Widget productCard({
                       return Container(
                         height: 120,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   )
                 : Container(
                     height: 120,
                     color: Colors.grey[300],
-                    child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
                   ),
           ),
           Expanded(
@@ -527,8 +530,11 @@ Widget productCard({
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0)
-                        .format(product['price'] ?? 0),
+                    NumberFormat.currency(
+                      locale: 'id',
+                      symbol: 'Rp ',
+                      decimalDigits: 0,
+                    ).format(product['price'] ?? 0),
                     style: const TextStyle(
                       color: AppColors.danger,
                       fontWeight: FontWeight.bold,

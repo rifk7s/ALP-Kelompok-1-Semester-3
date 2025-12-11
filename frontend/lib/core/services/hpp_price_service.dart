@@ -25,18 +25,21 @@ class HppPriceService {
       throw Exception('Error fetching HPP prices: $e');
     }
   }
-  
+
   // Get price for a specific category and variety
-  static Future<double?> getPriceForVariety(int categoryId, String variety) async {
+  static Future<double?> getPriceForVariety(
+    int categoryId,
+    String variety,
+  ) async {
     try {
       final prices = await getHppPrices(categoryId: categoryId);
-      
+
       for (var price in prices) {
         if (price['variety'] == variety) {
           return double.parse(price['price_per_kg'].toString());
         }
       }
-      
+
       return null;
     } catch (e) {
       throw Exception('Error getting price for variety: $e');

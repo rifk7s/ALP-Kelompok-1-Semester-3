@@ -135,17 +135,19 @@ class AuthService {
     try {
       // Sign out from Firebase first
       await ChatService.signOutFromFirebase();
-      
+
       final token = await StorageService.getToken();
       if (token == null) {
         await StorageService.clearAll();
         return AuthResult(success: true, message: 'Logout berhasil');
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/logout'),
-        headers: ApiConfig.headers(token: token),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/auth/logout'),
+            headers: ApiConfig.headers(token: token),
+          )
+          .timeout(const Duration(seconds: 10));
 
       await StorageService.clearAll();
 

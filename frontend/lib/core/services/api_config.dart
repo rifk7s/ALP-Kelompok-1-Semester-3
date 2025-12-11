@@ -6,7 +6,7 @@ class ApiConfig {
   // NOTE: Run backend with: php artisan serve --host=0.0.0.0 --port=8001
   static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
   static const String _iosDeviceUrl = 'http://192.168.18.227:8000/api';
-  
+
   static const String _androidEmulatorBase = 'http://10.0.2.2:8000';
   static const String _iosDeviceBase = 'http://192.168.18.227:8000';
 
@@ -17,7 +17,7 @@ class ApiConfig {
       return _iosDeviceUrl;
     }
   }
-  
+
   static String get baseServerUrl {
     if (Platform.isAndroid) {
       return _androidEmulatorBase;
@@ -25,18 +25,21 @@ class ApiConfig {
       return _iosDeviceBase;
     }
   }
-  
+
   // Convert relative storage path to full URL
   static String getImageUrl(String? relativePath) {
     if (relativePath == null || relativePath.isEmpty) {
       return '';
     }
     // If already a full URL, return as is
-    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    if (relativePath.startsWith('http://') ||
+        relativePath.startsWith('https://')) {
       return relativePath;
     }
     // Remove leading slash if present
-    final path = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+    final path = relativePath.startsWith('/')
+        ? relativePath.substring(1)
+        : relativePath;
     return '$baseServerUrl/$path';
   }
 

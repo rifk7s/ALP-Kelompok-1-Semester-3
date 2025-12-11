@@ -44,9 +44,9 @@ class _SearchPageState extends State<SearchPage> {
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat produk: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
       }
     }
   }
@@ -62,7 +62,9 @@ class _SearchPageState extends State<SearchPage> {
       } else {
         searchResults = _allProducts
             .where(
-              (p) => (p['name'] as String).toLowerCase().contains(query.toLowerCase()),
+              (p) => (p['name'] as String).toLowerCase().contains(
+                query.toLowerCase(),
+              ),
             )
             .toList();
       }
@@ -173,10 +175,7 @@ class _SearchPageState extends State<SearchPage> {
                 itemCount: searchResults.length,
                 itemBuilder: (context, index) {
                   final p = searchResults[index];
-                  return productCard(
-                    context: context,
-                    product: p,
-                  );
+                  return productCard(context: context, product: p);
                 },
               )
             : Column(
@@ -263,9 +262,7 @@ Widget productCard({
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(
-              product: product,
-            ),
+            builder: (context) => ProductDetailPage(product: product),
           ),
         );
       }
@@ -297,14 +294,22 @@ Widget productCard({
                       return Container(
                         height: 120,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   )
                 : Container(
                     height: 120,
                     color: Colors.grey[300],
-                    child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
                   ),
           ),
           Padding(
@@ -321,8 +326,11 @@ Widget productCard({
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0)
-                      .format(product['price'] ?? 0),
+                  NumberFormat.currency(
+                    locale: 'id',
+                    symbol: 'Rp ',
+                    decimalDigits: 0,
+                  ).format(product['price'] ?? 0),
                   style: const TextStyle(
                     color: AppColors.danger,
                     fontWeight: FontWeight.bold,
