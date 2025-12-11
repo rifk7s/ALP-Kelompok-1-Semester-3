@@ -8,7 +8,7 @@ class ApiConfig {
   static const String _iosDeviceUrl = 'http://10.1.50.240:8000/api';
 
   static const String _androidEmulatorBase = 'http://10.0.2.2:8000';
-  static const String _iosDeviceBase = 'http://192.168.18.227:8000';
+  static const String _iosDeviceBase = 'http://10.1.50.240:8000';
 
   static String get baseUrl {
     final url = Platform.isAndroid ? _androidEmulatorUrl : _iosDeviceUrl;
