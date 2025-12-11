@@ -9,10 +9,12 @@ use App\Http\Controllers\ProductContributionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ChatListController;
 use App\Http\Controllers\PetaniDataController;
 use App\Http\Controllers\HppPriceController;
+use App\Http\Controllers\AdminController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -83,4 +85,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('cart', [CartController::class, 'clear']);
 });
 
-Route::apiResource('/prices', HppPriceController::class);
+/*
+    Order Routes
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    // Order routes
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+});
+
+/*
+    Admin Routes (BUMDes only)
+*/
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/orders', [AdminController::class, 'index']);
+    Route::get('/orders/{order}', [AdminController::class, 'show']);
+    Route::post('/orders/{order}/confirm-payment', [AdminController::class, 'confirmPayment']);
+});
