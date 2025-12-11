@@ -12,13 +12,19 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::with(['buyer', 'orderItems.product']);
+        // Check if user is bumdes
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json([
+                'message' => 'Unauthorized. Admin access required.',
+            ], 403);
+        }
 
-        // Filter by status if provided, default to pending_payment
-        $status = $request->input('status', 'pending_payment');
-        $query->where('status', $status);
+        $orders = Order::with(['buyer', 'orderItems.product'])
+                    ->where('status', 'pending_payment')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
 
-        return response()->json($query->orderBy('created_at', 'desc')->get());
+        return response()->json($orders);
     }
 
     /**
@@ -26,11 +32,17 @@ class AdminController extends Controller
      */
     public function confirmOrderPayment(Request $request, Order $order)
     {
-        // Verify cart belongs to logged-in user
-        if ($order->user_id !== $request->user()->id) {
+        // Check if user is bumdes
+        if ($request->user()->role !== 'bumdes') {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 403);
+        }
+
+        if ($order->status !== 'pending_payment') {
+            return response()->json([
+                'message' => 'Order is not pending payment',
+            ], 400);
         }
 
         $order->update([
