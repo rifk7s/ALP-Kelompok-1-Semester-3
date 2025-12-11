@@ -31,10 +31,13 @@ class OrderController extends Controller
     public function checkout(Request $request)
     {
         $validated = $request->validate([
-            'shipping_address' => 'required|string|max:500',
+            'shipping_address' => 'sometimes|string|max:500',
         ]);
 
         $user = $request->user();
+
+        // Use provided address or fallback to user's address
+        $shippingAddress = $validated['shipping_address'] ?? $user->address;
 
         // Get cart items. Contains them in a list
         $cartItems = Cart::where('user_id', $user->id)
@@ -67,7 +70,7 @@ class OrderController extends Controller
                 'shipping_cost' => $shipping_cost,
                 'total' => $total,
                 'status' => 'pending_payment',
-                'shipping_address' => $validated['shipping_address'],
+                'shipping_address' => $shippingAddress,
                 'payment_deadline' => now()->addHours(24), // 24 hour payment window
                 'estimated_delivery' => now()->addDays(7), // 7 days estimate
             ]);
