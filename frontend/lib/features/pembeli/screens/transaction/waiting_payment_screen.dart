@@ -1,16 +1,21 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/order_service.dart';
 import 'success_payment_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
-  final int totalPayment;
+  final int? orderId;
+  final int? totalPayment;
   final String? orderNumber;
 
   const WaitingPaymentPage({
-    super.key, 
-    required this.totalPayment,
+    super.key,
+    this.orderId,
+    this.totalPayment,
     this.orderNumber,
   });
 
@@ -19,16 +24,168 @@ class WaitingPaymentPage extends StatefulWidget {
 }
 
 class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
-  late String orderId;
+  late String orderNumber;
+  Map<String, dynamic>? orderDetails;
+  bool isLoading = true;
+  File? selectedImage;
+  bool isSubmitting = false;
+  final ImagePicker _picker = ImagePicker();
+  Timer? _countdownTimer;
+  String _timeLeft = '-';
 
   @override
   void initState() {
     super.initState();
-    orderId = widget.orderNumber ?? "INV-${DateTime.now().millisecondsSinceEpoch}";
+    orderNumber = widget.orderNumber ?? "INV-${DateTime.now().millisecondsSinceEpoch}";
+    if (widget.orderId != null) {
+      _loadOrderDetails();
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+    _startCountdownTimer();
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        _updateCountdown();
+      }
+    });
+  }
+
+  void _updateCountdown() {
+    if (orderDetails?['payment_deadline'] != null) {
+      try {
+        final deadline = DateTime.parse(orderDetails!['payment_deadline']);
+        final now = DateTime.now();
+        final difference = deadline.difference(now);
+
+        if (difference.isNegative) {
+          setState(() => _timeLeft = 'Expired');
+          return;
+        }
+
+        final hours = difference.inHours;
+        final minutes = difference.inMinutes % 60;
+        final seconds = difference.inSeconds % 60;
+
+        if (hours > 0) {
+          setState(() => _timeLeft = '${hours}j ${minutes}m ${seconds}d');
+        } else if (minutes > 0) {
+          setState(() => _timeLeft = '${minutes}m ${seconds}d');
+        } else {
+          setState(() => _timeLeft = '${seconds}d');
+        }
+      } catch (e) {
+        print('Error parsing deadline: $e');
+      }
+    }
+  }
+
+  Future<void> _loadOrderDetails() async {
+    try {
+      final orders = await OrderService.getOrders();
+      final order = orders.firstWhere(
+        (o) => o['id'] == widget.orderId,
+        orElse: () => {},
+      );
+      
+      if (order.isNotEmpty) {
+        print('Loaded order details: $order'); // Debug
+        print('Order total: ${order['total']}, type: ${order['total'].runtimeType}'); // Debug
+        setState(() {
+          orderDetails = order;
+          orderNumber = order['order_number'] ?? orderNumber;
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print('Error loading order details: $e');
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        setState(() {
+          selectedImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih gambar: $e')),
+      );
+    }
+  }
+
+  Future<void> _submitPaymentProof() async {
+    if (selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Silakan pilih bukti pembayaran terlebih dahulu')),
+      );
+      return;
+    }
+
+    if (widget.orderId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order ID tidak ditemukan')),
+      );
+      return;
+    }
+
+    setState(() => isSubmitting = true);
+
+    try {
+      final success = await OrderService.uploadPaymentProof(
+        orderId: widget.orderId!,
+        imageFile: selectedImage!,
+      );
+
+      setState(() => isSubmitting = false);
+
+      if (success && mounted) {
+        // Navigate to success screen with order details
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SuccessPaymentScreen(
+              total: totalPayment,
+              orderId: orderNumber,
+            ),
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal mengirim bukti pembayaran')),
+        );
+      }
+    } catch (e) {
+      print('Error submitting payment proof: $e');
+      setState(() => isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -46,8 +203,43 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     return f.format(number);
   }
 
+  int get totalPayment {
+    if (widget.totalPayment != null) return widget.totalPayment!;
+    if (orderDetails != null) {
+      final total = orderDetails!['total'];
+      if (total is int) return total;
+      if (total is double) return total.toInt();
+      if (total is String) {
+        // Try parsing as double first (for "29100.00"), then convert to int
+        final doubleValue = double.tryParse(total);
+        if (doubleValue != null) return doubleValue.toInt();
+      }
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.surfaceAlt,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 1,
+          centerTitle: true,
+          title: const Text(
+            "Menunggu Pembayaran",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
+            ),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: AppBar(
@@ -95,6 +287,31 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                           fontSize: 13.5,
                         ),
                       ),
+                      if (orderDetails?['payment_deadline'] != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.warningLight,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.timer, size: 16, color: AppColors.warningDark),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Batas Waktu: $_timeLeft',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.warningDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -113,7 +330,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  formatCurrency(widget.totalPayment),
+                  formatCurrency(totalPayment),
                   style: const TextStyle(
                     fontSize: 18,
                     color: AppColors.primary,
@@ -180,13 +397,89 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    orderId,
+                    orderNumber,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14.5,
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          _section(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Bukti Pembayaran",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                if (selectedImage != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      selectedImage!,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.image),
+                        label: Text(selectedImage == null ? 'Pilih Gambar' : 'Ganti Gambar'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: AppColors.primary),
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (selectedImage != null) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting ? null : _submitPaymentProof,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Kirim Bukti Pembayaran',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

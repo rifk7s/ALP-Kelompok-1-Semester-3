@@ -40,9 +40,12 @@ class _CartPageState extends State<CartPage> {
     setState(() => isLoadingCart = true);
     try {
       final cart = await CartService.getCart();
+      print('Cart response: $cart'); // Debug
       if (cart != null && mounted) {
+        final items = cart['items'] ?? [];
+        print('Cart items count: ${items.length}'); // Debug
         setState(() {
-          cartItems = List<Map<String, dynamic>>.from(cart['items'] ?? []);
+          cartItems = List<Map<String, dynamic>>.from(items);
           subtotal = cart['subtotal'] ?? 0;
           shippingCost = cart['shipping_cost'] ?? 0;
           total = cart['total'] ?? 0;
@@ -50,9 +53,11 @@ class _CartPageState extends State<CartPage> {
           isLoadingCart = false;
         });
       } else {
+        print('Cart is null'); // Debug
         setState(() => isLoadingCart = false);
       }
     } catch (e) {
+      print('Error loading cart: $e'); // Debug
       setState(() => isLoadingCart = false);
       if (mounted) {
         SnackBarHelper.showError(context, 'Gagal memuat keranjang');

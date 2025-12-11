@@ -7,7 +7,10 @@ class CartService {
   static Future<Map<String, dynamic>?> getCart() async {
     try {
       final token = await StorageService.getToken();
-      if (token == null) return null;
+      if (token == null) {
+        print('No token found');
+        return null;
+      }
 
       final response = await http.get(
         Uri.parse('${ApiConfig.baseUrl}/cart'),
@@ -16,6 +19,9 @@ class CartService {
           'Accept': 'application/json',
         },
       );
+
+      print('Cart response status: ${response.statusCode}');
+      print('Cart response body: ${response.body}');
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
