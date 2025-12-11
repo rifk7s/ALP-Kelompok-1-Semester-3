@@ -288,7 +288,7 @@ Widget productCard({
               category: "Produk",
               variety: "Varietas",
               harvestDate: "20 November 2025",
-              description: "Deskripsi produk contoh dari PanenKi.",
+              description: "Deskripsi produk contoh dari PanenKi'.",
             ),
           ),
         );

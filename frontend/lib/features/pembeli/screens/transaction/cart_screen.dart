@@ -483,7 +483,7 @@ Widget productCard({
               category: "Produk",
               variety: "Varietas",
               harvestDate: "20 November 2025",
-              description: "Produk rekomendasi PanenKi.",
+              description: "Produk rekomendasi PanenKi'.",
             ),
           ),
         );

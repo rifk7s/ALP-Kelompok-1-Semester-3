@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(width: 10),
                         const Text(
-                          "PanenKi",
+                          "PanenKi'",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
