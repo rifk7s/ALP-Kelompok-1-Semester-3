@@ -60,8 +60,8 @@ class HppPriceController extends Controller
         $hppPrice = HppPrice::findOrFail($id);
 
         $validated = $request->validate([
-            'variety' => 'nullable|string',
-            'price_per_kg' => 'required|numeric|min:0',
+            'variety' => 'sometimes|string',
+            'price_per_kg' => 'sometimes|numeric|min:0',
         ]);
 
         $hppPrice->update([
