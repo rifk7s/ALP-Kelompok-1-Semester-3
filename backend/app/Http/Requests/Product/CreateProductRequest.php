@@ -28,10 +28,13 @@ class CreateProductRequest extends FormRequest
             'storage_days' => ['required', 'integer', 'min:0'],
             'price_per_kg' => ['required', 'numeric', 'min:0'],
             'stock_kg' => ['required', 'numeric', 'min:0'],
-            'sold_kg' => ['required', 'numeric', 'min:0'],
+            'sold_kg' => ['nullable', 'numeric', 'min:0'],
             'description' => ['nullable', 'string'],
-            'status' => ['required', 'in:active,sold_out'],
+            'status' => ['nullable', 'in:active,sold_out'],
             'category_id' => ['required', 'exists:categories,id'],
+            'petani_id' => ['nullable', 'exists:petani_data,id'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
     }
 }
