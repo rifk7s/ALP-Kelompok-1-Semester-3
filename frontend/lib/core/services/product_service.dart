@@ -165,7 +165,9 @@ class ProductService {
         if (name != null) request.fields['name'] = name;
         if (categoryId != null)
           request.fields['category_id'] = categoryId.toString();
-        if (variety != null) request.fields['variety'] = variety;
+        if (variety != null) {
+          request.fields['variety'] = variety;
+        }
         if (harvestDate != null) request.fields['harvest_date'] = harvestDate;
         if (storageDays != null)
           request.fields['storage_days'] = storageDays.toString();

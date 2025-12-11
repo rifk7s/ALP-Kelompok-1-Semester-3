@@ -102,7 +102,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     SizedBox(
                       width: double.infinity,
                       child: Text(
-                        widget.product['description'] ?? 'Tidak ada informasi tambahan.',
+                        widget.product['description'] ??
+                            'Tidak ada informasi tambahan.',
                         style: const TextStyle(
                           fontSize: 14,
                           height: 1.6,
@@ -162,10 +163,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: const Text(
                   '2',
                   style: TextStyle(
@@ -439,12 +437,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       borderRadius: BorderRadius.circular(14),
                       child: () {
                         // Get image from product_images like main detail page
-                        final imagePath = widget.product['product_images'] != null &&
-                            (widget.product['product_images'] as List).isNotEmpty
+                        final imagePath =
+                            widget.product['product_images'] != null &&
+                                (widget.product['product_images'] as List)
+                                    .isNotEmpty
                             ? widget.product['product_images'][0]['image_path']
                             : null;
                         final imageUrl = ApiConfig.getImageUrl(imagePath);
-                        
+
                         return imageUrl.isNotEmpty
                             ? Image.network(
                                 imageUrl,
@@ -487,7 +487,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           final now = DateTime.now().millisecondsSinceEpoch;
                           if (now - lastClick < 200) return;
                           lastClick = now;
-                          
+
                           if (tempQty > 1) {
                             setStateDialog(() => tempQty--);
                           }
@@ -513,7 +513,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -534,7 +536,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 Icon(
                                   Icons.edit,
                                   size: 16,
-                                  color: AppColors.primary.withValues(alpha: 0.7),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ],
                             ),
@@ -545,7 +549,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           final now = DateTime.now().millisecondsSinceEpoch;
                           if (now - lastClick < 200) return;
                           lastClick = now;
-                          
+
                           setStateDialog(() => tempQty++);
                         }),
                       ],
@@ -597,7 +601,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           child: ElevatedButton(
                             onPressed: () {
                               Navigator.pop(context);
-                              
+
                               // Show Shopee-style floating overlay
                               _showAddedToCartOverlay(context, tempQty);
                             },
@@ -735,10 +739,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             builder: (context, double value, child) {
               return Opacity(
                 opacity: value,
-                child: Transform.scale(
-                  scale: value,
-                  child: child,
-                ),
+                child: Transform.scale(scale: value, child: child),
               );
             },
             child: Container(

@@ -188,7 +188,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           );
         }
       });
-
     } catch (e) {
       debugPrint('Error loading data: $e');
       setState(() {
@@ -225,7 +224,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
   Future<void> submitUpdate() async {
     if (isSubmitting) return;
-    
+
     // Validation
     if (_namaProdukController.text.isEmpty) {
       SnackBarHelper.showError(context, 'Nama produk harus diisi');
@@ -233,7 +232,10 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     }
 
     if (petaniContributors.isEmpty) {
-      SnackBarHelper.showError(context, 'Tambahkan minimal 1 kontributor petani');
+      SnackBarHelper.showError(
+        context,
+        'Tambahkan minimal 1 kontributor petani',
+      );
       return;
     }
 
@@ -459,7 +461,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     const SizedBox(height: 16),
                     // Petani dropdown
                     DropdownButtonFormField<int>(
-                      value: editPetaniId,
+                      initialValue: editPetaniId,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Petani',
@@ -1062,7 +1064,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                         Expanded(
                           flex: 2,
                           child: DropdownButtonFormField<int>(
-                            value: selectedPetaniId,
+                            initialValue: selectedPetaniId,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person),
@@ -1178,7 +1180,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
                 inputLabel("Kategori *"),
                 DropdownButtonFormField<int>(
-                  value: selectedKategoriId,
+                  initialValue: selectedKategoriId,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.category),
@@ -1231,7 +1233,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
-                    value: selectedVarietas,
+                    initialValue: selectedVarietas,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),

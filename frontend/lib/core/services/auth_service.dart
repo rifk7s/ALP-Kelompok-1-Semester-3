@@ -46,7 +46,7 @@ class AuthService {
       }
 
       final url = '${ApiConfig.baseUrl}/auth/register';
-      
+
       final response = await http
           .post(
             Uri.parse(url),
@@ -54,7 +54,6 @@ class AuthService {
             body: jsonEncode(body),
           )
           .timeout(_timeout);
-
 
       final data = jsonDecode(response.body);
 
@@ -77,7 +76,9 @@ class AuthService {
         );
       }
     } on TimeoutException {
-      debugPrint('❌ Register: Connection timeout - Backend not reachable at ${ApiConfig.baseUrl}');
+      debugPrint(
+        '❌ Register: Connection timeout - Backend not reachable at ${ApiConfig.baseUrl}',
+      );
       return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
     } catch (e) {
       debugPrint('❌ Register: Connection failed - $e');

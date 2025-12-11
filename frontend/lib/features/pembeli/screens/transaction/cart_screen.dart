@@ -97,7 +97,7 @@ class _CartPageState extends State<CartPage> {
       return; // Ignore rapid clicks
     }
     _lastQtyChangeClick = now;
-    
+
     setState(() {
       if (newQty <= 0) {
         cart.removeAt(index);
@@ -495,12 +495,13 @@ Widget productCard({
             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
             child: () {
               // Get image from product_images array
-              final imagePath = product['product_images'] != null &&
-                  (product['product_images'] as List).isNotEmpty
+              final imagePath =
+                  product['product_images'] != null &&
+                      (product['product_images'] as List).isNotEmpty
                   ? product['product_images'][0]['image_path']
                   : null;
               final imageUrl = ApiConfig.getImageUrl(imagePath);
-              
+
               return imageUrl.isNotEmpty
                   ? Image.network(
                       imageUrl,
@@ -553,9 +554,11 @@ Widget productCard({
                       symbol: 'Rp ',
                       decimalDigits: 0,
                     ).format(
-                      (product['price_per_kg'] != null 
-                        ? double.parse(product['price_per_kg'].toString()).toInt()
-                        : 0),
+                      (product['price_per_kg'] != null
+                          ? double.parse(
+                              product['price_per_kg'].toString(),
+                            ).toInt()
+                          : 0),
                     ),
                     style: const TextStyle(
                       color: AppColors.danger,

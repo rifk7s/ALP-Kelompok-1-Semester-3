@@ -37,7 +37,6 @@ class PetaniService {
     final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
     final headers = ApiConfig.headers(token: token);
 
-
     final resp = await client
         .get(uri, headers: headers)
         .timeout(
@@ -46,7 +45,6 @@ class PetaniService {
             throw Exception('Request timeout - server tidak merespons');
           },
         );
-
 
     if (resp.statusCode == 200) {
       final jsonBody = json.decode(resp.body);
@@ -73,7 +71,6 @@ class PetaniService {
     final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
     final headers = ApiConfig.headers(token: token);
 
-
     final resp = await client
         .post(uri, headers: headers, body: json.encode(data))
         .timeout(
@@ -82,7 +79,6 @@ class PetaniService {
             throw Exception('Request timeout - server tidak merespons');
           },
         );
-
 
     if (resp.statusCode == 201) {
       final jsonBody = json.decode(resp.body);

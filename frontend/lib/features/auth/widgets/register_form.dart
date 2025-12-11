@@ -33,7 +33,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   Future<void> _handleRegister() async {
     if (_isLoading) return;
-    
+
     if (_nameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
         _passwordController.text.isEmpty ||

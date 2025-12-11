@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class SnackBarHelper {
   static bool _isShowing = false;
   static Timer? _throttleTimer;
-  
+
   static void show(
     BuildContext context,
     String message, {
@@ -13,12 +13,12 @@ class SnackBarHelper {
     Duration duration = const Duration(seconds: 2),
   }) {
     if (!context.mounted) return;
-    
+
     // THROTTLE: Block rapid calls completely
     if (_isShowing) return;
-    
+
     _isShowing = true;
-    
+
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -28,7 +28,7 @@ class SnackBarHelper {
           duration: duration,
         ),
       );
-    
+
     // Reset flag after duration + animation time
     _throttleTimer?.cancel();
     _throttleTimer = Timer(duration + const Duration(milliseconds: 300), () {
@@ -74,9 +74,9 @@ mixin ButtonDebounceMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> debounceAction(Future<void> Function() action) async {
     if (_isProcessing) return;
-    
+
     setState(() => _isProcessing = true);
-    
+
     try {
       await action();
     } finally {
@@ -97,9 +97,9 @@ class DialogManager {
     bool barrierDismissible = true,
   }) async {
     if (_isDialogOpen) return null;
-    
+
     _isDialogOpen = true;
-    
+
     try {
       final result = await showDialog<T>(
         context: context,
@@ -121,7 +121,7 @@ class DialogManager {
     VoidCallback? onConfirm,
   }) async {
     if (_isDialogOpen) return null;
-    
+
     return show<T>(
       context: context,
       builder: (context) => AlertDialog(

@@ -31,7 +31,7 @@ class _LoginFormState extends State<LoginForm> {
 
   Future<void> _handleLogin() async {
     if (_isLoading) return;
-    
+
     if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
       SnackBarHelper.showError(context, 'Nomor HP dan kata sandi harus diisi');
       return;
@@ -60,10 +60,7 @@ class _LoginFormState extends State<LoginForm> {
           context.pushReplacementSmooth(const StartPage());
         }
       } else {
-        SnackBarHelper.showError(
-          context,
-          result.message ?? 'Login gagal',
-        );
+        SnackBarHelper.showError(context, result.message ?? 'Login gagal');
       }
     } finally {
       if (mounted) {

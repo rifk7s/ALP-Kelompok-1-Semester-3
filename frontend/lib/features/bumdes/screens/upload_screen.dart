@@ -55,7 +55,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   bool isLoading = true;
   bool isSubmitting = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -114,7 +114,6 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         varietiesByCategory = varieties;
         isLoading = false;
       });
-
     } catch (e) {
       debugPrint('Error loading data: $e');
       setState(() {
@@ -186,7 +185,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     }
 
     if (petaniContributors.isEmpty) {
-      SnackBarHelper.showError(context, 'Tambahkan minimal 1 kontributor petani');
+      SnackBarHelper.showError(
+        context,
+        'Tambahkan minimal 1 kontributor petani',
+      );
       return;
     }
 
@@ -281,7 +283,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
     if (picked.isNotEmpty) {
       if (selectedImages.length + picked.length > 5) {
-        SnackBarHelper.showError(context, "Total foto tidak boleh lebih dari 5");
+        SnackBarHelper.showError(
+          context,
+          "Total foto tidak boleh lebih dari 5",
+        );
       }
 
       setState(() {
@@ -386,7 +391,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     const SizedBox(height: 16),
                     // Petani dropdown
                     DropdownButtonFormField<int>(
-                      value: editPetaniId,
+                      initialValue: editPetaniId,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Petani',
@@ -886,7 +891,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                         Expanded(
                           flex: 2,
                           child: DropdownButtonFormField<int>(
-                            value: selectedPetaniId,
+                            initialValue: selectedPetaniId,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person),
@@ -1003,7 +1008,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
                 inputLabel("Kategori *"),
                 DropdownButtonFormField<int>(
-                  value: selectedKategoriId,
+                  initialValue: selectedKategoriId,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.category),
@@ -1056,7 +1061,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
-                    value: selectedVarietas,
+                    initialValue: selectedVarietas,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),

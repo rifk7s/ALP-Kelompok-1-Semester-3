@@ -53,7 +53,6 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
           throw Exception('Token tidak ditemukan. Silakan login kembali.');
         }
 
-
         // Prepare data
         final data = {
           'name': nama,
