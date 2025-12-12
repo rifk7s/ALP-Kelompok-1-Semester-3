@@ -55,7 +55,7 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
             ),
             const SizedBox(height: 20),
             const Text(
-              "Pembayaran Berhasil!",
+              "Pengiriman Bukti Berhasil!",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

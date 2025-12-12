@@ -64,23 +64,35 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future<void> _createOrder() async {
-    if (isCreatingOrder) return;
+    print('_createOrder called'); // Debug
+    if (isCreatingOrder) {
+      print('Already creating order, returning'); // Debug
+      return;
+    }
     
     setState(() => isCreatingOrder = true);
+    print('Creating order started'); // Debug
     
     try {
+      print('Calling OrderService.createOrder...'); // Debug
       final order = await OrderService.createOrder(
         shippingAddress: userProfile?.address,
       );
       
+      print('Order result: $order'); // Debug
+      
       if (order != null && mounted) {
+        print('Order created successfully, navigating...'); // Debug
         // Navigate to waiting payment screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => WaitingPaymentPage(
+              orderId: order['id'] as int?,
               orderNumber: order['order_number'] ?? '',
-              totalPayment: order['total'] ?? 0,
+              totalPayment: (order['total'] is int) 
+                  ? order['total'] 
+                  : int.tryParse(order['total']?.toString() ?? '0'),
             ),
           ),
         );
@@ -472,19 +484,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              WaitingPaymentPage(totalPayment: totalAkhir),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      "Buat Pesanan",
-                      style: TextStyle(color: AppColors.white),
-                    ),
+                    onPressed: isCreatingOrder ? null : _createOrder,
+                    child: isCreatingOrder
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Buat Pesanan",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

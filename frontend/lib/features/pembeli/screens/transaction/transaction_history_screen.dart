@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
+import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
@@ -19,6 +21,11 @@ class TransactionHistoryPage extends StatefulWidget {
 class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  
+  List<Map<String, dynamic>> _backendOrders = [];
+  bool _isLoading = false;
+  Timer? _countdownTimer;
+  Map<String, String> _countdowns = {};
 
   final List<Map<String, dynamic>> _orders = [
     {
@@ -69,23 +76,114 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   ];
 
   List<Map<String, dynamic>> _getOrdersByStatus(String status) {
+    if (status == 'pending') {
+      // Use backend orders for pending/belum bayar
+      return _backendOrders.where((o) => 
+        o['status'] == 'pending_payment'
+      ).toList();
+    }
+    // Use dummy data for other statuses for now
     return _orders.where((o) => o['status'] == status).toList();
+  }
+
+  Future<void> _loadOrders() async {
+    setState(() => _isLoading = true);
+    try {
+      final orders = await OrderService.getOrders();
+      setState(() {
+        _backendOrders = orders;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading orders: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadOrders();
+    _startCountdownTimer();
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _updateCountdowns();
+        });
+      }
+    });
+  }
+
+  void _updateCountdowns() {
+    for (var order in _backendOrders) {
+      if (order['status'] == 'pending_payment' && order['payment_deadline'] != null) {
+        final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+        _countdowns[orderId] = _calculateTimeLeft(order['payment_deadline']);
+      }
+    }
+  }
+
+  String _calculateTimeLeft(String deadlineStr) {
+    try {
+      final deadline = DateTime.parse(deadlineStr);
+      final now = DateTime.now();
+      final difference = deadline.difference(now);
+
+      if (difference.isNegative) {
+        return 'Expired';
+      }
+
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+      final seconds = difference.inSeconds % 60;
+
+      if (hours > 0) {
+        return '${hours}j ${minutes}m ${seconds}d';
+      } else if (minutes > 0) {
+        return '${minutes}m ${seconds}d';
+      } else {
+        return '${seconds}d';
+      }
+    } catch (e) {
+      print('Error parsing deadline: $e');
+      return '-';
+    }
+  }
+
+  String _formatDeadline(String deadlineStr) {
+    try {
+      final deadline = DateTime.parse(deadlineStr);
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return '${deadline.day} ${months[deadline.month - 1]}, ${deadline.hour.toString().padLeft(2, '0')}:${deadline.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return deadlineStr;
+    }
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }
 
   String _formatRupiah(int amount) {
     return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
+  }
+
+  int _parseTotal(dynamic total) {
+    if (total is int) return total;
+    if (total is double) return total.toInt();
+    if (total is String) {
+      // Try parsing as double first (for "29100.00"), then convert to int
+      final doubleValue = double.tryParse(total);
+      if (doubleValue != null) return doubleValue.toInt();
+    }
+    return 0;
   }
 
   @override
@@ -130,6 +228,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   Widget _buildOrderList(String status) {
+    if (_isLoading && status == 'pending') {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     final orders = _getOrdersByStatus(status);
 
     if (orders.isEmpty) {
@@ -174,8 +276,26 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   Widget _buildOrderCard(Map<String, dynamic> order) {
+    // Handle both backend and dummy data formats
     final status = order['status'] as String;
-    final products = order['products'] as List;
+    
+    // Backend returns 'order_items', dummy data uses 'products'
+    final orderItems = order['order_items'] as List? ?? order['products'] as List? ?? [];
+    
+    // Convert backend order_items to products format if needed
+    final products = orderItems.map((item) {
+      if (item['product'] != null) {
+        // Backend format
+        final product = item['product'];
+        return {
+          'name': product['name'] ?? 'Produk',
+          'qty': double.parse(item['quantity_kg']?.toString() ?? '0').toInt(),
+          'image': 'assets/images/gabah.jpg', // Default for now
+        };
+      }
+      // Dummy format, return as is
+      return item;
+    }).toList();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -219,7 +339,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 ),
                 const Spacer(),
                 Text(
-                  order['id'],
+                  order['order_number'] ?? order['id'] ?? '',
                   style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
@@ -234,7 +354,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 const Icon(Icons.store, size: 16, color: AppColors.primary),
                 const SizedBox(width: 6),
                 Text(
-                  order['seller'],
+                  order['seller'] ?? 'BUMDes Desa Sengka',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -287,7 +407,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           const Divider(height: 24),
 
           // Status specific info
-          if (status == 'pending') _buildPendingInfo(order),
+          if (status == 'pending' || status == 'pending_payment') _buildPendingInfo(order),
           if (status == 'processing') _buildProcessingInfo(order),
           if (status == 'completed') _buildCompletedInfo(order),
 
@@ -302,7 +422,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 Text(
-                  _formatRupiah(order['total']),
+                  _formatRupiah(_parseTotal(order['total'])),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -324,6 +444,21 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   Widget _buildPendingInfo(Map<String, dynamic> order) {
+    final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+    final deadline = order['payment_deadline'] ?? order['deadline'];
+    final timeLeft = _countdowns[orderId] ?? '-';
+    
+    String deadlineText = '-';
+    if (deadline != null) {
+      if (deadline is String && deadline.contains('-')) {
+        // Backend format (ISO 8601)
+        deadlineText = _formatDeadline(deadline);
+      } else {
+        // Dummy data format
+        deadlineText = deadline.toString();
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -337,7 +472,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             Icon(Icons.timer, size: 18, color: AppColors.warningDark),
             const SizedBox(width: 8),
             Text(
-              'Batas: ${order['deadline']} (${order['timeLeft']})',
+              'Batas: $deadlineText ($timeLeft)',
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.warningDark,
@@ -420,7 +555,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
 
-    if (status == 'pending') {
+    if (status == 'pending' || status == 'pending_payment') {
       return Row(
         children: [
           Expanded(
@@ -457,8 +592,13 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        WaitingPaymentPage(totalPayment: order['total']),
+                    builder: (_) => WaitingPaymentPage(
+                      orderId: order['id'] as int?,
+                      orderNumber: order['order_number'] ?? order['id']?.toString(),
+                      totalPayment: (order['total'] is int) 
+                          ? order['total'] 
+                          : int.tryParse(order['total']?.toString() ?? '0'),
+                    ),
                   ),
                 );
               },
@@ -595,6 +735,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
+      case 'pending_payment':
         return AppColors.warning;
       case 'processing':
         return AppColors.info;
@@ -608,6 +749,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   IconData _getStatusIcon(String status) {
     switch (status) {
       case 'pending':
+      case 'pending_payment':
         return Icons.hourglass_empty;
       case 'processing':
         return Icons.local_shipping;
@@ -621,6 +763,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
+      case 'pending_payment':
         return 'Menunggu Pembayaran';
       case 'processing':
         return 'Sedang Diproses';

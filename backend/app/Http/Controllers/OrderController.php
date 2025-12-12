@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItems;
+use App\Models\Payment;
 
 
 class OrderController extends Controller
@@ -85,6 +86,14 @@ class OrderController extends Controller
                     'subtotal' => $cartItem->quantity_kg * $cartItem->product->price_per_kg,
                 ]);
             }
+
+            // Create payment record with pending status
+            Payment::create([
+                'order_id' => $order->id,
+                'amount' => $total,
+                'status' => 'pending',
+                'proof_image' => '', // Will be uploaded later by user
+            ]);
 
             // Clear the cart after successful order creation
             Cart::where('user_id', $user->id)->delete();

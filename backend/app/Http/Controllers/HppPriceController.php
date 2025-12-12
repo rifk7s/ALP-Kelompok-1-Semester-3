@@ -37,7 +37,7 @@ class HppPriceController extends Controller
             'category_id' => $validated['category_id'],
             'variety' => $validated['variety'] ?? 'Standard',
             'price_per_kg' => $validated['price_per_kg'],
-            'source' => 'Official Data',
+            'source' => 'Badan Pangan Nasional (Bulog)',
             'effective_date' => now()->toDateString(),
         ]);
 

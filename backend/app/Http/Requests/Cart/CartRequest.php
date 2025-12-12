@@ -21,8 +21,11 @@ class CartRequest extends FormRequest
      */
     public function rules(): array
     {
+        // For update requests, product_id is not required
+        $isUpdate = $this->route('cart') !== null;
+        
         return [
-            'product_id' => ['required', 'exists:products,id'],
+            'product_id' => $isUpdate ? ['sometimes', 'exists:products,id'] : ['required', 'exists:products,id'],
             'quantity_kg' => ['required', 'numeric', 'min:0.1'],
         ];
     }
