@@ -178,4 +178,39 @@ class OrderService {
       return null;
     }
   }
+
+  /// Mark order as completed (buyer confirms receipt)
+  static Future<bool> completeOrder(int orderId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        print('No token found for completing order');
+        return false;
+      }
+
+      final url = '${ApiConfig.baseUrl}/orders/$orderId/complete';
+      print('Attempting to complete order at: $url');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Complete order response status: ${response.statusCode}');
+      print('Complete order response body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Failed to complete order: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error completing order: $e');
+      return false;
+    }
+  }
 }

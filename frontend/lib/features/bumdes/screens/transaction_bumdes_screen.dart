@@ -197,46 +197,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     }
   }
 
-  Future<void> _rejectPayment(int orderId) async {
-    // Show confirmation dialog
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tolak Pembayaran'),
-        content: const Text('Apakah Anda yakin ingin menolak pembayaran pesanan ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Tolak'),
-          ),
-        ],
-      ),
-    );
 
-    if (confirmed != true) return;
-
-    final success = await AdminService.rejectPayment(orderId);
-
-    if (success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pembayaran ditolak')),
-        );
-        _loadOrders();
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal menolak pembayaran')),
-        );
-      }
-    }
-  }
 
   void _openTracking(Map<String, dynamic> order) {
     final status = order['status'] as String;
@@ -863,28 +824,10 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     ),
                   ],
                 ),
-                if (status != 'completed' && status != 'rejected') ...[
+                if (status != 'completed' && status != 'rejected' && status != 'shipped') ...[
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      // Reject button (only for pending_payment)
-                      if (status == 'pending_payment')
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => _rejectPayment(orderId),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              minimumSize: const Size.fromHeight(44),
-                              shape: buttonShape,
-                            ),
-                            icon: const Icon(Icons.close, size: 18),
-                            label: const Text('Tolak'),
-                          ),
-                        ),
-                      // Spacing if both buttons exist
-                      if (status == 'pending_payment')
-                        const SizedBox(width: 10),
                       // Advance status button
                       Expanded(
                         child: TextButton.icon(

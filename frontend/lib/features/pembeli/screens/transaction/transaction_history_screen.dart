@@ -26,6 +26,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   bool _isLoading = false;
   Timer? _countdownTimer;
   Map<String, String> _countdowns = {};
+  final Set<String> _expandedOrders = {}; // Track expanded orders
 
   final List<Map<String, dynamic>> _orders = [
     {
@@ -77,12 +78,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
   List<Map<String, dynamic>> _getOrdersByStatus(String status) {
     if (status == 'pending') {
-      // Use backend orders for pending/belum bayar
+      // Belum Bayar: only pending_payment
       return _backendOrders
           .where((o) => o['status'] == 'pending_payment')
           .toList();
+    } else if (status == 'processing') {
+      // Diproses: paid, processing, and shipped
+      return _backendOrders
+          .where((o) => 
+              o['status'] == 'paid' || 
+              o['status'] == 'processing' || 
+              o['status'] == 'shipped')
+          .toList();
+    } else if (status == 'completed') {
+      // Selesai: completed and rejected
+      return _backendOrders
+          .where((o) => 
+              o['status'] == 'completed' || 
+              o['status'] == 'rejected')
+          .toList();
     }
-    // Use dummy data for other statuses for now
+    // Fallback to dummy data if needed
     return _orders.where((o) => o['status'] == status).toList();
   }
 
@@ -178,11 +194,137 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     }
   }
 
+  String _formatDateOnly(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
+      ];
+      return '${date.day} ${months[date.month - 1]} ${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
   @override
   void dispose() {
     _countdownTimer?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _advanceStatus(int orderId, String currentStatus) async {
+    if (currentStatus == 'shipped') {
+      final success = await OrderService.completeOrder(orderId);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pesanan berhasil diselesaikan')),
+        );
+        _loadOrders();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal menyelesaikan pesanan')),
+        );
+      }
+    }
+  }
+
+  void _openTracking(Map<String, dynamic> order) {
+    final status = order['status'] as String;
+    
+    // Map status to stage label
+    String getStageLabel(String status) {
+      switch (status) {
+        case 'pending_payment':
+        case 'paid':
+          return 'Pesanan Dibuat';
+        case 'processing':
+          return 'Dikemas';
+        case 'shipped':
+          return 'Dikirim';
+        case 'completed':
+          return 'Selesai';
+        case 'rejected':
+          return 'Ditolak';
+        default:
+          return 'Pesanan Dibuat';
+      }
+    }
+    
+    // Build timestamps map
+    Map<String, String> timestamps = {};
+    
+    final pendingPaymentAt = order['pending_payment_at'] as String?;
+    final rejectedAt = order['rejected_at'] as String?;
+    final processingAt = order['processing_at'] as String?;
+    final shippedAt = order['shipped_at'] as String?;
+    final completedAt = order['completed_at'] as String?;
+    
+    // For rejected orders, only show 2 stages
+    if (status == 'rejected') {
+      if (pendingPaymentAt != null) {
+        timestamps['Pesanan Dibuat'] = _formatDeadline(pendingPaymentAt);
+      }
+      if (rejectedAt != null) {
+        timestamps['Ditolak'] = _formatDeadline(rejectedAt);
+      }
+    } else {
+      // Normal order flow
+      if (pendingPaymentAt != null) {
+        timestamps['Pesanan Dibuat'] = _formatDeadline(pendingPaymentAt);
+      }
+      if (processingAt != null) {
+        timestamps['Dikemas'] = _formatDeadline(processingAt);
+      }
+      if (shippedAt != null) {
+        timestamps['Dikirim'] = _formatDeadline(shippedAt);
+      }
+      if (completedAt != null) {
+        timestamps['Selesai'] = _formatDeadline(completedAt);
+      }
+    }
+    
+    // Get first product image
+    final orderItems = order['order_items'] as List<dynamic>? ?? [];
+    final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
+    final product = firstItem?['product'] as Map<String, dynamic>?;
+    final productImages = product?['product_images'] as List<dynamic>? ?? [];
+    final firstImage = productImages.isNotEmpty ? productImages[0] as Map<String, dynamic> : null;
+    final imagePath = firstImage?['image_path'] as String?;
+    
+    // Build full image URL if path exists
+    String? imageUrl;
+    if (imagePath != null && imagePath.isNotEmpty) {
+      imageUrl = ApiConfig.getImageUrl(imagePath);
+    }
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrderTrackingPage(
+          order: {
+            'id': order['order_number'] ?? order['id']?.toString(),
+            'seller': 'BUMDes Desa Sengka',
+            'productImage': imageUrl,
+            'statusText': getStageLabel(status),
+            'timestamps': timestamps,
+            'isRejected': status == 'rejected',
+          },
+        ),
+      ),
+    );
   }
 
   String _formatRupiah(int amount) {
@@ -242,7 +384,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   Widget _buildOrderList(String status) {
-    if (_isLoading && status == 'pending') {
+    if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -356,17 +498,26 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         String? imagePath;
         if (product['product_images'] != null &&
             (product['product_images'] as List).isNotEmpty) {
-          imagePath = product['product_images'][0]['image_path'];
+          imagePath = product['product_images'][0]['image_path'] as String?;
         }
         return {
-          'name': product['name'] ?? 'Produk',
+          'name': product['name']?.toString() ?? 'Produk',
           'qty': double.parse(item['quantity_kg']?.toString() ?? '0').toInt(),
           'image': imagePath, // Can be null, will handle in UI
         };
       }
-      // Dummy format, return as is
-      return item;
+      // Dummy format, ensure values are not null
+      return {
+        'name': item['name']?.toString() ?? 'Produk',
+        'qty': item['qty'] ?? 0,
+        'image': item['image']?.toString(),
+      };
     }).toList();
+    
+    // Safety check - if no products, return empty container
+    if (products.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -438,34 +589,116 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           // Products
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
+            child: Column(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: _buildProductImage(products[0]['image']),
+                // First product
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: _buildProductImage(products[0]['image'] as String?),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            products[0]['name']?.toString() ?? 'Produk',
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${products[0]['qty'] ?? 0} kg',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.grey600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        products.length > 1
-                            ? '${products[0]['name']} + ${products.length - 1} lainnya'
-                            : products[0]['name'],
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                
+                // Expandable section for additional products
+                if (products.length > 1) ...[
+                  const SizedBox(height: 12),
+                  
+                  // Show expanded products if order is expanded
+                  if (_expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? ''))
+                    ...products.skip(1).map((product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: _buildProductImage(product['image'] as String?),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product['name']?.toString() ?? 'Produk',
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${product['qty'] ?? 0} kg',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.grey600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${products.fold(0, (sum, p) => sum + (p['qty'] as int))} kg',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.grey600,
-                        ),
+                    )),
+                  
+                  // "Lihat Semua" button
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+                        if (_expandedOrders.contains(orderId)) {
+                          _expandedOrders.remove(orderId);
+                        } else {
+                          _expandedOrders.add(orderId);
+                        }
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? '')
+                                ? 'Sembunyikan'
+                                : 'Lihat Semua (${products.length - 1} produk lainnya)',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? '')
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 20,
+                            color: AppColors.primary,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -475,8 +708,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           // Status specific info
           if (status == 'pending' || status == 'pending_payment')
             _buildPendingInfo(order),
-          if (status == 'processing') _buildProcessingInfo(order),
-          if (status == 'completed') _buildCompletedInfo(order),
+          if (status == 'paid' || status == 'processing' || status == 'shipped')
+            _buildProcessingInfo(order, status),
+          if (status == 'completed' || status == 'rejected')
+            _buildCompletedInfo(order, status),
 
           // Total
           Padding(
@@ -552,7 +787,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     );
   }
 
-  Widget _buildProcessingInfo(Map<String, dynamic> order) {
+  Widget _buildProcessingInfo(Map<String, dynamic> order, String status) {
+    // Determine status detail based on current status
+    String statusDetail;
+    String? estimateDate;
+    IconData statusIcon;
+    
+    if (status == 'paid') {
+      statusDetail = 'Pembayaran Dikonfirmasi';
+      statusIcon = Icons.check_circle;
+      estimateDate = order['estimated_delivery'] as String?;
+    } else if (status == 'processing') {
+      statusDetail = 'Sedang Dikemas';
+      statusIcon = Icons.inventory_2;
+      estimateDate = order['estimated_delivery'] as String?;
+    } else {
+      // shipped
+      statusDetail = 'Sedang Dikirim';
+      statusIcon = Icons.local_shipping;
+      estimateDate = order['estimated_delivery'] as String?;
+    }
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -560,36 +815,57 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         children: [
           Row(
             children: [
-              Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
-              const SizedBox(width: 6),
-              const Text(
-                'Pembayaran Lunas',
-                style: TextStyle(fontSize: 12, color: AppColors.success),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(Icons.local_shipping, size: 16, color: AppColors.infoDark),
+              Icon(statusIcon, size: 16, color: AppColors.info),
               const SizedBox(width: 6),
               Text(
-                order['statusDetail'],
-                style: const TextStyle(fontSize: 12, color: AppColors.info),
+                statusDetail,
+                style: const TextStyle(fontSize: 12, color: AppColors.info, fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Estimasi Kirim: ${order['estimateShip']}',
-            style: TextStyle(fontSize: 12, color: AppColors.grey600),
-          ),
+          if (estimateDate != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Estimasi: ${_formatDateOnly(estimateDate)}',
+              style: TextStyle(fontSize: 12, color: AppColors.grey600),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildCompletedInfo(Map<String, dynamic> order) {
+  Widget _buildCompletedInfo(Map<String, dynamic> order, String status) {
+    if (status == 'rejected') {
+      final rejectedAt = order['rejected_at'] as String?;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.red.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.cancel, size: 16, color: Colors.red),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  rejectedAt != null 
+                      ? 'Ditolak: ${_formatDateOnly(rejectedAt)}'
+                      : 'Pesanan Ditolak',
+                  style: const TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // completed status
+    final completedAt = order['completed_at'] as String?;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -597,7 +873,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
           const SizedBox(width: 6),
           Text(
-            'Diterima: ${order['receivedDate']}',
+            completedAt != null
+                ? 'Selesai: ${_formatDateOnly(completedAt)}'
+                : 'Pesanan Selesai',
             style: TextStyle(fontSize: 12, color: AppColors.grey600),
           ),
         ],
@@ -678,63 +956,67 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       );
     }
 
-    if (status == 'processing') {
-      return Row(
+    if (status == 'processing' || status == 'paid' || status == 'shipped') {
+      return Column(
         children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () async {
-                final bumdes = await BumdesService.getBumdesInfo();
-                if (!mounted || bumdes == null) return;
-                final chatId = await ChatService.getOrCreateChat(
-                  recipientId: bumdes.id,
-                  recipientName: bumdes.name,
-                  recipientImage: 'assets/images/logo.png',
-                );
-                if (!mounted || chatId == null) return;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      chatId: chatId,
-                      name: bumdes.name,
-                      image: 'assets/images/logo.png',
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final bumdes = await BumdesService.getBumdesInfo();
+                    if (!mounted || bumdes == null) return;
+                    final chatId = await ChatService.getOrCreateChat(
                       recipientId: bumdes.id,
-                    ),
-                  ),
-                );
-              },
-              style: outlineStyle,
-              child: const Text('Chat BUMDes'),
-            ),
+                      recipientName: bumdes.name,
+                      recipientImage: 'assets/images/logo.png',
+                    );
+                    if (!mounted || chatId == null) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatDetailPage(
+                          chatId: chatId,
+                          name: bumdes.name,
+                          image: 'assets/images/logo.png',
+                          recipientId: bumdes.id,
+                        ),
+                      ),
+                    );
+                  },
+                  style: outlineStyle,
+                  child: const Text('Chat BUMDes'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _openTracking(order);
+                  },
+                  style: elevatedStyle,
+                  child: const Text('Lihat Detail'),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => OrderTrackingPage(
-                      order: {
-                        'id': '#ORD-2025-001',
-                        'seller': 'BUMDes Desa Sengka',
-                        'productImage': 'assets/images/gabah.jpg',
-                        'statusText': 'Dikemas',
-                        'timestamps': {
-                          'Pesanan Dibuat': '1 Des 2025, 10:00',
-                          'Dikemas': '2 Des 2025, 08:00',
-                          'Dikirim': '3 Des 2025, 14:00',
-                        },
-                      },
-                    ),
+          if (status == 'shipped') ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () => _advanceStatus(order['id'] as int, status),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-              },
-              style: elevatedStyle,
-              child: const Text('Lihat Detail'),
+                ),
+                icon: const Icon(Icons.sync, size: 18),
+                label: const Text('Selesaikan Pesanan'),
+              ),
             ),
-          ),
+          ],
         ],
       );
     }
@@ -761,22 +1043,29 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              List<Map<String, dynamic>> cartItems = (order['products'] as List)
-                  .map((p) {
-                    return {
-                      'id': p['id'] ?? 0,
-                      'quantity_kg': p['qty']?.toString() ?? '1',
-                      'product': {
-                        'name': p['name'] ?? '',
-                        'price_per_kg': p['price']?.toString() ?? '0',
-                        'product_images': [
-                          {'image_path': p['image'] ?? ''},
-                        ],
-                      },
-                    };
-                  })
-                  .toList()
-                  .cast<Map<String, dynamic>>();
+              // Extract products from order_items
+              final orderItems = order['order_items'] as List<dynamic>? ?? [];
+              
+              List<Map<String, dynamic>> cartItems = orderItems.map((item) {
+                final itemMap = item as Map<String, dynamic>;
+                final product = itemMap['product'] as Map<String, dynamic>? ?? {};
+                final productImages = product['product_images'] as List<dynamic>? ?? [];
+                final firstImage = productImages.isNotEmpty 
+                    ? productImages[0] as Map<String, dynamic> 
+                    : null;
+                
+                return {
+                  'id': product['id'] ?? 0,
+                  'quantity_kg': itemMap['quantity_kg']?.toString() ?? '1',
+                  'product': {
+                    'name': product['name'] ?? '',
+                    'price_per_kg': product['price_per_kg']?.toString() ?? '0',
+                    'product_images': [
+                      {'image_path': firstImage?['image_path'] ?? ''},
+                    ],
+                  },
+                };
+              }).toList();
 
               int totalPayment = cartItems.fold(0, (sum, item) {
                 final qty = double.parse(item['quantity_kg'].toString());
@@ -808,9 +1097,13 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       case 'pending_payment':
         return AppColors.warning;
       case 'processing':
+      case 'paid':
+      case 'shipped':
         return AppColors.info;
       case 'completed':
         return AppColors.success;
+      case 'rejected':
+        return Colors.red;
       default:
         return AppColors.textSecondary;
     }
