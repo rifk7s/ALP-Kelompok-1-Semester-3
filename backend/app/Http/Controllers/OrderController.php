@@ -195,6 +195,46 @@ class OrderController extends Controller
     }
 
     /**
+     * Mark order as completed (buyer confirms receipt)
+     */
+    public function complete(Request $request, Order $order)
+    {
+        \Log::info('Complete order attempt', [
+            'order_id' => $order->id,
+            'order_buyer_id' => $order->buyer_id,
+            'current_user_id' => $request->user()->id,
+            'order_status' => $order->status
+        ]);
+
+        // Check authorization
+        if ($order->buyer_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+                'debug' => [
+                    'order_buyer_id' => $order->buyer_id,
+                    'your_user_id' => $request->user()->id
+                ]
+            ], 403);
+        }
+
+        // Only shipped orders can be completed by buyer
+        if ($order->status !== 'shipped') {
+            return response()->json([
+                'message' => 'Only shipped orders can be completed'
+            ], 400);
+        }
+
+        $order->status = 'completed';
+        $order->completed_at = now();
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order marked as completed',
+            'order' => $order->load(['orderItems.product.productImages', 'buyer'])
+        ], 200);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     // public function update(Request $request, string $id)

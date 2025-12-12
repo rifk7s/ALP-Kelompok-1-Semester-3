@@ -96,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::get('/orders/{order}/status', [OrderController::class, 'checkStatus']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+    Route::post('/orders/{order}/complete', [OrderController::class, 'complete']);
     
     // Payment proof upload
     Route::post('/orders/{order}/payment-proof', [PaymentController::class, 'uploadProof']);
