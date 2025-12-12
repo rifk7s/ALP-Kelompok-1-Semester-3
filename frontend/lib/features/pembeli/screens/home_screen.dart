@@ -55,10 +55,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> loadProducts({int? categoryId}) async {
-    setState(() {
-      isLoadingProducts = true;
-    });
+  Future<void> loadProducts({int? categoryId, bool showLoading = true}) async {
+    if (showLoading) {
+      setState(() {
+        isLoadingProducts = true;
+      });
+    }
     try {
       final data = await ProductService.getProducts(categoryId: categoryId);
 
@@ -83,255 +85,279 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Pull-to-refresh handler
+  Future<void> _onRefresh() async {
+    await Future.wait([
+      loadCategories(),
+      loadProducts(categoryId: _selectedCategoryId, showLoading: false),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundImage: AssetImage("assets/images/logo.png"),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          "PanenKi'",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.shopping_cart_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CartPage(),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NotificationPage(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 5),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SearchPage(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.search, color: AppColors.textSecondary),
-                        SizedBox(width: 10),
-                        Text(
-                          "Gabah",
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: AppColors.primary,
+          backgroundColor: AppColors.surface,
+          displacement: 40,
+          strokeWidth: 2.5,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const HppPage()),
-                    );
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      "assets/images/hpp.png",
-                      width: double.infinity,
-                      height: 140,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Kategori",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                    ),
-                    if (_selectedCategoryId != null)
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedCategoryId = null;
-                          });
-                          loadProducts();
-                        },
-                        child: const Text(
-                          "Hapus Filter",
-                          style: TextStyle(
-                            color: AppColors.danger,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage(
+                              "assets/images/logo.png",
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            "PanenKi'",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              isLoadingCategories
-                  ? const Center(child: CircularProgressIndicator())
-                  : SizedBox(
-                      height: 45,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          final category = categories[index];
-                          final isSelected =
-                              _selectedCategoryId == category['id'];
-                          return kategoriItem(
-                            category['name'],
-                            "assets/images/gabah.jpg",
-                            () {
-                              setState(() {
-                                if (_selectedCategoryId == category['id']) {
-                                  _selectedCategoryId = null;
-                                  loadProducts();
-                                } else {
-                                  _selectedCategoryId = category['id'];
-                                  loadProducts(categoryId: category['id']);
-                                }
-                              });
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.shopping_cart_outlined),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const CartPage(),
+                                ),
+                              );
                             },
-                            isSelected,
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.notifications_outlined),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NotificationPage(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SearchPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.search, color: AppColors.textSecondary),
+                          SizedBox(width: 10),
+                          Text(
+                            "Gabah",
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HppPage(),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        "assets/images/hpp.png",
+                        width: double.infinity,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Kategori",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                      ),
+                      if (_selectedCategoryId != null)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryId = null;
+                            });
+                            loadProducts();
+                          },
+                          child: const Text(
+                            "Hapus Filter",
+                            style: TextStyle(
+                              color: AppColors.danger,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                isLoadingCategories
+                    ? const Center(child: CircularProgressIndicator())
+                    : SizedBox(
+                        height: 45,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: categories.length,
+                          itemBuilder: (context, index) {
+                            final category = categories[index];
+                            final isSelected =
+                                _selectedCategoryId == category['id'];
+                            return kategoriItem(
+                              category['name'],
+                              "assets/images/gabah.jpg",
+                              () {
+                                setState(() {
+                                  if (_selectedCategoryId == category['id']) {
+                                    _selectedCategoryId = null;
+                                    loadProducts();
+                                  } else {
+                                    _selectedCategoryId = category['id'];
+                                    loadProducts(categoryId: category['id']);
+                                  }
+                                });
+                              },
+                              isSelected,
+                            );
+                          },
+                        ),
+                      ),
+
+                const SizedBox(height: 25),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Produk",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                isLoadingProducts
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : products.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(40),
+                        child: Center(
+                          child: Text(
+                            'Tidak ada produk tersedia',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: products.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: 0.70,
+                            ),
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          return productCard(
+                            context: context,
+                            product: product,
                           );
                         },
                       ),
-                    ),
 
-              const SizedBox(height: 25),
-
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "Produk",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              isLoadingProducts
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : products.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.all(40),
-                      child: Center(
-                        child: Text(
-                          'Tidak ada produk tersedia',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: products.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 14,
-                            crossAxisSpacing: 14,
-                            childAspectRatio: 0.70,
-                          ),
-                      itemBuilder: (context, index) {
-                        final product = products[index];
-                        return productCard(context: context, product: product);
-                      },
-                    ),
-
-              const SizedBox(height: 30),
-            ],
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
       ),

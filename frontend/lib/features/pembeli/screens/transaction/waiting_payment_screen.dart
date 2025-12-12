@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'success_payment_screen.dart';
 import 'payment_confirmed_screen.dart';
 
@@ -24,7 +25,8 @@ class WaitingPaymentPage extends StatefulWidget {
   State<WaitingPaymentPage> createState() => _WaitingPaymentPageState();
 }
 
-class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
+class _WaitingPaymentPageState extends State<WaitingPaymentPage>
+    with ButtonDebounceMixin {
   late String orderNumber;
   Map<String, dynamic>? orderDetails;
   bool isLoading = true;
@@ -38,7 +40,8 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
   @override
   void initState() {
     super.initState();
-    orderNumber = widget.orderNumber ?? "INV-${DateTime.now().millisecondsSinceEpoch}";
+    orderNumber =
+        widget.orderNumber ?? "INV-${DateTime.now().millisecondsSinceEpoch}";
     if (widget.orderId != null) {
       _loadOrderDetails();
     } else {
@@ -57,14 +60,16 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
 
     try {
       final status = await OrderService.checkOrderStatus(widget.orderId!);
-      
+
       if (status != null && mounted) {
-        print('Payment status check: ${status['status']} - isPaid: ${status['is_paid']}');
-        
+        print(
+          'Payment status check: ${status['status']} - isPaid: ${status['is_paid']}',
+        );
+
         if (status['is_paid'] == true || status['status'] == 'paid') {
           // Payment confirmed! Navigate to success screen
           _countdownTimer?.cancel();
-          
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -77,11 +82,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
         } else {
           // Show message that payment is still pending
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Pembayaran belum dikonfirmasi. Silakan tunggu atau hubungi admin.'),
-                duration: Duration(seconds: 2),
-              ),
+            SnackBarHelper.showInfo(
+              context,
+              'Pembayaran belum dikonfirmasi. Silakan tunggu atau hubungi admin.',
             );
           }
         }
@@ -89,12 +92,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     } catch (e) {
       print('Error checking payment status: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal mengecek status pembayaran'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        SnackBarHelper.showError(context, 'Gagal mengecek status pembayaran');
       }
     } finally {
       if (mounted) {
@@ -103,12 +101,14 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
     }
   }
 
-  /// Manual refresh button handler
+  /// Manual refresh button handler - with debounce protection
   Future<void> _refreshStatus() async {
-    await _checkPaymentStatus();
-    if (mounted && widget.orderId != null) {
-      await _loadOrderDetails();
-    }
+    await debounceAction(() async {
+      await _checkPaymentStatus();
+      if (mounted && widget.orderId != null) {
+        await _loadOrderDetails();
+      }
+    });
   }
 
   void _startCountdownTimer() {
@@ -155,10 +155,12 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
         (o) => o['id'] == widget.orderId,
         orElse: () => {},
       );
-      
+
       if (order.isNotEmpty) {
         print('Loaded order details: $order'); // Debug
-        print('Order total: ${order['total']}, type: ${order['total'].runtimeType}'); // Debug
+        print(
+          'Order total: ${order['total']}, type: ${order['total'].runtimeType}',
+        ); // Debug
         setState(() {
           orderDetails = order;
           orderNumber = order['order_number'] ?? orderNumber;
@@ -181,7 +183,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
         maxHeight: 1920,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           selectedImage = File(image.path);
@@ -189,24 +191,23 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
       }
     } catch (e) {
       print('Error picking image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memilih gambar: $e')),
-      );
+      if (mounted) {
+        SnackBarHelper.showError(context, 'Gagal memilih gambar: $e');
+      }
     }
   }
 
   Future<void> _submitPaymentProof() async {
     if (selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih bukti pembayaran terlebih dahulu')),
+      SnackBarHelper.showError(
+        context,
+        'Silakan pilih bukti pembayaran terlebih dahulu',
       );
       return;
     }
 
     if (widget.orderId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order ID tidak ditemukan')),
-      );
+      SnackBarHelper.showError(context, 'Order ID tidak ditemukan');
       return;
     }
 
@@ -225,24 +226,18 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => SuccessPaymentScreen(
-              total: totalPayment,
-              orderId: orderNumber,
-            ),
+            builder: (_) =>
+                SuccessPaymentScreen(total: totalPayment, orderId: orderNumber),
           ),
         );
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal mengirim bukti pembayaran')),
-        );
+        SnackBarHelper.showError(context, 'Gagal mengirim bukti pembayaran');
       }
     } catch (e) {
       print('Error submitting payment proof: $e');
       setState(() => isSubmitting = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        SnackBarHelper.showError(context, 'Error: $e');
       }
     }
   }
@@ -319,16 +314,20 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
           ),
         ),
         actions: [
-          // Manual refresh button
+          // Manual refresh button with debounce protection
           IconButton(
-            onPressed: isCheckingStatus ? null : _refreshStatus,
-            icon: isCheckingStatus
+            onPressed: (isCheckingStatus || isProcessing)
+                ? null
+                : _refreshStatus,
+            icon: (isCheckingStatus || isProcessing)
                 ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
                     ),
                   )
                 : const Icon(Icons.refresh_rounded, color: AppColors.primary),
@@ -371,7 +370,10 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                       if (orderDetails?['payment_deadline'] != null) ...[
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.warningLight,
                             borderRadius: BorderRadius.circular(6),
@@ -379,7 +381,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.timer, size: 16, color: AppColors.warningDark),
+                              Icon(
+                                Icons.timer,
+                                size: 16,
+                                color: AppColors.warningDark,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 'Batas Waktu: $_timeLeft',
@@ -396,7 +402,10 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                       // Manual refresh hint
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(6),
@@ -404,7 +413,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.info_outline, size: 14, color: AppColors.primary),
+                            Icon(
+                              Icons.info_outline,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
@@ -544,7 +557,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                       child: OutlinedButton.icon(
                         onPressed: _pickImage,
                         icon: const Icon(Icons.image),
-                        label: Text(selectedImage == null ? 'Pilih Gambar' : 'Ganti Gambar'),
+                        label: Text(
+                          selectedImage == null
+                              ? 'Pilih Gambar'
+                              : 'Ganti Gambar',
+                        ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           side: const BorderSide(color: AppColors.primary),
@@ -574,7 +591,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Text(

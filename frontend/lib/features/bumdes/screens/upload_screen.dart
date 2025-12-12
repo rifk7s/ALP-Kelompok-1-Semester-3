@@ -391,6 +391,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     // Petani dropdown
                     DropdownButtonFormField<int>(
                       initialValue: editPetaniId,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Petani',
@@ -401,7 +402,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                           .map(
                             (p) => DropdownMenuItem<int>(
                               value: p.id,
-                              child: Text(p.name),
+                              child: Text(
+                                p.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           )
                           .toList(),
@@ -891,17 +895,25 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                           flex: 2,
                           child: DropdownButtonFormField<int>(
                             initialValue: selectedPetaniId,
+                            isExpanded: true,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person),
                               hintText: 'Pilih Petani',
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                             ),
                             items: petaniList
                                 .where((p) => p.isActive)
                                 .map(
                                   (p) => DropdownMenuItem<int>(
                                     value: p.id,
-                                    child: Text(p.name),
+                                    child: Text(
+                                      p.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 )
                                 .toList(),
@@ -1008,6 +1020,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 inputLabel("Kategori *"),
                 DropdownButtonFormField<int>(
                   initialValue: selectedKategoriId,
+                  isExpanded: true,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.category),
@@ -1016,7 +1029,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                       .map(
                         (c) => DropdownMenuItem<int>(
                           value: c['id'],
-                          child: Text(c['name']),
+                          child: Text(
+                            c['name'],
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       )
                       .toList(),
@@ -1061,6 +1077,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
                     initialValue: selectedVarietas,
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),
@@ -1069,7 +1086,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                         .map(
                           (v) => DropdownMenuItem<String>(
                             value: v,
-                            child: Text(v),
+                            child: Text(v, overflow: TextOverflow.ellipsis),
                           ),
                         )
                         .toList(),
