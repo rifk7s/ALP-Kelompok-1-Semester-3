@@ -9,6 +9,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Payment;
+use App\Helpers\NotificationHelper;
 
 
 class OrderController extends Controller
@@ -104,6 +105,14 @@ class OrderController extends Controller
 
             DB::commit();
 
+            NotificationHelper::sendNotification(
+                $user->id,
+                'Order Created',
+                'Your order #' . $order->order_number . ' has been created successfully.',
+                'order',
+                $order->id
+            );
+
             // Load relationships for response
             $order->load(['orderItems.product', 'buyer']);
 
@@ -111,6 +120,9 @@ class OrderController extends Controller
                 'message' => 'Order created successfully!',
                 'order' => $order,
             ], 201);
+
+            // Notify user their order has been created
+            
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -186,6 +198,14 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => 'cancelled']);
+
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Order Cancelled',
+            'Your order #' . $order->order_number . ' has been cancelled.',
+            'order',
+            $order->id
+        );
 
         return response()->json([
             'message' => 'Order cancelled successfully',

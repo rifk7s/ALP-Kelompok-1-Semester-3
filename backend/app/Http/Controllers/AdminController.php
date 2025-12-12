@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Helpers\NotificationHelper;
 
 class AdminController extends Controller
 {
@@ -51,6 +52,16 @@ class AdminController extends Controller
         $order->update([
             'status' => 'paid',
         ]);
+
+        // Create notification for the buyer to know his or her payment has been confirmed by admin
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Payment Confirmed',
+            'Your payment for Order #' . $order->id . ' has been confirmed.',
+            'payment',
+            $order->id
+        );
+        
 
         $order->load(['buyer', 'orderItems.product']);
 
