@@ -33,6 +33,8 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'shipping_address' => 'sometimes|string|max:500',
+            'shipping_cost' => 'sometimes|numeric|min:0',
+            'service_fee' => 'sometimes|numeric|min:0',
         ]);
 
         $user = $request->user();
@@ -56,8 +58,10 @@ class OrderController extends Controller
             return $item->quantity_kg * $item->product->price_per_kg;
         });
 
-        $shipping_cost = 10000;
-        $total = $subtotal + $shipping_cost;
+        // Use shipping cost from frontend or default to 10000
+        $shipping_cost = $validated['shipping_cost'] ?? 10000;
+        $service_fee = $validated['service_fee'] ?? 0;
+        $total = $subtotal + $shipping_cost + $service_fee;
 
         try {
             // Use database transaction. Used if any part fails, all changes are rolled back
@@ -141,6 +145,27 @@ class OrderController extends Controller
         $order->load(['orderItems.product', 'payments']);
 
         return response()->json($order);
+    }
+
+    /**
+     * Check order payment status (for polling)
+     */
+    public function checkStatus(Request $request, Order $order)
+    {
+        // Verify order belongs to user
+        if ($order->buyer_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        return response()->json([
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'status' => $order->status,
+            'is_paid' => $order->status === 'paid',
+            'total' => $order->total,
+        ]);
     }
 
     /**
