@@ -7,6 +7,8 @@ import 'storage_service.dart';
 class OrderService {
   static Future<Map<String, dynamic>?> createOrder({
     String? shippingAddress,
+    int? shippingCost,
+    int? serviceFee,
   }) async {
     try {
       final token = await StorageService.getToken();
@@ -18,6 +20,12 @@ class OrderService {
       final body = <String, dynamic>{};
       if (shippingAddress != null) {
         body['shipping_address'] = shippingAddress;
+      }
+      if (shippingCost != null) {
+        body['shipping_cost'] = shippingCost;
+      }
+      if (serviceFee != null) {
+        body['service_fee'] = serviceFee;
       }
 
       print('Creating order with URL: ${ApiConfig.baseUrl}/checkout');
@@ -115,6 +123,59 @@ class OrderService {
     } catch (e) {
       print('Error uploading payment proof: $e');
       return false;
+    }
+  }
+
+  /// Check order payment status (for polling)
+  static Future<Map<String, dynamic>?> checkOrderStatus(int orderId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        print('No token found for order status check');
+        return null;
+      }
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/orders/$orderId/status'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Order status check response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error checking order status: $e');
+      return null;
+    }
+  }
+
+  /// Get single order details
+  static Future<Map<String, dynamic>?> getOrderById(int orderId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/orders/$orderId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching order: $e');
+      return null;
     }
   }
 }

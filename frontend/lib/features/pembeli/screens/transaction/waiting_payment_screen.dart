@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'success_payment_screen.dart';
+import 'payment_confirmed_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int? orderId;
@@ -29,6 +30,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
   bool isLoading = true;
   File? selectedImage;
   bool isSubmitting = false;
+  bool isCheckingStatus = false;
   final ImagePicker _picker = ImagePicker();
   Timer? _countdownTimer;
   String _timeLeft = '-';
@@ -45,6 +47,68 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
       });
     }
     _startCountdownTimer();
+  }
+
+  /// Check if payment has been confirmed by admin (manual refresh)
+  Future<void> _checkPaymentStatus() async {
+    if (widget.orderId == null || isCheckingStatus) return;
+
+    setState(() => isCheckingStatus = true);
+
+    try {
+      final status = await OrderService.checkOrderStatus(widget.orderId!);
+      
+      if (status != null && mounted) {
+        print('Payment status check: ${status['status']} - isPaid: ${status['is_paid']}');
+        
+        if (status['is_paid'] == true || status['status'] == 'paid') {
+          // Payment confirmed! Navigate to success screen
+          _countdownTimer?.cancel();
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PaymentConfirmedScreen(
+                total: totalPayment,
+                orderId: orderNumber,
+              ),
+            ),
+          );
+        } else {
+          // Show message that payment is still pending
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Pembayaran belum dikonfirmasi. Silakan tunggu atau hubungi admin.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      print('Error checking payment status: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal mengecek status pembayaran'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isCheckingStatus = false);
+      }
+    }
+  }
+
+  /// Manual refresh button handler
+  Future<void> _refreshStatus() async {
+    await _checkPaymentStatus();
+    if (mounted && widget.orderId != null) {
+      await _loadOrderDetails();
+    }
   }
 
   void _startCountdownTimer() {
@@ -254,6 +318,23 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
             color: AppColors.textLight,
           ),
         ),
+        actions: [
+          // Manual refresh button
+          IconButton(
+            onPressed: isCheckingStatus ? null : _refreshStatus,
+            icon: isCheckingStatus
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    ),
+                  )
+                : const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            tooltip: 'Cek Status Pembayaran',
+          ),
+        ],
       ),
 
       body: ListView(
@@ -312,6 +393,32 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage> {
                           ),
                         ),
                       ],
+                      // Manual refresh hint
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.info_outline, size: 14, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'Tekan tombol refresh ↗ untuk cek status',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

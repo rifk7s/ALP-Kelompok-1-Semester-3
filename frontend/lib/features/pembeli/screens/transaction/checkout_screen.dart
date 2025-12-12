@@ -77,6 +77,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       print('Calling OrderService.createOrder...'); // Debug
       final order = await OrderService.createOrder(
         shippingAddress: userProfile?.address,
+        shippingCost: ongkir,
+        serviceFee: biayaLayanan,
       );
       
       print('Order result: $order'); // Debug
