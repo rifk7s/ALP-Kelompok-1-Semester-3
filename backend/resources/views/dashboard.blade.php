@@ -12,4 +12,16 @@
             <a href="{{ url('/admin/hpp') }}">Pengaturan HPP</a>
         </li>
     </ul>
+
+    <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+@endsection
+
+@section('scripts')
+<script>
+    function logout() {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        window.location.href = '/';
+    }
+</script>
 @endsection
