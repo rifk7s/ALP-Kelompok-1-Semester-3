@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Helpers\NotificationHelper;
 
 class AdminController extends Controller
 {
@@ -65,6 +66,15 @@ class AdminController extends Controller
             ]);
         }
 
+        // Create notification for the buyer to know his or her payment has been confirmed by admin
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Payment Confirmed',
+            'Your payment for Order #' . $order->id . ' has been confirmed.',
+            'payment',
+            $order->id
+        );
+
         $order->load(['buyer', 'orderItems.product', 'payments']);
 
         return response()->json([
@@ -90,6 +100,16 @@ class AdminController extends Controller
             'status' => 'processing',
             'processing_at' => now(),
         ]);
+
+        // Notify buyer that order is being processed
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Order Processing',
+            'Your Order #' . $order->id . ' is now being processed.',
+            'order',
+            $order->id
+        );
+
         $order->load(['buyer', 'orderItems.product']);
 
         return response()->json([
@@ -115,6 +135,16 @@ class AdminController extends Controller
             'status' => 'shipped',
             'shipped_at' => now(),
         ]);
+
+        // Notify buyer that order has been shipped
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Order Shipped',
+            'Your Order #' . $order->id . ' has been shipped.',
+            'order',
+            $order->id
+        );
+
         $order->load(['buyer', 'orderItems.product']);
 
         return response()->json([
@@ -140,6 +170,16 @@ class AdminController extends Controller
             'status' => 'completed',
             'completed_at' => now(),
         ]);
+
+        // Notify buyer that order is completed
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Order Completed',
+            'Your Order #' . $order->id . ' has been completed. Thank you for shopping!',
+            'order',
+            $order->id
+        );
+
         $order->load(['buyer', 'orderItems.product']);
 
         return response()->json([
@@ -174,6 +214,15 @@ class AdminController extends Controller
                 'status' => 'rejected',
             ]);
         }
+
+        // Notify buyer that payment was rejected
+        NotificationHelper::sendNotification(
+            $order->buyer_id,
+            'Payment Rejected',
+            'Your payment for Order #' . $order->id . ' has been rejected. Please contact support.',
+            'payment',
+            $order->id
+        );
 
         $order->load(['buyer', 'orderItems.product', 'payments']);
 

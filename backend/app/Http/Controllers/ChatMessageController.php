@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\NotificationHelper;
 
 class ChatMessageController extends Controller
 {
@@ -34,10 +35,34 @@ class ChatMessageController extends Controller
             'timestamp' => now()->timestamp,
         ]);
 
-        Chat::where('firebase_chat_id', $chatId)->update([
+        // Chat::where('firebase_chat_id', $chatId)->update([
+        //     'last_message' => $request->message,
+        //     'updated_at' => now(),
+        // ]);
+        /*
+            F
+        */
+        // fetch chat info for creating notification requirements
+        $chat= Chat::where('firebase_chat_id', $chatId)->first();
+        
+        $chat->update([
             'last_message' => $request->message,
             'updated_at' => now(),
         ]);
+
+        // Send notification to receiver
+        $receiverId = $chat->user1_id === $userId ? $chat->user2_id : $chat->user1_id;
+        $senderName = Auth::user()->name;
+        
+        NotificationHelper::sendNotification(
+            $receiverId,
+            'New Message from ' . $senderName,
+            strlen($request->message) > 50 
+                ? substr($request->message, 0, 50) . '...' 
+                : $request->message,
+            'chat',
+            $chat->id
+        );
 
         return response()->json([
             'status' => 'sent',
