@@ -113,21 +113,18 @@ class _ProductPageState extends State<ProductPage> {
                       sliver: SliverGrid(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.8,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final product = filteredProducts[index];
-                            return _productCard(
-                              context: context,
-                              product: product,
-                            );
-                          },
-                          childCount: filteredProducts.length,
-                        ),
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.8,
+                            ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final product = filteredProducts[index];
+                          return _productCard(
+                            context: context,
+                            product: product,
+                          );
+                        }, childCount: filteredProducts.length),
                       ),
                     ),
             ],
@@ -172,10 +169,7 @@ class _ProductPageState extends State<ProductPage> {
               const Center(
                 child: Text(
                   "Produk Saya",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               Positioned(

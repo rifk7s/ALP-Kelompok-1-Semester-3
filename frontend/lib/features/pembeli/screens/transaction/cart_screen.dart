@@ -25,7 +25,7 @@ class _CartPageState extends State<CartPage> {
   bool isLoadingRecommendations = true;
   final Set<int> _updatingItems = {};
   int _lastQtyChangeClick = 0;
-  
+
   int subtotal = 0;
   int shippingCost = 0;
   int total = 0;
@@ -55,9 +55,10 @@ class _CartPageState extends State<CartPage> {
           total = cart['total'] ?? 0;
           selectedItems = {
             for (var item in cartItems)
-              item['id']: previousSelection[item['id']] ?? false
+              item['id']: previousSelection[item['id']] ?? false,
           };
-          selectAll = selectedItems.values.isNotEmpty &&
+          selectAll =
+              selectedItems.values.isNotEmpty &&
               selectedItems.values.every((val) => val);
           isLoadingCart = false;
         });
@@ -78,11 +79,15 @@ class _CartPageState extends State<CartPage> {
     setState(() => isLoadingRecommendations = true);
     try {
       final products = await ProductService.getProducts();
-      final productsWithStock = products.where((p) {
-        final stockKg = double.tryParse(p['stock_kg']?.toString() ?? '0') ?? 0;
-        return stockKg > 0;
-      }).toList().cast<Map<String, dynamic>>();
-      
+      final productsWithStock = products
+          .where((p) {
+            final stockKg =
+                double.tryParse(p['stock_kg']?.toString() ?? '0') ?? 0;
+            return stockKg > 0;
+          })
+          .toList()
+          .cast<Map<String, dynamic>>();
+
       productsWithStock.shuffle();
       setState(() {
         rekomendasi = productsWithStock.take(3).toList();
@@ -160,7 +165,9 @@ class _CartPageState extends State<CartPage> {
 
   void _showQtyInputDialog(Map<String, dynamic> item) {
     final currentQty = double.parse(item['quantity_kg'].toString());
-    final controller = TextEditingController(text: currentQty.toStringAsFixed(0));
+    final controller = TextEditingController(
+      text: currentQty.toStringAsFixed(0),
+    );
 
     DialogManager.show(
       context: context,
@@ -268,191 +275,211 @@ class _CartPageState extends State<CartPage> {
                       itemBuilder: (context, i) {
                         final item = cartItems[i];
                         final product = item['product'];
-                        final qty = double.parse(item['quantity_kg'].toString());
-                        final pricePerKg = double.parse(product['price_per_kg'].toString()).toInt();
-                        final imagePath = product['product_images'] != null &&
+                        final qty = double.parse(
+                          item['quantity_kg'].toString(),
+                        );
+                        final pricePerKg = double.parse(
+                          product['price_per_kg'].toString(),
+                        ).toInt();
+                        final imagePath =
+                            product['product_images'] != null &&
                                 (product['product_images'] as List).isNotEmpty
                             ? product['product_images'][0]['image_path']
                             : null;
                         final isUpdating = _updatingItems.contains(item['id']);
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        const BoxShadow(
-                          blurRadius: 6,
-                          color: AppColors.shadowLight,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: selectedItems[item['id']] ?? false,
-                              activeColor: AppColors.primary,
-                              onChanged: (v) {
-                                setState(() {
-                                  selectedItems[item['id']] = v ?? false;
-                                  selectAll = selectedItems.values.every((val) => val);
-                                });
-                              },
-                            ),
-
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: imagePath != null
-                                  ? Image.network(
-                                      ApiConfig.getImageUrl(imagePath),
-                                      width: 65,
-                                      height: 65,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          width: 65,
-                                          height: 65,
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.image, size: 30),
-                                        );
-                                      },
-                                    )
-                                  : Container(
-                                      width: 65,
-                                      height: 65,
-                                      color: Colors.grey[300],
-                                      child: const Icon(Icons.image, size: 30),
-                                    ),
-                            ),
-                            const SizedBox(width: 12),
-
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product['name'] ?? 'Produk',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-
-                                  Text(
-                                    formatRupiah((qty * pricePerKg).toInt()),
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Harga per kg: ${formatRupiah(pricePerKg)}",
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              const BoxShadow(
+                                blurRadius: 6,
+                                color: AppColors.shadowLight,
+                                offset: Offset(0, 3),
                               ),
-                            ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: selectedItems[item['id']] ?? false,
+                                activeColor: AppColors.primary,
+                                onChanged: (v) {
+                                  setState(() {
+                                    selectedItems[item['id']] = v ?? false;
+                                    selectAll = selectedItems.values.every(
+                                      (val) => val,
+                                    );
+                                  });
+                                },
+                              ),
 
-                            Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.cartQtyBackground,
+                              ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: isUpdating
-                                        ? null
-                                        : () => changeQty(item, qty - 1),
-                                    icon: const Icon(Icons.remove, size: 18),
-                                  ),
-                                  GestureDetector(
-                                    onTap: isUpdating
-                                        ? null
-                                        : () => _showQtyInputDialog(item),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
+                                child: imagePath != null
+                                    ? Image.network(
+                                        ApiConfig.getImageUrl(imagePath),
+                                        width: 65,
+                                        height: 65,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                width: 65,
+                                                height: 65,
+                                                color: Colors.grey[300],
+                                                child: const Icon(
+                                                  Icons.image,
+                                                  size: 30,
+                                                ),
+                                              );
+                                            },
+                                      )
+                                    : Container(
+                                        width: 65,
+                                        height: 65,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.image,
+                                          size: 30,
+                                        ),
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.white,
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.3,
+                              ),
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product['name'] ?? 'Produk',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      formatRupiah((qty * pricePerKg).toInt()),
+                                      style: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "Harga per kg: ${formatRupiah(pricePerKg)}",
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.cartQtyBackground,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: isUpdating
+                                          ? null
+                                          : () => changeQty(item, qty - 1),
+                                      icon: const Icon(Icons.remove, size: 18),
+                                    ),
+                                    GestureDetector(
+                                      onTap: isUpdating
+                                          ? null
+                                          : () => _showQtyInputDialog(item),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          qty.toStringAsFixed(0),
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                      child: Text(
-                                        qty.toStringAsFixed(0),
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: isUpdating
-                                        ? null
-                                        : () => changeQty(item, qty + 1),
-                                    icon: const Icon(Icons.add, size: 18),
-                                  ),
-                                ],
+                                    IconButton(
+                                      onPressed: isUpdating
+                                          ? null
+                                          : () => changeQty(item, qty + 1),
+                                      icon: const Icon(Icons.add, size: 18),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Rekomendasi Produk",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                  );
-                },
-              ),
+                      ),
+                    ),
+                  ),
 
-            const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Rekomendasi Produk",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: rekomendasi.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.74,
+                        ),
+                    itemBuilder: (context, i) {
+                      final p = rekomendasi[i];
+                      return productCard(product: p, context: context);
+                    },
+                  ),
+
+                  const SizedBox(height: 130),
+                ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: rekomendasi.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.74,
-              ),
-              itemBuilder: (context, i) {
-                final p = rekomendasi[i];
-                return productCard(product: p, context: context);
-              },
-            ),
-
-            const SizedBox(height: 130),
-          ],
-        ),
-      ),
 
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
@@ -517,8 +544,10 @@ class _CartPageState extends State<CartPage> {
                     onPressed: totalSelectedItems == 0
                         ? null
                         : () {
-                          final selectedCart = cartItems
-                              .where((item) => selectedItems[item['id']] == true)
+                            final selectedCart = cartItems
+                                .where(
+                                  (item) => selectedItems[item['id']] == true,
+                                )
                                 .toList();
 
                             Navigator.push(

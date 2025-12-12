@@ -20,7 +20,12 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   late TabController _tabController;
   bool _isLoading = true;
 
-  final List<String> _statusFlow = ['pending_payment', 'processing', 'shipped', 'completed'];
+  final List<String> _statusFlow = [
+    'pending_payment',
+    'processing',
+    'shipped',
+    'completed',
+  ];
 
   List<Map<String, dynamic>> _orders = [];
   final Set<int> _expandedOrders = {};
@@ -33,10 +38,10 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
   Future<void> _loadOrders() async {
     setState(() => _isLoading = true);
-    
+
     final orders = await AdminService.getOrdersByStatus();
     print('Loaded ${orders.length} orders');
-    
+
     setState(() {
       _orders = orders;
       _isLoading = false;
@@ -52,14 +57,21 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   List<Map<String, dynamic>> _ordersByStatus(String status) {
     if (status == 'pending_payment') {
       // Baru tab shows both pending_payment and paid orders
-      return _orders.where((order) => 
-        order['status'] == 'pending_payment' || order['status'] == 'paid'
-      ).toList();
+      return _orders
+          .where(
+            (order) =>
+                order['status'] == 'pending_payment' ||
+                order['status'] == 'paid',
+          )
+          .toList();
     } else if (status == 'completed') {
       // Selesai tab shows both completed and rejected orders
-      return _orders.where((order) => 
-        order['status'] == 'completed' || order['status'] == 'rejected'
-      ).toList();
+      return _orders
+          .where(
+            (order) =>
+                order['status'] == 'completed' || order['status'] == 'rejected',
+          )
+          .toList();
     }
     return _orders.where((order) => order['status'] == status).toList();
   }
@@ -183,7 +195,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
   Future<void> _advanceStatus(int orderId, String currentStatus) async {
     bool success = false;
-    
+
     switch (currentStatus) {
       case 'pending_payment':
         success = await AdminService.confirmPayment(orderId);
@@ -205,17 +217,15 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       );
       _loadOrders();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memperbarui status')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal memperbarui status')));
     }
   }
 
-
-
   void _openTracking(Map<String, dynamic> order) {
     final status = order['status'] as String;
-    
+
     // Map status to stage label
     String getStageLabel(String status) {
       switch (status) {
@@ -234,16 +244,16 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           return 'Pesanan Dibuat';
       }
     }
-    
+
     // Build timestamps map
     Map<String, String> timestamps = {};
-    
+
     final pendingPaymentAt = order['pending_payment_at'] as String?;
     final rejectedAt = order['rejected_at'] as String?;
     final processingAt = order['processing_at'] as String?;
     final shippedAt = order['shipped_at'] as String?;
     final completedAt = order['completed_at'] as String?;
-    
+
     // For rejected orders, only show 2 stages
     if (status == 'rejected') {
       if (pendingPaymentAt != null) {
@@ -267,13 +277,15 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
         timestamps['Selesai'] = _formatDate(completedAt);
       }
     }
-    
+
     // Get first product image
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
-    final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
+    final firstItem = orderItems.isNotEmpty
+        ? orderItems[0] as Map<String, dynamic>
+        : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
     final imageUrl = _productImageUrl(product);
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -295,7 +307,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     final buyer = order['buyer'] as Map<String, dynamic>?;
     final buyerName = buyer?['name'] ?? 'Pembeli';
     final buyerId = order['buyer_id']?.toString() ?? '';
-    
+
     final chatId = await ChatService.getOrCreateChat(
       recipientId: buyerId,
       recipientName: buyerName,
@@ -444,20 +456,21 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     final orderNumber = order['order_number'] as String;
     final buyer = order['buyer'] as Map<String, dynamic>?;
     final buyerName = buyer?['name'] ?? 'Pembeli';
-    final shippingAddress = order['shipping_address'] as String? ?? 'Alamat tidak tersedia';
+    final shippingAddress =
+        order['shipping_address'] as String? ?? 'Alamat tidak tersedia';
     final notes = order['notes'] as String? ?? '';
     final total = order['total'];
     final createdAt = order['created_at'] as String?;
-    
+
     // Check payment proof
     final payments = order['payments'] as Map<String, dynamic>?;
     final proofImage = payments?['proof_image'] as String?;
     final hasProofImage = proofImage != null && proofImage.isNotEmpty;
-    
+
     // Adjust status label and color based on status and proof
     String displayStatusLabel = _statusLabel(status);
     Color displayStatusColor = _statusColor(status);
-    
+
     if (status == 'pending_payment') {
       if (hasProofImage) {
         displayStatusLabel = 'Menunggu Konfirmasi';
@@ -468,20 +481,22 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       displayStatusLabel = 'Pembayaran Dikonfirmasi';
       displayStatusColor = AppColors.success;
     }
-    
+
     // Extract first order item for product display
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
-    final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
+    final firstItem = orderItems.isNotEmpty
+        ? orderItems[0] as Map<String, dynamic>
+        : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
     final productName = product?['name'] ?? 'Produk';
     final quantityKg = firstItem?['quantity_kg'] ?? 0;
-    
+
     // Get product image
     final imageUrl = _productImageUrl(product);
-    
+
     // Parse total as double
-    final totalAmount = total is String 
-        ? double.tryParse(total) ?? 0 
+    final totalAmount = total is String
+        ? double.tryParse(total) ?? 0
         : (total is int ? total.toDouble() : (total as double? ?? 0));
 
     return Container(
@@ -584,16 +599,17 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     ),
                   ],
                 ),
-                
+
                 // Show remaining items if expanded
                 if (_expandedOrders.contains(orderId) && orderItems.length > 1)
                   ...orderItems.skip(1).map((item) {
                     final itemMap = item as Map<String, dynamic>;
-                    final itemProduct = itemMap['product'] as Map<String, dynamic>?;
+                    final itemProduct =
+                        itemMap['product'] as Map<String, dynamic>?;
                     final itemProductName = itemProduct?['name'] ?? 'Produk';
                     final itemQuantity = itemMap['quantity_kg'];
                     final itemImageUrl = _productImageUrl(itemProduct);
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(top: 12),
                       child: Row(
@@ -611,7 +627,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                                       width: 64,
                                       height: 64,
                                       color: AppColors.grey200,
-                                      child: const Icon(Icons.image_not_supported),
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                      ),
                                     ),
                                   )
                                 : Container(
@@ -648,7 +666,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       ),
                     );
                   }),
-                
+
                 // Show "Lihat Semua" button if there are more items
                 if (orderItems.length > 1)
                   Padding(
@@ -666,8 +684,8 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       child: Row(
                         children: [
                           Text(
-                            _expandedOrders.contains(orderId) 
-                                ? 'Sembunyikan' 
+                            _expandedOrders.contains(orderId)
+                                ? 'Sembunyikan'
                                 : 'Lihat Semua',
                             style: const TextStyle(
                               fontSize: 12,
@@ -687,7 +705,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       ),
                     ),
                   ),
-                
+
                 // Total price and buyer info
                 const SizedBox(height: 8),
                 Row(
@@ -695,10 +713,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                   children: [
                     Text(
                       buyerName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.grey600,
-                      ),
+                      style: TextStyle(fontSize: 12, color: AppColors.grey600),
                     ),
                     Text(
                       _formatRupiah(totalAmount.toInt()),
@@ -787,7 +802,10 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       ),
                       Text(
                         '${(_progress(status) * 100).round()}%',
-                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey600,
+                        ),
                       ),
                     ],
                   ),
@@ -798,7 +816,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                       minHeight: 8,
                       value: progress,
                       backgroundColor: AppColors.grey200,
-                      valueColor: AlwaysStoppedAnimation<Color>(displayStatusColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        displayStatusColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -852,7 +872,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     ),
                   ],
                 ),
-                if (status != 'completed' && status != 'rejected' && status != 'shipped') ...[
+                if (status != 'completed' &&
+                    status != 'rejected' &&
+                    status != 'shipped') ...[
                   const SizedBox(height: 10),
                   Row(
                     children: [

@@ -48,7 +48,9 @@ class OrderService {
         final data = json.decode(response.body);
         return data['order'];
       } else {
-        print('Failed to create order: ${response.statusCode} - ${response.body}');
+        print(
+          'Failed to create order: ${response.statusCode} - ${response.body}',
+        );
       }
       return null;
     } catch (e) {
@@ -101,10 +103,7 @@ class OrderService {
       request.headers['Accept'] = 'application/json';
 
       request.files.add(
-        await http.MultipartFile.fromPath(
-          'proof_image',
-          imageFile.path,
-        ),
+        await http.MultipartFile.fromPath('proof_image', imageFile.path),
       );
 
       print('Uploading payment proof for order $orderId');
@@ -117,7 +116,9 @@ class OrderService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Failed to upload payment proof: ${response.statusCode} - ${response.body}');
+        print(
+          'Failed to upload payment proof: ${response.statusCode} - ${response.body}',
+        );
         return false;
       }
     } catch (e) {
@@ -201,11 +202,13 @@ class OrderService {
 
       print('Complete order response status: ${response.statusCode}');
       print('Complete order response body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Failed to complete order: ${response.statusCode} - ${response.body}');
+        print(
+          'Failed to complete order: ${response.statusCode} - ${response.body}',
+        );
         return false;
       }
     } catch (e) {

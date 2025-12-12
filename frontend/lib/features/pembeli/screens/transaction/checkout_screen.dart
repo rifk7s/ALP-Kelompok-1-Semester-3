@@ -22,7 +22,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Profile? userProfile;
   bool isLoadingProfile = true;
   bool isCreatingOrder = false;
-  
+
   String paymentMethod = "Transfer Bank (BCA)";
   int ongkir = 15000;
   int biayaLayanan = 2500;
@@ -70,10 +70,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
       print('Already creating order, returning'); // Debug
       return;
     }
-    
+
     setState(() => isCreatingOrder = true);
     print('Creating order started'); // Debug
-    
+
     try {
       print('Calling OrderService.createOrder...'); // Debug
       final order = await OrderService.createOrder(
@@ -81,9 +81,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
         shippingCost: ongkir,
         serviceFee: biayaLayanan,
       );
-      
+
       print('Order result: $order'); // Debug
-      
+
       if (order != null && mounted) {
         print('Order created successfully, navigating...'); // Debug
         // Navigate to waiting payment screen
@@ -93,8 +93,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
             builder: (_) => WaitingPaymentPage(
               orderId: order['id'] as int?,
               orderNumber: order['order_number'] ?? '',
-              totalPayment: (order['total'] is int) 
-                  ? order['total'] 
+              totalPayment: (order['total'] is int)
+                  ? order['total']
                   : int.tryParse(order['total']?.toString() ?? '0'),
             ),
           ),
@@ -113,14 +113,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    int subtotal = widget.cart.fold(
-      0,
-      (t, item) {
-        final qty = double.parse(item['quantity_kg'].toString());
-        final price = double.parse(item['product']['price_per_kg'].toString());
-        return t + (qty * price).toInt();
-      },
-    );
+    int subtotal = widget.cart.fold(0, (t, item) {
+      final qty = double.parse(item['quantity_kg'].toString());
+      final price = double.parse(item['product']['price_per_kg'].toString());
+      return t + (qty * price).toInt();
+    });
 
     int totalAkhir = subtotal + ongkir + biayaLayanan;
 
@@ -170,9 +167,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         child: isLoadingProfile
                             ? const Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircularProgressIndicator(),
-                                ],
+                                children: [CircularProgressIndicator()],
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +189,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   const SizedBox(height: 8),
 
                                   Text(
-                                    userProfile?.address ?? 'Alamat belum diatur',
+                                    userProfile?.address ??
+                                        'Alamat belum diatur',
                                     style: const TextStyle(height: 1.4),
                                   ),
                                 ],
@@ -216,74 +212,85 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                        child: () {
-                          final product = item['product'];
-                          final imagePath = product['product_images'] != null &&
-                                  (product['product_images'] as List).isNotEmpty
-                              ? product['product_images'][0]['image_path']
-                              : null;
-                          final imageUrl = ApiConfig.getImageUrl(imagePath);
-                          
-                          return imageUrl.isNotEmpty
-                              ? Image.network(
-                                  imageUrl,
-                                  width: 70,
-                                  height: 70,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      width: 70,
-                                      height: 70,
-                                      color: Colors.grey[300],
-                                      child: const Icon(Icons.image, size: 30),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  width: 70,
-                                  height: 70,
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.image, size: 30),
-                                );
-                        }(),
-                      ),
-                      const SizedBox(width: 14),
+                          child: () {
+                            final product = item['product'];
+                            final imagePath =
+                                product['product_images'] != null &&
+                                    (product['product_images'] as List)
+                                        .isNotEmpty
+                                ? product['product_images'][0]['image_path']
+                                : null;
+                            final imageUrl = ApiConfig.getImageUrl(imagePath);
 
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item['product']['name'] ?? 'Produk',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Jumlah: x${double.parse(item['quantity_kg'].toString()).toStringAsFixed(0)}",
-                              style: TextStyle(color: AppColors.grey600),
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            Text(
-                              "Harga: ${rupiah.format(double.parse(item['product']['price_per_kg'].toString()).toInt())} /kg",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.greyDark,
-                              ),
-                            ),
-                          ],
+                            return imageUrl.isNotEmpty
+                                ? Image.network(
+                                    imageUrl,
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 70,
+                                        height: 70,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.image,
+                                          size: 30,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    width: 70,
+                                    height: 70,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.image, size: 30),
+                                  );
+                          }(),
                         ),
-                      ),
+                        const SizedBox(width: 14),
 
-                      Text(
-                        rupiah.format((double.parse(item['quantity_kg'].toString()) * 
-                            double.parse(item['product']['price_per_kg'].toString())).toInt()),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item['product']['name'] ?? 'Produk',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "Jumlah: x${double.parse(item['quantity_kg'].toString()).toStringAsFixed(0)}",
+                                style: TextStyle(color: AppColors.grey600),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              Text(
+                                "Harga: ${rupiah.format(double.parse(item['product']['price_per_kg'].toString()).toInt())} /kg",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.greyDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Text(
+                          rupiah.format(
+                            (double.parse(item['quantity_kg'].toString()) *
+                                    double.parse(
+                                      item['product']['price_per_kg']
+                                          .toString(),
+                                    ))
+                                .toInt(),
+                          ),
                         ),
                       ],
                     ),

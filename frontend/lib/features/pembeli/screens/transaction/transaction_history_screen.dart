@@ -86,17 +86,17 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     } else if (status == 'processing') {
       // Diproses: paid, processing, and shipped
       return _backendOrders
-          .where((o) => 
-              o['status'] == 'paid' || 
-              o['status'] == 'processing' || 
-              o['status'] == 'shipped')
+          .where(
+            (o) =>
+                o['status'] == 'paid' ||
+                o['status'] == 'processing' ||
+                o['status'] == 'shipped',
+          )
           .toList();
     } else if (status == 'completed') {
       // Selesai: completed and rejected
       return _backendOrders
-          .where((o) => 
-              o['status'] == 'completed' || 
-              o['status'] == 'rejected')
+          .where((o) => o['status'] == 'completed' || o['status'] == 'rejected')
           .toList();
     }
     // Fallback to dummy data if needed
@@ -228,7 +228,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   Future<void> _advanceStatus(int orderId, String currentStatus) async {
     if (currentStatus == 'shipped') {
       final success = await OrderService.completeOrder(orderId);
-      
+
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pesanan berhasil diselesaikan')),
@@ -244,7 +244,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
   void _openTracking(Map<String, dynamic> order) {
     final status = order['status'] as String;
-    
+
     // Map status to stage label
     String getStageLabel(String status) {
       switch (status) {
@@ -263,16 +263,16 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           return 'Pesanan Dibuat';
       }
     }
-    
+
     // Build timestamps map
     Map<String, String> timestamps = {};
-    
+
     final pendingPaymentAt = order['pending_payment_at'] as String?;
     final rejectedAt = order['rejected_at'] as String?;
     final processingAt = order['processing_at'] as String?;
     final shippedAt = order['shipped_at'] as String?;
     final completedAt = order['completed_at'] as String?;
-    
+
     // For rejected orders, only show 2 stages
     if (status == 'rejected') {
       if (pendingPaymentAt != null) {
@@ -296,21 +296,25 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         timestamps['Selesai'] = _formatDeadline(completedAt);
       }
     }
-    
+
     // Get first product image
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
-    final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
+    final firstItem = orderItems.isNotEmpty
+        ? orderItems[0] as Map<String, dynamic>
+        : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
     final productImages = product?['product_images'] as List<dynamic>? ?? [];
-    final firstImage = productImages.isNotEmpty ? productImages[0] as Map<String, dynamic> : null;
+    final firstImage = productImages.isNotEmpty
+        ? productImages[0] as Map<String, dynamic>
+        : null;
     final imagePath = firstImage?['image_path'] as String?;
-    
+
     // Build full image URL if path exists
     String? imageUrl;
     if (imagePath != null && imagePath.isNotEmpty) {
       imageUrl = ApiConfig.getImageUrl(imagePath);
     }
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -537,7 +541,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         'image': item['image']?.toString(),
       };
     }).toList();
-    
+
     // Safety check - if no products, return empty container
     if (products.isEmpty) {
       return const SizedBox.shrink();
@@ -620,7 +624,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: _buildProductImage(products[0]['image'] as String?),
+                      child: _buildProductImage(
+                        products[0]['image'] as String?,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -644,50 +650,64 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                     ),
                   ],
                 ),
-                
+
                 // Expandable section for additional products
                 if (products.length > 1) ...[
                   const SizedBox(height: 12),
-                  
+
                   // Show expanded products if order is expanded
-                  if (_expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? ''))
-                    ...products.skip(1).map((product) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: _buildProductImage(product['image'] as String?),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  if (_expandedOrders.contains(
+                    order['order_number'] ?? order['id']?.toString() ?? '',
+                  ))
+                    ...products
+                        .skip(1)
+                        .map(
+                          (product) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
                               children: [
-                                Text(
-                                  product['name']?.toString() ?? 'Produk',
-                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: _buildProductImage(
+                                    product['image'] as String?,
+                                  ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${product['qty'] ?? 0} kg',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.grey600,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product['name']?.toString() ?? 'Produk',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${product['qty'] ?? 0} kg',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.grey600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    )),
-                  
+                        ),
+
                   // "Lihat Semua" button
                   InkWell(
                     onTap: () {
                       setState(() {
-                        final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+                        final orderId =
+                            order['order_number'] ??
+                            order['id']?.toString() ??
+                            '';
                         if (_expandedOrders.contains(orderId)) {
                           _expandedOrders.remove(orderId);
                         } else {
@@ -701,7 +721,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? '')
+                            _expandedOrders.contains(
+                                  order['order_number'] ??
+                                      order['id']?.toString() ??
+                                      '',
+                                )
                                 ? 'Sembunyikan'
                                 : 'Lihat Semua (${products.length - 1} produk lainnya)',
                             style: const TextStyle(
@@ -712,7 +736,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                           ),
                           const SizedBox(width: 4),
                           Icon(
-                            _expandedOrders.contains(order['order_number'] ?? order['id']?.toString() ?? '')
+                            _expandedOrders.contains(
+                                  order['order_number'] ??
+                                      order['id']?.toString() ??
+                                      '',
+                                )
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             size: 20,
@@ -816,7 +844,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     String statusDetail;
     String? estimateDate;
     IconData statusIcon;
-    
+
     if (status == 'paid') {
       statusDetail = 'Pembayaran Dikonfirmasi';
       statusIcon = Icons.check_circle;
@@ -831,7 +859,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       statusIcon = Icons.local_shipping;
       estimateDate = order['estimated_delivery'] as String?;
     }
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -843,7 +871,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               const SizedBox(width: 6),
               Text(
                 statusDetail,
-                style: const TextStyle(fontSize: 12, color: AppColors.info, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.info,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -876,10 +908,14 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  rejectedAt != null 
+                  rejectedAt != null
                       ? 'Ditolak: ${_formatDateOnly(rejectedAt)}'
                       : 'Pesanan Ditolak',
-                  style: const TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -887,7 +923,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         ),
       );
     }
-    
+
     // completed status
     final completedAt = order['completed_at'] as String?;
     return Padding(
@@ -1061,15 +1097,17 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             onPressed: () {
               // Extract products from order_items
               final orderItems = order['order_items'] as List<dynamic>? ?? [];
-              
+
               List<Map<String, dynamic>> cartItems = orderItems.map((item) {
                 final itemMap = item as Map<String, dynamic>;
-                final product = itemMap['product'] as Map<String, dynamic>? ?? {};
-                final productImages = product['product_images'] as List<dynamic>? ?? [];
-                final firstImage = productImages.isNotEmpty 
-                    ? productImages[0] as Map<String, dynamic> 
+                final product =
+                    itemMap['product'] as Map<String, dynamic>? ?? {};
+                final productImages =
+                    product['product_images'] as List<dynamic>? ?? [];
+                final firstImage = productImages.isNotEmpty
+                    ? productImages[0] as Map<String, dynamic>
                     : null;
-                
+
                 return {
                   'id': product['id'] ?? 0,
                   'quantity_kg': itemMap['quantity_kg']?.toString() ?? '1',
@@ -1176,7 +1214,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   void _showCompletedOptions(Map<String, dynamic> order) {
-    final orderIdStr = order['order_number']?.toString() ?? order['id']?.toString() ?? '';
+    final orderIdStr =
+        order['order_number']?.toString() ?? order['id']?.toString() ?? '';
     final totalInt = _parseTotal(order['total']);
 
     showModalBottomSheet(
@@ -1198,17 +1237,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 ),
                 const SizedBox(height: 12),
                 ListTile(
-                  leading: const Icon(Icons.receipt_long, color: AppColors.primary),
+                  leading: const Icon(
+                    Icons.receipt_long,
+                    color: AppColors.primary,
+                  ),
                   title: const Text('Lihat Struk/Invoice'),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ReceiptPage(
-                          orderId: orderIdStr,
-                          total: totalInt,
-                        ),
+                        builder: (_) =>
+                            ReceiptPage(orderId: orderIdStr, total: totalInt),
                       ),
                     );
                   },
@@ -1222,7 +1262,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: AppColors.primary,
+                  ),
                   title: const Text('Chat BUMDes'),
                   onTap: () {
                     Navigator.pop(context);

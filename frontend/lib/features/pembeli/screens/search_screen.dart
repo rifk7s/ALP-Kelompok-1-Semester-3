@@ -55,25 +55,24 @@ class _SearchPageState extends State<SearchPage> {
         searchResults = [];
       } else {
         // Search in product name, category, and variety
-        searchResults = _allProducts
-            .where((p) {
-              final name = (p['name'] as String? ?? '').toLowerCase();
-              final category = (p['category']?['name'] as String? ?? '').toLowerCase();
-              final variety = (p['variety'] as String? ?? '').toLowerCase();
-              final searchLower = query.toLowerCase();
-              
-              return name.contains(searchLower) ||
-                     category.contains(searchLower) ||
-                     variety.contains(searchLower);
-            })
-            .toList();
+        searchResults = _allProducts.where((p) {
+          final name = (p['name'] as String? ?? '').toLowerCase();
+          final category = (p['category']?['name'] as String? ?? '')
+              .toLowerCase();
+          final variety = (p['variety'] as String? ?? '').toLowerCase();
+          final searchLower = query.toLowerCase();
+
+          return name.contains(searchLower) ||
+              category.contains(searchLower) ||
+              variety.contains(searchLower);
+        }).toList();
       }
     });
   }
 
   void _executeSearch(String query) {
     if (query.isEmpty) return;
-    
+
     setState(() {
       // Add to history
       if (!searchHistory.contains(query)) {
@@ -83,7 +82,7 @@ class _SearchPageState extends State<SearchPage> {
         searchHistory.insert(0, query);
       }
     });
-    
+
     // Perform search
     _onSearchChanged(query);
   }

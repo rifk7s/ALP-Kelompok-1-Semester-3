@@ -19,13 +19,13 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
   @override
   void initState() {
     super.initState();
-    
+
     // Set stages based on whether order is rejected
     final isRejected = widget.order['isRejected'] == true;
     _stages = isRejected
         ? ['Pesanan Dibuat', 'Ditolak']
         : ['Pesanan Dibuat', 'Dikemas', 'Dikirim', 'Selesai'];
-    
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -42,7 +42,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
   Widget build(BuildContext context) {
     final isRejected = widget.order['isRejected'] == true;
     int currentStage = _stages.indexOf(widget.order['statusText']);
-    
+
     // For rejected orders, both stages should be completed
     if (isRejected && currentStage < 0) {
       currentStage = _stages.length - 1;
@@ -138,15 +138,15 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                   int index = entry.key;
                   String stage = entry.value;
                   final isRejected = widget.order['isRejected'] == true;
-                  
+
                   // For rejected orders, both stages are completed
-                  bool completed = isRejected 
-                      ? true 
-                      : index < currentStage;
-                  bool isCurrent = isRejected 
-                      ? (index == _stages.length - 1) // Last stage is current for rejected
+                  bool completed = isRejected ? true : index < currentStage;
+                  bool isCurrent = isRejected
+                      ? (index ==
+                            _stages.length -
+                                1) // Last stage is current for rejected
                       : (index == currentStage);
-                  
+
                   return _buildStageTile(
                     stage,
                     completed,
