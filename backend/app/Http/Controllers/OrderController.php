@@ -105,6 +105,7 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Notify user their order has been created
             NotificationHelper::sendNotification(
                 $user->id,
                 'Order Created',
@@ -121,7 +122,7 @@ class OrderController extends Controller
                 'order' => $order,
             ], 201);
 
-            // Notify user their order has been created
+            
             
 
         } catch (\Exception $e) {
