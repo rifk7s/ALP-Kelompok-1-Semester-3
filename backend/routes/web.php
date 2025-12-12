@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/payment', fn()=> view('paymentPanel', ['title' => 'Admin Payment Panel']));
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('adminLogin');
 });
 
 Route::get('/admin', function () {

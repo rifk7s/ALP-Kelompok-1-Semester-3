@@ -20,6 +20,10 @@
             <!-- Filled by AJAX -->
         </tbody>
     </table>
+
+    <a class="btn btn-secondary mt-3" href="{{ url('/admin') }}">
+        Back to Dashboard
+    <a>
 </div>
 <!-- EDIT MODAL -->
 <div class="modal fade" id="editModal" tabindex="-1">
