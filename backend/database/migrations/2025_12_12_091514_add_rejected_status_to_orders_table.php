@@ -12,7 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify the enum to add 'rejected' status
+        $driver = Schema::getConnection()->getDriverName();
+
+        // SQLite does not support ALTER ... MODIFY or native ENUM, so skip there
+        if ($driver === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending_payment', 'paid', 'processing', 'shipped', 'completed', 'cancelled', 'rejected') NOT NULL DEFAULT 'pending_payment'");
     }
 
@@ -21,7 +27,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove 'rejected' from enum
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending_payment', 'paid', 'processing', 'shipped', 'completed', 'cancelled') NOT NULL DEFAULT 'pending_payment'");
     }
 };

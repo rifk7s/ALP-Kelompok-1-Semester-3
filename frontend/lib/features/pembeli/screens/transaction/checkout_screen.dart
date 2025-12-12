@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/order_service.dart';
@@ -221,10 +222,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   (product['product_images'] as List).isNotEmpty
                               ? product['product_images'][0]['image_path']
                               : null;
+                          final imageUrl = ApiConfig.getImageUrl(imagePath);
                           
-                          return imagePath != null
+                          return imageUrl.isNotEmpty
                               ? Image.network(
-                                  'http://localhost:8000/storage/$imagePath',
+                                  imageUrl,
                                   width: 70,
                                   height: 70,
                                   fit: BoxFit.cover,

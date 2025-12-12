@@ -5,6 +5,7 @@ import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
@@ -384,45 +385,68 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   }
 
   Widget _buildOrderList(String status) {
+    return PullToRefresh(
+      onRefresh: _loadOrders,
+      color: AppColors.primary,
+      backgroundColor: AppColors.surface,
+      displacement: 36,
+      strokeWidth: 2.5,
+      child: _buildOrderListBody(status),
+    );
+  }
+
+  Widget _buildOrderListBody(String status) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 200),
+          Center(child: CircularProgressIndicator()),
+        ],
+      );
     }
 
     final orders = _getOrdersByStatus(status);
 
     if (orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              status == 'pending'
-                  ? Icons.payment_outlined
-                  : status == 'processing'
-                  ? Icons.local_shipping_outlined
-                  : Icons.check_circle_outline,
-              size: 64,
-              color: AppColors.grey400,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              status == 'pending'
-                  ? 'Tidak ada pesanan yang belum dibayar'
-                  : status == 'processing'
-                  ? 'Tidak ada pesanan yang sedang diproses'
-                  : 'Belum ada pesanan selesai',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        children: [
+          const SizedBox(height: 120),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                status == 'pending'
+                    ? Icons.payment_outlined
+                    : status == 'processing'
+                    ? Icons.local_shipping_outlined
+                    : Icons.check_circle_outline,
+                size: 64,
+                color: AppColors.grey400,
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 12),
+              Text(
+                status == 'pending'
+                    ? 'Tidak ada pesanan yang belum dibayar'
+                    : status == 'processing'
+                    ? 'Tidak ada pesanan yang sedang diproses'
+                    : 'Belum ada pesanan selesai',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
       );
     }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: orders.length,
       itemBuilder: (context, index) {
         final order = orders[index];
@@ -1026,15 +1050,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      ReceiptPage(orderId: order['id'], total: order['total']),
-                ),
-              );
-            },
+            onPressed: () => _showCompletedOptions(order),
             style: outlineStyle,
             child: const Text('Lihat Detail'),
           ),
@@ -1135,5 +1151,89 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       default:
         return status;
     }
+  }
+
+  Future<void> _openChat(Map<String, dynamic> order) async {
+    final bumdes = await BumdesService.getBumdesInfo();
+    if (!mounted || bumdes == null) return;
+    final chatId = await ChatService.getOrCreateChat(
+      recipientId: bumdes.id,
+      recipientName: bumdes.name,
+      recipientImage: 'assets/images/logo.png',
+    );
+    if (!mounted || chatId == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatDetailPage(
+          chatId: chatId,
+          name: bumdes.name,
+          image: 'assets/images/logo.png',
+          recipientId: bumdes.id,
+        ),
+      ),
+    );
+  }
+
+  void _showCompletedOptions(Map<String, dynamic> order) {
+    final orderIdStr = order['order_number']?.toString() ?? order['id']?.toString() ?? '';
+    final totalInt = _parseTotal(order['total']);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Pilih tindakan',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  leading: const Icon(Icons.receipt_long, color: AppColors.primary),
+                  title: const Text('Lihat Struk/Invoice'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReceiptPage(
+                          orderId: orderIdStr,
+                          total: totalInt,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.timeline, color: AppColors.primary),
+                  title: const Text('Lihat Status & Pelacakan'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _openTracking(order);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+                  title: const Text('Chat BUMDes'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _openChat(order);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

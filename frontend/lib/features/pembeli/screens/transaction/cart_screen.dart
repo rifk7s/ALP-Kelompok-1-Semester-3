@@ -23,6 +23,7 @@ class _CartPageState extends State<CartPage> {
   List<Map<String, dynamic>> rekomendasi = [];
   bool isLoadingCart = true;
   bool isLoadingRecommendations = true;
+  final Set<int> _updatingItems = {};
   int _lastQtyChangeClick = 0;
   
   int subtotal = 0;
@@ -36,20 +37,28 @@ class _CartPageState extends State<CartPage> {
     _loadRecommendations();
   }
 
-  Future<void> _loadCart() async {
-    setState(() => isLoadingCart = true);
+  Future<void> _loadCart({bool showSpinner = true}) async {
+    if (showSpinner) {
+      setState(() => isLoadingCart = true);
+    }
     try {
       final cart = await CartService.getCart();
       print('Cart response: $cart'); // Debug
       if (cart != null && mounted) {
         final items = cart['items'] ?? [];
         print('Cart items count: ${items.length}'); // Debug
+        final previousSelection = Map<int, bool>.from(selectedItems);
         setState(() {
           cartItems = List<Map<String, dynamic>>.from(items);
           subtotal = cart['subtotal'] ?? 0;
           shippingCost = cart['shipping_cost'] ?? 0;
           total = cart['total'] ?? 0;
-          selectedItems = {for (var item in cartItems) item['id']: false};
+          selectedItems = {
+            for (var item in cartItems)
+              item['id']: previousSelection[item['id']] ?? false
+          };
+          selectAll = selectedItems.values.isNotEmpty &&
+              selectedItems.values.every((val) => val);
           isLoadingCart = false;
         });
       } else {
@@ -113,38 +122,35 @@ class _CartPageState extends State<CartPage> {
   Future<void> changeQty(Map<String, dynamic> item, double newQty) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastQtyChangeClick < 300) return;
+    if (_updatingItems.contains(item['id'])) return;
     _lastQtyChangeClick = now;
 
-    if (newQty <= 0) {
-      await removeItem(item['id']);
-    } else {
-      // Show loading state
-      setState(() {
-        isLoadingCart = true;
-      });
-      
-      final success = await CartService.updateCartItem(
-        cartId: item['id'],
-        quantityKg: newQty,
-      );
-      
-      if (success) {
-        await _loadCart();
+    setState(() => _updatingItems.add(item['id']));
+
+    try {
+      if (newQty <= 0) {
+        await removeItem(item['id']);
       } else {
-        setState(() {
-          isLoadingCart = false;
-        });
-        if (mounted) {
+        final success = await CartService.updateCartItem(
+          cartId: item['id'],
+          quantityKg: newQty,
+        );
+
+        if (success) {
+          await _loadCart(showSpinner: false);
+        } else if (mounted) {
           SnackBarHelper.showError(context, 'Gagal mengubah jumlah');
         }
       }
+    } finally {
+      setState(() => _updatingItems.remove(item['id']));
     }
   }
 
   Future<void> removeItem(int cartId) async {
     final success = await CartService.removeFromCart(cartId);
     if (success) {
-      await _loadCart();
+      await _loadCart(showSpinner: false);
     } else if (mounted) {
       SnackBarHelper.showError(context, 'Gagal menghapus item');
     }
@@ -268,6 +274,7 @@ class _CartPageState extends State<CartPage> {
                                 (product['product_images'] as List).isNotEmpty
                             ? product['product_images'][0]['image_path']
                             : null;
+                        final isUpdating = _updatingItems.contains(item['id']);
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
@@ -363,11 +370,15 @@ class _CartPageState extends State<CartPage> {
                               child: Row(
                                 children: [
                                   IconButton(
-                                    onPressed: () => changeQty(item, qty - 1),
+                                    onPressed: isUpdating
+                                        ? null
+                                        : () => changeQty(item, qty - 1),
                                     icon: const Icon(Icons.remove, size: 18),
                                   ),
                                   GestureDetector(
-                                    onTap: () => _showQtyInputDialog(item),
+                                    onTap: isUpdating
+                                        ? null
+                                        : () => _showQtyInputDialog(item),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -392,7 +403,9 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   IconButton(
-                                    onPressed: () => changeQty(item, qty + 1),
+                                    onPressed: isUpdating
+                                        ? null
+                                        : () => changeQty(item, qty + 1),
                                     icon: const Icon(Icons.add, size: 18),
                                   ),
                                 ],

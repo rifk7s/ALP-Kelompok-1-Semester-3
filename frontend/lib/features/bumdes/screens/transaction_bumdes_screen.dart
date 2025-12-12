@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 
@@ -167,6 +169,18 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     }
   }
 
+  String _productImageUrl(Map<String, dynamic>? product) {
+    final productImages = product?['product_images'] as List<dynamic>? ?? [];
+    final firstImage = productImages.isNotEmpty
+        ? productImages[0] as Map<String, dynamic>
+        : null;
+    final imagePath = firstImage?['image_path'] as String?;
+    final directUrl = firstImage?['image_url'] as String?;
+    if (directUrl != null && directUrl.isNotEmpty) return directUrl;
+    final resolved = ApiConfig.getImageUrl(imagePath);
+    return resolved.isNotEmpty ? resolved : '';
+  }
+
   Future<void> _advanceStatus(int orderId, String currentStatus) async {
     bool success = false;
     
@@ -258,9 +272,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
     final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
-    final productImages = product?['product_images'] as List<dynamic>? ?? [];
-    final firstImage = productImages.isNotEmpty ? productImages[0] as Map<String, dynamic> : null;
-    final imageUrl = firstImage?['image_url'] as String?;
+    final imageUrl = _productImageUrl(product);
     
     Navigator.push(
       context,
@@ -320,13 +332,6 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
             color: AppColors.textLight,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadOrders,
-            tooltip: 'Refresh',
-          ),
-        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
@@ -346,8 +351,19 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
-              children: _statusFlow.map(_buildOrderList).toList(),
+              children: _statusFlow.map(_buildOrderListWithRefresh).toList(),
             ),
+    );
+  }
+
+  Widget _buildOrderListWithRefresh(String status) {
+    return PullToRefresh(
+      onRefresh: _loadOrders,
+      color: AppColors.primary,
+      backgroundColor: AppColors.surface,
+      displacement: 36,
+      strokeWidth: 2.5,
+      child: _buildOrderList(status),
     );
   }
 
@@ -360,6 +376,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: filteredOrders.length,
       itemBuilder: (_, index) => _orderCard(filteredOrders[index]),
     );
@@ -367,35 +384,50 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
   Widget _emptyState(String status) {
     IconData icon;
+    String message;
     switch (status) {
       case 'pending_payment':
         icon = Icons.payment_outlined;
+        message = 'Tidak ada pesanan menunggu pembayaran';
         break;
       case 'paid':
         icon = Icons.check_circle_outline;
+        message = 'Tidak ada pesanan dibayar';
         break;
       case 'processing':
         icon = Icons.inventory_2_outlined;
+        message = 'Tidak ada pesanan dikemas';
         break;
       case 'shipped':
         icon = Icons.local_shipping_outlined;
+        message = 'Tidak ada pesanan dikirim';
         break;
       default:
         icon = Icons.check_circle;
+        message = 'Tidak ada pesanan selesai';
     }
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppColors.grey400),
-          const SizedBox(height: 12),
-          const Text(
-            'Belum ada transaksi untuk status ini',
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-          ),
-        ],
-      ),
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 80),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 64, color: AppColors.grey400),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -445,9 +477,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     final quantityKg = firstItem?['quantity_kg'] ?? 0;
     
     // Get product image
-    final productImages = product?['product_images'] as List<dynamic>? ?? [];
-    final firstImage = productImages.isNotEmpty ? productImages[0] as Map<String, dynamic> : null;
-    final imageUrl = firstImage?['image_url'] as String?;
+    final imageUrl = _productImageUrl(product);
     
     // Parse total as double
     final totalAmount = total is String 
@@ -562,9 +592,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                     final itemProduct = itemMap['product'] as Map<String, dynamic>?;
                     final itemProductName = itemProduct?['name'] ?? 'Produk';
                     final itemQuantity = itemMap['quantity_kg'];
-                    final itemProductImages = itemProduct?['product_images'] as List<dynamic>? ?? [];
-                    final itemFirstImage = itemProductImages.isNotEmpty ? itemProductImages[0] as Map<String, dynamic> : null;
-                    final itemImageUrl = itemFirstImage?['image_url'] as String?;
+                    final itemImageUrl = _productImageUrl(itemProduct);
                     
                     return Padding(
                       padding: const EdgeInsets.only(top: 12),

@@ -114,13 +114,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: AppColors.primary,
-          backgroundColor: AppColors.surface,
-          displacement: 40,
-          strokeWidth: 2.5,
+      body: PullToRefresh(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: AppColors.surface,
+        displacement: 40,
+        strokeWidth: 2.5,
+        child: SafeArea(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
