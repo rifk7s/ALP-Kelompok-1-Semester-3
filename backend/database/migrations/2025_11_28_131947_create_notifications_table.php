@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('message');
+            $table->enum('type', ['order', 'payment', 'product', 'chat'])->default('order');
+            $table->bigInteger('related_id')->nullable();
+            $table->boolean('is_read')->default(false);
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,6 +28,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('user_id');
+        });
+
         Schema::dropIfExists('notifications');
     }
 };
