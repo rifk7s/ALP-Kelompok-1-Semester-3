@@ -1,6 +1,113 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+/// Simple reusable pull-to-refresh wrapper.
+class PullToRefresh extends StatelessWidget {
+  final Future<void> Function() onRefresh;
+  final Widget child;
+  final Color? color;
+  final Color? backgroundColor;
+  final double displacement;
+  final double strokeWidth;
+
+  const PullToRefresh({
+    super.key,
+    required this.onRefresh,
+    required this.child,
+    this.color,
+    this.backgroundColor,
+    this.displacement = 40,
+    this.strokeWidth = 2.5,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: color,
+      backgroundColor: backgroundColor,
+      displacement: displacement,
+      strokeWidth: strokeWidth,
+      child: child,
+    );
+  }
+}
+
+/// Detect multi-finger pull-down and trigger refresh without blocking scroll.
+class MultiFingerRefresh extends StatefulWidget {
+  final Widget child;
+  final Future<void> Function() onRefresh;
+  final int fingerCount;
+  final double triggerDistance;
+
+  const MultiFingerRefresh({
+    super.key,
+    required this.child,
+    required this.onRefresh,
+    this.fingerCount = 3,
+    this.triggerDistance = 80,
+  });
+
+  @override
+  State<MultiFingerRefresh> createState() => _MultiFingerRefreshState();
+}
+
+class _MultiFingerRefreshState extends State<MultiFingerRefresh> {
+  final Map<int, Offset> _pointers = {};
+  Offset? _start;
+  bool _triggered = false;
+  bool _isRefreshing = false;
+
+  void _resetGesture() {
+    _start = null;
+    _triggered = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (event) {
+        _pointers[event.pointer] = event.position;
+        if (_pointers.length >= widget.fingerCount) {
+          _start = event.position;
+          _triggered = false;
+        }
+      },
+      onPointerMove: (event) {
+        if (_pointers.length >= widget.fingerCount) {
+          _start ??= event.position;
+          final dy = event.position.dy - (_start?.dy ?? event.position.dy);
+          if (!_triggered && !_isRefreshing && dy > widget.triggerDistance) {
+            _triggered = true;
+            _isRefreshing = true;
+            widget.onRefresh().whenComplete(() {
+              if (mounted) {
+                setState(() => _isRefreshing = false);
+              } else {
+                _isRefreshing = false;
+              }
+            });
+          }
+        }
+      },
+      onPointerUp: (event) {
+        _pointers.remove(event.pointer);
+        if (_pointers.length < widget.fingerCount) {
+          _resetGesture();
+        }
+      },
+      onPointerCancel: (event) {
+        _pointers.remove(event.pointer);
+        if (_pointers.length < widget.fingerCount) {
+          _resetGesture();
+        }
+      },
+      behavior: HitTestBehavior.translucent,
+      child: widget.child,
+    );
+  }
+}
+
 /// Helper to show snackbar with anti-spam throttle
 class SnackBarHelper {
   static bool _isShowing = false;

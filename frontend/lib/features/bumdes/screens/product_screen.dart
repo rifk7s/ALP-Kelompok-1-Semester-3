@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:intl/intl.dart';
@@ -90,112 +91,44 @@ class _ProductPageState extends State<ProductPage> {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned(
-                        left: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                      const Center(
-                        child: Text(
-                          "Produk Saya",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const NotificationPage(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Cari produk...",
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 0,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildFilterChip("all", "Semua"),
-                  const SizedBox(width: 8),
-                  _buildFilterChip("available", "Stok Tersedia"),
-                  const SizedBox(width: 8),
-                  _buildFilterChip("empty", "Stok Habis"),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            Expanded(
-              child: filteredProducts.isEmpty
-                  ? _emptyState()
-                  : GridView.builder(
+      body: PullToRefresh(
+        onRefresh: loadProducts,
+        color: AppColors.primary,
+        backgroundColor: AppColors.surface,
+        displacement: 40,
+        strokeWidth: 2.5,
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _header()),
+              SliverToBoxAdapter(child: _filterChips()),
+              filteredProducts.isEmpty
+                  ? SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _emptyState(),
+                    )
+                  : SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 0.8,
-                          ),
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = filteredProducts[index];
-                        return _productCard(context: context, product: product);
-                      },
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.8,
+                            ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final product = filteredProducts[index];
+                          return _productCard(
+                            context: context,
+                            product: product,
+                          );
+                        }, childCount: filteredProducts.length),
+                      ),
                     ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
 
@@ -215,6 +148,93 @@ class _ProductPageState extends State<ProductPage> {
         },
         child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),
+    );
+  }
+
+  Widget _header() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                left: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              const Center(
+                child: Text(
+                  "Produk Saya",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            decoration: InputDecoration(
+              hintText: "Cari produk...",
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: AppColors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChips() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            physics: const BouncingScrollPhysics(),
+            children: [
+              _buildFilterChip("all", "Semua"),
+              const SizedBox(width: 8),
+              _buildFilterChip("available", "Stok Tersedia"),
+              const SizedBox(width: 8),
+              _buildFilterChip("empty", "Stok Habis"),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 

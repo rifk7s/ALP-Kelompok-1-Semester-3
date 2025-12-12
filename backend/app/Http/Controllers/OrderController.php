@@ -76,6 +76,7 @@ class OrderController extends Controller
                 'shipping_cost' => $shipping_cost,
                 'total' => $total,
                 'status' => 'pending_payment',
+                'pending_payment_at' => now(),
                 'shipping_address' => $shippingAddress,
                 'payment_deadline' => now()->addHours(24), // 24 hour payment window
                 'estimated_delivery' => now()->addDays(7), // 7 days estimate
@@ -212,6 +213,46 @@ class OrderController extends Controller
             'message' => 'Order cancelled successfully',
             'order' => $order,
         ]);
+    }
+
+    /**
+     * Mark order as completed (buyer confirms receipt)
+     */
+    public function complete(Request $request, Order $order)
+    {
+        \Log::info('Complete order attempt', [
+            'order_id' => $order->id,
+            'order_buyer_id' => $order->buyer_id,
+            'current_user_id' => $request->user()->id,
+            'order_status' => $order->status
+        ]);
+
+        // Check authorization
+        if ($order->buyer_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+                'debug' => [
+                    'order_buyer_id' => $order->buyer_id,
+                    'your_user_id' => $request->user()->id
+                ]
+            ], 403);
+        }
+
+        // Only shipped orders can be completed by buyer
+        if ($order->status !== 'shipped') {
+            return response()->json([
+                'message' => 'Only shipped orders can be completed'
+            ], 400);
+        }
+
+        $order->status = 'completed';
+        $order->completed_at = now();
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order marked as completed',
+            'order' => $order->load(['orderItems.product.productImages', 'buyer'])
+        ], 200);
     }
 
     /**

@@ -48,7 +48,9 @@ class OrderService {
         final data = json.decode(response.body);
         return data['order'];
       } else {
-        print('Failed to create order: ${response.statusCode} - ${response.body}');
+        print(
+          'Failed to create order: ${response.statusCode} - ${response.body}',
+        );
       }
       return null;
     } catch (e) {
@@ -101,10 +103,7 @@ class OrderService {
       request.headers['Accept'] = 'application/json';
 
       request.files.add(
-        await http.MultipartFile.fromPath(
-          'proof_image',
-          imageFile.path,
-        ),
+        await http.MultipartFile.fromPath('proof_image', imageFile.path),
       );
 
       print('Uploading payment proof for order $orderId');
@@ -117,7 +116,9 @@ class OrderService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Failed to upload payment proof: ${response.statusCode} - ${response.body}');
+        print(
+          'Failed to upload payment proof: ${response.statusCode} - ${response.body}',
+        );
         return false;
       }
     } catch (e) {
@@ -176,6 +177,43 @@ class OrderService {
     } catch (e) {
       print('Error fetching order: $e');
       return null;
+    }
+  }
+
+  /// Mark order as completed (buyer confirms receipt)
+  static Future<bool> completeOrder(int orderId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        print('No token found for completing order');
+        return false;
+      }
+
+      final url = '${ApiConfig.baseUrl}/orders/$orderId/complete';
+      print('Attempting to complete order at: $url');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Complete order response status: ${response.statusCode}');
+      print('Complete order response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print(
+          'Failed to complete order: ${response.statusCode} - ${response.body}',
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Error completing order: $e');
+      return false;
     }
   }
 }

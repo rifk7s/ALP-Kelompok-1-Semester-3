@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'success_payment_screen.dart';
 import 'payment_confirmed_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
@@ -30,10 +27,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   late String orderNumber;
   Map<String, dynamic>? orderDetails;
   bool isLoading = true;
-  File? selectedImage;
-  bool isSubmitting = false;
   bool isCheckingStatus = false;
-  final ImagePicker _picker = ImagePicker();
   Timer? _countdownTimer;
   String _timeLeft = '-';
 
@@ -175,73 +169,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
     }
   }
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      print('Error picking image: $e');
-      if (mounted) {
-        SnackBarHelper.showError(context, 'Gagal memilih gambar: $e');
-      }
-    }
-  }
-
-  Future<void> _submitPaymentProof() async {
-    if (selectedImage == null) {
-      SnackBarHelper.showError(
-        context,
-        'Silakan pilih bukti pembayaran terlebih dahulu',
-      );
-      return;
-    }
-
-    if (widget.orderId == null) {
-      SnackBarHelper.showError(context, 'Order ID tidak ditemukan');
-      return;
-    }
-
-    setState(() => isSubmitting = true);
-
-    try {
-      final success = await OrderService.uploadPaymentProof(
-        orderId: widget.orderId!,
-        imageFile: selectedImage!,
-      );
-
-      setState(() => isSubmitting = false);
-
-      if (success && mounted) {
-        // Navigate to success screen with order details
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-                SuccessPaymentScreen(total: totalPayment, orderId: orderNumber),
-          ),
-        );
-      } else if (mounted) {
-        SnackBarHelper.showError(context, 'Gagal mengirim bukti pembayaran');
-      }
-    } catch (e) {
-      print('Error submitting payment proof: $e');
-      setState(() => isSubmitting = false);
-      if (mounted) {
-        SnackBarHelper.showError(context, 'Error: $e');
-      }
-    }
-  }
-
   @override
   void dispose() {
     _countdownTimer?.cancel();
@@ -313,282 +240,199 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
             color: AppColors.textLight,
           ),
         ),
-        actions: [
-          // Manual refresh button with debounce protection
-          IconButton(
-            onPressed: (isCheckingStatus || isProcessing)
-                ? null
-                : _refreshStatus,
-            icon: (isCheckingStatus || isProcessing)
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primary,
-                      ),
-                    ),
-                  )
-                : const Icon(Icons.refresh_rounded, color: AppColors.primary),
-            tooltip: 'Cek Status Pembayaran',
-          ),
-        ],
       ),
 
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _section(
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.hourglass_top_rounded,
-                  size: 40,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Menunggu Pembayaran",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Silakan selesaikan pembayaran Anda",
-                        style: TextStyle(
-                          color: AppColors.grey600,
-                          fontSize: 13.5,
-                        ),
-                      ),
-                      if (orderDetails?['payment_deadline'] != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+      body: PullToRefresh(
+        onRefresh: _refreshStatus,
+        color: AppColors.primary,
+        backgroundColor: AppColors.surfaceAlt,
+        displacement: 40,
+        strokeWidth: 2.5,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _section(
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.hourglass_top_rounded,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Menunggu Pembayaran",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.warningLight,
-                            borderRadius: BorderRadius.circular(6),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Silakan selesaikan pembayaran Anda",
+                          style: TextStyle(
+                            color: AppColors.grey600,
+                            fontSize: 13.5,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.timer,
-                                size: 16,
-                                color: AppColors.warningDark,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Batas Waktu: $_timeLeft',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                        ),
+                        if (orderDetails?['payment_deadline'] != null) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.warningLight,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.timer,
+                                  size: 16,
                                   color: AppColors.warningDark,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      // Manual refresh hint
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                'Tekan tombol refresh ↗ untuk cek status',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.primary,
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Batas Waktu: $_timeLeft',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.warningDark,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _section(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Total Pembayaran",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    formatCurrency(totalPayment),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Transfer ke Rekening",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  _infoRow("Bank", "BCA"),
+                  _infoRow("No. Rekening", "1234566"),
+                  _infoRow("A.n", "Bumdes Desa Sengka"),
+
+                  const SizedBox(height: 14),
+                  Divider(),
+
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      const Icon(Icons.copy_rounded, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Salin No. Rekening",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const Spacer(),
+                      const Icon(Icons.chevron_right, color: AppColors.primary),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          _section(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Total Pembayaran",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  formatCurrency(totalPayment),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          _section(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Transfer ke Rekening",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 12),
-                _infoRow("Bank", "BCA"),
-                _infoRow("No. Rekening", "1234566"),
-                _infoRow("A.n", "Bumdes Desa Sengka"),
-
-                const SizedBox(height: 14),
-                Divider(),
-
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    const Icon(Icons.copy_rounded, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "Salin No. Rekening",
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.chevron_right, color: AppColors.primary),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          _section(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Nomor Pesanan",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.grey100,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    orderNumber,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          _section(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Bukti Pembayaran",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 12),
-                if (selectedImage != null) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      selectedImage!,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                 ],
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.image),
-                        label: Text(
-                          selectedImage == null
-                              ? 'Pilih Gambar'
-                              : 'Ganti Gambar',
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: AppColors.primary),
-                          foregroundColor: AppColors.primary,
-                        ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Nomor Pesanan",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      orderNumber,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.5,
                       ),
                     ),
-                  ],
-                ),
-                if (selectedImage != null) ...[
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Cek Status Pembayaran",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
                   const SizedBox(height: 12),
+                  Text(
+                    'Tarik ke bawah atau tekan tombol untuk memperbarui status pembayaran.',
+                    style: TextStyle(color: AppColors.grey600, fontSize: 13),
+                  ),
+                  const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isSubmitting ? null : _submitPaymentProof,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: isSubmitting
+                    child: ElevatedButton.icon(
+                      onPressed: (isCheckingStatus || isProcessing)
+                          ? null
+                          : _refreshStatus,
+                      icon: (isCheckingStatus || isProcessing)
                           ? const SizedBox(
-                              height: 20,
-                              width: 20,
+                              width: 18,
+                              height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
@@ -596,22 +440,30 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
                                 ),
                               ),
                             )
-                          : const Text(
-                              'Kirim Bukti Pembayaran',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          : const Icon(Icons.refresh),
+                      label: const Text(
+                        'Refresh Status',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 30),
-        ],
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }

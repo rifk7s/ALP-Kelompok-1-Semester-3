@@ -78,6 +78,10 @@ function loadOrders() {
                             onclick="confirmPayment(${order.id})">
                         Confirm Payment
                     </button>
+                    <button class="btn btn-sm btn-danger ms-1" 
+                            onclick="rejectPayment(${order.id})">
+                        Reject
+                    </button>
                 </td>
             </tr>
         `).join('');
@@ -93,6 +97,29 @@ function confirmPayment(orderId) {
     if (!confirm('Confirm payment for this order?')) return;
     
     fetch(`/api/admin/orders/${orderId}/confirm-payment`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+    })
+    .then(res => {
+        if (res.status === 401 || res.status === 403) {
+            logout();
+            return;
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data) {
+            alert(data.message);
+            loadOrders();
+        }
+    });
+}
+
+// Reject payment with token
+function rejectPayment(orderId) {
+    if (!confirm('Are you sure you want to reject this payment?')) return;
+    
+    fetch(`/api/admin/orders/${orderId}/reject-payment`, {
         method: 'POST',
         headers: getAuthHeaders()
     })

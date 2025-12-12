@@ -181,7 +181,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
                   child: Text(
                     cartItemCount > 99 ? '99+' : cartItemCount.toString(),
                     style: const TextStyle(

@@ -32,10 +32,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
     );
 
     _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.elasticOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -53,10 +50,8 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ReceiptPage(
-              total: widget.total,
-              orderId: widget.orderId,
-            ),
+            builder: (_) =>
+                ReceiptPage(total: widget.total, orderId: widget.orderId),
           ),
         );
       }
@@ -207,13 +202,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.grey600,
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 14, color: AppColors.grey600)),
         Text(
           value,
           style: TextStyle(
