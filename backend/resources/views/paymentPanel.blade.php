@@ -27,43 +27,88 @@
 @section('scripts')
 <script>
 // Load orders on page load
-document.addEventListener('DOMContentLoaded', () => loadOrders());
+document.addEventListener('DOMContentLoaded', () =>{
+    loadOrders();
+    checkAuth();
+});
 
-// Fetch and display orders
-function loadOrders() {
-    fetch('/api/admin/orders?status=pending_payment')
-        .then(res => res.json())
-        .then(orders => {
-            let html = orders.map(order => `
-                <tr>
-                    <td>${order.order_number}</td>
-                    <td>${order.buyer.name}</td>
-                    <td>${order.total.toLocaleString()}</td>
-                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-sm btn-success" 
-                                onclick="confirmPayment(${order.id})">
-                            Confirm Payment
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-            
-            document.querySelector('#orderTable tbody').innerHTML = html || 
-                '<tr><td colspan="5" class="text-center">No pending orders</td></tr>';
-        });
+// Check if user is authenticated
+function checkAuth() {
+    const token = localStorage.getItem('admin_token');
+    const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+    
+    if (!token || user.role !== 'bumdes') {
+        window.location.href = '/admin/login';
+        return false;
+    }
+    return true;
 }
 
-// Confirm payment
+// Get token for API requests
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+    };
+}
+
+// Load orders with token
+function loadOrders() {
+    fetch('/api/admin/orders?status=pending_payment', {
+        headers: getAuthHeaders()
+    })
+    .then(res => {
+        if (res.status === 401 || res.status === 403) {
+            logout();
+            return;
+        }
+        return res.json();
+    })
+    .then(orders => {
+        if (!orders) return;
+        
+        let html = orders.map(order => `
+            <tr>
+                <td>${order.order_number}</td>
+                <td>${order.buyer.name}</td>
+                <td>${order.total.toLocaleString()}</td>
+                <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-sm btn-success" 
+                            onclick="confirmPayment(${order.id})">
+                        Confirm Payment
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.querySelector('#orderTable tbody').innerHTML = html || 
+            '<tr><td colspan="5" class="text-center">No pending orders</td></tr>';
+    })
+    .catch(() => logout());
+}
+
+// Confirm payment with token
 function confirmPayment(orderId) {
     if (!confirm('Confirm payment for this order?')) return;
     
-    fetch(`/api/admin/orders/${orderId}/confirm-payment`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
+    fetch(`/api/admin/orders/${orderId}/confirm-payment`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+    })
+    .then(res => {
+        if (res.status === 401 || res.status === 403) {
+            logout();
+            return;
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data) {
             alert(data.message);
-            loadOrders(); // Refresh table
-        });
+            loadOrders();
+        }
+    });
 }
 </script>
 @endsection
