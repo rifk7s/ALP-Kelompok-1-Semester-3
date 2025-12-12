@@ -46,7 +46,7 @@ class OrderController extends Controller
         // Merge: other orders first, then completed/rejected
         $sortedOrders = $otherOrders->concat($completedOrRejected);
 
-        return response()->json($sortedOrders);
+        return response()->json($sortedOrders, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     /**

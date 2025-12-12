@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/notification_service.dart';
+import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
+import 'package:frontend/features/bumdes/screens/transaction_bumdes_screen.dart';
+import 'package:frontend/features/shared/screens/chat_detail_page.dart';
+import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:intl/intl.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -24,6 +32,22 @@ class _NotificationPageState extends State<NotificationPage> {
     setState(() => _isLoading = true);
 
     final notifications = await NotificationService.getNotifications();
+
+    // Sort: unread first, then by created_at descending (newest first)
+    notifications.sort((a, b) {
+      final aIsRead = a['is_read'] == 1 || a['is_read'] == true;
+      final bIsRead = b['is_read'] == 1 || b['is_read'] == true;
+
+      // If read status differs, unread comes first
+      if (aIsRead != bIsRead) {
+        return aIsRead ? 1 : -1;
+      }
+
+      // If same read status, sort by created_at descending
+      final aTime = a['created_at'] as String? ?? '';
+      final bTime = b['created_at'] as String? ?? '';
+      return bTime.compareTo(aTime);
+    });
 
     setState(() {
       _notifications = notifications;
@@ -77,6 +101,192 @@ class _NotificationPageState extends State<NotificationPage> {
       setState(() {
         _notifications[index]['is_read'] = true;
       });
+    }
+  }
+
+  Future<void> _handleNotificationTap(Map<String, dynamic> notification) async {
+    // Mark as read first
+    final notificationId = notification['id'] ?? 0;
+    final index = _notifications.indexWhere((n) => n['id'] == notificationId);
+    if (index != -1) {
+      await _markAsRead(notificationId, index);
+    }
+
+    final type = notification['type'] as String?;
+    final relatedId = notification['related_id']?.toString();
+
+    if (type == 'order' || type == 'payment') {
+      // Check user role to determine navigation
+      final user = await StorageService.getUser();
+      final userRole = user?['role'] as String?;
+      final isBumdes = userRole == 'admin' || userRole == 'bumdes';
+
+      if (relatedId != null && mounted) {
+        if (isBumdes) {
+          // Navigate to BUMDes transaction page
+          try {
+            final orders = await AdminService.getOrdersByStatus();
+            final order = orders.firstWhere(
+              (o) => o['id'].toString() == relatedId,
+              orElse: () => <String, dynamic>{},
+            );
+
+            int initialTab = 0;
+            if (order.isNotEmpty) {
+              final status = order['status'] as String?;
+              print('Order status: $status for order ID: $relatedId');
+              if (status == 'pending_payment' || status == 'paid') {
+                initialTab = 0; // Baru
+              } else if (status == 'processing') {
+                initialTab = 1; // Sedang Dikemas
+              } else if (status == 'shipped') {
+                initialTab = 2; // Dikirim
+              } else if (status == 'completed' || status == 'rejected') {
+                initialTab = 3; // Selesai
+              }
+            }
+
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BumdesTransactionPage(initialTab: initialTab),
+                ),
+              );
+            }
+          } catch (e) {
+            print('Error fetching order: $e');
+            // If error, just navigate to transaction page
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BumdesTransactionPage(),
+                ),
+              );
+            }
+          }
+        } else {
+          // Navigate to Pembeli transaction history
+          try {
+            final orders = await OrderService.getOrders();
+            final order = orders.firstWhere(
+              (o) => o['id'].toString() == relatedId,
+              orElse: () => <String, dynamic>{},
+            );
+
+            int initialTab = 0;
+            if (order.isNotEmpty) {
+              final status = order['status'] as String?;
+              print('Order status: $status for order ID: $relatedId');
+              if (status == 'pending_payment') {
+                initialTab = 0; // Belum Bayar
+              } else if (status == 'paid' || status == 'processing' || status == 'shipped') {
+                initialTab = 1; // Diproses
+              } else if (status == 'completed' || status == 'rejected') {
+                initialTab = 2; // Selesai
+              }
+            }
+
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TransactionHistoryPage(initialTab: initialTab),
+                ),
+              );
+            }
+          } catch (e) {
+            print('Error fetching order: $e');
+            // If error, just navigate to transaction history
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TransactionHistoryPage(),
+                ),
+              );
+            }
+          }
+        }
+      }
+    } else if (type == 'chat') {
+      // Navigate to chat
+      if (relatedId != null && mounted) {
+        try {
+          // Get user role to determine which chat screen to use
+          final user = await StorageService.getUser();
+          final userRole = user?['role'] as String?;
+          final isBumdes = userRole == 'admin' || userRole == 'bumdes';
+
+          // Sign in to Firebase first
+          await ChatService.signInToFirebase();
+
+          // Get chat document to retrieve participant info
+          final chatDoc = await ChatService.getChatDocument(relatedId);
+          if (chatDoc != null) {
+            final currentUserId = ChatService.getCurrentUserId();
+            final participants = chatDoc['participants'] as List<dynamic>? ?? [];
+            final participantNames = chatDoc['participantNames'] as Map<String, dynamic>? ?? {};
+            final participantImages = chatDoc['participantImages'] as Map<String, dynamic>? ?? {};
+
+            // Get the other participant's info
+            String recipientId = '';
+            String recipientName = 'User';
+            String? recipientImage;
+
+            for (final participantId in participants) {
+              if (participantId != currentUserId) {
+                recipientId = participantId;
+                recipientName = participantNames[participantId] ?? 'User';
+                recipientImage = participantImages[participantId];
+                break;
+              }
+            }
+
+            if (mounted) {
+              if (isBumdes) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatBumdesPage(
+                      chatId: relatedId,
+                      name: recipientName,
+                      image: recipientImage,
+                      recipientId: recipientId,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatDetailPage(
+                      chatId: relatedId,
+                      name: recipientName,
+                      image: recipientImage ?? '',
+                      recipientId: recipientId,
+                    ),
+                  ),
+                );
+              }
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Chat tidak ditemukan')),
+              );
+            }
+          }
+        } catch (e) {
+          print('Error navigating to chat: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error membuka chat: $e')),
+            );
+          }
+        }
+      }
     }
   }
 
@@ -158,10 +368,7 @@ class _NotificationPageState extends State<NotificationPage> {
                         time: _formatTime(notification['created_at'] ?? ''),
                         isUnread: !isReadBool,
                         icon: _getIconForType(notification['type'] ?? ''),
-                        onTap: () => _markAsRead(
-                          notification['id'] ?? 0,
-                          index,
-                        ),
+                        onTap: () => _handleNotificationTap(notification),
                       );
                     },
                   ),

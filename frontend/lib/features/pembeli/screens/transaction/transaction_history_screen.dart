@@ -13,7 +13,9 @@ import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dar
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
-  const TransactionHistoryPage({super.key});
+  final int initialTab;
+  
+  const TransactionHistoryPage({super.key, this.initialTab = 0});
 
   @override
   State<TransactionHistoryPage> createState() => _TransactionHistoryPageState();
@@ -120,7 +122,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
     _loadOrders();
     _startCountdownTimer();
   }

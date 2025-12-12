@@ -9,6 +9,7 @@ import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:intl/intl.dart';
 
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoadingCategories = true;
   bool isLoadingProducts = true;
   int cartItemCount = 0;
+  int unreadNotificationCount = 0;
 
   @override
   void initState() {
@@ -39,6 +41,20 @@ class _HomePageState extends State<HomePage> {
     loadCategories();
     loadProducts();
     loadCartCount();
+    loadUnreadNotificationCount();
+  }
+
+  Future<void> loadUnreadNotificationCount() async {
+    try {
+      final count = await NotificationService.getUnreadCount();
+      if (mounted) {
+        setState(() {
+          unreadNotificationCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading unread notification count: $e');
+    }
   }
 
   Future<void> loadCartCount() async {
@@ -198,15 +214,20 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 12),
                           IconButton(
-                            icon: const Icon(Icons.notifications_outlined),
-                            onPressed: () {
-                              Navigator.push(
+                            icon: Badge(
+                              label: Text('$unreadNotificationCount'),
+                              isLabelVisible: unreadNotificationCount > 0,
+                              child: const Icon(Icons.notifications_outlined),
+                            ),
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       const NotificationPage(),
                                 ),
                               );
+                              loadUnreadNotificationCount(); // Refresh count after returning
                             },
                           ),
                         ],

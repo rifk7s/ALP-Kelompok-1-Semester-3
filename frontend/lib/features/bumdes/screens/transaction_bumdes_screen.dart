@@ -9,7 +9,9 @@ import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 
 class BumdesTransactionPage extends StatefulWidget {
-  const BumdesTransactionPage({super.key});
+  final int? initialTab;
+  
+  const BumdesTransactionPage({super.key, this.initialTab});
 
   @override
   State<BumdesTransactionPage> createState() => _BumdesTransactionPageState();
@@ -32,7 +34,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _statusFlow.length, vsync: this);
+    _tabController = TabController(
+      length: _statusFlow.length, 
+      vsync: this,
+      initialIndex: widget.initialTab ?? 0,
+    );
     _loadOrders();
   }
 
@@ -55,9 +61,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   }
 
   List<Map<String, dynamic>> _ordersByStatus(String status) {
+    List<Map<String, dynamic>> filtered;
+    
     if (status == 'pending_payment') {
       // Baru tab shows both pending_payment and paid orders
-      return _orders
+      filtered = _orders
           .where(
             (order) =>
                 order['status'] == 'pending_payment' ||
@@ -66,14 +74,25 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           .toList();
     } else if (status == 'completed') {
       // Selesai tab shows both completed and rejected orders
+      // Keep original sorting from backend (by completion timestamp)
       return _orders
           .where(
             (order) =>
                 order['status'] == 'completed' || order['status'] == 'rejected',
           )
           .toList();
+    } else {
+      filtered = _orders.where((order) => order['status'] == status).toList();
     }
-    return _orders.where((order) => order['status'] == status).toList();
+
+    // Sort by updated_at or created_at (newest first) for non-completed tabs
+    filtered.sort((a, b) {
+      final aTime = a['updated_at'] as String? ?? a['created_at'] as String? ?? '';
+      final bTime = b['updated_at'] as String? ?? b['created_at'] as String? ?? '';
+      return bTime.compareTo(aTime); // Descending order (newest first)
+    });
+
+    return filtered;
   }
 
   String _statusLabel(String status) {

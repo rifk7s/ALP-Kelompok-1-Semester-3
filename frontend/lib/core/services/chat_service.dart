@@ -51,6 +51,19 @@ class ChatService {
     return '${ids[0]}_${ids[1]}';
   }
 
+  static Future<Map<String, dynamic>?> getChatDocument(String chatId) async {
+    try {
+      final doc = await _firestore.collection('chats').doc(chatId).get();
+      if (doc.exists) {
+        return doc.data();
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting chat document: $e');
+      return null;
+    }
+  }
+
   static Stream<QuerySnapshot> getChatRooms() {
     final userId = getCurrentUserId();
     if (userId == null) {
