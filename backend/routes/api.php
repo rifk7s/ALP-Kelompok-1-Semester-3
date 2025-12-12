@@ -16,6 +16,7 @@ use App\Http\Controllers\ChatListController;
 use App\Http\Controllers\PetaniDataController;
 use App\Http\Controllers\HppPriceController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NotificationController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -45,10 +46,41 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile/me', [ProfileController::class, 'userrn']);
 
     /*
+        Cart Routes
+    */
+    Route::get('cart', [CartController::class, 'index']);
+    Route::post('cart', [CartController::class, 'store']);
+    Route::put('cart/{cart}', [CartController::class, 'update']);
+    Route::delete('cart/{cart}', [CartController::class, 'destroy']);
+    Route::delete('cart', [CartController::class, 'clear']);
+
+    /*
         Petani Data Routes (BUMDes only)
     */
     Route::apiResource('petani-data', PetaniDataController::class);
     Route::patch('petani-data/{petaniData}/toggle-active', [PetaniDataController::class, 'toggleActive']);
+
+    /*
+        Order routes
+    */ 
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::get('/orders/{order}/status', [OrderController::class, 'checkStatus']);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+    
+    /*
+        Payment proof upload
+    */ 
+    Route::post('/orders/{order}/payment-proof', [PaymentController::class, 'uploadProof']);
+
+    /*
+        Notification Routes
+    */
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 });
 
 /*
@@ -74,32 +106,6 @@ Route::apiResource('/products/categories', CategoryController::class);
 Route::apiResource('/products/product-images', ProductImageController::class);
 Route::apiResource('/products/contributions', ProductContributionController::class);
 Route::apiResource('/products/hpp-prices', HppPriceController::class);
-
-/*
-    Cart Routes
-*/
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('cart', [CartController::class, 'index']);
-    Route::post('cart', [CartController::class, 'store']);
-    Route::put('cart/{cart}', [CartController::class, 'update']);
-    Route::delete('cart/{cart}', [CartController::class, 'destroy']);
-    Route::delete('cart', [CartController::class, 'clear']);
-});
-
-/*
-    Order Routes
-*/
-Route::middleware('auth:sanctum')->group(function () {
-    // Order routes
-    Route::post('/checkout', [OrderController::class, 'checkout']);
-    Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{order}', [OrderController::class, 'show']);
-    Route::get('/orders/{order}/status', [OrderController::class, 'checkStatus']);
-    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
-    
-    // Payment proof upload
-    Route::post('/orders/{order}/payment-proof', [PaymentController::class, 'uploadProof']);
-});
 
 /*
     Admin Routes (BUMDes only)
