@@ -4,12 +4,12 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -21,7 +21,7 @@ class TransactionHistoryPage extends StatefulWidget {
 class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   List<Map<String, dynamic>> _backendOrders = [];
   bool _isLoading = false;
   Timer? _countdownTimer;
@@ -78,9 +78,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   List<Map<String, dynamic>> _getOrdersByStatus(String status) {
     if (status == 'pending') {
       // Use backend orders for pending/belum bayar
-      return _backendOrders.where((o) => 
-        o['status'] == 'pending_payment'
-      ).toList();
+      return _backendOrders
+          .where((o) => o['status'] == 'pending_payment')
+          .toList();
     }
     // Use dummy data for other statuses for now
     return _orders.where((o) => o['status'] == status).toList();
@@ -120,7 +120,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
   void _updateCountdowns() {
     for (var order in _backendOrders) {
-      if (order['status'] == 'pending_payment' && order['payment_deadline'] != null) {
+      if (order['status'] == 'pending_payment' &&
+          order['payment_deadline'] != null) {
         final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
         _countdowns[orderId] = _calculateTimeLeft(order['payment_deadline']);
       }
@@ -157,7 +158,20 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   String _formatDeadline(String deadlineStr) {
     try {
       final deadline = DateTime.parse(deadlineStr);
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
+      ];
       return '${deadline.day} ${months[deadline.month - 1]}, ${deadline.hour.toString().padLeft(2, '0')}:${deadline.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return deadlineStr;
@@ -231,7 +245,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     if (_isLoading && status == 'pending') {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     final orders = _getOrdersByStatus(status);
 
     if (orders.isEmpty) {
@@ -275,22 +289,79 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     );
   }
 
+  /// Build product image - handles both network images from DB and static assets
+  Widget _buildProductImage(String? imagePath) {
+    if (imagePath != null &&
+        imagePath.isNotEmpty &&
+        !imagePath.startsWith('assets/')) {
+      // Network image from database
+      final imageUrl = ApiConfig.getImageUrl(imagePath);
+      return Image.network(
+        imageUrl,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 60,
+            height: 60,
+            color: AppColors.grey200,
+            child: Icon(Icons.image, size: 24, color: AppColors.greyMedium),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: 60,
+            height: 60,
+            color: AppColors.grey200,
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+      );
+    } else if (imagePath != null && imagePath.startsWith('assets/')) {
+      // Static asset image (for dummy data)
+      return Image.asset(imagePath, width: 60, height: 60, fit: BoxFit.cover);
+    } else {
+      // No image - show placeholder
+      return Container(
+        width: 60,
+        height: 60,
+        color: AppColors.grey200,
+        child: Icon(Icons.image, size: 24, color: AppColors.greyMedium),
+      );
+    }
+  }
+
   Widget _buildOrderCard(Map<String, dynamic> order) {
     // Handle both backend and dummy data formats
     final status = order['status'] as String;
-    
+
     // Backend returns 'order_items', dummy data uses 'products'
-    final orderItems = order['order_items'] as List? ?? order['products'] as List? ?? [];
-    
+    final orderItems =
+        order['order_items'] as List? ?? order['products'] as List? ?? [];
+
     // Convert backend order_items to products format if needed
     final products = orderItems.map((item) {
       if (item['product'] != null) {
         // Backend format
         final product = item['product'];
+        // Get image from product_images
+        String? imagePath;
+        if (product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty) {
+          imagePath = product['product_images'][0]['image_path'];
+        }
         return {
           'name': product['name'] ?? 'Produk',
           'qty': double.parse(item['quantity_kg']?.toString() ?? '0').toInt(),
-          'image': 'assets/images/gabah.jpg', // Default for now
+          'image': imagePath, // Can be null, will handle in UI
         };
       }
       // Dummy format, return as is
@@ -371,12 +442,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    products[0]['image'],
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildProductImage(products[0]['image']),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -407,7 +473,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
           const Divider(height: 24),
 
           // Status specific info
-          if (status == 'pending' || status == 'pending_payment') _buildPendingInfo(order),
+          if (status == 'pending' || status == 'pending_payment')
+            _buildPendingInfo(order),
           if (status == 'processing') _buildProcessingInfo(order),
           if (status == 'completed') _buildCompletedInfo(order),
 
@@ -447,7 +514,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
     final deadline = order['payment_deadline'] ?? order['deadline'];
     final timeLeft = _countdowns[orderId] ?? '-';
-    
+
     String deadlineText = '-';
     if (deadline != null) {
       if (deadline is String && deadline.contains('-')) {
@@ -594,9 +661,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   MaterialPageRoute(
                     builder: (_) => WaitingPaymentPage(
                       orderId: order['id'] as int?,
-                      orderNumber: order['order_number'] ?? order['id']?.toString(),
-                      totalPayment: (order['total'] is int) 
-                          ? order['total'] 
+                      orderNumber:
+                          order['order_number'] ?? order['id']?.toString(),
+                      totalPayment: (order['total'] is int)
+                          ? order['total']
                           : int.tryParse(order['total']?.toString() ?? '0'),
                     ),
                   ),
@@ -693,28 +761,30 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              List<Map<String, dynamic>> cartItems = (order['products'] as List).map((p) {
-                return {
-                  'id': p['id'] ?? 0,
-                  'quantity_kg': p['qty']?.toString() ?? '1',
-                  'product': {
-                    'name': p['name'] ?? '',
-                    'price_per_kg': p['price']?.toString() ?? '0',
-                    'product_images': [
-                      {'image_path': p['image'] ?? ''}
-                    ],
-                  },
-                };
-              }).toList().cast<Map<String, dynamic>>();
+              List<Map<String, dynamic>> cartItems = (order['products'] as List)
+                  .map((p) {
+                    return {
+                      'id': p['id'] ?? 0,
+                      'quantity_kg': p['qty']?.toString() ?? '1',
+                      'product': {
+                        'name': p['name'] ?? '',
+                        'price_per_kg': p['price']?.toString() ?? '0',
+                        'product_images': [
+                          {'image_path': p['image'] ?? ''},
+                        ],
+                      },
+                    };
+                  })
+                  .toList()
+                  .cast<Map<String, dynamic>>();
 
-              int totalPayment = cartItems.fold(
-                0,
-                (sum, item) {
-                  final qty = double.parse(item['quantity_kg'].toString());
-                  final price = double.parse(item['product']['price_per_kg'].toString());
-                  return sum + (qty * price).toInt();
-                },
-              );
+              int totalPayment = cartItems.fold(0, (sum, item) {
+                final qty = double.parse(item['quantity_kg'].toString());
+                final price = double.parse(
+                  item['product']['price_per_kg'].toString(),
+                );
+                return sum + (qty * price).toInt();
+              });
 
               Navigator.push(
                 context,

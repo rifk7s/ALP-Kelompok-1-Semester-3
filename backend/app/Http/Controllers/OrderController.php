@@ -19,7 +19,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = Order::where('buyer_id', $request->user()->id)
-                      ->with(['orderItems.product'])
+                      ->with(['orderItems.product.productImages'])
                       ->orderBy('created_at', 'desc')
                       ->get();
 
@@ -142,7 +142,7 @@ class OrderController extends Controller
             ], 403);
         }
 
-        $order->load(['orderItems.product', 'payments']);
+        $order->load(['orderItems.product.productImages', 'payments']);
 
         return response()->json($order);
     }
