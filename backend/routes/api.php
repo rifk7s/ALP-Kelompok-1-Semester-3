@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
     Route::post('/chat/send', [ChatMessageController::class, 'sendMessage']);
+    Route::post('/chat/notify', [ChatMessageController::class, 'notifyMessage']);
     Route::get('/chat/{chatId}', [ChatMessageController::class, 'getMessages']);
     Route::delete('/chat/{chatId}/message/{messageId}', [ChatMessageController::class, 'deleteMessage']);
     Route::get('/chat/list', [ChatListController::class, 'getChatList']);

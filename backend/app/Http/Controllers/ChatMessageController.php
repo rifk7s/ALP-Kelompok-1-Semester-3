@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Helpers\NotificationHelper;
+use App\Services\NotificationService;
 
 class ChatMessageController extends Controller
 {
@@ -54,13 +54,17 @@ class ChatMessageController extends Controller
         $receiverId = $chat->user1_id === $userId ? $chat->user2_id : $chat->user1_id;
         $senderName = Auth::user()->name;
         
-        NotificationHelper::sendNotification(
+        \Log::info('Sending chat notification', [
+            'recipient_id' => $receiverId,
+            'sender_name' => $senderName,
+            'message' => $request->message,
+            'chat_id' => $chat->id
+        ]);
+        
+        NotificationService::notifyChatMessage(
             $receiverId,
-            'New Message from ' . $senderName,
-            strlen($request->message) > 50 
-                ? substr($request->message, 0, 50) . '...' 
-                : $request->message,
-            'chat',
+            $senderName,
+            $request->message,
             $chat->id
         );
 
@@ -68,6 +72,26 @@ class ChatMessageController extends Controller
             'status' => 'sent',
             'message_id' => $messageId,
         ]);
+    }
+
+    public function notifyMessage(Request $request)
+    {
+        $request->validate([
+            'recipient_id' => 'required|integer',
+            'message' => 'required|string',
+            'chat_id' => 'nullable|string',
+        ]);
+
+        $senderName = Auth::user()->name;
+        
+        NotificationService::notifyChatMessage(
+            $request->recipient_id,
+            $senderName,
+            $request->message,
+            $request->chat_id
+        );
+
+        return response()->json(['status' => 'notification sent']);
     }
 
     public function getMessages($chatId)

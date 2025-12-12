@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'storage_service.dart';
+import 'api_config.dart';
 
 class ChatService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -112,6 +115,28 @@ class ChatService {
       'timestamp': FieldValue.serverTimestamp(),
       'read': false,
     });
+
+    // Send notification to recipient via backend
+    try {
+      final token = await StorageService.getToken();
+      if (token != null) {
+        await http.post(
+          Uri.parse('${ApiConfig.baseUrl}/chat/notify'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: json.encode({
+            'recipient_id': recipientId,
+            'message': text,
+            'chat_id': chatId,
+          }),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to send chat notification: $e');
+    }
   }
 
   static Future<void> markMessagesAsRead(String chatId) async {
