@@ -12,18 +12,20 @@ class OrderTrackingPage extends StatefulWidget {
 
 class _OrderTrackingPageState extends State<OrderTrackingPage>
     with SingleTickerProviderStateMixin {
-  final List<String> _stages = [
-    'Pesanan Dibuat',
-    'Dikemas',
-    'Dikirim',
-    'Selesai',
-  ];
+  late List<String> _stages;
 
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
+
+    // Set stages based on whether order is rejected
+    final isRejected = widget.order['isRejected'] == true;
+    _stages = isRejected
+        ? ['Pesanan Dibuat', 'Ditolak']
+        : ['Pesanan Dibuat', 'Dikemas', 'Dikirim', 'Selesai'];
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -38,7 +40,13 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
 
   @override
   Widget build(BuildContext context) {
+    final isRejected = widget.order['isRejected'] == true;
     int currentStage = _stages.indexOf(widget.order['statusText']);
+
+    // For rejected orders, both stages should be completed
+    if (isRejected && currentStage < 0) {
+      currentStage = _stages.length - 1;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -78,13 +86,25 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          widget.order['productImage'] ??
-                              'assets/images/gabah.jpg',
-                          width: 70,
-                          height: 70,
-                          fit: BoxFit.cover,
-                        ),
+                        child: widget.order['productImage'] != null
+                            ? Image.network(
+                                widget.order['productImage'],
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 70,
+                                  height: 70,
+                                  color: AppColors.grey200,
+                                  child: const Icon(Icons.image_not_supported),
+                                ),
+                              )
+                            : Container(
+                                width: 70,
+                                height: 70,
+                                color: AppColors.grey200,
+                                child: const Icon(Icons.image),
+                              ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -117,8 +137,16 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                 ..._stages.asMap().entries.map((entry) {
                   int index = entry.key;
                   String stage = entry.value;
-                  bool completed = index < currentStage;
-                  bool isCurrent = index == currentStage;
+                  final isRejected = widget.order['isRejected'] == true;
+
+                  // For rejected orders, both stages are completed
+                  bool completed = isRejected ? true : index < currentStage;
+                  bool isCurrent = isRejected
+                      ? (index ==
+                            _stages.length -
+                                1) // Last stage is current for rejected
+                      : (index == currentStage);
+
                   return _buildStageTile(
                     stage,
                     completed,

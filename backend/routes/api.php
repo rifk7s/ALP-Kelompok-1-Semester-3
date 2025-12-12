@@ -96,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::get('/orders/{order}/status', [OrderController::class, 'checkStatus']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+    Route::post('/orders/{order}/complete', [OrderController::class, 'complete']);
     
     // Payment proof upload
     Route::post('/orders/{order}/payment-proof', [PaymentController::class, 'uploadProof']);
@@ -108,6 +109,10 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/orders', [AdminController::class, 'index']);
     Route::get('/orders/{order}', [AdminController::class, 'show']);
     Route::post('/orders/{order}/confirm-payment', [AdminController::class, 'confirmPayment']);
+    Route::post('/orders/{order}/reject-payment', [AdminController::class, 'rejectPayment']);
+    Route::post('/orders/{order}/mark-processing', [AdminController::class, 'markProcessing']);
+    Route::post('/orders/{order}/mark-shipped', [AdminController::class, 'markShipped']);
+    Route::post('/orders/{order}/mark-completed', [AdminController::class, 'markCompleted']);
 });
 
 // HPP Panel Routes for testing without auth

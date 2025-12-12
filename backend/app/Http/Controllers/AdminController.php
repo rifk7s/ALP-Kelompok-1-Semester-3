@@ -19,13 +19,17 @@ class AdminController extends Controller
             ], 403);
         }
 
-        // Filter by status if provided, default to pending_payment
-        $status = $request->input('status', 'pending_payment');
+        // Filter by status if provided, otherwise return all orders
+        $status = $request->input('status');
         
-        $orders = Order::with(['buyer', 'orderItems.product'])
-                    ->where('status', $status)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+        $query = Order::with(['buyer', 'orderItems.product.productImages', 'payments'])
+                    ->orderBy('created_at', 'desc');
+        
+        if ($status) {
+            $query->where('status', $status);
+        }
+        
+        $orders = $query->get();
 
         return response()->json($orders);
     }
@@ -50,12 +54,131 @@ class AdminController extends Controller
 
         $order->update([
             'status' => 'paid',
+            'paid_at' => now(),
         ]);
 
-        $order->load(['buyer', 'orderItems.product']);
+        // Update payment status to verified
+        $payment = $order->payments;
+        if ($payment) {
+            $payment->update([
+                'status' => 'verified',
+            ]);
+        }
+
+        $order->load(['buyer', 'orderItems.product', 'payments']);
 
         return response()->json([
             'message' => 'Order payment confirmed successfully',
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Mark order as processing
+     */
+    public function markProcessing(Request $request, Order $order)
+    {
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== 'paid') {
+            return response()->json(['message' => 'Order must be paid first'], 400);
+        }
+
+        $order->update([
+            'status' => 'processing',
+            'processing_at' => now(),
+        ]);
+        $order->load(['buyer', 'orderItems.product']);
+
+        return response()->json([
+            'message' => 'Order marked as processing',
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Mark order as shipped
+     */
+    public function markShipped(Request $request, Order $order)
+    {
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== 'processing') {
+            return response()->json(['message' => 'Order must be processing first'], 400);
+        }
+
+        $order->update([
+            'status' => 'shipped',
+            'shipped_at' => now(),
+        ]);
+        $order->load(['buyer', 'orderItems.product']);
+
+        return response()->json([
+            'message' => 'Order marked as shipped',
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Mark order as completed
+     */
+    public function markCompleted(Request $request, Order $order)
+    {
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== 'shipped') {
+            return response()->json(['message' => 'Order must be shipped first'], 400);
+        }
+
+        $order->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+        $order->load(['buyer', 'orderItems.product']);
+
+        return response()->json([
+            'message' => 'Order marked as completed',
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Reject order payment
+     */
+    public function rejectPayment(Request $request, Order $order)
+    {
+        if ($request->user()->role !== 'bumdes') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== 'pending_payment') {
+            return response()->json(['message' => 'Only pending payment orders can be rejected'], 400);
+        }
+
+        // Update order status to rejected
+        $order->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+        ]);
+
+        // Update payment status to rejected
+        $payment = $order->payments;
+        if ($payment) {
+            $payment->update([
+                'status' => 'rejected',
+            ]);
+        }
+
+        $order->load(['buyer', 'orderItems.product', 'payments']);
+
+        return response()->json([
+            'message' => 'Order payment rejected',
             'order' => $order,
         ]);
     }

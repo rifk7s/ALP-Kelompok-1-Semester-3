@@ -8,6 +8,7 @@ import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/category_service.dart';
+import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:intl/intl.dart';
 
@@ -30,12 +31,28 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> products = [];
   bool isLoadingCategories = true;
   bool isLoadingProducts = true;
+  int cartItemCount = 0;
 
   @override
   void initState() {
     super.initState();
     loadCategories();
     loadProducts();
+    loadCartCount();
+  }
+
+  Future<void> loadCartCount() async {
+    try {
+      final cartData = await CartService.getCart();
+      if (cartData != null && mounted) {
+        final items = cartData['items'] as List<dynamic>? ?? [];
+        setState(() {
+          cartItemCount = items.length;
+        });
+      }
+    } catch (e) {
+      print('Error loading cart count: $e');
+    }
   }
 
   Future<void> loadCategories() async {
@@ -97,13 +114,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: AppColors.primary,
-          backgroundColor: AppColors.surface,
-          displacement: 40,
-          strokeWidth: 2.5,
+      body: PullToRefresh(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: AppColors.surface,
+        displacement: 40,
+        strokeWidth: 2.5,
+        child: SafeArea(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -137,16 +154,47 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Row(
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.shopping_cart_outlined),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CartPage(),
+                          Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.shopping_cart_outlined),
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const CartPage(),
+                                    ),
+                                  );
+                                  // Reload cart count when returning from cart page
+                                  loadCartCount();
+                                },
+                              ),
+                              if (cartItemCount > 0)
+                                Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    child: Text(
+                                      cartItemCount.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
                                 ),
-                              );
-                            },
+                            ],
                           ),
                           const SizedBox(width: 12),
                           IconButton(

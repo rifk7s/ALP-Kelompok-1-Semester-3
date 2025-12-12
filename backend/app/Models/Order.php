@@ -22,8 +22,15 @@ class Order extends Model
         'total',
         'status',
         'shipping_address',
+        'notes',
         'payment_deadline',
         'estimated_delivery',
+        'pending_payment_at',
+        'paid_at',
+        'processing_at',
+        'shipped_at',
+        'completed_at',
+        'rejected_at',
 
         // Foreign keys
         'buyer_id',

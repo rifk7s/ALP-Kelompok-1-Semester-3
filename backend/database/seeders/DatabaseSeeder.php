@@ -20,11 +20,13 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '0811111111',
         ]);
 
         $this->call([
             CategorySeeder::class,
             HppPriceSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

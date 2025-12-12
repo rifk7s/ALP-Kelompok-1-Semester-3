@@ -24,21 +24,21 @@ class _HppPageState extends State<HppPage> {
 
   Future<void> _loadHppData() async {
     setState(() => isLoading = true);
-    
+
     try {
       final data = await HppPriceService.getHppPrices();
-      
+
       // Group by category
       Map<String, List<dynamic>> grouped = {};
       DateTime? latestDate;
-      
+
       for (var item in data) {
         String categoryName = item['category']['name'];
         if (!grouped.containsKey(categoryName)) {
           grouped[categoryName] = [];
         }
         grouped[categoryName]!.add(item);
-        
+
         // Find latest effective date
         try {
           DateTime effectiveDate = DateTime.parse(item['effective_date']);
@@ -49,7 +49,7 @@ class _HppPageState extends State<HppPage> {
           print('Error parsing date: $e');
         }
       }
-      
+
       setState(() {
         hppData = data;
         hppByCategory = grouped;
@@ -65,8 +65,20 @@ class _HppPageState extends State<HppPage> {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    final months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
@@ -142,7 +154,9 @@ class _HppPageState extends State<HppPage> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.black.withValues(alpha: 0.15),
+                                  color: AppColors.black.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                                 child: const Text(
@@ -181,16 +195,20 @@ class _HppPageState extends State<HppPage> {
                     ...hppByCategory.entries.map((entry) {
                       String categoryName = entry.key;
                       List<dynamic> items = entry.value;
-                      
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildSectionTitle(categoryName),
-                          ...items.map((item) => _buildItem(
-                            title: item['variety'],
-                            price: '${_formatPrice(item['price_per_kg'])}/kg',
-                            date: _formatDate(DateTime.parse(item['effective_date'])),
-                          )),
+                          ...items.map(
+                            (item) => _buildItem(
+                              title: item['variety'],
+                              price: '${_formatPrice(item['price_per_kg'])}/kg',
+                              date: _formatDate(
+                                DateTime.parse(item['effective_date']),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 28),
                         ],
                       );

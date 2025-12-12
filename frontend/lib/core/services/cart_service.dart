@@ -48,10 +48,7 @@ class CartService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'product_id': productId,
-          'quantity_kg': quantityKg,
-        }),
+        body: json.encode({'product_id': productId, 'quantity_kg': quantityKg}),
       );
 
       return response.statusCode == 201;
@@ -76,9 +73,7 @@ class CartService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'quantity_kg': quantityKg,
-        }),
+        body: json.encode({'quantity_kg': quantityKg}),
       );
 
       return response.statusCode == 200;
