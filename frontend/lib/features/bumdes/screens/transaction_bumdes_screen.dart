@@ -554,7 +554,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: imageUrl != null
+                      child: imageUrl.isNotEmpty
                           ? Image.network(
                               imageUrl,
                               width: 64,
@@ -617,7 +617,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: itemImageUrl != null
+                            child: itemImageUrl.isNotEmpty
                                 ? Image.network(
                                     itemImageUrl,
                                     width: 64,
