@@ -9,14 +9,14 @@ import 'package:frontend/features/shared/widgets/typing_indicator.dart'
 class ChatBumdesPage extends StatefulWidget {
   final String chatId;
   final String name;
-  final String image;
+  final String? image;
   final String recipientId;
 
   const ChatBumdesPage({
     super.key,
     required this.chatId,
     required this.name,
-    required this.image,
+    this.image,
     required this.recipientId,
   });
 
@@ -154,7 +154,9 @@ class _ChatBumdesPageState extends State<ChatBumdesPage> {
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(backgroundImage: AssetImage(widget.image)),
+            widget.image != null
+                ? CircleAvatar(backgroundImage: AssetImage(widget.image!))
+                : const CircleAvatar(child: Icon(Icons.person)),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

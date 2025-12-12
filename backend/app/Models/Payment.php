@@ -17,7 +17,6 @@ class Payment extends Model
         'amount',
         'proof_image',
         'status',
-        'notes',
 
         // Foreign keys
         'order_id',

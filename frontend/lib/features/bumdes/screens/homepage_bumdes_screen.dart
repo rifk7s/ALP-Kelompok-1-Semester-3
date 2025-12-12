@@ -6,6 +6,7 @@ import 'petani/manage_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/admin_service.dart';
 
 class HomePageBumdes extends StatefulWidget {
   final VoidCallback? onProductTap;
@@ -26,6 +27,7 @@ class HomePageBumdes extends StatefulWidget {
 class _HomePageBumdesState extends State<HomePageBumdes> {
   int activeProductCount = 0;
   int petaniCount = 0;
+  int completedOrdersThisMonth = 0;
   bool isLoading = true;
 
   @override
@@ -53,9 +55,28 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
       // Fetch petani count
       final petaniList = await PetaniService().fetchAllPetani(token: token ?? '');
       
+      // Fetch completed orders this month
+      final orders = await AdminService.getOrdersByStatus();
+      final now = DateTime.now();
+      final completedThisMonth = orders.where((order) {
+        final status = order['status'] as String?;
+        if (status != 'completed') return false;
+        
+        final completedAtStr = order['completed_at'] as String?;
+        if (completedAtStr == null) return false;
+        
+        try {
+          final completedAt = DateTime.parse(completedAtStr);
+          return completedAt.year == now.year && completedAt.month == now.month;
+        } catch (e) {
+          return false;
+        }
+      }).length;
+      
       setState(() {
         activeProductCount = activeProducts;
         petaniCount = petaniList.length;
+        completedOrdersThisMonth = completedThisMonth;
         isLoading = false;
       });
     } catch (e) {
@@ -138,7 +159,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                           icon: Icons.monetization_on_outlined,
                           title: 'Transaksi',
                           subtitle: 'Bulan Ini',
-                          value: '23',
+                          value: isLoading ? '-' : '$completedOrdersThisMonth',
                           width: cardWidth,
                           showArrow: true,
                           onTap: widget.onTransactionTap,

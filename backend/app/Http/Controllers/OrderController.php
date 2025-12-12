@@ -75,6 +75,7 @@ class OrderController extends Controller
                 'shipping_cost' => $shipping_cost,
                 'total' => $total,
                 'status' => 'pending_payment',
+                'pending_payment_at' => now(),
                 'shipping_address' => $shippingAddress,
                 'payment_deadline' => now()->addHours(24), // 24 hour payment window
                 'estimated_delivery' => now()->addDays(7), // 7 days estimate
