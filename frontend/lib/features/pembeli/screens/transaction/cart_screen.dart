@@ -130,6 +130,21 @@ class _CartPageState extends State<CartPage> {
     if (_updatingItems.contains(item['id'])) return;
     _lastQtyChangeClick = now;
 
+    // Check stock before allowing increase
+    final product = item['product'];
+    final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+    final currentQty = double.parse(item['quantity_kg'].toString());
+    
+    if (newQty > currentQty && newQty > stockKg) {
+      if (mounted) {
+        SnackBarHelper.showError(
+          context,
+          'Stok tidak mencukupi. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg',
+        );
+      }
+      return;
+    }
+
     setState(() => _updatingItems.add(item['id']));
 
     try {
@@ -165,6 +180,8 @@ class _CartPageState extends State<CartPage> {
 
   void _showQtyInputDialog(Map<String, dynamic> item) {
     final currentQty = double.parse(item['quantity_kg'].toString());
+    final product = item['product'];
+    final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
     final controller = TextEditingController(
       text: currentQty.toStringAsFixed(0),
     );
@@ -214,8 +231,18 @@ class _CartPageState extends State<CartPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final input = int.tryParse(controller.text) ?? 1;
-                final qty = input < 1 ? 1 : input;
+                final qty = double.tryParse(controller.text) ?? 0;
+                if (qty <= 0) {
+                  Navigator.pop(context);
+                  return;
+                }
+                if (qty > stockKg) {
+                  SnackBarHelper.showError(
+                    context,
+                    'Jumlah melebihi stok. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg',
+                  );
+                  return;
+                }
                 Navigator.pop(context);
                 changeQty(item, qty.toDouble());
               },
@@ -281,17 +308,21 @@ class _CartPageState extends State<CartPage> {
                         final pricePerKg = double.parse(
                           product['price_per_kg'].toString(),
                         ).toInt();
+                        final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+                        final isOutOfStock = stockKg <= 0;
                         final imagePath =
                             product['product_images'] != null &&
                                 (product['product_images'] as List).isNotEmpty
                             ? product['product_images'][0]['image_path']
                             : null;
                         final isUpdating = _updatingItems.contains(item['id']);
-                        return Container(
+                        return Opacity(
+                          opacity: isOutOfStock ? 0.5 : 1.0,
+                          child: Container(
                           margin: const EdgeInsets.only(bottom: 16),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: isOutOfStock ? AppColors.grey200 : AppColors.surface,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               const BoxShadow(
@@ -301,12 +332,33 @@ class _CartPageState extends State<CartPage> {
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
+                            children: [
+                              if (isOutOfStock)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(8),
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'STOK HABIS',
+                                    style: TextStyle(
+                                      color: Colors.red.shade700,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              Row(
                             children: [
                               Checkbox(
-                                value: selectedItems[item['id']] ?? false,
+                                value: isOutOfStock ? false : (selectedItems[item['id']] ?? false),
                                 activeColor: AppColors.primary,
-                                onChanged: (v) {
+                                onChanged: isOutOfStock ? null : (v) {
                                   setState(() {
                                     selectedItems[item['id']] = v ?? false;
                                     selectAll = selectedItems.values.every(
@@ -359,6 +411,8 @@ class _CartPageState extends State<CartPage> {
                                         fontWeight: FontWeight.w700,
                                         fontSize: 15,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 6),
 
@@ -379,63 +433,101 @@ class _CartPageState extends State<CartPage> {
                                         color: AppColors.textSecondary,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                    
+                                    const SizedBox(height: 10),
 
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.cartQtyBackground,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: isUpdating
-                                          ? null
-                                          : () => changeQty(item, qty - 1),
-                                      icon: const Icon(Icons.remove, size: 18),
-                                    ),
-                                    GestureDetector(
-                                      onTap: isUpdating
-                                          ? null
-                                          : () => _showQtyInputDialog(item),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            6,
+                                    // Quantity controls and remove button
+                                    Row(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: AppColors.cartQtyBackground,
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                          border: Border.all(
-                                            color: AppColors.primary.withValues(
-                                              alpha: 0.3,
-                                            ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                onPressed: (isUpdating || isOutOfStock)
+                                                    ? null
+                                                    : () => changeQty(item, qty - 1),
+                                                icon: const Icon(Icons.remove, size: 18),
+                                                padding: const EdgeInsets.all(4),
+                                              ),
+                                              InkWell(
+                                                onTap: (isUpdating || isOutOfStock)
+                                                    ? null
+                                                    : () => _showQtyInputDialog(item),
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.white,
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    border: Border.all(
+                                                      color: AppColors.primary.withValues(
+                                                        alpha: 0.3,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        qty.toStringAsFixed(0),
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Icon(
+                                                        Icons.edit,
+                                                        size: 14,
+                                                        color: (isUpdating || isOutOfStock)
+                                                            ? Colors.grey
+                                                            : AppColors.primary,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: (isUpdating || isOutOfStock)
+                                                    ? null
+                                                    : () => changeQty(item, qty + 1),
+                                                icon: const Icon(Icons.add, size: 18),
+                                                padding: const EdgeInsets.all(4),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        child: Text(
-                                          qty.toStringAsFixed(0),
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
+                                        const SizedBox(width: 8),
+                                        IconButton(
+                                          onPressed: isUpdating
+                                              ? null
+                                              : () => changeQty(item, 0),
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            size: 22,
+                                            color: Colors.red,
                                           ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          tooltip: 'Hapus dari keranjang',
                                         ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: isUpdating
-                                          ? null
-                                          : () => changeQty(item, qty + 1),
-                                      icon: const Icon(Icons.add, size: 18),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                        ),
                         );
                       },
                     ),
@@ -549,6 +641,29 @@ class _CartPageState extends State<CartPage> {
                                   (item) => selectedItems[item['id']] == true,
                                 )
                                 .toList();
+
+                            // Validate stock for all selected items
+                            for (final item in selectedCart) {
+                              final product = item['product'];
+                              final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+                              final qty = double.parse(item['quantity_kg'].toString());
+                              
+                              if (stockKg <= 0) {
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Produk "${product['name']}" stok habis. Silakan hapus dari keranjang.',
+                                );
+                                return;
+                              }
+                              
+                              if (qty > stockKg) {
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Jumlah "${product['name']}" melebihi stok. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg',
+                                );
+                                return;
+                              }
+                            }
 
                             Navigator.push(
                               context,
