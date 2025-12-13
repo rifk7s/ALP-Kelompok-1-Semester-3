@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/order_service.dart';
@@ -134,7 +135,9 @@ class _NotificationPageState extends State<NotificationPage> {
             int initialTab = 0;
             if (order.isNotEmpty) {
               final status = order['status'] as String?;
-              print('Order status: $status for order ID: $relatedId');
+              if (kDebugMode) {
+                debugPrint('Order status: $status for order ID: $relatedId');
+              }
               if (status == 'pending_payment' || status == 'paid') {
                 initialTab = 0; // Baru
               } else if (status == 'processing') {
@@ -155,14 +158,14 @@ class _NotificationPageState extends State<NotificationPage> {
               );
             }
           } catch (e) {
-            print('Error fetching order: $e');
+            if (kDebugMode) {
+              debugPrint('Error fetching order: $e');
+            }
             // If error, just navigate to transaction page
             if (mounted) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => BumdesTransactionPage(),
-                ),
+                MaterialPageRoute(builder: (_) => BumdesTransactionPage()),
               );
             }
           }
@@ -178,10 +181,14 @@ class _NotificationPageState extends State<NotificationPage> {
             int initialTab = 0;
             if (order.isNotEmpty) {
               final status = order['status'] as String?;
-              print('Order status: $status for order ID: $relatedId');
+              if (kDebugMode) {
+                debugPrint('Order status: $status for order ID: $relatedId');
+              }
               if (status == 'pending_payment') {
                 initialTab = 0; // Belum Bayar
-              } else if (status == 'paid' || status == 'processing' || status == 'shipped') {
+              } else if (status == 'paid' ||
+                  status == 'processing' ||
+                  status == 'shipped') {
                 initialTab = 1; // Diproses
               } else if (status == 'completed' || status == 'rejected') {
                 initialTab = 2; // Selesai
@@ -192,19 +199,20 @@ class _NotificationPageState extends State<NotificationPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => TransactionHistoryPage(initialTab: initialTab),
+                  builder: (_) =>
+                      TransactionHistoryPage(initialTab: initialTab),
                 ),
               );
             }
           } catch (e) {
-            print('Error fetching order: $e');
+            if (kDebugMode) {
+              debugPrint('Error fetching order: $e');
+            }
             // If error, just navigate to transaction history
             if (mounted) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => TransactionHistoryPage(),
-                ),
+                MaterialPageRoute(builder: (_) => TransactionHistoryPage()),
               );
             }
           }
@@ -226,9 +234,12 @@ class _NotificationPageState extends State<NotificationPage> {
           final chatDoc = await ChatService.getChatDocument(relatedId);
           if (chatDoc != null) {
             final currentUserId = ChatService.getCurrentUserId();
-            final participants = chatDoc['participants'] as List<dynamic>? ?? [];
-            final participantNames = chatDoc['participantNames'] as Map<String, dynamic>? ?? {};
-            final participantImages = chatDoc['participantImages'] as Map<String, dynamic>? ?? {};
+            final participants =
+                chatDoc['participants'] as List<dynamic>? ?? [];
+            final participantNames =
+                chatDoc['participantNames'] as Map<String, dynamic>? ?? {};
+            final participantImages =
+                chatDoc['participantImages'] as Map<String, dynamic>? ?? {};
 
             // Get the other participant's info
             String recipientId = '';
@@ -279,11 +290,13 @@ class _NotificationPageState extends State<NotificationPage> {
             }
           }
         } catch (e) {
-          print('Error navigating to chat: $e');
+          if (kDebugMode) {
+            debugPrint('Error navigating to chat: $e');
+          }
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error membuka chat: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error membuka chat: $e')));
           }
         }
       }
@@ -320,7 +333,9 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ),
         actions: [
-          if (_notifications.any((n) => n['is_read'] == 0 || n['is_read'] == false))
+          if (_notifications.any(
+            (n) => n['is_read'] == 0 || n['is_read'] == false,
+          ))
             TextButton(
               onPressed: _markAllAsRead,
               child: const Text(
@@ -333,46 +348,46 @@ class _NotificationPageState extends State<NotificationPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _notifications.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.notifications_none,
-                        size: 64,
-                        color: AppColors.grey400,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Tidak ada notifikasi',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    size: 64,
+                    color: AppColors.grey400,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadNotifications,
-                  child: ListView.builder(
-                    itemCount: _notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = _notifications[index];
-                      final isRead = notification['is_read'];
-                      final isReadBool = (isRead == 1 || isRead == true);
-                      return notifItem(
-                        id: notification['id'] ?? 0,
-                        title: notification['title'] ?? '',
-                        message: notification['message'] ?? '',
-                        time: _formatTime(notification['created_at'] ?? ''),
-                        isUnread: !isReadBool,
-                        icon: _getIconForType(notification['type'] ?? ''),
-                        onTap: () => _handleNotificationTap(notification),
-                      );
-                    },
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Tidak ada notifikasi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadNotifications,
+              child: ListView.builder(
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = _notifications[index];
+                  final isRead = notification['is_read'];
+                  final isReadBool = (isRead == 1 || isRead == true);
+                  return notifItem(
+                    id: notification['id'] ?? 0,
+                    title: notification['title'] ?? '',
+                    message: notification['message'] ?? '',
+                    time: _formatTime(notification['created_at'] ?? ''),
+                    isUnread: !isReadBool,
+                    icon: _getIconForType(notification['type'] ?? ''),
+                    onTap: () => _handleNotificationTap(notification),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -400,8 +415,8 @@ class _NotificationPageState extends State<NotificationPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isUnread 
-                        ? AppColors.primaryLight.withOpacity(0.3)
+                    color: isUnread
+                        ? AppColors.primaryLight.withValues(alpha: 0.3)
                         : AppColors.grey200,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -420,9 +435,12 @@ class _NotificationPageState extends State<NotificationPage> {
                         title,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight:
-                              isUnread ? FontWeight.bold : FontWeight.w500,
-                          color: isUnread ? AppColors.textLight : AppColors.grey600,
+                          fontWeight: isUnread
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isUnread
+                              ? AppColors.textLight
+                              : AppColors.grey600,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -430,7 +448,9 @@ class _NotificationPageState extends State<NotificationPage> {
                         message,
                         style: TextStyle(
                           fontSize: 13,
-                          color: isUnread ? AppColors.grey800 : AppColors.grey600,
+                          color: isUnread
+                              ? AppColors.grey800
+                              : AppColors.grey600,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -440,7 +460,9 @@ class _NotificationPageState extends State<NotificationPage> {
                         time,
                         style: TextStyle(
                           fontSize: 11,
-                          color: isUnread ? AppColors.textSecondary : AppColors.grey400,
+                          color: isUnread
+                              ? AppColors.textSecondary
+                              : AppColors.grey400,
                         ),
                       ),
                     ],

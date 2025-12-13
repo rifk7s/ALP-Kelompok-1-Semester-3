@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
@@ -16,7 +17,7 @@ import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.da
 
 class TransactionHistoryPage extends StatefulWidget {
   final int initialTab;
-  
+
   const TransactionHistoryPage({super.key, this.initialTab = 0});
 
   @override
@@ -30,7 +31,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   List<Map<String, dynamic>> _backendOrders = [];
   bool _isLoading = false;
   Timer? _countdownTimer;
-  Map<String, String> _countdowns = {};
+  final Map<String, String> _countdowns = {};
   final Set<String> _expandedOrders = {}; // Track expanded orders
 
   final List<Map<String, dynamic>> _orders = [
@@ -116,7 +117,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading orders: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading orders: $e');
+      }
       setState(() => _isLoading = false);
     }
   }
@@ -124,7 +127,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
     _loadOrders();
     _startCountdownTimer();
   }
@@ -171,7 +178,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         return '${seconds}d';
       }
     } catch (e) {
-      print('Error parsing deadline: $e');
+      if (kDebugMode) {
+        debugPrint('Error parsing deadline: $e');
+      }
       return '-';
     }
   }
@@ -232,6 +241,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   Future<void> _advanceStatus(int orderId, String currentStatus) async {
     if (currentStatus == 'shipped') {
       final success = await OrderService.completeOrder(orderId);
+
+      if (!mounted) return;
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -304,8 +315,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     // Get first product image
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
     final firstItem = orderItems.isNotEmpty
-      ? orderItems[0] as Map<String, dynamic>
-      : null;
+        ? orderItems[0] as Map<String, dynamic>
+        : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
     final imagePath = ProductImageUtils.firstImagePath(product);
     final imageUrl = ApiConfig.getImageUrl(imagePath);
@@ -1091,7 +1102,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               List<Map<String, dynamic>> cartItems = orderItems.map((item) {
                 final itemMap = item as Map<String, dynamic>;
                 final product = itemMap['product'] as Map<String, dynamic>?;
-                final imagePath = ProductImageUtils.firstImagePath(product) ?? '';
+                final imagePath =
+                    ProductImageUtils.firstImagePath(product) ?? '';
 
                 return {
                   'id': product?['id'] ?? 0,
@@ -1128,7 +1140,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
               for (final item in cartItems) {
                 final productId = (item['id'] as int?) ?? 0;
-                final qty = double.tryParse(item['quantity_kg'].toString()) ?? 0;
+                final qty =
+                    double.tryParse(item['quantity_kg'].toString()) ?? 0;
 
                 if (productId <= 0 || qty <= 0) {
                   if (!mounted) return;

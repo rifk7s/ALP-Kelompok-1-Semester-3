@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'storage_service.dart';
@@ -13,7 +14,9 @@ class OrderService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        print('No token found for order creation');
+        if (kDebugMode) {
+          debugPrint('No token found for order creation');
+        }
         return null;
       }
 
@@ -28,8 +31,10 @@ class OrderService {
         body['service_fee'] = serviceFee;
       }
 
-      print('Creating order with URL: ${ApiConfig.baseUrl}/checkout');
-      print('Request body: ${json.encode(body)}');
+      if (kDebugMode) {
+        debugPrint('Creating order with URL: ${ApiConfig.baseUrl}/checkout');
+        debugPrint('Request body: ${json.encode(body)}');
+      }
 
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/checkout'),
@@ -41,20 +46,26 @@ class OrderService {
         body: json.encode(body),
       );
 
-      print('Order creation response status: ${response.statusCode}');
-      print('Order creation response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Order creation response status: ${response.statusCode}');
+        debugPrint('Order creation response body: ${response.body}');
+      }
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
         return data['order'];
       } else {
-        print(
-          'Failed to create order: ${response.statusCode} - ${response.body}',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            'Failed to create order: ${response.statusCode} - ${response.body}',
+          );
+        }
       }
       return null;
     } catch (e) {
-      print('Error creating order: $e');
+      if (kDebugMode) {
+        debugPrint('Error creating order: $e');
+      }
       return null;
     }
   }
@@ -78,7 +89,9 @@ class OrderService {
       }
       return [];
     } catch (e) {
-      print('Error fetching orders: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching orders: $e');
+      }
       return [];
     }
   }
@@ -90,7 +103,9 @@ class OrderService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        print('No token found for payment proof upload');
+        if (kDebugMode) {
+          debugPrint('No token found for payment proof upload');
+        }
         return false;
       }
 
@@ -106,23 +121,33 @@ class OrderService {
         await http.MultipartFile.fromPath('proof_image', imageFile.path),
       );
 
-      print('Uploading payment proof for order $orderId');
+      if (kDebugMode) {
+        debugPrint('Uploading payment proof for order $orderId');
+      }
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('Payment proof upload response status: ${response.statusCode}');
-      print('Payment proof upload response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint(
+          'Payment proof upload response status: ${response.statusCode}',
+        );
+        debugPrint('Payment proof upload response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-          'Failed to upload payment proof: ${response.statusCode} - ${response.body}',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            'Failed to upload payment proof: ${response.statusCode} - ${response.body}',
+          );
+        }
         return false;
       }
     } catch (e) {
-      print('Error uploading payment proof: $e');
+      if (kDebugMode) {
+        debugPrint('Error uploading payment proof: $e');
+      }
       return false;
     }
   }
@@ -132,7 +157,9 @@ class OrderService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        print('No token found for order status check');
+        if (kDebugMode) {
+          debugPrint('No token found for order status check');
+        }
         return null;
       }
 
@@ -144,14 +171,18 @@ class OrderService {
         },
       );
 
-      print('Order status check response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Order status check response: ${response.statusCode}');
+      }
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
       return null;
     } catch (e) {
-      print('Error checking order status: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking order status: $e');
+      }
       return null;
     }
   }
@@ -175,7 +206,9 @@ class OrderService {
       }
       return null;
     } catch (e) {
-      print('Error fetching order: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching order: $e');
+      }
       return null;
     }
   }
@@ -185,12 +218,16 @@ class OrderService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        print('No token found for completing order');
+        if (kDebugMode) {
+          debugPrint('No token found for completing order');
+        }
         return false;
       }
 
       final url = '${ApiConfig.baseUrl}/orders/$orderId/complete';
-      print('Attempting to complete order at: $url');
+      if (kDebugMode) {
+        debugPrint('Attempting to complete order at: $url');
+      }
 
       final response = await http.post(
         Uri.parse(url),
@@ -200,19 +237,25 @@ class OrderService {
         },
       );
 
-      print('Complete order response status: ${response.statusCode}');
-      print('Complete order response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Complete order response status: ${response.statusCode}');
+        debugPrint('Complete order response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        print(
-          'Failed to complete order: ${response.statusCode} - ${response.body}',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            'Failed to complete order: ${response.statusCode} - ${response.body}',
+          );
+        }
         return false;
       }
     } catch (e) {
-      print('Error completing order: $e');
+      if (kDebugMode) {
+        debugPrint('Error completing order: $e');
+      }
       return false;
     }
   }

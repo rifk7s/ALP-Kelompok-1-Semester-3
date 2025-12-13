@@ -7,14 +7,16 @@ class ProductImageUtils {
     if (images is List && images.isNotEmpty) {
       final first = images.first;
       if (first is Map) {
-        final dynamic imagePath = first['image_path'] ?? first['image'] ?? first['image_url'];
+        final dynamic imagePath =
+            first['image_path'] ?? first['image'] ?? first['image_url'];
         final asString = imagePath?.toString();
         if (asString != null && asString.isNotEmpty) return asString;
       }
     }
 
     // Fallbacks seen across some UI code paths
-    final direct = product['image_path'] ?? product['image'] ?? product['image_url'];
+    final direct =
+        product['image_path'] ?? product['image'] ?? product['image_url'];
     final asString = direct?.toString();
     if (asString != null && asString.isNotEmpty) return asString;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
@@ -53,7 +54,9 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      print('Error loading unread notification count: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading unread notification count: $e');
+      }
     }
   }
 
@@ -67,7 +70,9 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      print('Error loading cart count: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading cart count: $e');
+      }
     }
   }
 

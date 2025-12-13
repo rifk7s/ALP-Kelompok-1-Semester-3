@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'upload_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
@@ -49,7 +50,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
         });
       }
     } catch (e) {
-      print('Error loading unread count: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading unread count: $e');
+      }
     }
   }
 
@@ -138,7 +141,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading dashboard data: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading dashboard data: $e');
+      }
       setState(() {
         isLoading = false;
       });
@@ -185,7 +190,10 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                       icon: Badge(
                         label: Text('$unreadNotificationCount'),
                         isLabelVisible: unreadNotificationCount > 0,
-                        child: const Icon(Icons.notifications_outlined, size: 28),
+                        child: const Icon(
+                          Icons.notifications_outlined,
+                          size: 28,
+                        ),
                       ),
                       onPressed: () async {
                         await Navigator.push(

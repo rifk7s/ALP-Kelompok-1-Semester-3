@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
@@ -10,7 +11,7 @@ import 'package:frontend/features/pembeli/screens/transaction/order_track_screen
 
 class BumdesTransactionPage extends StatefulWidget {
   final int? initialTab;
-  
+
   const BumdesTransactionPage({super.key, this.initialTab});
 
   @override
@@ -35,7 +36,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: _statusFlow.length, 
+      length: _statusFlow.length,
       vsync: this,
       initialIndex: widget.initialTab ?? 0,
     );
@@ -46,7 +47,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     setState(() => _isLoading = true);
 
     final orders = await AdminService.getOrdersByStatus();
-    print('Loaded ${orders.length} orders');
+    if (kDebugMode) {
+      debugPrint('Loaded ${orders.length} orders');
+    }
 
     setState(() {
       _orders = orders;
@@ -62,7 +65,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
   List<Map<String, dynamic>> _ordersByStatus(String status) {
     List<Map<String, dynamic>> filtered;
-    
+
     if (status == 'pending_payment') {
       // Baru tab shows both pending_payment and paid orders
       filtered = _orders
@@ -87,8 +90,10 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
 
     // Sort by updated_at or created_at (newest first) for non-completed tabs
     filtered.sort((a, b) {
-      final aTime = a['updated_at'] as String? ?? a['created_at'] as String? ?? '';
-      final bTime = b['updated_at'] as String? ?? b['created_at'] as String? ?? '';
+      final aTime =
+          a['updated_at'] as String? ?? a['created_at'] as String? ?? '';
+      final bTime =
+          b['updated_at'] as String? ?? b['created_at'] as String? ?? '';
       return bTime.compareTo(aTime); // Descending order (newest first)
     });
 
@@ -229,6 +234,8 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
         success = await AdminService.markCompleted(orderId);
         break;
     }
+
+    if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(

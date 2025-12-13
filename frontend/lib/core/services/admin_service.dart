@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'storage_service.dart';
@@ -24,8 +25,10 @@ class AdminService {
         },
       );
 
-      print('Admin orders response status: ${response.statusCode}');
-      print('Admin orders response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Admin orders response status: ${response.statusCode}');
+        debugPrint('Admin orders response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -33,7 +36,9 @@ class AdminService {
       }
       return [];
     } catch (e) {
-      print('Error fetching admin orders: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching admin orders: $e');
+      }
       return [];
     }
   }
@@ -52,10 +57,14 @@ class AdminService {
         },
       );
 
-      print('Confirm payment response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Confirm payment response: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
-      print('Error confirming payment: $e');
+      if (kDebugMode) {
+        debugPrint('Error confirming payment: $e');
+      }
       return false;
     }
   }
@@ -74,10 +83,14 @@ class AdminService {
         },
       );
 
-      print('Reject payment response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Reject payment response: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
-      print('Error rejecting payment: $e');
+      if (kDebugMode) {
+        debugPrint('Error rejecting payment: $e');
+      }
       return false;
     }
   }
@@ -96,10 +109,14 @@ class AdminService {
         },
       );
 
-      print('Mark processing response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Mark processing response: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking processing: $e');
+      if (kDebugMode) {
+        debugPrint('Error marking processing: $e');
+      }
       return false;
     }
   }
@@ -118,10 +135,14 @@ class AdminService {
         },
       );
 
-      print('Mark shipped response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Mark shipped response: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking shipped: $e');
+      if (kDebugMode) {
+        debugPrint('Error marking shipped: $e');
+      }
       return false;
     }
   }
@@ -140,10 +161,14 @@ class AdminService {
         },
       );
 
-      print('Mark completed response: ${response.statusCode}');
+      if (kDebugMode) {
+        debugPrint('Mark completed response: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking completed: $e');
+      if (kDebugMode) {
+        debugPrint('Error marking completed: $e');
+      }
       return false;
     }
   }

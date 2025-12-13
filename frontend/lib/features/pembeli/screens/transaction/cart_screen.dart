@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -43,10 +44,14 @@ class _CartPageState extends State<CartPage> {
     }
     try {
       final cart = await CartService.getCart();
-      print('Cart response: $cart'); // Debug
+      if (kDebugMode) {
+        debugPrint('Cart response: $cart');
+      }
       if (cart != null && mounted) {
         final items = cart['items'] ?? [];
-        print('Cart items count: ${items.length}'); // Debug
+        if (kDebugMode) {
+          debugPrint('Cart items count: ${items.length}');
+        }
         final previousSelection = Map<int, bool>.from(selectedItems);
         setState(() {
           cartItems = List<Map<String, dynamic>>.from(items);
@@ -63,11 +68,15 @@ class _CartPageState extends State<CartPage> {
           isLoadingCart = false;
         });
       } else {
-        print('Cart is null'); // Debug
+        if (kDebugMode) {
+          debugPrint('Cart is null');
+        }
         setState(() => isLoadingCart = false);
       }
     } catch (e) {
-      print('Error loading cart: $e'); // Debug
+      if (kDebugMode) {
+        debugPrint('Error loading cart: $e');
+      }
       setState(() => isLoadingCart = false);
       if (mounted) {
         SnackBarHelper.showError(context, 'Gagal memuat keranjang');
@@ -132,9 +141,10 @@ class _CartPageState extends State<CartPage> {
 
     // Check stock before allowing increase
     final product = item['product'];
-    final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+    final stockKg =
+        double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
     final currentQty = double.parse(item['quantity_kg'].toString());
-    
+
     if (newQty > currentQty && newQty > stockKg) {
       if (mounted) {
         SnackBarHelper.showError(
@@ -181,7 +191,8 @@ class _CartPageState extends State<CartPage> {
   void _showQtyInputDialog(Map<String, dynamic> item) {
     final currentQty = double.parse(item['quantity_kg'].toString());
     final product = item['product'];
-    final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+    final stockKg =
+        double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
     final controller = TextEditingController(
       text: currentQty.toStringAsFixed(0),
     );
@@ -308,7 +319,11 @@ class _CartPageState extends State<CartPage> {
                         final pricePerKg = double.parse(
                           product['price_per_kg'].toString(),
                         ).toInt();
-                        final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
+                        final stockKg =
+                            double.tryParse(
+                              product['stock_kg']?.toString() ?? '0',
+                            ) ??
+                            0;
                         final isOutOfStock = stockKg <= 0;
                         final imagePath =
                             product['product_images'] != null &&
@@ -319,215 +334,273 @@ class _CartPageState extends State<CartPage> {
                         return Opacity(
                           opacity: isOutOfStock ? 0.5 : 1.0,
                           child: Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: isOutOfStock ? AppColors.grey200 : AppColors.surface,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              const BoxShadow(
-                                blurRadius: 6,
-                                color: AppColors.shadowLight,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              if (isOutOfStock)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade100,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    'STOK HABIS',
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isOutOfStock
+                                  ? AppColors.grey200
+                                  : AppColors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                const BoxShadow(
+                                  blurRadius: 6,
+                                  color: AppColors.shadowLight,
+                                  offset: Offset(0, 3),
                                 ),
-                              Row(
-                            children: [
-                              Checkbox(
-                                value: isOutOfStock ? false : (selectedItems[item['id']] ?? false),
-                                activeColor: AppColors.primary,
-                                onChanged: isOutOfStock ? null : (v) {
-                                  setState(() {
-                                    selectedItems[item['id']] = v ?? false;
-                                    selectAll = selectedItems.values.every(
-                                      (val) => val,
-                                    );
-                                  });
-                                },
-                              ),
-
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: imagePath != null
-                                    ? Image.network(
-                                        ApiConfig.getImageUrl(imagePath),
-                                        width: 65,
-                                        height: 65,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Container(
-                                                width: 65,
-                                                height: 65,
-                                                color: Colors.grey[300],
-                                                child: const Icon(
-                                                  Icons.image,
-                                                  size: 30,
-                                                ),
-                                              );
-                                            },
-                                      )
-                                    : Container(
-                                        width: 65,
-                                        height: 65,
-                                        color: Colors.grey[300],
-                                        child: const Icon(
-                                          Icons.image,
-                                          size: 30,
-                                        ),
-                                      ),
-                              ),
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product['name'] ?? 'Produk',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                if (isOutOfStock)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(8),
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade100,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    const SizedBox(height: 6),
-
-                                    Text(
-                                      formatRupiah((qty * pricePerKg).toInt()),
-                                      style: const TextStyle(
-                                        color: AppColors.primary,
+                                    child: Text(
+                                      'STOK HABIS',
+                                      style: TextStyle(
+                                        color: Colors.red.shade700,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "Harga per kg: ${formatRupiah(pricePerKg)}",
-                                      style: const TextStyle(
                                         fontSize: 12,
-                                        color: AppColors.textSecondary,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    
-                                    const SizedBox(height: 10),
+                                  ),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: isOutOfStock
+                                          ? false
+                                          : (selectedItems[item['id']] ??
+                                                false),
+                                      activeColor: AppColors.primary,
+                                      onChanged: isOutOfStock
+                                          ? null
+                                          : (v) {
+                                              setState(() {
+                                                selectedItems[item['id']] =
+                                                    v ?? false;
+                                                selectAll = selectedItems.values
+                                                    .every((val) => val);
+                                              });
+                                            },
+                                    ),
 
-                                    // Quantity controls and remove button
-                                    Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: AppColors.cartQtyBackground,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                onPressed: (isUpdating || isOutOfStock)
-                                                    ? null
-                                                    : () => changeQty(item, qty - 1),
-                                                icon: const Icon(Icons.remove, size: 18),
-                                                padding: const EdgeInsets.all(4),
-                                              ),
-                                              InkWell(
-                                                onTap: (isUpdating || isOutOfStock)
-                                                    ? null
-                                                    : () => _showQtyInputDialog(item),
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 6,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.white,
-                                                    borderRadius: BorderRadius.circular(6),
-                                                    border: Border.all(
-                                                      color: AppColors.primary.withValues(
-                                                        alpha: 0.3,
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: imagePath != null
+                                          ? Image.network(
+                                              ApiConfig.getImageUrl(imagePath),
+                                              width: 65,
+                                              height: 65,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return Container(
+                                                      width: 65,
+                                                      height: 65,
+                                                      color: Colors.grey[300],
+                                                      child: const Icon(
+                                                        Icons.image,
+                                                        size: 30,
                                                       ),
+                                                    );
+                                                  },
+                                            )
+                                          : Container(
+                                              width: 65,
+                                              height: 65,
+                                              color: Colors.grey[300],
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 30,
+                                              ),
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12),
+
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            product['name'] ?? 'Produk',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 15,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 6),
+
+                                          Text(
+                                            formatRupiah(
+                                              (qty * pricePerKg).toInt(),
+                                            ),
+                                            style: const TextStyle(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            "Harga per kg: ${formatRupiah(pricePerKg)}",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 10),
+
+                                          // Quantity controls and remove button
+                                          Row(
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: AppColors
+                                                      .cartQtyBackground,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      onPressed:
+                                                          (isUpdating ||
+                                                              isOutOfStock)
+                                                          ? null
+                                                          : () => changeQty(
+                                                              item,
+                                                              qty - 1,
+                                                            ),
+                                                      icon: const Icon(
+                                                        Icons.remove,
+                                                        size: 18,
+                                                      ),
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            4,
+                                                          ),
                                                     ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        qty.toStringAsFixed(0),
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.bold,
+                                                    InkWell(
+                                                      onTap:
+                                                          (isUpdating ||
+                                                              isOutOfStock)
+                                                          ? null
+                                                          : () =>
+                                                                _showQtyInputDialog(
+                                                                  item,
+                                                                ),
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 6,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color:
+                                                              AppColors.white,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
+                                                          border: Border.all(
+                                                            color: AppColors
+                                                                .primary
+                                                                .withValues(
+                                                                  alpha: 0.3,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              qty.toStringAsFixed(
+                                                                0,
+                                                              ),
+                                                              style: const TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 4,
+                                                            ),
+                                                            Icon(
+                                                              Icons.edit,
+                                                              size: 14,
+                                                              color:
+                                                                  (isUpdating ||
+                                                                      isOutOfStock)
+                                                                  ? Colors.grey
+                                                                  : AppColors
+                                                                        .primary,
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                      const SizedBox(width: 4),
-                                                      Icon(
-                                                        Icons.edit,
-                                                        size: 14,
-                                                        color: (isUpdating || isOutOfStock)
-                                                            ? Colors.grey
-                                                            : AppColors.primary,
+                                                    ),
+                                                    IconButton(
+                                                      onPressed:
+                                                          (isUpdating ||
+                                                              isOutOfStock)
+                                                          ? null
+                                                          : () => changeQty(
+                                                              item,
+                                                              qty + 1,
+                                                            ),
+                                                      icon: const Icon(
+                                                        Icons.add,
+                                                        size: 18,
                                                       ),
-                                                    ],
-                                                  ),
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            4,
+                                                          ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
+                                              const SizedBox(width: 8),
                                               IconButton(
-                                                onPressed: (isUpdating || isOutOfStock)
+                                                onPressed: isUpdating
                                                     ? null
-                                                    : () => changeQty(item, qty + 1),
-                                                icon: const Icon(Icons.add, size: 18),
-                                                padding: const EdgeInsets.all(4),
+                                                    : () => changeQty(item, 0),
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  size: 22,
+                                                  color: Colors.red,
+                                                ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                tooltip: 'Hapus dari keranjang',
                                               ),
                                             ],
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        IconButton(
-                                          onPressed: isUpdating
-                                              ? null
-                                              : () => changeQty(item, 0),
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            size: 22,
-                                            color: Colors.red,
-                                          ),
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          tooltip: 'Hapus dari keranjang',
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
-                        ),
                         );
                       },
                     ),
@@ -645,9 +718,15 @@ class _CartPageState extends State<CartPage> {
                             // Validate stock for all selected items
                             for (final item in selectedCart) {
                               final product = item['product'];
-                              final stockKg = double.tryParse(product['stock_kg']?.toString() ?? '0') ?? 0;
-                              final qty = double.parse(item['quantity_kg'].toString());
-                              
+                              final stockKg =
+                                  double.tryParse(
+                                    product['stock_kg']?.toString() ?? '0',
+                                  ) ??
+                                  0;
+                              final qty = double.parse(
+                                item['quantity_kg'].toString(),
+                              );
+
                               if (stockKg <= 0) {
                                 SnackBarHelper.showError(
                                   context,
@@ -655,7 +734,7 @@ class _CartPageState extends State<CartPage> {
                                 );
                                 return;
                               }
-                              
+
                               if (qty > stockKg) {
                                 SnackBarHelper.showError(
                                   context,

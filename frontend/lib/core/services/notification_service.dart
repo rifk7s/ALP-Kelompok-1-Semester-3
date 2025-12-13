@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:http/http.dart' as http;
@@ -20,8 +21,10 @@ class NotificationService {
         },
       );
 
-      print('Notifications response status: ${response.statusCode}');
-      print('Notifications response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Notifications response status: ${response.statusCode}');
+        debugPrint('Notifications response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -30,7 +33,9 @@ class NotificationService {
         throw Exception('Failed to load notifications');
       }
     } catch (e) {
-      print('Error fetching notifications: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching notifications: $e');
+      }
       return [];
     }
   }
@@ -58,7 +63,9 @@ class NotificationService {
         return 0;
       }
     } catch (e) {
-      print('Error fetching unread count: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching unread count: $e');
+      }
       return 0;
     }
   }
@@ -72,7 +79,9 @@ class NotificationService {
       }
 
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/notifications/$notificationId/mark-read'),
+        Uri.parse(
+          '${ApiConfig.baseUrl}/notifications/$notificationId/mark-read',
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -81,7 +90,9 @@ class NotificationService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking notification as read: $e');
+      if (kDebugMode) {
+        debugPrint('Error marking notification as read: $e');
+      }
       return false;
     }
   }
@@ -104,7 +115,9 @@ class NotificationService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking all notifications as read: $e');
+      if (kDebugMode) {
+        debugPrint('Error marking all notifications as read: $e');
+      }
       return false;
     }
   }

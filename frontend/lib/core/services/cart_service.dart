@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'storage_service.dart';
@@ -8,7 +9,9 @@ class CartService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        print('No token found');
+        if (kDebugMode) {
+          debugPrint('No token found');
+        }
         return null;
       }
 
@@ -20,15 +23,19 @@ class CartService {
         },
       );
 
-      print('Cart response status: ${response.statusCode}');
-      print('Cart response body: ${response.body}');
+      if (kDebugMode) {
+        debugPrint('Cart response status: ${response.statusCode}');
+        debugPrint('Cart response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
       return null;
     } catch (e) {
-      print('Error getting cart: $e');
+      if (kDebugMode) {
+        debugPrint('Error getting cart: $e');
+      }
       return null;
     }
   }
@@ -53,7 +60,9 @@ class CartService {
 
       return response.statusCode == 201;
     } catch (e) {
-      print('Error adding to cart: $e');
+      if (kDebugMode) {
+        debugPrint('Error adding to cart: $e');
+      }
       return false;
     }
   }
@@ -78,7 +87,9 @@ class CartService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error updating cart item: $e');
+      if (kDebugMode) {
+        debugPrint('Error updating cart item: $e');
+      }
       return false;
     }
   }
@@ -98,7 +109,9 @@ class CartService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error removing from cart: $e');
+      if (kDebugMode) {
+        debugPrint('Error removing from cart: $e');
+      }
       return false;
     }
   }
@@ -118,7 +131,9 @@ class CartService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error clearing cart: $e');
+      if (kDebugMode) {
+        debugPrint('Error clearing cart: $e');
+      }
       return false;
     }
   }

@@ -633,16 +633,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 // Reload cart count
                                 await _loadCartCount();
                                 // Show success overlay
-                                if (mounted) {
-                                  _showAddedToCartOverlay(context, tempQty);
-                                }
+                                if (!mounted) return;
+                                _showAddedToCartOverlay(tempQty);
                               } else {
-                                if (mounted) {
-                                  SnackBarHelper.showError(
-                                    context,
-                                    'Gagal menambahkan ke keranjang',
-                                  );
-                                }
+                                if (!mounted) return;
+                                SnackBarHelper.showError(
+                                  this.context,
+                                  'Gagal menambahkan ke keranjang',
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -765,7 +763,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   // Shopee-style floating overlay
-  void _showAddedToCartOverlay(BuildContext context, int qty) {
+  void _showAddedToCartOverlay(int qty) {
+    final overlayState = Overlay.of(context);
+
     final overlay = OverlayEntry(
       builder: (context) => Positioned(
         top: MediaQuery.of(context).size.height * 0.35,
@@ -821,7 +821,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ),
     );
 
-    Overlay.of(context).insert(overlay);
+    overlayState.insert(overlay);
     Future.delayed(const Duration(milliseconds: 1500), () {
       overlay.remove();
     });

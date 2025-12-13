@@ -94,7 +94,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
                       color: AppColors.primaryLight,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
+                          color: AppColors.primary.withValues(alpha: 0.3),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -142,7 +142,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.black.withOpacity(0.08),
+                              color: AppColors.black.withValues(alpha: 0.08),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
