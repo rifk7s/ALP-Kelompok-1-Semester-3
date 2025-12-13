@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +47,9 @@ class _HppPageState extends State<HppPage> {
             latestDate = effectiveDate;
           }
         } catch (e) {
-          print('Error parsing date: $e');
+          if (kDebugMode) {
+            debugPrint('Error parsing date: $e');
+          }
         }
       }
 
@@ -59,7 +62,9 @@ class _HppPageState extends State<HppPage> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading HPP data: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading HPP data: $e');
+      }
       setState(() => isLoading = false);
     }
   }

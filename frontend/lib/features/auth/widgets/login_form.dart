@@ -154,7 +154,7 @@ class _LoginFormState extends State<LoginForm> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     )
                   : const Text('Masuk'),

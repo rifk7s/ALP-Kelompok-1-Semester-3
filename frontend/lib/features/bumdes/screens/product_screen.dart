@@ -309,7 +309,7 @@ class _ProductPageState extends State<ProductPage> {
         opacity: isSoldOut ? 0.5 : 1.0,
         child: Container(
           decoration: BoxDecoration(
-            color: isSoldOut ? Colors.grey[300] : AppColors.white,
+            color: isSoldOut ? AppColors.greyLight : AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -360,7 +360,7 @@ class _ProductPageState extends State<ProductPage> {
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: isSoldOut
-                            ? Colors.grey[700]
+                            ? AppColors.greyDark
                             : AppColors.textDark,
                       ),
                       maxLines: 1,
@@ -376,7 +376,7 @@ class _ProductPageState extends State<ProductPage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut
-                                ? Colors.grey[600]
+                                ? AppColors.grey600
                                 : AppColors.textSecondary,
                           ),
                         ),
@@ -385,7 +385,7 @@ class _ProductPageState extends State<ProductPage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut
-                                ? Colors.grey[600]
+                                ? AppColors.grey600
                                 : AppColors.textSecondary,
                           ),
                         ),
@@ -394,7 +394,7 @@ class _ProductPageState extends State<ProductPage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut
-                                ? Colors.grey[600]
+                                ? AppColors.grey600
                                 : AppColors.textSecondary,
                           ),
                         ),
@@ -408,7 +408,7 @@ class _ProductPageState extends State<ProductPage> {
                       style: TextStyle(
                         fontSize: 11,
                         color: isSoldOut
-                            ? Colors.grey[600]
+                            ? AppColors.grey600
                             : AppColors.textLight,
                       ),
                       maxLines: 1,
@@ -424,7 +424,7 @@ class _ProductPageState extends State<ProductPage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red[100],
+                          color: AppColors.dangerShade100,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -432,7 +432,7 @@ class _ProductPageState extends State<ProductPage> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: Colors.red[700],
+                            color: AppColors.dangerShade700,
                           ),
                         ),
                       ),

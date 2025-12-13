@@ -319,7 +319,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Produk berhasil diperbarui!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
 
@@ -650,7 +650,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppColors.danger,
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Gagal memuat data',
@@ -743,7 +747,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                 height: double.infinity,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: Colors.grey[300],
+                                    color: AppColors.greyLight,
                                     child: const Icon(Icons.broken_image),
                                   );
                                 },
@@ -765,7 +769,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                               },
                               child: CircleAvatar(
                                 backgroundColor: isMarkedForDeletion
-                                    ? Colors.orange
+                                    ? AppColors.warning
                                     : AppColors.textMuted,
                                 radius: 12,
                                 child: Icon(
@@ -836,13 +840,13 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.green,
+                                  color: AppColors.success,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
                                   'NEW',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -920,7 +924,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                     child: Text(
                                       '${index + 1}',
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -1269,9 +1273,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.price_change),
                     filled: true,
-                    fillColor: Color(0xFFF5F5F5),
+                    fillColor: AppColors.grey100,
                   ),
-                  style: const TextStyle(color: Colors.black54),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
 
                 const SizedBox(height: 14),
@@ -1286,10 +1290,10 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.numbers),
                     filled: true,
-                    fillColor: Color(0xFFF5F5F5),
+                    fillColor: AppColors.grey100,
                     hintText: 'Auto-calculated from contributions',
                   ),
-                  style: const TextStyle(color: Colors.black54),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -1330,7 +1334,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.white,
                         strokeWidth: 2,
                       ),
                     )

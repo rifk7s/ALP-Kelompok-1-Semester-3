@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'upload_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
@@ -7,6 +8,7 @@ import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/core/services/notification_service.dart';
 
 class HomePageBumdes extends StatefulWidget {
   final VoidCallback? onProductTap;
@@ -30,11 +32,28 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
   int completedOrdersThisMonth = 0;
   List<Map<String, dynamic>> recentActivities = [];
   bool isLoading = true;
+  int unreadNotificationCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final count = await NotificationService.getUnreadCount();
+      if (mounted) {
+        setState(() {
+          unreadNotificationCount = count;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error loading unread count: $e');
+      }
+    }
   }
 
   Future<void> _loadData() async {
@@ -122,7 +141,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading dashboard data: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading dashboard data: $e');
+      }
       setState(() {
         isLoading = false;
       });
@@ -166,14 +187,22 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.notifications_outlined, size: 28),
-                      onPressed: () {
-                        Navigator.push(
+                      icon: Badge(
+                        label: Text('$unreadNotificationCount'),
+                        isLabelVisible: unreadNotificationCount > 0,
+                        child: const Icon(
+                          Icons.notifications_outlined,
+                          size: 28,
+                        ),
+                      ),
+                      onPressed: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const NotificationPage(),
                           ),
                         );
+                        _loadUnreadCount(); // Refresh count after returning
                       },
                     ),
                   ],
@@ -369,9 +398,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                               break;
                             case 'rejected':
                               icon = Icons.cancel_outlined;
-                              iconColor = Colors.red;
+                              iconColor = AppColors.danger;
                               statusLabel = 'Ditolak';
-                              statusColor = Colors.red;
+                              statusColor = AppColors.danger;
                               activityTitle = 'Ditolak #$orderNumber';
                               break;
                             default:

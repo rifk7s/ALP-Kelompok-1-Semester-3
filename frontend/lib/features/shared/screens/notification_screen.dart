@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/services/notification_service.dart';
+import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
+import 'package:frontend/features/bumdes/screens/transaction_bumdes_screen.dart';
+import 'package:frontend/features/shared/screens/chat_detail_page.dart';
+import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
+import 'package:intl/intl.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -9,11 +20,307 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
+  List<Map<String, dynamic>> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    setState(() => _isLoading = true);
+
+    final notifications = await NotificationService.getNotifications();
+
+    // Sort: unread first, then by created_at descending (newest first)
+    notifications.sort((a, b) {
+      final aIsRead = a['is_read'] == 1 || a['is_read'] == true;
+      final bIsRead = b['is_read'] == 1 || b['is_read'] == true;
+
+      // If read status differs, unread comes first
+      if (aIsRead != bIsRead) {
+        return aIsRead ? 1 : -1;
+      }
+
+      // If same read status, sort by created_at descending
+      final aTime = a['created_at'] as String? ?? '';
+      final bTime = b['created_at'] as String? ?? '';
+      return bTime.compareTo(aTime);
+    });
+
+    setState(() {
+      _notifications = notifications;
+      _isLoading = false;
+    });
+  }
+
+  String _formatTime(String timestamp) {
+    try {
+      final dateTime = DateTime.parse(timestamp);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+
+      if (difference.inMinutes < 1) {
+        return 'Baru saja';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes} menit lalu';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours} jam lalu';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} hari lalu';
+      } else {
+        return DateFormat('d MMM yyyy', 'id_ID').format(dateTime);
+      }
+    } catch (e) {
+      return timestamp;
+    }
+  }
+
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'order':
+        return Icons.shopping_bag;
+      case 'payment':
+        return Icons.payment;
+      case 'chat':
+        return Icons.chat;
+      case 'product':
+        return Icons.inventory;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  Future<void> _markAsRead(int notificationId, int index) async {
+    final isRead = _notifications[index]['is_read'];
+    if (isRead == 1 || isRead == true) return;
+
+    final success = await NotificationService.markAsRead(notificationId);
+    if (success && mounted) {
+      setState(() {
+        _notifications[index]['is_read'] = true;
+      });
+    }
+  }
+
+  Future<void> _handleNotificationTap(Map<String, dynamic> notification) async {
+    // Mark as read first
+    final notificationId = notification['id'] ?? 0;
+    final index = _notifications.indexWhere((n) => n['id'] == notificationId);
+    if (index != -1) {
+      await _markAsRead(notificationId, index);
+    }
+
+    final type = notification['type'] as String?;
+    final relatedId = notification['related_id']?.toString();
+
+    if (type == 'order' || type == 'payment') {
+      // Check user role to determine navigation
+      final user = await StorageService.getUser();
+      final userRole = user?['role'] as String?;
+      final isBumdes = userRole == 'admin' || userRole == 'bumdes';
+
+      if (relatedId != null && mounted) {
+        if (isBumdes) {
+          // Navigate to BUMDes transaction page
+          try {
+            final orders = await AdminService.getOrdersByStatus();
+            final order = orders.firstWhere(
+              (o) => o['id'].toString() == relatedId,
+              orElse: () => <String, dynamic>{},
+            );
+
+            int initialTab = 0;
+            if (order.isNotEmpty) {
+              final status = order['status'] as String?;
+              if (kDebugMode) {
+                debugPrint('Order status: $status for order ID: $relatedId');
+              }
+              if (status == 'pending_payment' || status == 'paid') {
+                initialTab = 0; // Baru
+              } else if (status == 'processing') {
+                initialTab = 1; // Sedang Dikemas
+              } else if (status == 'shipped') {
+                initialTab = 2; // Dikirim
+              } else if (status == 'completed' || status == 'rejected') {
+                initialTab = 3; // Selesai
+              }
+            }
+
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BumdesTransactionPage(initialTab: initialTab),
+                ),
+              );
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('Error fetching order: $e');
+            }
+            // If error, just navigate to transaction page
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => BumdesTransactionPage()),
+              );
+            }
+          }
+        } else {
+          // Navigate to Pembeli transaction history
+          try {
+            final orders = await OrderService.getOrders();
+            final order = orders.firstWhere(
+              (o) => o['id'].toString() == relatedId,
+              orElse: () => <String, dynamic>{},
+            );
+
+            int initialTab = 0;
+            if (order.isNotEmpty) {
+              final status = order['status'] as String?;
+              if (kDebugMode) {
+                debugPrint('Order status: $status for order ID: $relatedId');
+              }
+              if (status == 'pending_payment') {
+                initialTab = 0; // Belum Bayar
+              } else if (status == 'paid' ||
+                  status == 'processing' ||
+                  status == 'shipped') {
+                initialTab = 1; // Diproses
+              } else if (status == 'completed' || status == 'rejected') {
+                initialTab = 2; // Selesai
+              }
+            }
+
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TransactionHistoryPage(initialTab: initialTab),
+                ),
+              );
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('Error fetching order: $e');
+            }
+            // If error, just navigate to transaction history
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => TransactionHistoryPage()),
+              );
+            }
+          }
+        }
+      }
+    } else if (type == 'chat') {
+      // Navigate to chat
+      if (relatedId != null && mounted) {
+        try {
+          // Get user role to determine which chat screen to use
+          final user = await StorageService.getUser();
+          final userRole = user?['role'] as String?;
+          final isBumdes = userRole == 'admin' || userRole == 'bumdes';
+
+          // Sign in to Firebase first
+          await ChatService.signInToFirebase();
+
+          // Get chat document to retrieve participant info
+          final chatDoc = await ChatService.getChatDocument(relatedId);
+          if (chatDoc != null) {
+            final currentUserId = ChatService.getCurrentUserId();
+            final participants =
+                chatDoc['participants'] as List<dynamic>? ?? [];
+            final participantNames =
+                chatDoc['participantNames'] as Map<String, dynamic>? ?? {};
+            final participantImages =
+                chatDoc['participantImages'] as Map<String, dynamic>? ?? {};
+
+            // Get the other participant's info
+            String recipientId = '';
+            String recipientName = 'User';
+            String? recipientImage;
+
+            for (final participantId in participants) {
+              if (participantId != currentUserId) {
+                recipientId = participantId;
+                recipientName = participantNames[participantId] ?? 'User';
+                recipientImage = participantImages[participantId];
+                break;
+              }
+            }
+
+            if (mounted) {
+              if (isBumdes) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatBumdesPage(
+                      chatId: relatedId,
+                      name: recipientName,
+                      image: recipientImage,
+                      recipientId: recipientId,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatDetailPage(
+                      chatId: relatedId,
+                      name: recipientName,
+                      image: recipientImage ?? '',
+                      recipientId: recipientId,
+                    ),
+                  ),
+                );
+              }
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Chat tidak ditemukan')),
+              );
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('Error navigating to chat: $e');
+          }
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error membuka chat: $e')));
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _markAllAsRead() async {
+    final success = await NotificationService.markAllAsRead();
+    if (success && mounted) {
+      setState(() {
+        for (var notification in _notifications) {
+          notification['is_read'] = true;
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua notifikasi ditandai sudah dibaca')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 1,
@@ -25,105 +332,148 @@ class _NotificationPageState extends State<NotificationPage> {
             color: AppColors.textLight,
           ),
         ),
-      ),
-
-      body: ListView(
-        children: [
-          notifItem(
-            title: "Pesanan kamu telah dikirim!",
-            message: "Kurir sedang menuju lokasi kamu.",
-            time: "2 menit lalu",
-            isUnread: true,
-            icon: Icons.local_shipping,
-          ),
-          notifItem(
-            title: "Voucher khusus buat kamu!",
-            message: "Diskon 30% berlaku untuk semua kategori.",
-            time: "1 jam lalu",
-            isUnread: false,
-            icon: Icons.discount,
-          ),
-          notifItem(
-            title: "Keamanan Akun",
-            message: "Login baru terdeteksi di perangkat lain.",
-            time: "Kemarin",
-            isUnread: false,
-            icon: Icons.security,
-          ),
-          notifItem(
-            title: "Promo Gratis Ongkir",
-            message: "Cek segera sebelum kehabisan!",
-            time: "2 hari lalu",
-            isUnread: false,
-            icon: Icons.card_giftcard,
-          ),
+        actions: [
+          if (_notifications.any(
+            (n) => n['is_read'] == 0 || n['is_read'] == false,
+          ))
+            TextButton(
+              onPressed: _markAllAsRead,
+              child: const Text(
+                'Tandai Semua Dibaca',
+                style: TextStyle(color: AppColors.primary, fontSize: 12),
+              ),
+            ),
         ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _notifications.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    size: 64,
+                    color: AppColors.grey400,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Tidak ada notifikasi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadNotifications,
+              child: ListView.builder(
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = _notifications[index];
+                  final isRead = notification['is_read'];
+                  final isReadBool = (isRead == 1 || isRead == true);
+                  return notifItem(
+                    id: notification['id'] ?? 0,
+                    title: notification['title'] ?? '',
+                    message: notification['message'] ?? '',
+                    time: _formatTime(notification['created_at'] ?? ''),
+                    isUnread: !isReadBool,
+                    icon: _getIconForType(notification['type'] ?? ''),
+                    onTap: () => _handleNotificationTap(notification),
+                  );
+                },
+              ),
+            ),
     );
   }
 
   Widget notifItem({
+    required int id,
     required String title,
     required String message,
     required String time,
     required bool isUnread,
     required IconData icon,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(color: AppColors.surface),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.notificationCard,
-                  borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isUnread ? AppColors.white : AppColors.grey200,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isUnread
+                        ? AppColors.primaryLight.withValues(alpha: 0.3)
+                        : AppColors.grey200,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isUnread ? AppColors.primary : AppColors.grey600,
+                    size: 22,
+                  ),
                 ),
-                child: Icon(icon, color: AppColors.primary, size: 22),
-              ),
-
-              const SizedBox(width: 14),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: isUnread
-                            ? FontWeight.bold
-                            : FontWeight.w600,
-                        color: AppColors.textLight,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: isUnread
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isUnread
+                              ? AppColors.textLight
+                              : AppColors.grey600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      message,
-                      style: TextStyle(fontSize: 13, color: AppColors.grey800),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      time,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
+                      const SizedBox(height: 4),
+                      Text(
+                        message,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isUnread
+                              ? AppColors.grey800
+                              : AppColors.grey600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 5),
+                      Text(
+                        time,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isUnread
+                              ? AppColors.textSecondary
+                              : AppColors.grey400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-          Container(height: 1, color: AppColors.notificationDivider),
-        ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(height: 1, color: AppColors.notificationDivider),
+          ],
+        ),
       ),
     );
   }

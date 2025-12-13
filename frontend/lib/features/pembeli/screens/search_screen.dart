@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 
 class SearchPage extends StatefulWidget {
@@ -271,6 +272,10 @@ Widget productCard({
   required Map<String, dynamic> product,
   BuildContext? context,
 }) {
+  final imagePath =
+      ProductImageUtils.firstImagePath(product) ?? product['image']?.toString();
+  final imageUrl = ApiConfig.getImageUrl(imagePath);
+
   return GestureDetector(
     onTap: () {
       if (context != null) {
@@ -299,9 +304,9 @@ Widget productCard({
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: product['image'] != null
+            child: imageUrl.isNotEmpty
                 ? Image.network(
-                    ApiConfig.getImageUrl(product['image']),
+                    imageUrl,
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -309,11 +314,11 @@ Widget productCard({
                       return Container(
                         height: 120,
                         width: double.infinity,
-                        color: Colors.grey[300],
+                        color: AppColors.greyLight,
                         child: const Icon(
                           Icons.image,
                           size: 50,
-                          color: Colors.grey,
+                          color: AppColors.grey,
                         ),
                       );
                     },
@@ -321,11 +326,11 @@ Widget productCard({
                 : Container(
                     height: 120,
                     width: double.infinity,
-                    color: Colors.grey[300],
+                    color: AppColors.greyLight,
                     child: const Icon(
                       Icons.image,
                       size: 50,
-                      color: Colors.grey,
+                      color: AppColors.grey,
                     ),
                   ),
           ),

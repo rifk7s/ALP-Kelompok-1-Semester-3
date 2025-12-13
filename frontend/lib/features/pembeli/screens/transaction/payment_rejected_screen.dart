@@ -1,23 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
 import 'package:intl/intl.dart';
 
-class PaymentConfirmedScreen extends StatefulWidget {
+class PaymentRejectedScreen extends StatefulWidget {
   final int total;
   final String orderId;
 
-  const PaymentConfirmedScreen({
+  const PaymentRejectedScreen({
     super.key,
     required this.total,
     required this.orderId,
   });
 
   @override
-  State<PaymentConfirmedScreen> createState() => _PaymentConfirmedScreenState();
+  State<PaymentRejectedScreen> createState() => _PaymentRejectedScreenState();
 }
 
-class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
+class _PaymentRejectedScreenState extends State<PaymentRejectedScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -44,17 +46,15 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
 
     _animationController.forward();
 
-    // Auto navigate to receipt after 3 seconds
+    // Auto navigate to "Pesanan Saya" after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-                ReceiptPage(total: widget.total, orderId: widget.orderId),
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const TransactionHistoryPage(initialTab: 2),
+        ),
+      );
     });
   }
 
@@ -84,48 +84,48 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated success icon
+                // Animated rejected icon
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.primaryLight,
+                      color: AppColors.dangerLight,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: AppColors.danger.withValues(alpha: 0.28),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
                       ],
                     ),
                     child: const Icon(
-                      Icons.check_circle_rounded,
-                      color: AppColors.primary,
+                      Icons.cancel_rounded,
+                      color: AppColors.danger,
                       size: 100,
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
-                // Success message
+                // Rejected message
                 FadeTransition(
                   opacity: _fadeAnimation,
                   child: Column(
                     children: [
                       const Text(
-                        "Pembayaran Dikonfirmasi!",
+                        'Pembayaran Ditolak',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.danger,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Pesanan Anda sedang diproses",
+                        'Bukti pembayaran Anda ditolak admin. Silakan cek riwayat pesanan.',
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.grey600,
@@ -150,10 +150,10 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
                         ),
                         child: Column(
                           children: [
-                            _infoRow("Nomor Pesanan", widget.orderId),
+                            _infoRow('Nomor Pesanan', widget.orderId),
                             const Divider(height: 24),
                             _infoRow(
-                              "Total Pembayaran",
+                              'Total Pembayaran',
                               formatCurrency(widget.total),
                               isHighlight: true,
                             ),
@@ -179,7 +179,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            "Mengalihkan ke struk...",
+                            'Mengalihkan ke Pesanan Saya...',
                             style: TextStyle(
                               color: AppColors.grey600,
                               fontSize: 14,
@@ -208,7 +208,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
           style: TextStyle(
             fontSize: isHighlight ? 18 : 14,
             fontWeight: FontWeight.bold,
-            color: isHighlight ? AppColors.primary : AppColors.textLight,
+            color: isHighlight ? AppColors.danger : AppColors.textLight,
           ),
         ),
       ],

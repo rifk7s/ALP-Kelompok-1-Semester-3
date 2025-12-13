@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
@@ -9,7 +10,9 @@ import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 
 class BumdesTransactionPage extends StatefulWidget {
-  const BumdesTransactionPage({super.key});
+  final int? initialTab;
+
+  const BumdesTransactionPage({super.key, this.initialTab});
 
   @override
   State<BumdesTransactionPage> createState() => _BumdesTransactionPageState();
@@ -32,7 +35,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _statusFlow.length, vsync: this);
+    _tabController = TabController(
+      length: _statusFlow.length,
+      vsync: this,
+      initialIndex: widget.initialTab ?? 0,
+    );
     _loadOrders();
   }
 
@@ -40,7 +47,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     setState(() => _isLoading = true);
 
     final orders = await AdminService.getOrdersByStatus();
-    print('Loaded ${orders.length} orders');
+    if (kDebugMode) {
+      debugPrint('Loaded ${orders.length} orders');
+    }
 
     setState(() {
       _orders = orders;
@@ -55,9 +64,11 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   }
 
   List<Map<String, dynamic>> _ordersByStatus(String status) {
+    List<Map<String, dynamic>> filtered;
+
     if (status == 'pending_payment') {
       // Baru tab shows both pending_payment and paid orders
-      return _orders
+      filtered = _orders
           .where(
             (order) =>
                 order['status'] == 'pending_payment' ||
@@ -66,14 +77,27 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           .toList();
     } else if (status == 'completed') {
       // Selesai tab shows both completed and rejected orders
+      // Keep original sorting from backend (by completion timestamp)
       return _orders
           .where(
             (order) =>
                 order['status'] == 'completed' || order['status'] == 'rejected',
           )
           .toList();
+    } else {
+      filtered = _orders.where((order) => order['status'] == status).toList();
     }
-    return _orders.where((order) => order['status'] == status).toList();
+
+    // Sort by updated_at or created_at (newest first) for non-completed tabs
+    filtered.sort((a, b) {
+      final aTime =
+          a['updated_at'] as String? ?? a['created_at'] as String? ?? '';
+      final bTime =
+          b['updated_at'] as String? ?? b['created_at'] as String? ?? '';
+      return bTime.compareTo(aTime); // Descending order (newest first)
+    });
+
+    return filtered;
   }
 
   String _statusLabel(String status) {
@@ -100,7 +124,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       case 'pending_payment':
         return AppColors.warning;
       case 'paid':
-        return Colors.blue;
+        return AppColors.info;
       case 'processing':
         return AppColors.primary;
       case 'shipped':
@@ -108,7 +132,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       case 'completed':
         return AppColors.success;
       case 'rejected':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return AppColors.textSecondary;
     }
@@ -210,6 +234,8 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
         success = await AdminService.markCompleted(orderId);
         break;
     }
+
+    if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'payment_confirmed_screen.dart';
+import 'payment_rejected_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int? orderId;
@@ -56,9 +58,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
       final status = await OrderService.checkOrderStatus(widget.orderId!);
 
       if (status != null && mounted) {
-        print(
-          'Payment status check: ${status['status']} - isPaid: ${status['is_paid']}',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            'Payment status check: ${status['status']} - isPaid: ${status['is_paid']}',
+          );
+        }
 
         if (status['is_paid'] == true || status['status'] == 'paid') {
           // Payment confirmed! Navigate to success screen
@@ -68,6 +72,19 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
             context,
             MaterialPageRoute(
               builder: (_) => PaymentConfirmedScreen(
+                total: totalPayment,
+                orderId: orderNumber,
+              ),
+            ),
+          );
+        } else if (status['status'] == 'rejected') {
+          // Payment rejected! Navigate to rejected screen
+          _countdownTimer?.cancel();
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PaymentRejectedScreen(
                 total: totalPayment,
                 orderId: orderNumber,
               ),
@@ -84,7 +101,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         }
       }
     } catch (e) {
-      print('Error checking payment status: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking payment status: $e');
+      }
       if (mounted) {
         SnackBarHelper.showError(context, 'Gagal mengecek status pembayaran');
       }
@@ -137,7 +156,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
           setState(() => _timeLeft = '${seconds}d');
         }
       } catch (e) {
-        print('Error parsing deadline: $e');
+        if (kDebugMode) {
+          debugPrint('Error parsing deadline: $e');
+        }
       }
     }
   }
@@ -151,10 +172,12 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
       );
 
       if (order.isNotEmpty) {
-        print('Loaded order details: $order'); // Debug
-        print(
-          'Order total: ${order['total']}, type: ${order['total'].runtimeType}',
-        ); // Debug
+        if (kDebugMode) {
+          debugPrint('Loaded order details: $order');
+          debugPrint(
+            'Order total: ${order['total']}, type: ${order['total'].runtimeType}',
+          );
+        }
         setState(() {
           orderDetails = order;
           orderNumber = order['order_number'] ?? orderNumber;
@@ -164,7 +187,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         setState(() => isLoading = false);
       }
     } catch (e) {
-      print('Error loading order details: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading order details: $e');
+      }
       setState(() => isLoading = false);
     }
   }
@@ -436,7 +461,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  AppColors.white,
                                 ),
                               ),
                             )
@@ -450,7 +475,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

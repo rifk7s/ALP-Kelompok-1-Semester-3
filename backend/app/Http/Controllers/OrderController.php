@@ -9,6 +9,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use App\Helpers\NotificationHelper;
 
 
@@ -21,10 +22,31 @@ class OrderController extends Controller
     {
         $orders = Order::where('buyer_id', $request->user()->id)
                       ->with(['orderItems.product.productImages'])
-                      ->orderBy('created_at', 'desc')
                       ->get();
 
-        return response()->json($orders);
+        // Separate orders by status groups
+        $completedOrRejected = $orders->filter(function ($order) {
+            return in_array($order->status, ['completed', 'rejected']);
+        })->sortByDesc(function ($order) {
+            // Use completed_at for completed orders, rejected_at for rejected orders
+            if ($order->status === 'completed') {
+                return strtotime($order->completed_at ?? $order->created_at);
+            } elseif ($order->status === 'rejected') {
+                return strtotime($order->rejected_at ?? $order->created_at);
+            }
+            return strtotime($order->created_at);
+        })->values();
+
+        $otherOrders = $orders->filter(function ($order) {
+            return !in_array($order->status, ['completed', 'rejected']);
+        })->sortByDesc(function ($order) {
+            return strtotime($order->created_at);
+        })->values();
+
+        // Merge: other orders first, then completed/rejected
+        $sortedOrders = $otherOrders->concat($completedOrRejected);
+
+        return response()->json($sortedOrders, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -106,14 +128,8 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Notify user their order has been created
-            NotificationHelper::sendNotification(
-                $user->id,
-                'Order Created',
-                'Your order #' . $order->order_number . ' has been created successfully.',
-                'order',
-                $order->id
-            );
+            // Notify BUMDes about new order
+            NotificationService::notifyNewOrder($order);
 
             // Load relationships for response
             $order->load(['orderItems.product', 'buyer']);
@@ -201,14 +217,6 @@ class OrderController extends Controller
 
         $order->update(['status' => 'cancelled']);
 
-        NotificationHelper::sendNotification(
-            $order->buyer_id,
-            'Order Cancelled',
-            'Your order #' . $order->order_number . ' has been cancelled.',
-            'order',
-            $order->id
-        );
-
         return response()->json([
             'message' => 'Order cancelled successfully',
             'order' => $order,
@@ -220,21 +228,10 @@ class OrderController extends Controller
      */
     public function complete(Request $request, Order $order)
     {
-        \Log::info('Complete order attempt', [
-            'order_id' => $order->id,
-            'order_buyer_id' => $order->buyer_id,
-            'current_user_id' => $request->user()->id,
-            'order_status' => $order->status
-        ]);
-
         // Check authorization
         if ($order->buyer_id !== $request->user()->id) {
             return response()->json([
                 'message' => 'Unauthorized',
-                'debug' => [
-                    'order_buyer_id' => $order->buyer_id,
-                    'your_user_id' => $request->user()->id
-                ]
             ], 403);
         }
 
@@ -245,9 +242,13 @@ class OrderController extends Controller
             ], 400);
         }
 
+        $oldStatus = $order->status;
         $order->status = 'completed';
         $order->completed_at = now();
         $order->save();
+
+        // Notify BUMDes that order is completed
+        NotificationService::notifyOrderStatusChange($order, $oldStatus, 'completed');
 
         return response()->json([
             'message' => 'Order marked as completed',

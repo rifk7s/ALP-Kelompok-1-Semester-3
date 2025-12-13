@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -59,33 +60,45 @@ class _CheckoutPageState extends State<CheckoutPage> {
     if (phone == null || phone.isEmpty) return '-';
     // Format: 0812-3456-7890
     if (phone.length >= 4) {
-      return phone.substring(0, 4) + '-' + phone.substring(4);
+      return '${phone.substring(0, 4)}-${phone.substring(4)}';
     }
     return phone;
   }
 
   Future<void> _createOrder() async {
-    print('_createOrder called'); // Debug
+    if (kDebugMode) {
+      debugPrint('_createOrder called');
+    }
     if (isCreatingOrder) {
-      print('Already creating order, returning'); // Debug
+      if (kDebugMode) {
+        debugPrint('Already creating order, returning');
+      }
       return;
     }
 
     setState(() => isCreatingOrder = true);
-    print('Creating order started'); // Debug
+    if (kDebugMode) {
+      debugPrint('Creating order started');
+    }
 
     try {
-      print('Calling OrderService.createOrder...'); // Debug
+      if (kDebugMode) {
+        debugPrint('Calling OrderService.createOrder...');
+      }
       final order = await OrderService.createOrder(
         shippingAddress: userProfile?.address,
         shippingCost: ongkir,
         serviceFee: biayaLayanan,
       );
 
-      print('Order result: $order'); // Debug
+      if (kDebugMode) {
+        debugPrint('Order result: $order');
+      }
 
       if (order != null && mounted) {
-        print('Order created successfully, navigating...'); // Debug
+        if (kDebugMode) {
+          debugPrint('Order created successfully, navigating...');
+        }
         // Navigate to waiting payment screen
         Navigator.pushReplacement(
           context,
@@ -232,7 +245,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       return Container(
                                         width: 70,
                                         height: 70,
-                                        color: Colors.grey[300],
+                                        color: AppColors.greyLight,
                                         child: const Icon(
                                           Icons.image,
                                           size: 30,
@@ -243,7 +256,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 : Container(
                                     width: 70,
                                     height: 70,
-                                    color: Colors.grey[300],
+                                    color: AppColors.greyLight,
                                     child: const Icon(Icons.image, size: 30),
                                   );
                           }(),
@@ -502,7 +515,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : const Text(
@@ -510,7 +523,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                   ),

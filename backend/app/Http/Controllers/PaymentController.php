@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\NotificationService;
 
 class PaymentController extends Controller
 {
@@ -39,6 +40,9 @@ class PaymentController extends Controller
             'proof_image' => $imagePath,
             'status' => 'pending', // Keep as pending until admin confirms
         ]);
+
+        // Notify BUMDes that payment proof has been uploaded
+        NotificationService::notifyPaymentProofUploaded($order);
 
         return response()->json([
             'message' => 'Payment proof uploaded successfully',

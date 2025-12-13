@@ -281,7 +281,7 @@ class _ContactPageState extends State<ContactPage> {
                                       child: Text(
                                         unread > 99 ? '99+' : unread.toString(),
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.white,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),

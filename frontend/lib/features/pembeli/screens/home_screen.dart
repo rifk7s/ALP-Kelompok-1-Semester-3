@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
@@ -9,6 +10,7 @@ import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:intl/intl.dart';
 
@@ -32,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoadingCategories = true;
   bool isLoadingProducts = true;
   int cartItemCount = 0;
+  int unreadNotificationCount = 0;
 
   @override
   void initState() {
@@ -39,6 +42,22 @@ class _HomePageState extends State<HomePage> {
     loadCategories();
     loadProducts();
     loadCartCount();
+    loadUnreadNotificationCount();
+  }
+
+  Future<void> loadUnreadNotificationCount() async {
+    try {
+      final count = await NotificationService.getUnreadCount();
+      if (mounted) {
+        setState(() {
+          unreadNotificationCount = count;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error loading unread notification count: $e');
+      }
+    }
   }
 
   Future<void> loadCartCount() async {
@@ -51,7 +70,9 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      print('Error loading cart count: $e');
+      if (kDebugMode) {
+        debugPrint('Error loading cart count: $e');
+      }
     }
   }
 
@@ -176,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(
-                                      color: Colors.red,
+                                      color: AppColors.danger,
                                       shape: BoxShape.circle,
                                     ),
                                     constraints: const BoxConstraints(
@@ -186,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Text(
                                       cartItemCount.toString(),
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -198,15 +219,20 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 12),
                           IconButton(
-                            icon: const Icon(Icons.notifications_outlined),
-                            onPressed: () {
-                              Navigator.push(
+                            icon: Badge(
+                              label: Text('$unreadNotificationCount'),
+                              isLabelVisible: unreadNotificationCount > 0,
+                              child: const Icon(Icons.notifications_outlined),
+                            ),
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       const NotificationPage(),
                                 ),
                               );
+                              loadUnreadNotificationCount(); // Refresh count after returning
                             },
                           ),
                         ],
@@ -483,7 +509,7 @@ Widget productCard({
       opacity: isSoldOut ? 0.5 : 1.0,
       child: Container(
         decoration: BoxDecoration(
-          color: isSoldOut ? Colors.grey[300] : AppColors.surface,
+          color: isSoldOut ? AppColors.greyLight : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             const BoxShadow(
@@ -541,7 +567,9 @@ Widget productCard({
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: isSoldOut ? Colors.grey[700] : AppColors.textDark,
+                      color: isSoldOut
+                          ? AppColors.greyDark
+                          : AppColors.textDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -550,7 +578,7 @@ Widget productCard({
                   Text(
                     '${rupiah.format(pricePerKg.toInt())}/kg',
                     style: TextStyle(
-                      color: isSoldOut ? Colors.grey[600] : AppColors.danger,
+                      color: isSoldOut ? AppColors.grey600 : AppColors.danger,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -560,7 +588,7 @@ Widget productCard({
                     style: TextStyle(
                       fontSize: 12,
                       color: isSoldOut
-                          ? Colors.grey[600]
+                          ? AppColors.grey600
                           : AppColors.textSecondary,
                     ),
                   ),
@@ -571,7 +599,7 @@ Widget productCard({
                         Icons.location_on_outlined,
                         size: 14,
                         color: isSoldOut
-                            ? Colors.grey[600]
+                            ? AppColors.grey600
                             : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
@@ -581,7 +609,7 @@ Widget productCard({
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut
-                                ? Colors.grey[600]
+                                ? AppColors.grey600
                                 : AppColors.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -597,7 +625,7 @@ Widget productCard({
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red[100],
+                        color: AppColors.dangerShade100,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -605,7 +633,7 @@ Widget productCard({
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red[700],
+                          color: AppColors.dangerShade700,
                         ),
                       ),
                     ),
