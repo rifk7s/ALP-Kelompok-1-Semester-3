@@ -23,7 +23,7 @@ class AdminController extends Controller
         // Filter by status if provided, otherwise return all orders
         $status = $request->input('status');
         
-        $query = Order::with(['buyer', 'orderItems.product', 'payments']);
+        $query = Order::with(['buyer', 'orderItems.product.productImages', 'payments']);
         
         if ($status) {
             $query->where('status', $status);
@@ -90,7 +90,7 @@ class AdminController extends Controller
         // Notify buyer about payment confirmation
         NotificationService::notifyOrderStatusChange($order, 'pending_payment', 'paid');
 
-        $order->load(['buyer', 'orderItems.product', 'payments']);
+        $order->load(['buyer', 'orderItems.product.productImages', 'payments']);
 
         return response()->json([
             'message' => 'Order payment confirmed successfully',
@@ -119,7 +119,7 @@ class AdminController extends Controller
         // Notify buyer that order is being processed
         NotificationService::notifyOrderStatusChange($order, 'paid', 'processing');
 
-        $order->load(['buyer', 'orderItems.product']);
+        $order->load(['buyer', 'orderItems.product.productImages']);
 
         return response()->json([
             'message' => 'Order marked as processing',
@@ -148,7 +148,7 @@ class AdminController extends Controller
         // Notify buyer that order has been shipped
         NotificationService::notifyOrderStatusChange($order, 'processing', 'shipped');
 
-        $order->load(['buyer', 'orderItems.product']);
+        $order->load(['buyer', 'orderItems.product.productImages']);
 
         return response()->json([
             'message' => 'Order marked as shipped',
@@ -174,7 +174,7 @@ class AdminController extends Controller
             'completed_at' => now(),
         ]);
 
-        $order->load(['buyer', 'orderItems.product']);
+        $order->load(['buyer', 'orderItems.product.productImages']);
 
         return response()->json([
             'message' => 'Order marked as completed',
@@ -212,7 +212,7 @@ class AdminController extends Controller
         // Notify buyer about rejection
         NotificationService::notifyOrderStatusChange($order, 'pending_payment', 'rejected');
 
-        $order->load(['buyer', 'orderItems.product', 'payments']);
+        $order->load(['buyer', 'orderItems.product.productImages', 'payments']);
 
         return response()->json([
             'message' => 'Order payment rejected',
@@ -232,7 +232,7 @@ class AdminController extends Controller
             ], 403);
         }
 
-        $order->load(['orderItems.product', 'payments']);
+        $order->load(['orderItems.product.productImages', 'payments']);
 
         return response()->json($order);
     }

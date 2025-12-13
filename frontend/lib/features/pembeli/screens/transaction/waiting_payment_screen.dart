@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'payment_confirmed_screen.dart';
+import 'payment_rejected_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int? orderId;
@@ -30,9 +29,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   Map<String, dynamic>? orderDetails;
   bool isLoading = true;
   bool isCheckingStatus = false;
-  bool isUploading = false;
-  File? _selectedImage;
-  final ImagePicker _picker = ImagePicker();
   Timer? _countdownTimer;
   String _timeLeft = '-';
 
@@ -78,6 +74,19 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
               ),
             ),
           );
+        } else if (status['status'] == 'rejected') {
+          // Payment rejected! Navigate to rejected screen
+          _countdownTimer?.cancel();
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PaymentRejectedScreen(
+                total: totalPayment,
+                orderId: orderNumber,
+              ),
+            ),
+          );
         } else {
           // Show message that payment is still pending
           if (mounted) {
@@ -110,81 +119,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
     });
   }
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      print('Error picking image: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memilih gambar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _uploadPaymentProof() async {
-    if (_selectedImage == null || widget.orderId == null) return;
-
-    setState(() => isUploading = true);
-
-    try {
-      final success = await OrderService.uploadPaymentProof(
-        orderId: widget.orderId!,
-        imageFile: _selectedImage!,
-      );
-
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Bukti pembayaran berhasil diunggah!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          setState(() {
-            _selectedImage = null;
-          });
-          await _loadOrderDetails();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gagal mengunggah bukti pembayaran'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      print('Error uploading payment proof: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => isUploading = false);
-      }
-    }
-  }
 
   void _startCountdownTimer() {
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -455,168 +389,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
                       const Icon(Icons.chevron_right, color: AppColors.primary),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _section(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Upload Bukti Pembayaran",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Unggah foto bukti transfer Anda untuk mempercepat proses verifikasi.',
-                    style: TextStyle(color: AppColors.grey600, fontSize: 13),
-                  ),
-                  const SizedBox(height: 14),
-                  
-                  // Image preview or upload box
-                  if (_selectedImage != null)
-                    Container(
-                      width: double.infinity,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.primary, width: 2),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: [
-                            Image.file(
-                              _selectedImage!,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedImage = null;
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    InkWell(
-                      onTap: _pickImage,
-                      child: Container(
-                        width: double.infinity,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: AppColors.grey100,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            width: 2,
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 48,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Ketuk untuk memilih gambar',
-                              style: TextStyle(
-                                color: AppColors.grey600,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'JPG, PNG (Maks. 5MB)',
-                              style: TextStyle(
-                                color: AppColors.grey400,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  
-                  if (_selectedImage != null) ...[
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _pickImage,
-                            icon: const Icon(Icons.image),
-                            label: const Text('Ganti Gambar'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: BorderSide(color: AppColors.primary),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: isUploading ? null : _uploadPaymentProof,
-                            icon: isUploading
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Icon(Icons.upload),
-                            label: Text(isUploading ? 'Uploading...' : 'Upload'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
             ),

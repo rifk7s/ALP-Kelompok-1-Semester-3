@@ -1,9 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -15,12 +14,11 @@ return new class extends Migration
 
         $statusListSql = implode("','", $allowedStatuses);
 
-        // Rebuild table to update the CHECK constraint on `status`.
-        // SQLite cannot ALTER/MODIFY an existing CHECK constraint.
         DB::statement('PRAGMA foreign_keys=OFF');
 
-        // Use a temporary table name that is unlikely to collide.
-        DB::statement("DROP TABLE IF EXISTS orders__tmp");
+        // Rebuild table to update the CHECK constraint on `status`.
+        // Include all current columns on `orders`.
+        DB::statement('DROP TABLE IF EXISTS orders__tmp');
 
         DB::statement(
             "CREATE TABLE orders__tmp (\n"
@@ -35,6 +33,7 @@ return new class extends Migration
             ."    processing_at DATETIME NULL,\n"
             ."    shipped_at DATETIME NULL,\n"
             ."    completed_at DATETIME NULL,\n"
+            ."    rejected_at DATETIME NULL,\n"
             ."    shipping_address TEXT NOT NULL,\n"
             ."    notes TEXT NULL,\n"
             ."    payment_deadline DATETIME NULL,\n"
@@ -47,58 +46,51 @@ return new class extends Migration
         );
 
         DB::statement(
-            "INSERT INTO orders__tmp (id, order_number, subtotal, shipping_cost, total, status, pending_payment_at, paid_at, processing_at, shipped_at, completed_at, shipping_address, notes, payment_deadline, estimated_delivery, buyer_id, created_at, updated_at)\n"
-            ."SELECT id, order_number, subtotal, shipping_cost, total, status, pending_payment_at, paid_at, processing_at, shipped_at, completed_at, shipping_address, notes, payment_deadline, estimated_delivery, buyer_id, created_at, updated_at\n"
+            "INSERT INTO orders__tmp (id, order_number, subtotal, shipping_cost, total, status, pending_payment_at, paid_at, processing_at, shipped_at, completed_at, rejected_at, shipping_address, notes, payment_deadline, estimated_delivery, buyer_id, created_at, updated_at)\n"
+            ."SELECT id, order_number, subtotal, shipping_cost, total, status, pending_payment_at, paid_at, processing_at, shipped_at, completed_at, rejected_at, shipping_address, notes, payment_deadline, estimated_delivery, buyer_id, created_at, updated_at\n"
             ."FROM orders"
         );
 
         DB::statement('DROP TABLE orders');
         DB::statement('ALTER TABLE orders__tmp RENAME TO orders');
+
         DB::statement('PRAGMA foreign_keys=ON');
     }
 
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         $driver = Schema::getConnection()->getDriverName();
 
-        if ($driver === 'sqlite') {
-            $this->rebuildOrdersTableForSqlite([
-                'pending_payment',
-                'paid',
-                'processing',
-                'shipped',
-                'completed',
-                'cancelled',
-                'rejected',
-            ]);
+        if ($driver !== 'sqlite') {
             return;
         }
 
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending_payment', 'paid', 'processing', 'shipped', 'completed', 'cancelled', 'rejected') NOT NULL DEFAULT 'pending_payment'");
+        $this->rebuildOrdersTableForSqlite([
+            'pending_payment',
+            'paid',
+            'processing',
+            'shipped',
+            'completed',
+            'cancelled',
+            'rejected',
+        ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         $driver = Schema::getConnection()->getDriverName();
 
-        if ($driver === 'sqlite') {
-            $this->rebuildOrdersTableForSqlite([
-                'pending_payment',
-                'paid',
-                'processing',
-                'shipped',
-                'completed',
-                'cancelled',
-            ]);
+        if ($driver !== 'sqlite') {
             return;
         }
 
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending_payment', 'paid', 'processing', 'shipped', 'completed', 'cancelled') NOT NULL DEFAULT 'pending_payment'");
+        $this->rebuildOrdersTableForSqlite([
+            'pending_payment',
+            'paid',
+            'processing',
+            'shipped',
+            'completed',
+            'cancelled',
+        ]);
     }
 };

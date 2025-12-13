@@ -5,6 +5,8 @@ import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
@@ -302,20 +304,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     // Get first product image
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
     final firstItem = orderItems.isNotEmpty
-        ? orderItems[0] as Map<String, dynamic>
-        : null;
+      ? orderItems[0] as Map<String, dynamic>
+      : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
-    final productImages = product?['product_images'] as List<dynamic>? ?? [];
-    final firstImage = productImages.isNotEmpty
-        ? productImages[0] as Map<String, dynamic>
-        : null;
-    final imagePath = firstImage?['image_path'] as String?;
-
-    // Build full image URL if path exists
-    String? imageUrl;
-    if (imagePath != null && imagePath.isNotEmpty) {
-      imageUrl = ApiConfig.getImageUrl(imagePath);
-    }
+    final imagePath = ProductImageUtils.firstImagePath(product);
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
 
     Navigator.push(
       context,
@@ -521,17 +514,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
     // Convert backend order_items to products format if needed
     final products = orderItems.map((item) {
-      if (item['product'] != null) {
+      if (item is Map<String, dynamic> && item['product'] != null) {
         // Backend format
-        final product = item['product'];
-        // Get image from product_images
-        String? imagePath;
-        if (product['product_images'] != null &&
-            (product['product_images'] as List).isNotEmpty) {
-          imagePath = product['product_images'][0]['image_path'] as String?;
-        }
+        final product = item['product'] as Map<String, dynamic>?;
+        final imagePath = ProductImageUtils.firstImagePath(product);
         return {
-          'name': product['name']?.toString() ?? 'Produk',
+          'name': product?['name']?.toString() ?? 'Produk',
           'qty': double.parse(item['quantity_kg']?.toString() ?? '0').toInt(),
           'image': imagePath, // Can be null, will handle in UI
         };
@@ -1096,28 +1084,23 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               // Extract products from order_items
               final orderItems = order['order_items'] as List<dynamic>? ?? [];
 
               List<Map<String, dynamic>> cartItems = orderItems.map((item) {
                 final itemMap = item as Map<String, dynamic>;
-                final product =
-                    itemMap['product'] as Map<String, dynamic>? ?? {};
-                final productImages =
-                    product['product_images'] as List<dynamic>? ?? [];
-                final firstImage = productImages.isNotEmpty
-                    ? productImages[0] as Map<String, dynamic>
-                    : null;
+                final product = itemMap['product'] as Map<String, dynamic>?;
+                final imagePath = ProductImageUtils.firstImagePath(product) ?? '';
 
                 return {
-                  'id': product['id'] ?? 0,
+                  'id': product?['id'] ?? 0,
                   'quantity_kg': itemMap['quantity_kg']?.toString() ?? '1',
                   'product': {
-                    'name': product['name'] ?? '',
-                    'price_per_kg': product['price_per_kg']?.toString() ?? '0',
+                    'name': product?['name'] ?? '',
+                    'price_per_kg': product?['price_per_kg']?.toString() ?? '0',
                     'product_images': [
-                      {'image_path': firstImage?['image_path'] ?? ''},
+                      {'image_path': imagePath},
                     ],
                   },
                 };
@@ -1131,6 +1114,47 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 return sum + (qty * price).toInt();
               });
 
+              // Checkout endpoint builds orders from server-side cart.
+              // "Beli Lagi" must repopulate cart first.
+              final cleared = await CartService.clearCart();
+              if (!cleared) {
+                if (!mounted) return;
+                SnackBarHelper.showError(
+                  context,
+                  'Gagal menyiapkan keranjang. Coba lagi.',
+                );
+                return;
+              }
+
+              for (final item in cartItems) {
+                final productId = (item['id'] as int?) ?? 0;
+                final qty = double.tryParse(item['quantity_kg'].toString()) ?? 0;
+
+                if (productId <= 0 || qty <= 0) {
+                  if (!mounted) return;
+                  SnackBarHelper.showError(
+                    context,
+                    'Data produk tidak valid untuk beli lagi.',
+                  );
+                  return;
+                }
+
+                final ok = await CartService.addToCart(
+                  productId: productId,
+                  quantityKg: qty,
+                );
+
+                if (!ok) {
+                  if (!mounted) return;
+                  SnackBarHelper.showError(
+                    context,
+                    'Gagal menambahkan produk ke keranjang.',
+                  );
+                  return;
+                }
+              }
+
+              if (!mounted) return;
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1159,7 +1183,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       case 'completed':
         return AppColors.success;
       case 'rejected':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return AppColors.textSecondary;
     }
@@ -1174,6 +1198,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         return Icons.local_shipping;
       case 'completed':
         return Icons.check_circle;
+      case 'rejected':
+        return Icons.cancel;
       default:
         return Icons.info;
     }
@@ -1188,6 +1214,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         return 'Sedang Diproses';
       case 'completed':
         return 'Pesanan Selesai';
+      case 'rejected':
+        return 'Pembayaran Ditolak';
       default:
         return status;
     }

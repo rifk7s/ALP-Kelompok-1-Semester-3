@@ -21,7 +21,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = Order::where('buyer_id', $request->user()->id)
-                      ->with(['orderItems.product'])
+                      ->with(['orderItems.product.productImages'])
                       ->get();
 
         // Separate orders by status groups
