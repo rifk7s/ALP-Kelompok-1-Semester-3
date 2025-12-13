@@ -197,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(
-                                      color: Colors.red,
+                                      color: AppColors.danger,
                                       shape: BoxShape.circle,
                                     ),
                                     constraints: const BoxConstraints(
@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Text(
                                       cartItemCount.toString(),
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -509,7 +509,7 @@ Widget productCard({
       opacity: isSoldOut ? 0.5 : 1.0,
       child: Container(
         decoration: BoxDecoration(
-          color: isSoldOut ? Colors.grey[300] : AppColors.surface,
+          color: isSoldOut ? AppColors.greyLight : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             const BoxShadow(
@@ -567,7 +567,9 @@ Widget productCard({
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: isSoldOut ? Colors.grey[700] : AppColors.textDark,
+                      color: isSoldOut
+                          ? AppColors.greyDark
+                          : AppColors.textDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -576,7 +578,7 @@ Widget productCard({
                   Text(
                     '${rupiah.format(pricePerKg.toInt())}/kg',
                     style: TextStyle(
-                      color: isSoldOut ? Colors.grey[600] : AppColors.danger,
+                      color: isSoldOut ? AppColors.grey600 : AppColors.danger,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -586,7 +588,7 @@ Widget productCard({
                     style: TextStyle(
                       fontSize: 12,
                       color: isSoldOut
-                          ? Colors.grey[600]
+                          ? AppColors.grey600
                           : AppColors.textSecondary,
                     ),
                   ),
@@ -597,7 +599,7 @@ Widget productCard({
                         Icons.location_on_outlined,
                         size: 14,
                         color: isSoldOut
-                            ? Colors.grey[600]
+                            ? AppColors.grey600
                             : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
@@ -607,7 +609,7 @@ Widget productCard({
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut
-                                ? Colors.grey[600]
+                                ? AppColors.grey600
                                 : AppColors.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -623,7 +625,7 @@ Widget productCard({
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red[100],
+                        color: AppColors.dangerShade100,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -631,7 +633,7 @@ Widget productCard({
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red[700],
+                          color: AppColors.dangerShade700,
                         ),
                       ),
                     ),

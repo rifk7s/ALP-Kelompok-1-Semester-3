@@ -398,9 +398,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                               break;
                             case 'rejected':
                               icon = Icons.cancel_outlined;
-                              iconColor = Colors.red;
+                              iconColor = AppColors.danger;
                               statusLabel = 'Ditolak';
-                              statusColor = Colors.red;
+                              statusColor = AppColors.danger;
                               activityTitle = 'Ditolak #$orderNumber';
                               break;
                             default:

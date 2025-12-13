@@ -124,7 +124,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       case 'pending_payment':
         return AppColors.warning;
       case 'paid':
-        return Colors.blue;
+        return AppColors.info;
       case 'processing':
         return AppColors.primary;
       case 'shipped':
@@ -132,7 +132,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       case 'completed':
         return AppColors.success;
       case 'rejected':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return AppColors.textSecondary;
     }

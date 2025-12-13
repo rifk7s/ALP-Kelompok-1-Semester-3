@@ -900,12 +900,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
+            color: AppColors.danger.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
-              const Icon(Icons.cancel, size: 16, color: Colors.red),
+              const Icon(Icons.cancel, size: 16, color: AppColors.danger),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -914,7 +914,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       : 'Pesanan Ditolak',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.red,
+                    color: AppColors.danger,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

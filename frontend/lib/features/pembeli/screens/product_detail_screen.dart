@@ -178,7 +178,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.danger,
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -188,7 +188,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: Text(
                     cartItemCount > 99 ? '99+' : cartItemCount.toString(),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -476,11 +476,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   return Container(
                                     height: 180,
                                     width: double.infinity,
-                                    color: Colors.grey[300],
+                                    color: AppColors.greyLight,
                                     child: const Icon(
                                       Icons.image,
                                       size: 60,
-                                      color: Colors.grey,
+                                      color: AppColors.grey,
                                     ),
                                   );
                                 },
@@ -488,11 +488,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             : Container(
                                 height: 180,
                                 width: double.infinity,
-                                color: Colors.grey[300],
+                                color: AppColors.greyLight,
                                 child: const Icon(
                                   Icons.image,
                                   size: 60,
-                                  color: Colors.grey,
+                                  color: AppColors.grey,
                                 ),
                               );
                       }(),
@@ -772,7 +772,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         left: MediaQuery.of(context).size.width * 0.25,
         right: MediaQuery.of(context).size.width * 0.25,
         child: Material(
-          color: Colors.transparent,
+          color: AppColors.transparent,
           child: TweenAnimationBuilder(
             duration: const Duration(milliseconds: 300),
             tween: Tween<double>(begin: 0, end: 1),
@@ -785,7 +785,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.85),
+                color: AppColors.black.withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -794,12 +794,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.check,
-                      color: Colors.green,
+                      color: AppColors.success,
                       size: 32,
                     ),
                   ),
@@ -807,7 +807,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   const Text(
                     "Ditambahkan ke keranjang",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

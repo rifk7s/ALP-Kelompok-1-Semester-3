@@ -166,7 +166,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   width: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 )
               : const Text('Daftar Sebagai Pembeli'),

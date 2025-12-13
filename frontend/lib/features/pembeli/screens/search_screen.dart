@@ -314,11 +314,11 @@ Widget productCard({
                       return Container(
                         height: 120,
                         width: double.infinity,
-                        color: Colors.grey[300],
+                        color: AppColors.greyLight,
                         child: const Icon(
                           Icons.image,
                           size: 50,
-                          color: Colors.grey,
+                          color: AppColors.grey,
                         ),
                       );
                     },
@@ -326,11 +326,11 @@ Widget productCard({
                 : Container(
                     height: 120,
                     width: double.infinity,
-                    color: Colors.grey[300],
+                    color: AppColors.greyLight,
                     child: const Icon(
                       Icons.image,
                       size: 50,
-                      color: Colors.grey,
+                      color: AppColors.grey,
                     ),
                   ),
           ),

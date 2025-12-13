@@ -357,13 +357,13 @@ class _CartPageState extends State<CartPage> {
                                     padding: const EdgeInsets.all(8),
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.shade100,
+                                      color: AppColors.dangerShade100,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       'STOK HABIS',
                                       style: TextStyle(
-                                        color: Colors.red.shade700,
+                                        color: AppColors.dangerShade700,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
                                       ),
@@ -403,7 +403,8 @@ class _CartPageState extends State<CartPage> {
                                                     return Container(
                                                       width: 65,
                                                       height: 65,
-                                                      color: Colors.grey[300],
+                                                      color:
+                                                          AppColors.greyLight,
                                                       child: const Icon(
                                                         Icons.image,
                                                         size: 30,
@@ -414,7 +415,7 @@ class _CartPageState extends State<CartPage> {
                                           : Container(
                                               width: 65,
                                               height: 65,
-                                              color: Colors.grey[300],
+                                              color: AppColors.greyLight,
                                               child: const Icon(
                                                 Icons.image,
                                                 size: 30,
@@ -547,7 +548,8 @@ class _CartPageState extends State<CartPage> {
                                                               color:
                                                                   (isUpdating ||
                                                                       isOutOfStock)
-                                                                  ? Colors.grey
+                                                                  ? AppColors
+                                                                        .grey
                                                                   : AppColors
                                                                         .primary,
                                                             ),
@@ -584,7 +586,7 @@ class _CartPageState extends State<CartPage> {
                                                 icon: const Icon(
                                                   Icons.delete_outline,
                                                   size: 22,
-                                                  color: Colors.red,
+                                                  color: AppColors.danger,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                                 constraints:
@@ -820,11 +822,11 @@ Widget productCard({
                         return Container(
                           height: 120,
                           width: double.infinity,
-                          color: Colors.grey[300],
+                          color: AppColors.greyLight,
                           child: const Icon(
                             Icons.image,
                             size: 50,
-                            color: Colors.grey,
+                            color: AppColors.grey,
                           ),
                         );
                       },
@@ -832,11 +834,11 @@ Widget productCard({
                   : Container(
                       height: 120,
                       width: double.infinity,
-                      color: Colors.grey[300],
+                      color: AppColors.greyLight,
                       child: const Icon(
                         Icons.image,
                         size: 50,
-                        color: Colors.grey,
+                        color: AppColors.grey,
                       ),
                     );
             }(),

@@ -245,7 +245,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       return Container(
                                         width: 70,
                                         height: 70,
-                                        color: Colors.grey[300],
+                                        color: AppColors.greyLight,
                                         child: const Icon(
                                           Icons.image,
                                           size: 30,
@@ -256,7 +256,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 : Container(
                                     width: 70,
                                     height: 70,
-                                    color: Colors.grey[300],
+                                    color: AppColors.greyLight,
                                     child: const Icon(Icons.image, size: 30),
                                   );
                           }(),
@@ -515,7 +515,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : const Text(
@@ -523,7 +523,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                   ),

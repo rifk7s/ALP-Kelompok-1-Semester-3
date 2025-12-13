@@ -96,7 +96,11 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 60,
+                    color: AppColors.danger,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     _errorMessage!,

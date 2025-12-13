@@ -579,7 +579,11 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppColors.danger,
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Gagal memuat data',
@@ -751,7 +755,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                                     child: Text(
                                       '${index + 1}',
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -1116,9 +1120,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.price_change),
                     filled: true,
-                    fillColor: Color(0xFFF5F5F5),
+                    fillColor: AppColors.grey100,
                   ),
-                  style: const TextStyle(color: Colors.black54),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
 
                 const SizedBox(height: 14),
@@ -1133,10 +1137,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.numbers),
                     filled: true,
-                    fillColor: Color(0xFFF5F5F5),
+                    fillColor: AppColors.grey100,
                     hintText: 'Auto-calculated from contributions',
                   ),
-                  style: const TextStyle(color: Colors.black54),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -1177,7 +1181,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.white,
                         strokeWidth: 2,
                       ),
                     )

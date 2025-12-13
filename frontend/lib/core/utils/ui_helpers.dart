@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/theme.dart';
 
 /// Simple reusable pull-to-refresh wrapper.
 class PullToRefresh extends StatelessWidget {
@@ -144,11 +145,11 @@ class SnackBarHelper {
   }
 
   static void showError(BuildContext context, String message) {
-    show(context, message, backgroundColor: Colors.red);
+    show(context, message, backgroundColor: AppColors.danger);
   }
 
   static void showSuccess(BuildContext context, String message) {
-    show(context, message, backgroundColor: Colors.green);
+    show(context, message, backgroundColor: AppColors.success);
   }
 
   static void showInfo(BuildContext context, String message) {

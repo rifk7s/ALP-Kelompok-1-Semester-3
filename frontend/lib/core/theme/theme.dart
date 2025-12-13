@@ -52,6 +52,9 @@ class AppColors {
   // Semantic colors
   static const Color danger = Color(0xFFD81B1B); // Logout, delete, error
   static const Color dangerLight = Color(0xFFFFEBEE);
+  // Material red shades used in UI badges (moved from hardcoded Colors.red[...])
+  static const Color dangerShade100 = Color(0xFFFFCDD2);
+  static const Color dangerShade700 = Color(0xFFD32F2F);
   static const Color success = Color(0xFF4CAF50); // Green
   static const Color successLight = Color(0xFFE8F5E9);
   static const Color successDark = Color(0xFF43A047);

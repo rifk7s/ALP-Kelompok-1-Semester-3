@@ -224,7 +224,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profil berhasil diperbarui'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
           duration: Duration(seconds: 2),
         ),
       );
@@ -243,7 +243,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(content: Text(message), backgroundColor: AppColors.danger),
     );
   }
 }
