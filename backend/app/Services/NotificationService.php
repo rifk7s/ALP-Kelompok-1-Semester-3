@@ -28,26 +28,6 @@ class NotificationService
     }
 
     /**
-     * Create notification for payment proof upload (for BUMDes)
-     */
-    public static function notifyPaymentProofUploaded($order)
-    {
-        // Get all bumdes users
-        $bumdesUsers = User::where('role', 'bumdes')->get();
-        
-        foreach ($bumdesUsers as $user) {
-            Notification::create([
-                'user_id' => $user->id,
-                'title' => 'Bukti Pembayaran Diunggah',
-                'message' => "Pembeli telah mengunggah bukti pembayaran untuk pesanan #{$order->order_number}",
-                'type' => 'payment',
-                'related_id' => $order->id,
-                'is_read' => false,
-            ]);
-        }
-    }
-
-    /**
      * Create notification for order status change
      */
     public static function notifyOrderStatusChange($order, $oldStatus, $newStatus)

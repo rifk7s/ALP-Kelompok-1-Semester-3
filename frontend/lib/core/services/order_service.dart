@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
@@ -93,62 +92,6 @@ class OrderService {
         debugPrint('Error fetching orders: $e');
       }
       return [];
-    }
-  }
-
-  static Future<bool> uploadPaymentProof({
-    required int orderId,
-    required File imageFile,
-  }) async {
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) {
-        if (kDebugMode) {
-          debugPrint('No token found for payment proof upload');
-        }
-        return false;
-      }
-
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${ApiConfig.baseUrl}/orders/$orderId/payment-proof'),
-      );
-
-      request.headers['Authorization'] = 'Bearer $token';
-      request.headers['Accept'] = 'application/json';
-
-      request.files.add(
-        await http.MultipartFile.fromPath('proof_image', imageFile.path),
-      );
-
-      if (kDebugMode) {
-        debugPrint('Uploading payment proof for order $orderId');
-      }
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (kDebugMode) {
-        debugPrint(
-          'Payment proof upload response status: ${response.statusCode}',
-        );
-        debugPrint('Payment proof upload response body: ${response.body}');
-      }
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        if (kDebugMode) {
-          debugPrint(
-            'Failed to upload payment proof: ${response.statusCode} - ${response.body}',
-          );
-        }
-        return false;
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error uploading payment proof: $e');
-      }
-      return false;
     }
   }
 
