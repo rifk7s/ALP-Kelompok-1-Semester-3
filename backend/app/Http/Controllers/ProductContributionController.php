@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use App\Models\ProductContribution;
 use App\Http\Requests\Product\CreateProductContributionRequest;
 use App\Http\Requests\Product\UpdateProductContributionRequest; 
 
+#[Group('Products', 'Kontribusi stok produk dari petani', weight: 33)]
 class ProductContributionController extends Controller
 {
     /**

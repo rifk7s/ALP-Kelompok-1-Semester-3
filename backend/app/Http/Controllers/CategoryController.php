@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use App\Models\Category;
 use App\Http\Requests\Product\CreateCategoryRequest;
 use App\Http\Requests\Product\UpdateCategoryRequest;
 // use Illuminate\Http\Request;
 
+#[Group('Products', 'Manajemen kategori produk', weight: 31)]
 class CategoryController extends Controller
 {
     /**

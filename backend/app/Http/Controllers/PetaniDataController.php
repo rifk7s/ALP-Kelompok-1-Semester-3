@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use App\Models\PetaniData;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
+#[Group('Petani Data', 'Manajemen data petani (akses BUMDes)', weight: 80)]
 class PetaniDataController extends Controller
 {
     /**

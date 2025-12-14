@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 
+#[Group('Notifications', 'Notifikasi user', weight: 60)]
 class NotificationController extends Controller
 {
     /**
