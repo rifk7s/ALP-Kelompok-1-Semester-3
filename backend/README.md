@@ -1,99 +1,240 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Backend (Laravel)
 
-## Setup Instructions
+[⬅ Back to root README](../README.md) · [Frontend README ➜](../frontend/README.md)
 
-After cloning the repository, follow these steps to set up the backend:
+Laravel 12 backend API for the project. This backend uses **Firebase (Admin SDK)** and **Google Cloud Firestore**.
 
-1. Install dependencies:
-   ```bash
-   composer install
-   ```
+## Prerequisites
 
-2. Copy environment file:
-   ```bash
-   cp .env.example .env
-   ```
+- [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net/)
+- [![Composer](https://img.shields.io/badge/Composer-latest-885630?style=flat-square&logo=composer&logoColor=white)](https://getcomposer.org)
+- [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+- [![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+- [![Firebase](https://img.shields.io/badge/Firebase-Admin%20SDK-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/docs/admin/setup)
+- [![Firestore](https://img.shields.io/badge/Firestore-Google%20Cloud-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/firestore)
 
-3. Generate application key:
-   ```bash
-   php artisan key:generate
-   ```
+> [!IMPORTANT]
+> **PHP gRPC extension is required** for Firestore (`google/cloud-firestore`). See the **PHP gRPC extension** section below.
 
-4. Run migrations:
-   ```bash
-   php artisan migrate
-   ```
+## Setup (local development)
 
-5. Seed the database with initial data:
-   ```bash
-   php artisan db:seed --class=CategorySeeder
-   php artisan db:seed --class=HppPriceSeeder
-   ```
+From the repository root:
 
-6. Create storage symlink:
-   ```bash
-   php artisan storage:link
-   ```
+```bash
+cd backend
+```
 
-7. Start the development server:
-   ```bash
-   php artisan serve --host=0.0.0.0
-   ```
+### 1) Install dependencies
 
-## About Laravel
+```bash
+composer install
+npm install
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 2) Create `.env`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3) Configure database (SQLite recommended)
 
-## Learning Laravel
+Laravel defaults to SQLite when `DB_CONNECTION` is not set, but this repo’s `.env.example` ships with MySQL enabled.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Option A — SQLite (recommended for quick local setup)**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1) Update `.env`:
 
-## Laravel Sponsors
+```dotenv
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2) Create the SQLite file:
 
-### Premium Partners
+```bash
+touch database/database.sqlite
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Option B — MySQL**
 
-## Contributing
+Set your MySQL credentials in `.env` (keep `DB_CONNECTION=mysql`) and ensure the database exists.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4) Configure Firebase credentials
 
-## Code of Conduct
+This backend expects a Firebase **service account JSON** file and reads it using:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```dotenv
+FIREBASE_CREDENTIALS=storage/app/private/your-firebase-adminsdk.json
+FIREBASE_DB_URL=https://your-project-id-default-rtdb.firebasedatabase.app/
+FIREBASE_PROJECT_ID=your-project-id
+```
 
-## Security Vulnerabilities
+> [!IMPORTANT]
+> `FIREBASE_CREDENTIALS` is treated as a path **relative to the Laravel base path**.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Suggested local layout:
 
-## License
+```bash
+mkdir -p storage/app/private
+# put your JSON here (do NOT commit it)
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Windows (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Force storage/app/private | Out-Null
+# put your JSON here (do NOT commit it)
+```
+
+Windows (CMD):
+
+```bat
+mkdir storage\app\private
+REM put your JSON here (do NOT commit it)
+```
+
+### 5) Migrate
+
+```bash
+php artisan migrate
+```
+
+### 6) Seed (important order)
+
+Some seeders depend on other tables/data. Recommended order:
+
+```bash
+php artisan db:seed --class=CategorySeeder
+php artisan db:seed --class=HppPriceSeeder
+php artisan db:seed --class=PetaniDataSeeder
+php artisan db:seed --class=ProductSeeder
+php artisan db:seed --class=OrderSeeder
+```
+
+> [!NOTE]
+> `HppPriceSeeder` depends on categories (so it must run after `CategorySeeder`).
+
+> [!NOTE]
+> `OrderSeeder` requires products. If products are missing it will print: “No products found. Please seed products first.”
+
+### 7) Storage symlink
+
+```bash
+php artisan storage:link
+```
+
+### 8) Run the backend
+
+API server only:
+
+```bash
+php artisan serve
+```
+
+Run server + queue + logs + Vite (recommended for active development):
+
+```bash
+composer run dev
+```
+
+> [!TIP]
+> There is also a convenience script: `composer run setup` (installs deps, generates key, runs migrations, installs/builds Vite).
+
+## PHP gRPC extension (required for Firestore)
+
+Firestore uses gRPC under the hood via the PHP extension `grpc`.
+
+### Verify
+
+```bash
+php -m | grep -i grpc
+```
+
+If you don’t see `grpc`, install and enable it (steps vary per OS).
+
+### macOS
+
+Try PECL first:
+
+```bash
+pecl install grpc
+```
+
+If PECL cannot install a compatible binary, build from the PECL source tarball (common on macOS):
+
+> [!NOTE]
+> You may need Xcode Command Line Tools and common build tooling (e.g. `phpize`, `autoconf`, `make`).
+
+```bash
+pecl download grpc
+tar -xzf grpc-*.tgz
+cd grpc-*
+phpize
+./configure
+make
+make install
+```
+
+Enable it in the PHP config you’re using (CLI and/or FPM):
+
+```ini
+extension=grpc.so
+```
+
+> [!NOTE]
+> The exact `php.ini` location depends on your PHP installation (Homebrew PHP, MAMP, XAMPP, etc.).
+
+### Linux
+
+Install build tools + PECL, then install the extension:
+
+> [!TIP]
+> On Debian/Ubuntu you typically need: `php-dev`, `php-pear`, `gcc`, `make`, `autoconf`.
+
+```bash
+sudo pecl install grpc
+```
+
+Enable it in your `php.ini`:
+
+```ini
+extension=grpc.so
+```
+
+Restart your PHP service (e.g. `php-fpm`, Apache) if needed.
+
+### Windows
+
+1) Download the matching `php_grpc.dll` from `https://pecl.php.net/package/grpc`
+2) Put it into your PHP `ext` directory
+3) Enable it in `php.ini`:
+
+```ini
+extension=php_grpc.dll
+```
+
+> [!IMPORTANT]
+> Make sure the DLL matches your PHP version, architecture (x64), and thread-safety (TS/NTS).
+
+## Troubleshooting
+
+### Firestore errors mentioning gRPC
+
+If you get errors like “Class \Grpc\ChannelCredentials not found” or “grpc extension is required”, confirm the extension is enabled for the PHP you’re running:
+
+```bash
+php -v
+php --ini
+php -m | grep -i grpc
+```
+
+### Firebase credentials file not found
+
+If you see errors about missing credentials, verify:
+
+- `.env` points to the correct path in `FIREBASE_CREDENTIALS`
+- the JSON file exists at that path
+- the path is relative to the backend base path (project `backend/`)

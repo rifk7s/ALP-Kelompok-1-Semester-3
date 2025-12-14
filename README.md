@@ -1,6 +1,18 @@
 # ALP Kelompok 1 Semester 3 
 A full-stack mobile application built with Flutter (frontend) and Laravel (backend).
 
+## Docs
+
+- Backend setup: [backend/README.md](backend/README.md)
+- Frontend setup: [frontend/README.md](frontend/README.md)
+
+## Secrets / Ignored Files
+
+Some required config files are intentionally **not committed** (see `.gitignore`).
+
+- Backend Firebase service account JSON: follow [backend/README.md](backend/README.md)
+- Frontend Firebase files + env: follow [frontend/README.md](frontend/README.md)
+
 ## Prerequisites
 
 ### Backend
@@ -9,11 +21,15 @@ A full-stack mobile application built with Flutter (frontend) and Laravel (backe
 - [![Composer](https://img.shields.io/badge/Composer-latest-885630?style=flat-square&logo=composer&logoColor=white)](https://getcomposer.org)
 - [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 - [![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+- [![Firebase](https://img.shields.io/badge/Firebase-Admin%20SDK-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/docs/admin/setup)
+- [![Firestore](https://img.shields.io/badge/Firestore-Google%20Cloud-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/firestore)
+- ![gRPC](https://img.shields.io/badge/PHP%20ext-gRPC-required?style=flat-square)
 
 ### Frontend
 
 - [![Flutter](https://img.shields.io/badge/Flutter-3.9.2%2B-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 - [![Dart](https://img.shields.io/badge/Dart-3.9.2%2B-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
+- [![Firebase](https://img.shields.io/badge/Firebase-Core%20%2B%20Auth%20%2B%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
 
 ## Getting Started
 
@@ -51,14 +67,11 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Run database migrations to create the database schema:
+> [!IMPORTANT]
+> Firestore requires the PHP `grpc` extension, and Firebase requires a service-account JSON.
+> Follow the full backend guide: [backend/README.md](backend/README.md).
 
-```bash
-php artisan migrate
-```
-
-> [!NOTE]
-> The default database is SQLite. The database file will be automatically created in `database/database.sqlite`.
+Run migrations / seeders by following: [backend/README.md](backend/README.md).
 
 Return to the root directory:
 
@@ -82,6 +95,10 @@ Install Flutter dependencies:
 ```bash
 flutter pub get
 ```
+
+> [!IMPORTANT]
+> The frontend requires Firebase config + environment variables (they are intentionally gitignored).
+> Follow the full frontend guide: [frontend/README.md](frontend/README.md).
 
 Return to the root directory:
 
@@ -181,13 +198,24 @@ flutter build apk
 #### Database Connection Error
 
 > [!NOTE]
-> The default database is SQLite. If you encounter connection issues, ensure the database file exists.
+> This backend works with **SQLite** or **MySQL**. Pick whichever you prefer and configure it in `backend/.env`.
 
-**Solution:** Create the database file and run migrations
+**If using SQLite (common on macOS):**
 
 ```bash
 cd backend
 touch database/database.sqlite
+php artisan migrate
+```
+
+**If using MySQL (common on Windows):**
+
+- Ensure your `.env` has `DB_CONNECTION=mysql` and correct `DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/DB_PASSWORD`
+- Create the database in MySQL (name must match `DB_DATABASE`)
+- Then run:
+
+```bash
+cd backend
 php artisan migrate
 ```
 
@@ -204,23 +232,9 @@ chmod -R 775 storage bootstrap/cache
 
 #### Database Schema Conflicts
 
-**Problem:** Application fails to start due to column/table conflicts
+If your schema/migrations get out of sync, the safest project-specific guidance depends on whether you’re using SQLite or MySQL.
 
-**Solution:** Drop the existing database and restart the application
-
-**Steps:**
-1. Delete the database file
-2. Recreate the database schema with migrations
-
-```bash
-cd backend
-rm database/database.sqlite
-touch database/database.sqlite
-php artisan migrate
-```
-
-> [!CAUTION]
-> The database will be automatically recreated with the updated schema, but all previous data will be lost.
+Follow the backend docs for the recommended reset steps: [backend/README.md](backend/README.md).
 
 ### Frontend Issues
 
@@ -247,4 +261,28 @@ flutter doctor
 cd frontend
 flutter clean
 flutter pub get
+```
+
+#### Firebase Config Missing
+
+If you see errors related to Firebase initialization, confirm you have created/added:
+
+- `frontend/.env`
+- `frontend/android/app/google-services.json`
+- `frontend/ios/Runner/GoogleService-Info.plist`
+
+Setup details + required keys are in [frontend/README.md](frontend/README.md).
+
+#### Can't Connect To Backend API
+
+If the app times out calling the API, check the base URLs in [frontend/lib/core/services/api_config.dart](frontend/lib/core/services/api_config.dart).
+
+- Android emulator should use `http://10.0.2.2:8000/api`
+- iOS simulator / physical devices must use a reachable host IP
+
+Also ensure the backend is running with network binding:
+
+```bash
+cd backend
+php artisan serve --host=0.0.0.0 --port=8000
 ```
