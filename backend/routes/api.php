@@ -57,7 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /*
         Petani Data Routes (BUMDes only)
     */
-    Route::apiResource('petani-data', PetaniDataController::class);
+    Route::apiResource('petani-data', PetaniDataController::class)
+        ->parameters(['petani-data' => 'petaniData']);
     Route::patch('petani-data/{petaniData}/toggle-active', [PetaniDataController::class, 'toggleActive']);
 
     /*
