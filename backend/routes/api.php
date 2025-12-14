@@ -57,7 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /*
         Petani Data Routes (BUMDes only)
     */
-    Route::apiResource('petani-data', PetaniDataController::class);
+    Route::apiResource('petani-data', PetaniDataController::class)
+        ->parameters(['petani-data' => 'petaniData']);
     Route::patch('petani-data/{petaniData}/toggle-active', [PetaniDataController::class, 'toggleActive']);
 
     /*
@@ -99,9 +100,11 @@ Route::get('/bumdes', function () {
 */
 Route::apiResource('/products/product', ProductController::class);
 Route::apiResource('/products/categories', CategoryController::class);
-Route::apiResource('/products/product-images', ProductImageController::class);
+Route::apiResource('/products/product-images', ProductImageController::class)
+    ->parameters(['product-images' => 'productImage']);
 Route::apiResource('/products/contributions', ProductContributionController::class);
-Route::apiResource('/products/hpp-prices', HppPriceController::class);
+Route::apiResource('/products/hpp-prices', HppPriceController::class)
+    ->parameters(['hpp-prices' => 'hppPrice']);
 
 /*
     Admin Routes (BUMDes only)
@@ -117,4 +120,5 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 });
 
 // HPP Panel Routes for testing without auth
-Route::apiResource('/prices', HppPriceController::class);
+Route::apiResource('/prices', HppPriceController::class)
+    ->parameters(['prices' => 'hppPrice']);
