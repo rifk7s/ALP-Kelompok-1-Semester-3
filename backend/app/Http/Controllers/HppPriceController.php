@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use App\Models\HppPrice;
 use Illuminate\Validation\Rule;
 
+#[Group('HPP Prices', 'Harga HPP per kategori/varietas', weight: 35)]
 class HppPriceController extends Controller
 {
     /**

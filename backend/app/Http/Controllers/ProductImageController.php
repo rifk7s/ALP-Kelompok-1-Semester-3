@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 // use Illuminate\Http\Request;
 use App\Models\ProductImage;
 use App\Http\Requests\Product\ProductImageRequest;
 
+#[Group('Products', 'Manajemen gambar produk', weight: 32)]
 class ProductImageController extends Controller
 {
     /**

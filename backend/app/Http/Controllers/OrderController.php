@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -13,6 +14,7 @@ use App\Services\NotificationService;
 use App\Helpers\NotificationHelper;
 
 
+#[Group('Orders', 'Checkout dan manajemen pesanan pembeli', weight: 50)]
 class OrderController extends Controller
 {
     /**

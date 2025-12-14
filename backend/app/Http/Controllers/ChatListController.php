@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use Dedoc\Scramble\Attributes\Group;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+#[Group('Chat', 'Buat, lihat, dan hapus daftar chat', weight: 71)]
 class ChatListController extends Controller
 {
     public function getChatList()

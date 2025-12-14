@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use App\Http\Requests\Cart\CartRequest;
 use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
+#[Group('Cart', 'Keranjang belanja user', weight: 40)]
 class CartController extends Controller
 {
     /**

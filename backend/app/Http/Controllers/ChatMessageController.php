@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\NotificationService;
 
+#[Group('Chat', 'Kirim dan kelola pesan chat', weight: 70)]
 class ChatMessageController extends Controller
 {
     protected $db;

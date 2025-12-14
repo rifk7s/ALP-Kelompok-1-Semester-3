@@ -8,12 +8,17 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 // use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Dedoc\Scramble\Attributes\Group;
 use Kreait\Firebase\Auth as FirebaseAuth;
 use Kreait\Firebase\Factory;
 
+#[Group('Authentication', 'Registrasi, login, dan token akses', weight: 10)]
 class AuthController extends Controller
 {
     // REGISTER
+    /**
+     * @unauthenticated
+     */
     public function register(RegisterRequest $request)
     {
         $user = User::create([
@@ -33,6 +38,9 @@ class AuthController extends Controller
     }
 
     // LOGIN
+    /**
+     * @unauthenticated
+     */
     public function login(LoginRequest $request)
     {       
         $user = User::where('phone', $request->phone)->first();

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Services\NotificationService;
 
+#[Group('Admin', 'Operasi admin (BUMDes) untuk pesanan', weight: 90)]
 class AdminController extends Controller
 {
     /**

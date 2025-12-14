@@ -29,7 +29,32 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'Dokumentasi API Backend Panenki',
+        'description' => <<<'MD'
+    ## Panenki API
+
+    Interactive reference for the Panenki backend (OpenAPI 3.1). Use the sidebar to browse endpoints by domain.
+
+    ### Quick start
+    1. **Pick a server** from the **API Base URL** section above.
+    2. **Authenticate** (if required): `POST /api/auth/login` → copy `access_token`.
+    3. Call protected endpoints with:
+
+    `Authorization: Bearer <access_token>`
+
+    ### Requests & content types
+    - Most endpoints accept/return `application/json`.
+    - Some product endpoints use `multipart/form-data` (e.g., create/update with images).
+
+    ### Common responses
+    - `200/201` success
+    - `401` unauthenticated (missing/invalid token)
+    - `403` forbidden (role/permission)
+    - `404` not found
+    - `422` validation error
+
+    ### Version
+    Displayed version comes from `API_VERSION` (default `0.0.1`).
+    MD,
     ],
 
     /*

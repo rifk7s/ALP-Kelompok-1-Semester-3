@@ -9,7 +9,9 @@ use App\Models\ProductContribution;
 use App\Models\ProductImage;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
+use Dedoc\Scramble\Attributes\Group;
 
+#[Group('Products', 'Manajemen produk, kategori, gambar, dan kontribusi petani', weight: 30)]
 class ProductController extends Controller
 {
     /**
@@ -30,6 +32,8 @@ class ProductController extends Controller
 
     /**
      * Store a newly created resource in storage.
+        *
+        * @requestMediaType multipart/form-data
      */
     public function store(CreateProductRequest $request)
     {
@@ -113,6 +117,8 @@ class ProductController extends Controller
 
     /**
      * Update the specified resource in storage.
+        *
+        * @requestMediaType multipart/form-data
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
