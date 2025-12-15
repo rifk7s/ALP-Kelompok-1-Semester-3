@@ -16,19 +16,34 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get categories
-        $gabah = Category::where('slug', 'gabah')->first();
-        $buah = Category::where('slug', 'buah')->first();
-        $sayur = Category::where('slug', 'sayur')->first();
-        $padi = Category::where('slug', 'padi')->first();
-        $cabe = Category::where('slug', 'cabe')->first();
+        // Get or create categories
+        $gabah = Category::firstOrCreate(['slug' => 'gabah'], ['name' => 'Gabah', 'icon' => '🌾']);
+        $buah = Category::firstOrCreate(['slug' => 'buah'], ['name' => 'Buah', 'icon' => '🍎']);
+        $sayur = Category::firstOrCreate(['slug' => 'sayur'], ['name' => 'Sayur', 'icon' => '🥬']);
+        $padi = Category::firstOrCreate(['slug' => 'padi'], ['name' => 'Padi', 'icon' => '🌾']);
+        $cabe = Category::firstOrCreate(['slug' => 'cabe'], ['name' => 'Cabe', 'icon' => '🌶️']);
 
-        // Get petani
-        $pakJono = PetaniData::where('name', 'Pak Jono')->first();
-        $buRani = PetaniData::where('name', 'Bu Rani')->first();
-        $pakBudi = PetaniData::where('name', 'Pak Budi')->first();
-        $buSiti = PetaniData::where('name', 'Bu Siti')->first();
-        $pakAhmad = PetaniData::where('name', 'Pak Ahmad')->first();
+        // Get or create petani
+        $pakJono = PetaniData::firstOrCreate(
+            ['name' => 'Pak Jono'],
+            ['phone' => '081234567890', 'address' => 'Desa Sumber Makmur, Jawa Timur', 'is_active' => true]
+        );
+        $buRani = PetaniData::firstOrCreate(
+            ['name' => 'Bu Rani'],
+            ['phone' => '081234567891', 'address' => 'Desa Tani Sejahtera, Jawa Tengah', 'is_active' => true]
+        );
+        $pakBudi = PetaniData::firstOrCreate(
+            ['name' => 'Pak Budi'],
+            ['phone' => '081234567892', 'address' => 'Desa Maju Bersama, Jawa Barat', 'is_active' => true]
+        );
+        $buSiti = PetaniData::firstOrCreate(
+            ['name' => 'Bu Siti'],
+            ['phone' => '081234567893', 'address' => 'Desa Subur Makmur, Jawa Timur', 'is_active' => true]
+        );
+        $pakAhmad = PetaniData::firstOrCreate(
+            ['name' => 'Pak Ahmad'],
+            ['phone' => '081234567894', 'address' => 'Desa Sukamaju, Jawa Tengah', 'is_active' => true]
+        );
 
         // Products with stock
         $products = [

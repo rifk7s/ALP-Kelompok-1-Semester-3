@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_screen.dart';
 import 'edit_screen.dart';
+import 'detail_screen.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -73,6 +74,20 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
     );
 
     // If result is true, reload the list
+    if (result == true) {
+      _loadPetaniData();
+    }
+  }
+
+  Future<void> _navigateToDetailScreen(PetaniData petani) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PetaniDetailScreen(petaniId: petani.id),
+      ),
+    );
+
+    // If result is true (deleted), reload the list
     if (result == true) {
       _loadPetaniData();
     }
@@ -211,7 +226,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                     final hp = petani.phone ?? '-';
 
                     return GestureDetector(
-                      onTap: () => _navigateToEditScreen(petani),
+                      onTap: () => _navigateToDetailScreen(petani),
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.white,
@@ -224,110 +239,58 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                             ),
                           ],
                         ),
-                        child: Stack(
-                          children: [
-                            // Main content - Centered
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.warningAccent
-                                            .withValues(alpha: 0.85),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        nama.isNotEmpty
-                                            ? nama[0].toUpperCase()
-                                            : 'P',
-                                        style: const TextStyle(
-                                          fontSize: 26,
-                                          color: AppColors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 14),
-
-                                    Text(
-                                      nama,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 6),
-
-                                    Text(
-                                      hp,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: AppColors.warningAccent
+                                      .withValues(alpha: 0.85),
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  nama.isNotEmpty
+                                      ? nama[0].toUpperCase()
+                                      : 'P',
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            // Action buttons
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () => _navigateToEditScreen(petani),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.info.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.edit,
-                                        size: 18,
-                                        color: AppColors.info,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  InkWell(
-                                    onTap: () => _deletePetani(petani),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.danger.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.delete_outline,
-                                        size: 18,
-                                        color: AppColors.danger,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 14),
+
+                              Text(
+                                nama,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+
+                              const SizedBox(height: 6),
+
+                              Text(
+                                hp,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );

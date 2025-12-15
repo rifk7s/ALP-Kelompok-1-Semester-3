@@ -202,4 +202,51 @@ class OrderService {
       return false;
     }
   }
+
+  /// Cancel order (only for pending_payment or paid status)
+  static Future<bool> cancelOrder(int orderId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        if (kDebugMode) {
+          debugPrint('No token found for cancelling order');
+        }
+        return false;
+      }
+
+      final url = '${ApiConfig.baseUrl}/orders/$orderId/cancel';
+      if (kDebugMode) {
+        debugPrint('Attempting to cancel order at: $url');
+      }
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (kDebugMode) {
+        debugPrint('Cancel order response status: ${response.statusCode}');
+        debugPrint('Cancel order response body: ${response.body}');
+      }
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            'Failed to cancel order: ${response.statusCode} - ${response.body}',
+          );
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error cancelling order: $e');
+      }
+      return false;
+    }
+  }
 }

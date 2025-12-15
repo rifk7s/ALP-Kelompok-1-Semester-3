@@ -162,4 +162,35 @@ class PetaniService {
 
     throw Exception('Gagal menghapus petani: ${resp.statusCode}');
   }
+
+  Future<Map<String, dynamic>> fetchPetaniDetail({
+    required int petaniId,
+    required String token,
+  }) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data/$petaniId');
+    final headers = ApiConfig.headers(token: token);
+
+    final resp = await client
+        .get(uri, headers: headers)
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('Request timeout - server tidak merespons');
+          },
+        );
+
+    if (resp.statusCode == 200) {
+      final jsonBody = json.decode(resp.body);
+      if (jsonBody is Map && jsonBody.containsKey('data')) {
+        return jsonBody['data'] as Map<String, dynamic>;
+      }
+      throw Exception('Invalid response format');
+    } else if (resp.statusCode == 401) {
+      throw Exception('Token expired atau tidak valid');
+    } else if (resp.statusCode == 403) {
+      throw Exception('Anda tidak memiliki akses (hanya BumDes)');
+    }
+
+    throw Exception('Gagal memuat detail petani: ${resp.statusCode}');
+  }
 }

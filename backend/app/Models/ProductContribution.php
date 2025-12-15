@@ -24,12 +24,12 @@ class ProductContribution extends Model
         'petani_id'     
     ];
 
-    public function product(): Belongsto
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function petani(): Belongsto
+    public function petani(): BelongsTo
     {
         return $this->belongsTo(PetaniData::class, 'petani_id');
     }

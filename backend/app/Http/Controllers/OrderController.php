@@ -202,7 +202,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Cancel order (only if pending_payment)
+     * Cancel order (pending_payment or paid)
      */
     public function cancel(Request $request, Order $order)
     {
@@ -212,18 +212,78 @@ class OrderController extends Controller
             ], 403);
         }
 
-        if ($order->status !== 'pending_payment') {
+        // Can only cancel if pending_payment or paid
+        if (!in_array($order->status, ['pending_payment', 'paid'])) {
             return response()->json([
                 'message' => 'Cannot cancel order with status: ' . $order->status,
             ], 400);
         }
 
-        $order->update(['status' => 'cancelled']);
+        DB::beginTransaction();
+        
+        try {
+            // If order was paid, need to restore stock
+            if ($order->status === 'paid') {
+                $orderItems = $order->orderItems;
+                
+                foreach ($orderItems as $item) {
+                    $product = $item->product;
+                    
+                    // Restore stock and decrease sold_kg
+                    $newStock = $product->stock_kg + $item->quantity_kg;
+                    $newSold = $product->sold_kg - $item->quantity_kg;
+                    
+                    $product->update([
+                        'stock_kg' => $newStock,
+                        'sold_kg' => max(0, $newSold),
+                        'status' => $newStock > 0 ? 'active' : 'sold_out',
+                    ]);
+                    
+                    // Restore remaining_kg in product_contributions (reverse FIFO - restore to oldest first)
+                    $remainingToRestore = $item->quantity_kg;
+                    
+                    $contributions = ProductContribution::where('product_id', $product->id)
+                        ->orderBy('entry_date', 'asc')
+                        ->get();
+                    
+                    foreach ($contributions as $contribution) {
+                        if ($remainingToRestore <= 0) {
+                            break;
+                        }
+                        
+                        $restoreAmount = min($remainingToRestore, $contribution->contributed_kg - $contribution->remaining_kg);
+                        
+                        $contribution->update([
+                            'remaining_kg' => $contribution->remaining_kg + $restoreAmount,
+                        ]);
+                        
+                        $remainingToRestore -= $restoreAmount;
+                    }
+                }
+            }
 
-        return response()->json([
-            'message' => 'Order cancelled successfully',
-            'order' => $order,
-        ]);
+            // Delete order items
+            $order->orderItems()->delete();
+            
+            // Delete payment records
+            $order->payments()->delete();
+            
+            // Delete the order
+            $order->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Order cancelled successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'message' => 'Failed to cancel order',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

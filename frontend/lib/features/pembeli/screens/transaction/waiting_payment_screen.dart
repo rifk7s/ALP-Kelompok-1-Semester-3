@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'payment_confirmed_screen.dart';
 import 'payment_rejected_screen.dart';
@@ -232,9 +233,21 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.surfaceAlt,
-        appBar: AppBar(
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          
+          // Clear cart and go back to home
+          await CartService.clearCart();
+          
+          if (mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.surfaceAlt,
+          appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 1,
           centerTitle: true,
@@ -248,12 +261,25 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
           ),
         ),
         body: const Center(child: CircularProgressIndicator()),
+      ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        
+        // Clear cart and go back to home
+        await CartService.clearCart();
+        
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.surfaceAlt,
+        appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 1,
         centerTitle: true,
@@ -490,6 +516,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
           ],
         ),
       ),
+    ),
     );
   }
 

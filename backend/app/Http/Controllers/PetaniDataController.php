@@ -64,6 +64,9 @@ class PetaniDataController extends Controller
             return response()->json(['message' => 'Unauthorized. Only BUMDes can access this.'], 403);
         }
 
+        // Load product contributions with product details
+        $petaniData->load(['productContributions.product']);
+
         return response()->json([
             'message' => 'Petani data retrieved successfully',
             'data' => $petaniData
@@ -105,6 +108,32 @@ class PetaniDataController extends Controller
             return response()->json(['message' => 'Unauthorized. Only BUMDes can delete petani data.'], 403);
         }
 
+        // Get all product contributions from this petani
+        $productContributions = $petaniData->productContributions;
+        
+        // Track which products to delete
+        $productsToDelete = [];
+        
+        foreach ($productContributions as $contribution) {
+            $productId = $contribution->product_id;
+            
+            // Count how many different petani contributed to this product
+            $contributorCount = \App\Models\ProductContribution::where('product_id', $productId)
+                ->distinct('petani_id')
+                ->count('petani_id');
+            
+            // If only 1 petani (the one being deleted), mark product for deletion
+            if ($contributorCount === 1) {
+                $productsToDelete[] = $productId;
+            }
+        }
+        
+        // Delete products that only have this petani as contributor
+        if (!empty($productsToDelete)) {
+            \App\Models\Product::whereIn('id', $productsToDelete)->delete();
+        }
+        
+        // Delete the petani (cascade will delete the contributions)
         $petaniData->delete();
 
         return response()->json([
