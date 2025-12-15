@@ -75,7 +75,9 @@ class ReceiptPage extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    isRejected ? Icons.cancel_rounded : Icons.receipt_long_rounded,
+                    isRejected
+                        ? Icons.cancel_rounded
+                        : Icons.receipt_long_rounded,
                     size: 50,
                     color: isRejected ? AppColors.danger : AppColors.primary,
                   ),
@@ -88,7 +90,9 @@ class ReceiptPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w800,
-                    color: isRejected ? AppColors.danger : AppColors.textPrimary,
+                    color: isRejected
+                        ? AppColors.danger
+                        : AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),

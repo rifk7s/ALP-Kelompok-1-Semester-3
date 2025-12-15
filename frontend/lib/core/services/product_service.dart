@@ -28,6 +28,26 @@ class ProductService {
     }
   }
 
+  // Fetch a single product by ID
+  static Future<Map<String, dynamic>?> getProductById(int productId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/products/product/$productId'),
+        headers: ApiConfig.headers(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        throw Exception('Failed to load product');
+      }
+    } catch (e) {
+      throw Exception('Error fetching product: $e');
+    }
+  }
+
   // Create a new product with contributions
   static Future<Map<String, dynamic>> createProduct({
     required String name,
