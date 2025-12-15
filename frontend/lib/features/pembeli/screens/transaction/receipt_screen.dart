@@ -5,8 +5,14 @@ import 'package:frontend/core/theme/theme.dart';
 class ReceiptPage extends StatelessWidget {
   final int total;
   final String orderId;
+  final String orderStatus;
 
-  const ReceiptPage({super.key, required this.total, required this.orderId});
+  const ReceiptPage({
+    super.key,
+    required this.total,
+    required this.orderId,
+    required this.orderStatus,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +24,15 @@ class ReceiptPage extends StatelessWidget {
       );
       return f.format(number);
     }
+
+    final isRejected = orderStatus == 'rejected';
+    final headline = isRejected ? 'Pembayaran Ditolak' : 'Pembayaran Berhasil';
+    final badgeText = isRejected ? 'Ditolak' : 'Berhasil';
+    final badgeBg = isRejected ? AppColors.dangerLight : AppColors.successLight;
+    final badgeFg = isRejected ? AppColors.danger : AppColors.success;
+    final message = isRejected
+        ? 'Bukti pembayaran Anda ditolak. Silakan hubungi BUMDes atau coba metode pembayaran lain.'
+        : 'Terima kasih telah melakukan pembayaran!';
 
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
@@ -59,18 +74,22 @@ class ReceiptPage extends StatelessWidget {
                     color: AppColors.primaryLight,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.receipt_long_rounded,
+                  child: Icon(
+                    isRejected ? Icons.cancel_rounded : Icons.receipt_long_rounded,
                     size: 50,
-                    color: AppColors.primary,
+                    color: isRejected ? AppColors.danger : AppColors.primary,
                   ),
                 ),
 
                 const SizedBox(height: 18),
 
-                const Text(
-                  "Pembayaran Berhasil",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+                Text(
+                  headline,
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: isRejected ? AppColors.danger : AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 6),
 
@@ -112,13 +131,13 @@ class ReceiptPage extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.successLight,
+                        color: badgeBg,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        "Berhasil",
+                      child: Text(
+                        badgeText,
                         style: TextStyle(
-                          color: AppColors.success,
+                          color: badgeFg,
                           fontWeight: FontWeight.bold,
                           fontSize: 13.5,
                         ),
@@ -130,7 +149,7 @@ class ReceiptPage extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 Text(
-                  "Terima kasih telah melakukan pembayaran!",
+                  message,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.grey600, fontSize: 13.5),
                 ),
