@@ -40,10 +40,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Future<void> _loadProductData() async {
     setState(() => _isLoadingProduct = true);
-    
+
     try {
-      final freshProduct = await ProductService.getProductById(widget.product['id']);
-      
+      final freshProduct = await ProductService.getProductById(
+        widget.product['id'],
+      );
+
       if (freshProduct != null && mounted) {
         setState(() {
           _currentProduct = freshProduct;
@@ -103,9 +105,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (_isLoadingProduct) {
       return Scaffold(
         backgroundColor: AppColors.surface,
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -461,7 +461,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             // Check stock before opening dialog
             final qtyInCart = await _getQuantityInCart();
             final available = stockKg - qtyInCart;
-            
+
             if (available <= 0) {
               if (mounted) {
                 SnackBarHelper.showError(
@@ -473,7 +473,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               }
               return;
             }
-            
+
             _openQtyDialog();
           },
           style: ElevatedButton.styleFrom(
@@ -533,8 +533,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         // Get image from product_images like main detail page
                         final imagePath =
                             product['product_images'] != null &&
-                                (product['product_images'] as List)
-                                    .isNotEmpty
+                                (product['product_images'] as List).isNotEmpty
                             ? product['product_images'][0]['image_path']
                             : null;
                         final imageUrl = ApiConfig.getImageUrl(imagePath);
@@ -590,7 +589,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           onTap: () async {
                             final qtyInCart = await _getQuantityInCart();
                             final available = stockKg - qtyInCart;
-                            
+
+                            if (!context.mounted) return;
+
                             _showQtyInputDialog(context, tempQty, (newQty) {
                               if (newQty <= available) {
                                 setStateDialog(() => tempQty = newQty);
@@ -660,6 +661,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           final qtyInCart = await _getQuantityInCart();
                           final available = stockKg - qtyInCart;
 
+                          if (!context.mounted) return;
+
                           if (tempQty < available) {
                             setStateDialog(() => tempQty++);
                           } else {
@@ -719,50 +722,54 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
+                              final navigator = Navigator.of(context);
+
                               // Fetch fresh stock from database
-                              final freshProduct = await ProductService.getProductById(product['id']);
-                              
+                              final freshProduct =
+                                  await ProductService.getProductById(
+                                    product['id'],
+                                  );
+
                               if (freshProduct == null) {
-                                if (mounted) {
-                                  SnackBarHelper.showError(
-                                    context,
-                                    'Produk tidak ditemukan',
-                                  );
-                                }
-                                return;
-                              }
-                              
-                              final dbStockKg = double.tryParse(
-                                freshProduct['stock_kg']?.toString() ?? '0',
-                              ) ?? 0;
-                              
-                              // Validate stock including cart quantity
-                              final qtyInCart = await _getQuantityInCart();
-                              final available = dbStockKg - qtyInCart;
-                              
-                              if (dbStockKg <= 0) {
-                                if (mounted) {
-                                  SnackBarHelper.showError(
-                                    context,
-                                    'Produk stok habis',
-                                  );
-                                }
-                                return;
-                              }
-                              
-                              if (tempQty > available) {
-                                if (mounted) {
-                                  SnackBarHelper.showError(
-                                    context,
-                                    qtyInCart > 0
-                                        ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Stok tersisa ${available.toInt()} kg'
-                                        : 'Jumlah melebihi stok tersedia (${dbStockKg.toInt()} kg)',
-                                  );
-                                }
+                                if (!context.mounted) return;
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Produk tidak ditemukan',
+                                );
                                 return;
                               }
 
-                              Navigator.pop(context);
+                              final dbStockKg =
+                                  double.tryParse(
+                                    freshProduct['stock_kg']?.toString() ?? '0',
+                                  ) ??
+                                  0;
+
+                              // Validate stock including cart quantity
+                              final qtyInCart = await _getQuantityInCart();
+                              final available = dbStockKg - qtyInCart;
+
+                              if (dbStockKg <= 0) {
+                                if (!context.mounted) return;
+                                SnackBarHelper.showError(
+                                  context,
+                                  'Produk stok habis',
+                                );
+                                return;
+                              }
+
+                              if (tempQty > available) {
+                                if (!context.mounted) return;
+                                SnackBarHelper.showError(
+                                  context,
+                                  qtyInCart > 0
+                                      ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Stok tersisa ${available.toInt()} kg'
+                                      : 'Jumlah melebihi stok tersedia (${dbStockKg.toInt()} kg)',
+                                );
+                                return;
+                              }
+
+                              navigator.pop();
 
                               // Add to cart via backend
                               final success = await CartService.addToCart(

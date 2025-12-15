@@ -739,60 +739,70 @@ class _CartPageState extends State<CartPage> {
 
                               try {
                                 // Get current stock from database
-                                final freshProduct = await ProductService.getProductById(productId);
-                                
+                                final freshProduct =
+                                    await ProductService.getProductById(
+                                      productId,
+                                    );
+
                                 if (freshProduct == null) {
                                   stockValid = false;
-                                  errorMsg = 'Produk "${product['name']}" tidak ditemukan';
+                                  errorMsg =
+                                      'Produk "${product['name']}" tidak ditemukan';
                                   break;
                                 }
 
-                                final dbStockKg = double.tryParse(
-                                  freshProduct['stock_kg']?.toString() ?? '0',
-                                ) ?? 0;
+                                final dbStockKg =
+                                    double.tryParse(
+                                      freshProduct['stock_kg']?.toString() ??
+                                          '0',
+                                    ) ??
+                                    0;
 
                                 if (dbStockKg <= 0) {
                                   stockValid = false;
-                                  errorMsg = 'Produk "${product['name']}" stok habis. Silakan hapus dari keranjang.';
+                                  errorMsg =
+                                      'Produk "${product['name']}" stok habis. Silakan hapus dari keranjang.';
                                   break;
                                 }
 
                                 if (cartQty > dbStockKg) {
                                   stockValid = false;
-                                  errorMsg = 'Jumlah "${product['name']}" (${cartQty.toStringAsFixed(0)} kg) melebihi stok tersedia (${dbStockKg.toStringAsFixed(0)} kg). Silakan kurangi jumlah.';
+                                  errorMsg =
+                                      'Jumlah "${product['name']}" (${cartQty.toStringAsFixed(0)} kg) melebihi stok tersedia (${dbStockKg.toStringAsFixed(0)} kg). Silakan kurangi jumlah.';
                                   break;
                                 }
                               } catch (e) {
                                 stockValid = false;
-                                errorMsg = 'Gagal memeriksa stok "${product['name']}". Coba lagi.';
+                                errorMsg =
+                                    'Gagal memeriksa stok "${product['name']}". Coba lagi.';
                                 break;
                               }
                             }
 
                             // Close loading indicator
-                            if (mounted) Navigator.pop(context);
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
 
                             if (!stockValid) {
-                              if (mounted) {
-                                SnackBarHelper.showError(context, errorMsg ?? 'Validasi stok gagal');
-                                // Reload cart to get fresh data
-                                _loadCart(showSpinner: false);
-                              }
+                              SnackBarHelper.showError(
+                                context,
+                                errorMsg ?? 'Validasi stok gagal',
+                              );
+                              // Reload cart to get fresh data
+                              _loadCart(showSpinner: false);
                               return;
                             }
 
                             // Stock validated, proceed to checkout
-                            if (mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => CheckoutPage(
-                                    cart: selectedCart,
-                                    total: totalPrice,
-                                  ),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CheckoutPage(
+                                  cart: selectedCart,
+                                  total: totalPrice,
                                 ),
-                              );
-                            }
+                              ),
+                            );
                           },
                     child: const Text(
                       "Buat Pesanan",

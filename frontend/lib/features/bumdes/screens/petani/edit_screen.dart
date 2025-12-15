@@ -245,7 +245,7 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                       onChanged: (value) {
                         setState(() => _isActive = value);
                       },
-                      activeColor: AppColors.primary,
+                      activeThumbColor: AppColors.primary,
                     ),
                   ],
                 ),
