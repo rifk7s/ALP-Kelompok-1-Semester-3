@@ -7,6 +7,7 @@ import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
@@ -1126,6 +1127,71 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 return sum + (qty * price).toInt();
               });
 
+              // Show loading dialog while checking stock
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+
+              // Check stock availability for all products before proceeding
+              bool stockValid = true;
+              String? errorMsg;
+
+              for (final item in cartItems) {
+                final productId = (item['id'] as int?) ?? 0;
+                final qty = double.tryParse(item['quantity_kg'].toString()) ?? 0;
+
+                if (productId <= 0 || qty <= 0) {
+                  stockValid = false;
+                  errorMsg = 'Data produk tidak valid untuk beli lagi.';
+                  break;
+                }
+
+                try {
+                  // Fetch fresh product data from database
+                  final freshProduct = await ProductService.getProductById(productId);
+                  
+                  if (freshProduct == null) {
+                    stockValid = false;
+                    errorMsg = 'Produk "${item['product']['name']}" tidak ditemukan';
+                    break;
+                  }
+
+                  final dbStockKg = double.tryParse(
+                    freshProduct['stock_kg']?.toString() ?? '0',
+                  ) ?? 0;
+
+                  if (dbStockKg <= 0) {
+                    stockValid = false;
+                    errorMsg = 'Produk "${item['product']['name']}" stok habis';
+                    break;
+                  }
+
+                  if (qty > dbStockKg) {
+                    stockValid = false;
+                    errorMsg = 'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
+                    break;
+                  }
+                } catch (e) {
+                  stockValid = false;
+                  errorMsg = 'Gagal memeriksa stok "${item['product']['name']}"';
+                  break;
+                }
+              }
+
+              // Close loading dialog
+              if (mounted) Navigator.pop(context);
+
+              if (!stockValid) {
+                if (mounted) {
+                  SnackBarHelper.showError(context, errorMsg ?? 'Validasi stok gagal');
+                }
+                return;
+              }
+
               // Checkout endpoint builds orders from server-side cart.
               // "Beli Lagi" must repopulate cart first.
               final cleared = await CartService.clearCart();
@@ -1142,15 +1208,6 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 final productId = (item['id'] as int?) ?? 0;
                 final qty =
                     double.tryParse(item['quantity_kg'].toString()) ?? 0;
-
-                if (productId <= 0 || qty <= 0) {
-                  if (!mounted) return;
-                  SnackBarHelper.showError(
-                    context,
-                    'Data produk tidak valid untuk beli lagi.',
-                  );
-                  return;
-                }
 
                 final ok = await CartService.addToCart(
                   productId: productId,

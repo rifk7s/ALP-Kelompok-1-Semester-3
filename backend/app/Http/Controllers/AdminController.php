@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Order;
+use App\Models\ProductContribution;
 use App\Services\NotificationService;
 
 #[Group('Admin', 'Operasi admin (BUMDes) untuk pesanan', weight: 90)]
@@ -76,28 +78,81 @@ class AdminController extends Controller
             ], 400);
         }
 
-        $order->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-        ]);
+        DB::beginTransaction();
+        
+        try {
+            // Update product stock and sold_kg for each order item
+            $orderItems = $order->orderItems;
+            
+            foreach ($orderItems as $item) {
+                $product = $item->product;
+                
+                // Reduce stock and increase sold_kg
+                $newStock = $product->stock_kg - $item->quantity_kg;
+                $newSold = $product->sold_kg + $item->quantity_kg;
+                
+                $product->update([
+                    'stock_kg' => max(0, $newStock), // Ensure stock doesn't go negative
+                    'sold_kg' => $newSold,
+                    'status' => $newStock <= 0 ? 'sold_out' : $product->status,
+                ]);
+                
+                // Also decrease remaining_kg in product_contributions
+                $remainingToDeduct = $item->quantity_kg;
+                
+                // Get contributions for this product ordered by entry_date (FIFO)
+                $contributions = ProductContribution::where('product_id', $product->id)
+                    ->where('remaining_kg', '>', 0)
+                    ->orderBy('entry_date', 'asc')
+                    ->get();
+                
+                foreach ($contributions as $contribution) {
+                    if ($remainingToDeduct <= 0) {
+                        break;
+                    }
+                    
+                    $deductAmount = min($remainingToDeduct, $contribution->remaining_kg);
+                    
+                    $contribution->update([
+                        'remaining_kg' => $contribution->remaining_kg - $deductAmount,
+                    ]);
+                    
+                    $remainingToDeduct -= $deductAmount;
+                }
+            }
 
-        // Update payment status to verified
-        $payment = $order->payments;
-        if ($payment) {
-            $payment->update([
-                'status' => 'verified',
+            $order->update([
+                'status' => 'paid',
+                'paid_at' => now(),
             ]);
+
+            // Update payment status to verified
+            $payment = $order->payments;
+            if ($payment) {
+                $payment->update([
+                    'status' => 'verified',
+                ]);
+            }
+
+            DB::commit();
+
+            // Notify buyer about payment confirmation
+            NotificationService::notifyOrderStatusChange($order, 'pending_payment', 'paid');
+
+            $order->load(['buyer', 'orderItems.product.productImages', 'payments']);
+
+            return response()->json([
+                'message' => 'Order payment confirmed successfully',
+                'order' => $order,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'message' => 'Failed to confirm payment',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Notify buyer about payment confirmation
-        NotificationService::notifyOrderStatusChange($order, 'pending_payment', 'paid');
-
-        $order->load(['buyer', 'orderItems.product.productImages', 'payments']);
-
-        return response()->json([
-            'message' => 'Order payment confirmed successfully',
-            'order' => $order,
-        ]);
     }
 
     /**
