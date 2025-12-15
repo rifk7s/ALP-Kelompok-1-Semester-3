@@ -51,7 +51,11 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
           context,
           MaterialPageRoute(
             builder: (_) =>
-                ReceiptPage(total: widget.total, orderId: widget.orderId),
+                ReceiptPage(
+                  total: widget.total,
+                  orderId: widget.orderId,
+                  orderStatus: 'paid',
+                ),
           ),
         );
       }

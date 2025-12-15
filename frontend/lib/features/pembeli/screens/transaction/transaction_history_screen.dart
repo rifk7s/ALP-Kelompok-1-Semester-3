@@ -1287,11 +1287,16 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   title: const Text('Lihat Struk/Invoice'),
                   onTap: () {
                     Navigator.pop(context);
+                    final status = order['status']?.toString() ?? '';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            ReceiptPage(orderId: orderIdStr, total: totalInt),
+                            ReceiptPage(
+                              orderId: orderIdStr,
+                              total: totalInt,
+                              orderStatus: status,
+                            ),
                       ),
                     );
                   },
