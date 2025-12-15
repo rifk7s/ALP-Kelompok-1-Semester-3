@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:intl/intl.dart';
 import 'edit_screen.dart';
+import '../product_detail_screen.dart';
 
 class PetaniDetailScreen extends StatefulWidget {
   final int petaniId;
@@ -143,6 +145,51 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
           backgroundColor: AppColors.danger,
         ),
       );
+    }
+  }
+
+  void _navigateToProductDetail(Map<String, dynamic> product) async {
+    final productId = product['id'];
+    if (productId == null) return;
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Fetch full product data with all relationships
+      final fullProduct = await ProductService.getProductById(productId);
+      
+      // Hide loading
+      if (mounted) Navigator.pop(context);
+
+      if (fullProduct != null && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailPage(
+              product: fullProduct,
+              onUpdate: (updatedProduct) {
+                // Reload petani detail to get updated product info
+                _loadPetaniDetail();
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hide loading
+      if (mounted) Navigator.pop(context);
+      
+      // Show error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading product: $e')),
+        );
+      }
     }
   }
 
@@ -429,7 +476,9 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     final remainingKg = double.tryParse(contribution['remaining_kg']?.toString() ?? '0') ?? 0.0;
     final entryDate = contribution['entry_date'] ?? '-';
 
-    return Container(
+    return GestureDetector(
+      onTap: product != null ? () => _navigateToProductDetail(product) : null,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -495,6 +544,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
             ],
           ),
         ],
+      ),
       ),
     );
   }

@@ -213,31 +213,6 @@ class AdminController extends Controller
         ]);
     }
 
-    /**
-     * Mark order as completed
-     */
-    public function markCompleted(Request $request, Order $order)
-    {
-        if ($request->user()->role !== 'bumdes') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        if ($order->status !== 'shipped') {
-            return response()->json(['message' => 'Order must be shipped first'], 400);
-        }
-
-        $order->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
-
-        $order->load(['buyer', 'orderItems.product.productImages']);
-
-        return response()->json([
-            'message' => 'Order marked as completed',
-            'order' => $order,
-        ]);
-    }
 
     /**
      * Reject order payment

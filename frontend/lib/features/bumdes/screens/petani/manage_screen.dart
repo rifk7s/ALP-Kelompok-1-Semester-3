@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'add_screen.dart';
-import 'edit_screen.dart';
 import 'detail_screen.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
@@ -67,18 +66,6 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
     }
   }
 
-  Future<void> _navigateToEditScreen(PetaniData petani) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => EditPetaniScreen(petani: petani)),
-    );
-
-    // If result is true, reload the list
-    if (result == true) {
-      _loadPetaniData();
-    }
-  }
-
   Future<void> _navigateToDetailScreen(PetaniData petani) async {
     final result = await Navigator.push(
       context,
@@ -90,60 +77,6 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
     // If result is true (deleted), reload the list
     if (result == true) {
       _loadPetaniData();
-    }
-  }
-
-  Future<void> _deletePetani(PetaniData petani) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Data Petani'),
-        content: Text(
-          'Apakah Anda yakin ingin menghapus data petani "${petani.name}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
-      }
-
-      await _petaniService.deletePetani(id: petani.id, token: token);
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data petani berhasil dihapus'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-
-      _loadPetaniData();
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: AppColors.danger,
-        ),
-      );
     }
   }
 

@@ -9,6 +9,7 @@ import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/admin_service.dart';
 import 'package:frontend/core/services/notification_service.dart';
+import 'package:frontend/core/services/chat_service.dart';
 
 class HomePageBumdes extends StatefulWidget {
   final VoidCallback? onProductTap;
@@ -33,12 +34,49 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
   List<Map<String, dynamic>> recentActivities = [];
   bool isLoading = true;
   int unreadNotificationCount = 0;
+  int unreadChatCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadData();
     _loadUnreadCount();
+    _loadUnreadChatCount();
+  }
+  Future<void> _loadUnreadChatCount() async {
+    try {
+      // Ensure signed in to Firebase
+      await ChatService.signInToFirebase();
+      final userId = ChatService.getCurrentUserId();
+      if (userId == null) {
+        debugPrint('No Firebase user ID for unread chat count');
+        return;
+      }
+      int totalUnread = 0;
+      final chatRooms = await ChatService.getChatRooms().first;
+      debugPrint('Fetched ${chatRooms.docs.length} chat rooms for unread count');
+      for (final doc in chatRooms.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final unreadCounts = data['unreadCounts'];
+        if (unreadCounts is Map && unreadCounts[userId] != null) {
+          final val = unreadCounts[userId];
+          if (val is int) {
+            totalUnread += val;
+          } else if (val is String) {
+            totalUnread += int.tryParse(val) ?? 0;
+          }
+        }
+      }
+      if (mounted) {
+        setState(() {
+          unreadChatCount = totalUnread;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error loading unread chat count: $e');
+      }
+    }
   }
 
   Future<void> _loadUnreadCount() async {
@@ -238,10 +276,15 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                         _dashboardCard(
                           icon: Icons.chat_bubble_outline,
                           title: 'Chat Unread',
-                          value: '3',
+                          value: isLoading ? '-' : '$unreadChatCount',
                           width: cardWidth,
                           showArrow: true,
-                          onTap: widget.onChatTap,
+                          onTap: () async {
+                            if (widget.onChatTap != null) {
+                              widget.onChatTap!();
+                            }
+                            await _loadUnreadChatCount();
+                          },
                         ),
                         _dashboardCard(
                           icon: Icons.people_outline,

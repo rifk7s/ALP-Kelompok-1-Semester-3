@@ -230,9 +230,6 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
       case 'processing':
         success = await AdminService.markShipped(orderId);
         break;
-      case 'shipped':
-        success = await AdminService.markCompleted(orderId);
-        break;
     }
 
     if (!mounted) return;

@@ -146,30 +146,4 @@ class AdminService {
       return false;
     }
   }
-
-  /// Mark order as completed (shipped -> completed)
-  static Future<bool> markCompleted(int orderId) async {
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) return false;
-
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/admin/orders/$orderId/mark-completed'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-
-      if (kDebugMode) {
-        debugPrint('Mark completed response: ${response.statusCode}');
-      }
-      return response.statusCode == 200;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error marking completed: $e');
-      }
-      return false;
-    }
-  }
 }

@@ -111,7 +111,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('category', 'productImages');
+        $product->load('category', 'productImages', 'productContributions.petani');
         return response()->json($product);
     }
 
