@@ -5,6 +5,7 @@ import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:intl/intl.dart';
@@ -27,11 +28,41 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int tempQty = 1;
   int cartItemCount = 0;
+  Map<String, dynamic>? _currentProduct;
+  bool _isLoadingProduct = true;
 
   @override
   void initState() {
     super.initState();
+    _loadProductData();
     _loadCartCount();
+  }
+
+  Future<void> _loadProductData() async {
+    setState(() => _isLoadingProduct = true);
+    
+    try {
+      final freshProduct = await ProductService.getProductById(widget.product['id']);
+      
+      if (freshProduct != null && mounted) {
+        setState(() {
+          _currentProduct = freshProduct;
+          _isLoadingProduct = false;
+        });
+      } else {
+        setState(() {
+          _currentProduct = widget.product;
+          _isLoadingProduct = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _currentProduct = widget.product;
+          _isLoadingProduct = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadCartCount() async {
@@ -43,17 +74,41 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  Map<String, dynamic> get product => _currentProduct ?? widget.product;
+
   int get parsedPrice {
-    final pricePerKg = double.parse(widget.product['price_per_kg'].toString());
+    final pricePerKg = double.parse(product['price_per_kg'].toString());
     return pricePerKg.toInt();
   }
 
   double get stockKg {
-    return double.parse(widget.product['stock_kg'].toString());
+    return double.parse(product['stock_kg'].toString());
+  }
+
+  Future<double> _getQuantityInCart() async {
+    final cart = await CartService.getCart();
+    if (cart == null) return 0;
+
+    final items = cart['items'] as List<dynamic>? ?? [];
+    for (var item in items) {
+      if (item['product_id'] == product['id']) {
+        return double.parse(item['quantity_kg'].toString());
+      }
+    }
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingProduct) {
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -79,17 +134,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   InfoRow(
                     icon: Icons.category_outlined,
                     label: "Kategori",
-                    value: widget.product['category']?['name'] ?? '-',
+                    value: product['category']?['name'] ?? '-',
                   ),
                   InfoRow(
                     icon: Icons.qr_code_2_outlined,
                     label: "Varietas",
-                    value: widget.product['variety'] ?? '-',
+                    value: product['variety'] ?? '-',
                   ),
                   InfoRow(
                     icon: Icons.date_range_outlined,
                     label: "Tanggal Panen",
-                    value: _formatDate(widget.product['harvest_date']),
+                    value: _formatDate(product['harvest_date']),
                   ),
                 ],
               ),
@@ -119,7 +174,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     SizedBox(
                       width: double.infinity,
                       child: Text(
-                        widget.product['description'] ??
+                        product['description'] ??
                             'Tidak ada informasi tambahan.',
                         style: const TextStyle(
                           fontSize: 14,
@@ -204,9 +259,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _productImage() {
     final imagePath =
-        widget.product['product_images'] != null &&
-            (widget.product['product_images'] as List).isNotEmpty
-        ? widget.product['product_images'][0]['image_path']
+        product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty
+        ? product['product_images'][0]['image_path']
         : null;
     final imageUrl = ApiConfig.getImageUrl(imagePath);
 
@@ -249,7 +304,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.product['name'],
+          product['name'],
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
@@ -281,9 +336,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _sellerCard() {
     final imagePath =
-        widget.product['product_images'] != null &&
-            (widget.product['product_images'] as List).isNotEmpty
-        ? widget.product['product_images'][0]['image_path']
+        product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty
+        ? product['product_images'][0]['image_path']
         : null;
     final imageUrl = ApiConfig.getImageUrl(imagePath);
 
@@ -402,7 +457,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: () => _openQtyDialog(),
+          onPressed: () async {
+            // Check stock before opening dialog
+            final qtyInCart = await _getQuantityInCart();
+            final available = stockKg - qtyInCart;
+            
+            if (available <= 0) {
+              if (mounted) {
+                SnackBarHelper.showError(
+                  context,
+                  qtyInCart > 0
+                      ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang dan stok tersisa ${available.toInt()} kg'
+                      : 'Stok habis',
+                );
+              }
+              return;
+            }
+            
+            _openQtyDialog();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -444,7 +517,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.product['name'] ?? 'Produk',
+                      product['name'] ?? 'Produk',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 18,
@@ -459,10 +532,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: () {
                         // Get image from product_images like main detail page
                         final imagePath =
-                            widget.product['product_images'] != null &&
-                                (widget.product['product_images'] as List)
+                            product['product_images'] != null &&
+                                (product['product_images'] as List)
                                     .isNotEmpty
-                            ? widget.product['product_images'][0]['image_path']
+                            ? product['product_images'][0]['image_path']
                             : null;
                         final imageUrl = ApiConfig.getImageUrl(imagePath);
 
@@ -514,9 +587,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           }
                         }),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
+                            final qtyInCart = await _getQuantityInCart();
+                            final available = stockKg - qtyInCart;
+                            
                             _showQtyInputDialog(context, tempQty, (newQty) {
-                              setStateDialog(() => tempQty = newQty);
+                              if (newQty <= available) {
+                                setStateDialog(() => tempQty = newQty);
+                              } else {
+                                SnackBarHelper.showError(
+                                  context,
+                                  qtyInCart > 0
+                                      ? 'Jumlah melebihi stok. Anda sudah punya ${qtyInCart.toInt()} kg di keranjang. Maksimal tambah ${available.toInt()} kg lagi'
+                                      : 'Jumlah melebihi stok. Maksimal ${stockKg.toInt()} kg',
+                                );
+                              }
                             });
                           },
                           child: Container(
@@ -565,13 +650,26 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                         ),
-                        _qtyButton(Icons.add, () {
+                        _qtyButton(Icons.add, () async {
                           // Debounce: 200ms cooldown
                           final now = DateTime.now().millisecondsSinceEpoch;
                           if (now - lastClick < 200) return;
                           lastClick = now;
 
-                          setStateDialog(() => tempQty++);
+                          // Recalculate available stock
+                          final qtyInCart = await _getQuantityInCart();
+                          final available = stockKg - qtyInCart;
+
+                          if (tempQty < available) {
+                            setStateDialog(() => tempQty++);
+                          } else {
+                            SnackBarHelper.showError(
+                              context,
+                              qtyInCart > 0
+                                  ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Maksimal tambah ${available.toInt()} kg lagi'
+                                  : 'Stok tidak cukup. Maksimal ${stockKg.toInt()} kg',
+                            );
+                          }
                         }),
                       ],
                     ),
@@ -621,17 +719,61 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
+                              // Fetch fresh stock from database
+                              final freshProduct = await ProductService.getProductById(product['id']);
+                              
+                              if (freshProduct == null) {
+                                if (mounted) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Produk tidak ditemukan',
+                                  );
+                                }
+                                return;
+                              }
+                              
+                              final dbStockKg = double.tryParse(
+                                freshProduct['stock_kg']?.toString() ?? '0',
+                              ) ?? 0;
+                              
+                              // Validate stock including cart quantity
+                              final qtyInCart = await _getQuantityInCart();
+                              final available = dbStockKg - qtyInCart;
+                              
+                              if (dbStockKg <= 0) {
+                                if (mounted) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Produk stok habis',
+                                  );
+                                }
+                                return;
+                              }
+                              
+                              if (tempQty > available) {
+                                if (mounted) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    qtyInCart > 0
+                                        ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Stok tersisa ${available.toInt()} kg'
+                                        : 'Jumlah melebihi stok tersedia (${dbStockKg.toInt()} kg)',
+                                  );
+                                }
+                                return;
+                              }
+
                               Navigator.pop(context);
 
                               // Add to cart via backend
                               final success = await CartService.addToCart(
-                                productId: widget.product['id'],
+                                productId: product['id'],
                                 quantityKg: tempQty.toDouble(),
                               );
 
                               if (success) {
-                                // Reload cart count
+                                // Reload cart count and product data
                                 await _loadCartCount();
+                                await _loadProductData();
                                 // Show success overlay
                                 if (!mounted) return;
                                 _showAddedToCartOverlay(tempQty);

@@ -710,51 +710,89 @@ class _CartPageState extends State<CartPage> {
                     ),
                     onPressed: totalSelectedItems == 0
                         ? null
-                        : () {
+                        : () async {
                             final selectedCart = cartItems
                                 .where(
                                   (item) => selectedItems[item['id']] == true,
                                 )
                                 .toList();
 
-                            // Validate stock for all selected items
+                            // Show loading indicator while checking stock
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+
+                            // Fetch fresh stock from database for all selected items
+                            bool stockValid = true;
+                            String? errorMsg;
+
                             for (final item in selectedCart) {
                               final product = item['product'];
-                              final stockKg =
-                                  double.tryParse(
-                                    product['stock_kg']?.toString() ?? '0',
-                                  ) ??
-                                  0;
-                              final qty = double.parse(
+                              final productId = product['id'];
+                              final cartQty = double.parse(
                                 item['quantity_kg'].toString(),
                               );
 
-                              if (stockKg <= 0) {
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Produk "${product['name']}" stok habis. Silakan hapus dari keranjang.',
-                                );
-                                return;
-                              }
+                              try {
+                                // Get current stock from database
+                                final freshProduct = await ProductService.getProductById(productId);
+                                
+                                if (freshProduct == null) {
+                                  stockValid = false;
+                                  errorMsg = 'Produk "${product['name']}" tidak ditemukan';
+                                  break;
+                                }
 
-                              if (qty > stockKg) {
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Jumlah "${product['name']}" melebihi stok. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg',
-                                );
-                                return;
+                                final dbStockKg = double.tryParse(
+                                  freshProduct['stock_kg']?.toString() ?? '0',
+                                ) ?? 0;
+
+                                if (dbStockKg <= 0) {
+                                  stockValid = false;
+                                  errorMsg = 'Produk "${product['name']}" stok habis. Silakan hapus dari keranjang.';
+                                  break;
+                                }
+
+                                if (cartQty > dbStockKg) {
+                                  stockValid = false;
+                                  errorMsg = 'Jumlah "${product['name']}" (${cartQty.toStringAsFixed(0)} kg) melebihi stok tersedia (${dbStockKg.toStringAsFixed(0)} kg). Silakan kurangi jumlah.';
+                                  break;
+                                }
+                              } catch (e) {
+                                stockValid = false;
+                                errorMsg = 'Gagal memeriksa stok "${product['name']}". Coba lagi.';
+                                break;
                               }
                             }
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CheckoutPage(
-                                  cart: selectedCart,
-                                  total: totalPrice,
+                            // Close loading indicator
+                            if (mounted) Navigator.pop(context);
+
+                            if (!stockValid) {
+                              if (mounted) {
+                                SnackBarHelper.showError(context, errorMsg ?? 'Validasi stok gagal');
+                                // Reload cart to get fresh data
+                                _loadCart(showSpinner: false);
+                              }
+                              return;
+                            }
+
+                            // Stock validated, proceed to checkout
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CheckoutPage(
+                                    cart: selectedCart,
+                                    total: totalPrice,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                     child: const Text(
                       "Buat Pesanan",

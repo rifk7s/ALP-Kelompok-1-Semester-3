@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_screen.dart';
+import 'edit_screen.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -62,6 +63,74 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
     // If result is true, reload the list
     if (result == true) {
       _loadPetaniData();
+    }
+  }
+
+  Future<void> _navigateToEditScreen(PetaniData petani) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => EditPetaniScreen(petani: petani)),
+    );
+
+    // If result is true, reload the list
+    if (result == true) {
+      _loadPetaniData();
+    }
+  }
+
+  Future<void> _deletePetani(PetaniData petani) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Data Petani'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus data petani "${petani.name}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.danger,
+            ),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
+
+      await _petaniService.deletePetani(id: petani.id, token: token);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data petani berhasil dihapus'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+
+      _loadPetaniData();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.danger,
+        ),
+      );
     }
   }
 
@@ -144,7 +213,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                     final hp = petani.phone ?? '-';
 
                     return GestureDetector(
-                      onTap: () {},
+                      onTap: () => _navigateToEditScreen(petani),
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.white,
@@ -157,51 +226,102 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                             ),
                           ],
                         ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Stack(
                           children: [
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: AppColors.warningAccent.withValues(
-                                  alpha: 0.85,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                nama.isNotEmpty ? nama[0].toUpperCase() : 'P',
-                                style: const TextStyle(
-                                  fontSize: 26,
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.bold,
+                            // Main content - Centered
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.warningAccent.withValues(
+                                          alpha: 0.85,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        nama.isNotEmpty ? nama[0].toUpperCase() : 'P',
+                                        style: const TextStyle(
+                                          fontSize: 26,
+                                          color: AppColors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    Text(
+                                      nama,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      hp,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
 
-                            const SizedBox(height: 14),
-
-                            Text(
-                              nama,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            Text(
-                              hp,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
+                            // Action buttons
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () => _navigateToEditScreen(petani),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.info.withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        size: 18,
+                                        color: AppColors.info,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  InkWell(
+                                    onTap: () => _deletePetani(petani),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.danger.withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.delete_outline,
+                                        size: 18,
+                                        color: AppColors.danger,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
