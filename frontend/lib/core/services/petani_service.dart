@@ -139,10 +139,7 @@ class PetaniService {
     throw Exception('Gagal memperbarui petani: ${resp.statusCode}');
   }
 
-  Future<bool> deletePetani({
-    required int id,
-    required String token,
-  }) async {
+  Future<bool> deletePetani({required int id, required String token}) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data/$id');
     final headers = ApiConfig.headers(token: token);
 

@@ -1291,12 +1291,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            ReceiptPage(
-                              orderId: orderIdStr,
-                              total: totalInt,
-                              orderStatus: status,
-                            ),
+                        builder: (_) => ReceiptPage(
+                          orderId: orderIdStr,
+                          total: totalInt,
+                          orderStatus: status,
+                        ),
                       ),
                     );
                   },

@@ -28,7 +28,9 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.petani.name);
     _phoneController = TextEditingController(text: widget.petani.phone ?? '');
-    _addressController = TextEditingController(text: widget.petani.address ?? '');
+    _addressController = TextEditingController(
+      text: widget.petani.address ?? '',
+    );
     _isActive = widget.petani.isActive;
   }
 
@@ -140,7 +142,10 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
                 validator: (value) {
@@ -180,7 +185,10 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -214,7 +222,10 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -271,7 +282,9 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
                           ),
                         )
                       : const Text(

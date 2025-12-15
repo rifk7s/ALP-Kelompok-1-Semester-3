@@ -93,9 +93,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.danger,
-            ),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text('Hapus'),
           ),
         ],
@@ -240,14 +238,15 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                                       width: 60,
                                       height: 60,
                                       decoration: BoxDecoration(
-                                        color: AppColors.warningAccent.withValues(
-                                          alpha: 0.85,
-                                        ),
+                                        color: AppColors.warningAccent
+                                            .withValues(alpha: 0.85),
                                         shape: BoxShape.circle,
                                       ),
                                       alignment: Alignment.center,
                                       child: Text(
-                                        nama.isNotEmpty ? nama[0].toUpperCase() : 'P',
+                                        nama.isNotEmpty
+                                            ? nama[0].toUpperCase()
+                                            : 'P',
                                         style: const TextStyle(
                                           fontSize: 26,
                                           color: AppColors.white,
@@ -295,7 +294,9 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: AppColors.info.withValues(alpha: 0.1),
+                                        color: AppColors.info.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -311,7 +312,9 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: AppColors.danger.withValues(alpha: 0.1),
+                                        color: AppColors.danger.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
