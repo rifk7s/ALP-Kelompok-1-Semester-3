@@ -7,6 +7,7 @@ import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
@@ -962,37 +963,117 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     );
 
     if (status == 'pending' || status == 'pending_payment') {
-      return Row(
+      return Column(
         children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () async {
-                final bumdes = await BumdesService.getBumdesInfo();
-                if (!mounted || bumdes == null) return;
-                final chatId = await ChatService.getOrCreateChat(
-                  recipientId: bumdes.id,
-                  recipientName: bumdes.name,
-                  recipientImage: 'assets/images/logo.png',
-                );
-                if (!mounted || chatId == null) return;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      chatId: chatId,
-                      name: bumdes.name,
-                      image: 'assets/images/logo.png',
-                      recipientId: bumdes.id,
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    // Show confirmation dialog
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Batalkan Pesanan?'),
+                        content: const Text(
+                          'Apakah Anda yakin ingin membatalkan pesanan ini?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Tidak'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.danger,
+                            ),
+                            child: const Text('Ya, Batalkan'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm != true || !mounted) return;
+
+                    // Show loading
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+
+                    if (kDebugMode) {
+                      print(
+                        'Cancelling order - ID: ${order['id']}, Order Number: ${order['order_number']}',
+                      );
+                    }
+                    final success = await OrderService.cancelOrder(
+                      order['id'] as int,
+                    );
+
+                    if (mounted) Navigator.pop(context); // Close loading
+
+                    if (!mounted) return;
+
+                    if (success) {
+                      SnackBarHelper.showSuccess(
+                        context,
+                        'Pesanan berhasil dibatalkan',
+                      );
+                      _loadOrders(); // Reload orders
+                    } else {
+                      SnackBarHelper.showError(
+                        context,
+                        'Gagal membatalkan pesanan',
+                      );
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    side: const BorderSide(color: AppColors.danger),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                );
-              },
-              style: outlineStyle,
-              child: const Text('Chat BUMDes'),
-            ),
+                  child: const Text('Batalkan'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final bumdes = await BumdesService.getBumdesInfo();
+                    if (!mounted || bumdes == null) return;
+                    final chatId = await ChatService.getOrCreateChat(
+                      recipientId: bumdes.id,
+                      recipientName: bumdes.name,
+                      recipientImage: 'assets/images/logo.png',
+                    );
+                    if (!mounted || chatId == null) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatDetailPage(
+                          chatId: chatId,
+                          name: bumdes.name,
+                          image: 'assets/images/logo.png',
+                          recipientId: bumdes.id,
+                        ),
+                      ),
+                    );
+                  },
+                  style: outlineStyle,
+                  child: const Text('Chat BUMDes'),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -1022,6 +1103,84 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         children: [
           Row(
             children: [
+              // Show cancel button only for 'paid' status
+              if (status == 'paid') ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      // Show confirmation dialog
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Batalkan Pesanan?'),
+                          content: const Text(
+                            'Pesanan ini sudah dibayar. Stok akan dikembalikan jika dibatalkan. Apakah Anda yakin?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Tidak'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.danger,
+                              ),
+                              child: const Text('Ya, Batalkan'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm != true || !mounted) return;
+
+                      // Show loading
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+
+                      if (kDebugMode) {
+                        print(
+                          'Cancelling paid order - ID: ${order['id']}, Order Number: ${order['order_number']}',
+                        );
+                      }
+                      final success = await OrderService.cancelOrder(
+                        order['id'] as int,
+                      );
+
+                      if (mounted) Navigator.pop(context); // Close loading
+
+                      if (!mounted) return;
+
+                      if (success) {
+                        SnackBarHelper.showSuccess(
+                          context,
+                          'Pesanan berhasil dibatalkan dan stok dikembalikan',
+                        );
+                        _loadOrders(); // Reload orders
+                      } else {
+                        SnackBarHelper.showError(
+                          context,
+                          'Gagal membatalkan pesanan',
+                        );
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.danger,
+                      side: const BorderSide(color: AppColors.danger),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Batalkan'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: OutlinedButton(
                   onPressed: () async {
@@ -1126,6 +1285,81 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 return sum + (qty * price).toInt();
               });
 
+              // Show loading dialog while checking stock
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
+              );
+
+              // Check stock availability for all products before proceeding
+              bool stockValid = true;
+              String? errorMsg;
+
+              for (final item in cartItems) {
+                final productId = (item['id'] as int?) ?? 0;
+                final qty =
+                    double.tryParse(item['quantity_kg'].toString()) ?? 0;
+
+                if (productId <= 0 || qty <= 0) {
+                  stockValid = false;
+                  errorMsg = 'Data produk tidak valid untuk beli lagi.';
+                  break;
+                }
+
+                try {
+                  // Fetch fresh product data from database
+                  final freshProduct = await ProductService.getProductById(
+                    productId,
+                  );
+
+                  if (freshProduct == null) {
+                    stockValid = false;
+                    errorMsg =
+                        'Produk "${item['product']['name']}" tidak ditemukan';
+                    break;
+                  }
+
+                  final dbStockKg =
+                      double.tryParse(
+                        freshProduct['stock_kg']?.toString() ?? '0',
+                      ) ??
+                      0;
+
+                  if (dbStockKg <= 0) {
+                    stockValid = false;
+                    errorMsg = 'Produk "${item['product']['name']}" stok habis';
+                    break;
+                  }
+
+                  if (qty > dbStockKg) {
+                    stockValid = false;
+                    errorMsg =
+                        'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
+                    break;
+                  }
+                } catch (e) {
+                  stockValid = false;
+                  errorMsg =
+                      'Gagal memeriksa stok "${item['product']['name']}"';
+                  break;
+                }
+              }
+
+              // Close loading dialog
+              if (mounted) Navigator.pop(context);
+
+              if (!stockValid) {
+                if (mounted) {
+                  SnackBarHelper.showError(
+                    context,
+                    errorMsg ?? 'Validasi stok gagal',
+                  );
+                }
+                return;
+              }
+
               // Checkout endpoint builds orders from server-side cart.
               // "Beli Lagi" must repopulate cart first.
               final cleared = await CartService.clearCart();
@@ -1142,15 +1376,6 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                 final productId = (item['id'] as int?) ?? 0;
                 final qty =
                     double.tryParse(item['quantity_kg'].toString()) ?? 0;
-
-                if (productId <= 0 || qty <= 0) {
-                  if (!mounted) return;
-                  SnackBarHelper.showError(
-                    context,
-                    'Data produk tidak valid untuk beli lagi.',
-                  );
-                  return;
-                }
 
                 final ok = await CartService.addToCart(
                   productId: productId,

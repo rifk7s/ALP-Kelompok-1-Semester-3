@@ -28,6 +28,6 @@ class PetaniData extends Model
 
     public function productContributions(): HasMany
     {
-        return $this->hasMany(ProductContribution::class);
+        return $this->hasMany(ProductContribution::class, 'petani_id');
     }
 }
