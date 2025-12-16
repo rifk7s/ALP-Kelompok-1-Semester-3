@@ -1000,15 +1000,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                     showDialog(
                       context: context,
                       barrierDismissible: false,
-                      builder: (context) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      builder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
                     );
 
                     if (kDebugMode) {
-                      print('Cancelling order - ID: ${order['id']}, Order Number: ${order['order_number']}');
+                      print(
+                        'Cancelling order - ID: ${order['id']}, Order Number: ${order['order_number']}',
+                      );
                     }
-                    final success = await OrderService.cancelOrder(order['id'] as int);
+                    final success = await OrderService.cancelOrder(
+                      order['id'] as int,
+                    );
 
                     if (mounted) Navigator.pop(context); // Close loading
 
@@ -1135,15 +1138,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (context) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        builder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
                       );
 
                       if (kDebugMode) {
-                        print('Cancelling paid order - ID: ${order['id']}, Order Number: ${order['order_number']}');
+                        print(
+                          'Cancelling paid order - ID: ${order['id']}, Order Number: ${order['order_number']}',
+                        );
                       }
-                      final success = await OrderService.cancelOrder(order['id'] as int);
+                      final success = await OrderService.cancelOrder(
+                        order['id'] as int,
+                      );
 
                       if (mounted) Navigator.pop(context); // Close loading
 
@@ -1283,9 +1289,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
               );
 
               // Check stock availability for all products before proceeding
@@ -1294,7 +1299,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
               for (final item in cartItems) {
                 final productId = (item['id'] as int?) ?? 0;
-                final qty = double.tryParse(item['quantity_kg'].toString()) ?? 0;
+                final qty =
+                    double.tryParse(item['quantity_kg'].toString()) ?? 0;
 
                 if (productId <= 0 || qty <= 0) {
                   stockValid = false;
@@ -1304,17 +1310,22 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
                 try {
                   // Fetch fresh product data from database
-                  final freshProduct = await ProductService.getProductById(productId);
-                  
+                  final freshProduct = await ProductService.getProductById(
+                    productId,
+                  );
+
                   if (freshProduct == null) {
                     stockValid = false;
-                    errorMsg = 'Produk "${item['product']['name']}" tidak ditemukan';
+                    errorMsg =
+                        'Produk "${item['product']['name']}" tidak ditemukan';
                     break;
                   }
 
-                  final dbStockKg = double.tryParse(
-                    freshProduct['stock_kg']?.toString() ?? '0',
-                  ) ?? 0;
+                  final dbStockKg =
+                      double.tryParse(
+                        freshProduct['stock_kg']?.toString() ?? '0',
+                      ) ??
+                      0;
 
                   if (dbStockKg <= 0) {
                     stockValid = false;
@@ -1324,12 +1335,14 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
                   if (qty > dbStockKg) {
                     stockValid = false;
-                    errorMsg = 'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
+                    errorMsg =
+                        'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
                     break;
                   }
                 } catch (e) {
                   stockValid = false;
-                  errorMsg = 'Gagal memeriksa stok "${item['product']['name']}"';
+                  errorMsg =
+                      'Gagal memeriksa stok "${item['product']['name']}"';
                   break;
                 }
               }
@@ -1339,7 +1352,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 
               if (!stockValid) {
                 if (mounted) {
-                  SnackBarHelper.showError(context, errorMsg ?? 'Validasi stok gagal');
+                  SnackBarHelper.showError(
+                    context,
+                    errorMsg ?? 'Validasi stok gagal',
+                  );
                 }
                 return;
               }

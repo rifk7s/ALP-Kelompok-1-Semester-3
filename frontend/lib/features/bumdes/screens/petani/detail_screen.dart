@@ -10,10 +10,7 @@ import '../product_detail_screen.dart';
 class PetaniDetailScreen extends StatefulWidget {
   final int petaniId;
 
-  const PetaniDetailScreen({
-    super.key,
-    required this.petaniId,
-  });
+  const PetaniDetailScreen({super.key, required this.petaniId});
 
   @override
   State<PetaniDetailScreen> createState() => _PetaniDetailScreenState();
@@ -73,7 +70,8 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       name: _petaniData!['name'],
       phone: _petaniData!['phone'],
       address: _petaniData!['address'],
-      isActive: _petaniData!['is_active'] == 1 || _petaniData!['is_active'] == true,
+      isActive:
+          _petaniData!['is_active'] == 1 || _petaniData!['is_active'] == true,
     );
 
     final result = await Navigator.push(
@@ -119,10 +117,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
         throw Exception('Token tidak ditemukan');
       }
 
-      await _petaniService.deletePetani(
-        id: _petaniData!['id'],
-        token: token,
-      );
+      await _petaniService.deletePetani(id: _petaniData!['id'], token: token);
 
       if (!mounted) return;
 
@@ -162,7 +157,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     try {
       // Fetch full product data with all relationships
       final fullProduct = await ProductService.getProductById(productId);
-      
+
       // Hide loading
       if (mounted) Navigator.pop(context);
 
@@ -183,12 +178,12 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     } catch (e) {
       // Hide loading
       if (mounted) Navigator.pop(context);
-      
+
       // Show error
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading product: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading product: $e')));
       }
     }
   }
@@ -205,7 +200,9 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: _petaniData != null ? () => _navigateToEditScreen() : null,
+            onPressed: _petaniData != null
+                ? () => _navigateToEditScreen()
+                : null,
             tooltip: 'Edit Petani',
           ),
           IconButton(
@@ -218,30 +215,30 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppColors.danger,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: AppColors.textDark),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadPetaniDetail,
-                        child: const Text('Coba Lagi'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.danger,
                   ),
-                )
-              : _buildContent(),
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: AppColors.textDark),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadPetaniDetail,
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
+            )
+          : _buildContent(),
     );
   }
 
@@ -315,7 +312,11 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.location_on, color: AppColors.white, size: 16),
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.white,
+                      size: 16,
+                    ),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
@@ -352,7 +353,10 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
                     ),
                     // Month selector
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(20),
@@ -420,11 +424,11 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     final filteredContributions = contributions.where((contribution) {
       final entryDate = contribution['entry_date'];
       if (entryDate == null) return false;
-      
+
       try {
         final date = DateTime.parse(entryDate);
-        return date.year == _selectedMonth.year && 
-               date.month == _selectedMonth.month;
+        return date.year == _selectedMonth.year &&
+            date.month == _selectedMonth.month;
       } catch (e) {
         return false;
       }
@@ -470,81 +474,84 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
   Widget _buildContributionCard(Map<String, dynamic> contribution) {
     final product = contribution['product'];
     final productName = product?['name'] ?? '-';
-    
+
     // Parse as double since the API returns them as strings
-    final contributedKg = double.tryParse(contribution['contributed_kg']?.toString() ?? '0') ?? 0.0;
-    final remainingKg = double.tryParse(contribution['remaining_kg']?.toString() ?? '0') ?? 0.0;
+    final contributedKg =
+        double.tryParse(contribution['contributed_kg']?.toString() ?? '0') ??
+        0.0;
+    final remainingKg =
+        double.tryParse(contribution['remaining_kg']?.toString() ?? '0') ?? 0.0;
     final entryDate = contribution['entry_date'] ?? '-';
 
     return GestureDetector(
       onTap: product != null ? () => _navigateToProductDetail(product) : null,
       child: Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            productName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoItem(
-                  icon: Icons.add_circle_outline,
-                  label: 'Kontribusi',
-                  value: '${contributedKg.toStringAsFixed(2)} kg',
-                  color: AppColors.primary,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              productName,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoItem(
+                    icon: Icons.add_circle_outline,
+                    label: 'Kontribusi',
+                    value: '${contributedKg.toStringAsFixed(2)} kg',
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoItem(
-                  icon: Icons.inventory_2_outlined,
-                  label: 'Tersisa',
-                  value: '${remainingKg.toStringAsFixed(2)} kg',
-                  color: AppColors.success,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildInfoItem(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Tersisa',
+                    value: '${remainingKg.toStringAsFixed(2)} kg',
+                    color: AppColors.success,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(
-                Icons.calendar_today,
-                size: 14,
-                color: AppColors.textLight,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Tanggal masuk: $entryDate',
-                style: const TextStyle(
-                  fontSize: 12,
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  size: 14,
                   color: AppColors.textLight,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+                const SizedBox(width: 4),
+                Text(
+                  'Tanggal masuk: $entryDate',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -564,10 +571,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
             const SizedBox(width: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textLight,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textLight),
             ),
           ],
         ),

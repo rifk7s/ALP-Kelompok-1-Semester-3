@@ -43,6 +43,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     _loadUnreadCount();
     _loadUnreadChatCount();
   }
+
   Future<void> _loadUnreadChatCount() async {
     try {
       // Ensure signed in to Firebase
@@ -54,7 +55,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
       }
       int totalUnread = 0;
       final chatRooms = await ChatService.getChatRooms().first;
-      debugPrint('Fetched ${chatRooms.docs.length} chat rooms for unread count');
+      debugPrint(
+        'Fetched ${chatRooms.docs.length} chat rooms for unread count',
+      );
       for (final doc in chatRooms.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final unreadCounts = data['unreadCounts'];

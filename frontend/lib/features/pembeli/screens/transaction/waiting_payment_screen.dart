@@ -237,11 +237,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
-          
+
           // Clear cart and go back to home
           final navigator = Navigator.of(context);
           await CartService.clearCart();
-          
+
           if (mounted) {
             navigator.popUntil((route) => route.isFirst);
           }
@@ -249,6 +249,39 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         child: Scaffold(
           backgroundColor: AppColors.surfaceAlt,
           appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 1,
+            centerTitle: true,
+            title: const Text(
+              "Menunggu Pembayaran",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textLight,
+              ),
+            ),
+          ),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        // Clear cart and go back to home
+        final navigator = Navigator.of(context);
+        await CartService.clearCart();
+
+        if (mounted) {
+          navigator.popUntil((route) => route.isFirst);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.surfaceAlt,
+        appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 1,
           centerTitle: true,
@@ -261,264 +294,249 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
             ),
           ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      );
-    }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        
-        // Clear cart and go back to home
-        final navigator = Navigator.of(context);
-        await CartService.clearCart();
-        
-        if (mounted) {
-          navigator.popUntil((route) => route.isFirst);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.surfaceAlt,
-        appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 1,
-        centerTitle: true,
-        title: const Text(
-          "Menunggu Pembayaran",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textLight,
-          ),
-        ),
-      ),
+        body: PullToRefresh(
+          onRefresh: _refreshStatus,
+          color: AppColors.primary,
+          backgroundColor: AppColors.surfaceAlt,
+          displacement: 40,
+          strokeWidth: 2.5,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _section(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.hourglass_top_rounded,
+                      size: 40,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Menunggu Pembayaran",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Silakan selesaikan pembayaran Anda",
+                            style: TextStyle(
+                              color: AppColors.grey600,
+                              fontSize: 13.5,
+                            ),
+                          ),
+                          if (orderDetails?['payment_deadline'] != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.warningLight,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.timer,
+                                    size: 16,
+                                    color: AppColors.warningDark,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Batas Waktu: $_timeLeft',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.warningDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-      body: PullToRefresh(
-        onRefresh: _refreshStatus,
-        color: AppColors.primary,
-        backgroundColor: AppColors.surfaceAlt,
-        displacement: 40,
-        strokeWidth: 2.5,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _section(
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.hourglass_top_rounded,
-                    size: 40,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 20),
+
+              _section(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Total Pembayaran",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      formatCurrency(totalPayment),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              _section(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Transfer ke Rekening",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _infoRow("Bank", "BCA"),
+                    _infoRow("No. Rekening", "1234566"),
+                    _infoRow("A.n", "Bumdes Desa Sengka"),
+
+                    const SizedBox(height: 14),
+                    Divider(),
+
+                    const SizedBox(height: 14),
+                    Row(
                       children: [
+                        const Icon(
+                          Icons.copy_rounded,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
                         const Text(
-                          "Menunggu Pembayaran",
+                          "Salin No. Rekening",
                           style: TextStyle(
-                            fontSize: 17,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              _section(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Nomor Pesanan",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey100,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        orderNumber,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              _section(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Cek Status Pembayaran",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Tarik ke bawah atau tekan tombol untuk memperbarui status pembayaran.',
+                      style: TextStyle(color: AppColors.grey600, fontSize: 13),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: (isCheckingStatus || isProcessing)
+                            ? null
+                            : _refreshStatus,
+                        icon: (isCheckingStatus || isProcessing)
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white,
+                                  ),
+                                ),
+                              )
+                            : const Icon(Icons.refresh),
+                        label: const Text(
+                          'Refresh Status',
+                          style: TextStyle(
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Silakan selesaikan pembayaran Anda",
-                          style: TextStyle(
-                            color: AppColors.grey600,
-                            fontSize: 13.5,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        if (orderDetails?['payment_deadline'] != null) ...[
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.warningLight,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.timer,
-                                  size: 16,
-                                  color: AppColors.warningDark,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Batas Waktu: $_timeLeft',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.warningDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _section(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Total Pembayaran",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    formatCurrency(totalPayment),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _section(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Transfer ke Rekening",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 12),
-                  _infoRow("Bank", "BCA"),
-                  _infoRow("No. Rekening", "1234566"),
-                  _infoRow("A.n", "Bumdes Desa Sengka"),
-
-                  const SizedBox(height: 14),
-                  Divider(),
-
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      const Icon(Icons.copy_rounded, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "Salin No. Rekening",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.chevron_right, color: AppColors.primary),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _section(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Nomor Pesanan",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.grey100,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      orderNumber,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.5,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _section(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Cek Status Pembayaran",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Tarik ke bawah atau tekan tombol untuk memperbarui status pembayaran.',
-                    style: TextStyle(color: AppColors.grey600, fontSize: 13),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: (isCheckingStatus || isProcessing)
-                          ? null
-                          : _refreshStatus,
-                      icon: (isCheckingStatus || isProcessing)
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.white,
-                                ),
-                              ),
-                            )
-                          : const Icon(Icons.refresh),
-                      label: const Text(
-                        'Refresh Status',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 30),
-          ],
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 

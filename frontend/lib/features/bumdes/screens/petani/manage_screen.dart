@@ -182,15 +182,14 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
                                 width: 60,
                                 height: 60,
                                 decoration: BoxDecoration(
-                                  color: AppColors.warningAccent
-                                      .withValues(alpha: 0.85),
+                                  color: AppColors.warningAccent.withValues(
+                                    alpha: 0.85,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
-                                  nama.isNotEmpty
-                                      ? nama[0].toUpperCase()
-                                      : 'P',
+                                  nama.isNotEmpty ? nama[0].toUpperCase() : 'P',
                                   style: const TextStyle(
                                     fontSize: 26,
                                     color: AppColors.white,
