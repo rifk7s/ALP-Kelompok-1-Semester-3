@@ -621,36 +621,48 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                // First product
-                Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: _buildProductImage(
-                        products[0]['image'] as String?,
+                // First product with Lihat Detail link
+                InkWell(
+                  onTap: () => _openTracking(order),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: _buildProductImage(
+                          products[0]['image'] as String?,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            products[0]['name']?.toString() ?? 'Produk',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${products[0]['qty'] ?? 0} kg',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.grey600,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              products[0]['name']?.toString() ?? 'Produk',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              '${products[0]['qty'] ?? 0} kg',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.grey600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      // Lihat Detail icon button
+                      Icon(
+                        Icons.chevron_right,
+                        color: AppColors.grey600,
+                        size: 24,
+                      ),
+                    ],
+                  ),
                 ),
 
                 // Expandable section for additional products
@@ -1208,35 +1220,20 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   child: const Text('Chat BUMDes'),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _openTracking(order);
-                  },
-                  style: elevatedStyle,
-                  child: const Text('Lihat Detail'),
-                ),
-              ),
-            ],
-          ),
-          if (status == 'shipped') ...[
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton.icon(
-                onPressed: () => _advanceStatus(order['id'] as int, status),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              // For shipped status: Selesaikan Pesanan as primary CTA
+              if (status == 'shipped') ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _advanceStatus(order['id'] as int, status),
+                    style: elevatedStyle,
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                    label: const Text('Selesaikan'),
                   ),
                 ),
-                icon: const Icon(Icons.sync, size: 18),
-                label: const Text('Selesaikan Pesanan'),
-              ),
-            ),
-          ],
+              ],
+            ],
+          ),
         ],
       );
     }
@@ -1245,10 +1242,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: OutlinedButton.icon(
             onPressed: () => _showCompletedOptions(order),
             style: outlineStyle,
-            child: const Text('Lihat Detail'),
+            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+            label: const Text('Riwayat'),
           ),
         ),
         const SizedBox(width: 12),
