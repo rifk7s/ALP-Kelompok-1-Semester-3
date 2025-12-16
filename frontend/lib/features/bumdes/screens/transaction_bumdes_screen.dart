@@ -864,54 +864,101 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _openChat(order),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          minimumSize: const Size.fromHeight(48),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: buttonShape,
-                        ),
-                        child: const Text('Chat Pembeli'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _openTracking(order),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.white,
-                          minimumSize: const Size.fromHeight(48),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: buttonShape,
-                        ),
-                        child: const Text('Lacak'),
-                      ),
-                    ),
-                  ],
-                ),
-                if (status != 'completed' &&
-                    status != 'rejected' &&
-                    status != 'shipped') ...[
-                  const SizedBox(height: 10),
+                // For Baru (pending_payment/paid) and Dikemas (processing) tabs:
+                // "Perbarui ke tahap berikutnya" is the primary CTA
+                if (status == 'pending_payment' ||
+                    status == 'paid' ||
+                    status == 'processing') ...[
                   Row(
                     children: [
-                      // Advance status button
                       Expanded(
-                        child: TextButton.icon(
-                          onPressed: () => _advanceStatus(orderId, status),
-                          style: TextButton.styleFrom(
+                        child: OutlinedButton(
+                          onPressed: () => _openChat(order),
+                          style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
-                            minimumSize: const Size.fromHeight(44),
+                            side: const BorderSide(color: AppColors.primary),
+                            minimumSize: const Size.fromHeight(48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: buttonShape,
                           ),
-                          icon: const Icon(Icons.sync, size: 18),
-                          label: const Text('Perbarui ke tahap berikutnya'),
+                          child: const Text('Chat Pembeli'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _advanceStatus(orderId, status),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.white,
+                            minimumSize: const Size.fromHeight(48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: buttonShape,
+                          ),
+                          icon: const Icon(Icons.arrow_forward, size: 18),
+                          label: Text(
+                            status == 'processing'
+                                ? 'Kirim Pesanan'
+                                : 'Proses Pesanan',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ]
+                // For Dikirim (shipped) tab: "Lacak" is the primary CTA
+                else if (status == 'shipped') ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _openChat(order),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
+                            minimumSize: const Size.fromHeight(48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: buttonShape,
+                          ),
+                          child: const Text('Chat Pembeli'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _openTracking(order),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.white,
+                            minimumSize: const Size.fromHeight(48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: buttonShape,
+                          ),
+                          icon: const Icon(
+                            Icons.local_shipping_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('Lacak Pesanan'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ]
+                // For Selesai (completed/rejected) tab: Only Chat button
+                else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _openChat(order),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
+                            minimumSize: const Size.fromHeight(48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: buttonShape,
+                          ),
+                          child: const Text('Chat Pembeli'),
                         ),
                       ),
                     ],
