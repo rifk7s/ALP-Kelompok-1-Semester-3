@@ -239,10 +239,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
           if (didPop) return;
           
           // Clear cart and go back to home
+          final navigator = Navigator.of(context);
           await CartService.clearCart();
           
           if (mounted) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            navigator.popUntil((route) => route.isFirst);
           }
         },
         child: Scaffold(
@@ -271,10 +272,11 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         if (didPop) return;
         
         // Clear cart and go back to home
+        final navigator = Navigator.of(context);
         await CartService.clearCart();
         
         if (mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          navigator.popUntil((route) => route.isFirst);
         }
       },
       child: Scaffold(
