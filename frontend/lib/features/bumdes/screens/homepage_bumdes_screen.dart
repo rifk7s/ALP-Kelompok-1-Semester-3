@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'upload_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'petani/manage_screen.dart';
@@ -191,6 +192,14 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    await Future.wait([
+      _loadData(),
+      _loadUnreadCount(),
+      _loadUnreadChatCount(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     const horizontalPadding = 20.0;
@@ -198,279 +207,292 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: 16,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: AssetImage("assets/images/logo.png"),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          "PanenKi'",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+        child: PullToRefresh(
+          onRefresh: _onRefresh,
+          color: AppColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundImage: AssetImage(
+                              "assets/images/logo.png",
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Badge(
-                        label: Text('$unreadNotificationCount'),
-                        isLabelVisible: unreadNotificationCount > 0,
-                        child: const Icon(
-                          Icons.notifications_outlined,
-                          size: 28,
-                        ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            "PanenKi'",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotificationPage(),
-                          ),
-                        );
-                        _loadUnreadCount(); // Refresh count after returning
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 28),
-
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    double cardWidth = (constraints.maxWidth - 16) / 2;
-
-                    return Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [
-                        _dashboardCard(
-                          icon: Icons.check_circle_outline,
-                          title: 'Produk Aktif',
-                          value: isLoading ? '-' : '$activeProductCount',
-                          width: cardWidth,
-                          showArrow: true,
-                          onTap: widget.onProductTap,
-                        ),
-                        _dashboardCard(
-                          icon: Icons.monetization_on_outlined,
-                          title: 'Transaksi',
-                          subtitle: 'Bulan Ini',
-                          value: isLoading ? '-' : '$completedOrdersThisMonth',
-                          width: cardWidth,
-                          showArrow: true,
-                          onTap: widget.onTransactionTap,
-                        ),
-                        _dashboardCard(
-                          icon: Icons.chat_bubble_outline,
-                          title: 'Chat Unread',
-                          value: isLoading ? '-' : '$unreadChatCount',
-                          width: cardWidth,
-                          showArrow: true,
-                          onTap: () async {
-                            if (widget.onChatTap != null) {
-                              widget.onChatTap!();
-                            }
-                            await _loadUnreadChatCount();
-                          },
-                        ),
-                        _dashboardCard(
-                          icon: Icons.people_outline,
-                          title: 'Kelola Petani',
-                          value: isLoading ? '-' : '$petaniCount',
-                          width: cardWidth,
-                          showArrow: true,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const KelolaPetaniScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 32),
-
-                const Text(
-                  'Aktivitas Terbaru',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                const SizedBox(height: 16),
-
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : recentActivities.isEmpty
-                    ? Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Belum ada aktivitas',
-                            style: TextStyle(color: AppColors.grey600),
+                      IconButton(
+                        icon: Badge(
+                          label: Text('$unreadNotificationCount'),
+                          isLabelVisible: unreadNotificationCount > 0,
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            size: 28,
                           ),
                         ),
-                      )
-                    : Column(
-                        children: recentActivities.map((order) {
-                          final status = order['status'] as String;
-                          final orderNumber = order['order_number'] as String;
-                          final total = order['total'];
-                          final orderItems =
-                              order['order_items'] as List<dynamic>? ?? [];
-
-                          // Get first product name
-                          String productName = 'Produk';
-                          if (orderItems.isNotEmpty) {
-                            final firstItem =
-                                orderItems[0] as Map<String, dynamic>;
-                            final product =
-                                firstItem['product'] as Map<String, dynamic>?;
-                            productName = product?['name'] ?? 'Produk';
-                          }
-
-                          // Format total
-                          final formattedTotal =
-                              'Rp ${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
-
-                          // Calculate time ago
-                          String timeAgo = '';
-                          DateTime? timestamp;
-
-                          try {
-                            if (status == 'completed' &&
-                                order['completed_at'] != null) {
-                              timestamp = DateTime.parse(order['completed_at']);
-                            } else if (status == 'shipped' &&
-                                order['shipped_at'] != null) {
-                              timestamp = DateTime.parse(order['shipped_at']);
-                            } else if (status == 'processing' &&
-                                order['processing_at'] != null) {
-                              timestamp = DateTime.parse(
-                                order['processing_at'],
-                              );
-                            } else if (status == 'paid' &&
-                                order['paid_at'] != null) {
-                              timestamp = DateTime.parse(order['paid_at']);
-                            } else if (status == 'rejected' &&
-                                order['rejected_at'] != null) {
-                              timestamp = DateTime.parse(order['rejected_at']);
-                            } else if (order['pending_payment_at'] != null) {
-                              timestamp = DateTime.parse(
-                                order['pending_payment_at'],
-                              );
-                            }
-
-                            if (timestamp != null) {
-                              final difference = DateTime.now().difference(
-                                timestamp,
-                              );
-                              if (difference.inMinutes < 60) {
-                                timeAgo = '${difference.inMinutes} menit lalu';
-                              } else if (difference.inHours < 24) {
-                                timeAgo = '${difference.inHours} jam lalu';
-                              } else {
-                                timeAgo = '${difference.inDays} hari lalu';
-                              }
-                            }
-                          } catch (e) {
-                            timeAgo = 'Baru saja';
-                          }
-
-                          // Map status to display values
-                          IconData icon;
-                          Color iconColor;
-                          String statusLabel;
-                          Color statusColor;
-                          String activityTitle;
-
-                          switch (status) {
-                            case 'pending_payment':
-                              icon = Icons.shopping_bag_outlined;
-                              iconColor = AppColors.warning;
-                              statusLabel = 'Menunggu';
-                              statusColor = AppColors.warning;
-                              activityTitle = 'Order baru #$orderNumber';
-                              break;
-                            case 'paid':
-                              icon = Icons.payment;
-                              iconColor = AppColors.info;
-                              statusLabel = 'Dibayar';
-                              statusColor = AppColors.info;
-                              activityTitle = 'Pembayaran #$orderNumber';
-                              break;
-                            case 'processing':
-                              icon = Icons.inventory_2_outlined;
-                              iconColor = AppColors.info;
-                              statusLabel = 'Dikemas';
-                              statusColor = AppColors.info;
-                              activityTitle = 'Pengemasan #$orderNumber';
-                              break;
-                            case 'shipped':
-                              icon = Icons.local_shipping_outlined;
-                              iconColor = AppColors.info;
-                              statusLabel = 'Dikirim';
-                              statusColor = AppColors.info;
-                              activityTitle = 'Pengiriman #$orderNumber';
-                              break;
-                            case 'completed':
-                              icon = Icons.check_circle_outline;
-                              iconColor = AppColors.success;
-                              statusLabel = 'Selesai';
-                              statusColor = AppColors.success;
-                              activityTitle = 'Selesai #$orderNumber';
-                              break;
-                            case 'rejected':
-                              icon = Icons.cancel_outlined;
-                              iconColor = AppColors.danger;
-                              statusLabel = 'Ditolak';
-                              statusColor = AppColors.danger;
-                              activityTitle = 'Ditolak #$orderNumber';
-                              break;
-                            default:
-                              icon = Icons.help_outline;
-                              iconColor = AppColors.grey600;
-                              statusLabel = 'Unknown';
-                              statusColor = AppColors.grey600;
-                              activityTitle = 'Order #$orderNumber';
-                          }
-
-                          return _activityCard(
-                            icon: icon,
-                            iconColor: iconColor,
-                            title: activityTitle,
-                            subtitle: '$productName - $formattedTotal',
-                            time: timeAgo,
-                            status: statusLabel,
-                            statusColor: statusColor,
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationPage(),
+                            ),
                           );
-                        }).toList(),
+                          _loadUnreadCount(); // Refresh count after returning
+                        },
                       ),
+                    ],
+                  ),
 
-                const SizedBox(height: 80),
-              ],
+                  const SizedBox(height: 28),
+
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double cardWidth = (constraints.maxWidth - 16) / 2;
+
+                      return Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        children: [
+                          _dashboardCard(
+                            icon: Icons.check_circle_outline,
+                            title: 'Produk Aktif',
+                            value: isLoading ? '-' : '$activeProductCount',
+                            width: cardWidth,
+                            showArrow: true,
+                            onTap: widget.onProductTap,
+                          ),
+                          _dashboardCard(
+                            icon: Icons.monetization_on_outlined,
+                            title: 'Transaksi',
+                            subtitle: 'Bulan Ini',
+                            value: isLoading
+                                ? '-'
+                                : '$completedOrdersThisMonth',
+                            width: cardWidth,
+                            showArrow: true,
+                            onTap: widget.onTransactionTap,
+                          ),
+                          _dashboardCard(
+                            icon: Icons.chat_bubble_outline,
+                            title: 'Chat Unread',
+                            value: isLoading ? '-' : '$unreadChatCount',
+                            width: cardWidth,
+                            showArrow: true,
+                            onTap: () async {
+                              if (widget.onChatTap != null) {
+                                widget.onChatTap!();
+                              }
+                              await _loadUnreadChatCount();
+                            },
+                          ),
+                          _dashboardCard(
+                            icon: Icons.people_outline,
+                            title: 'Kelola Petani',
+                            value: isLoading ? '-' : '$petaniCount',
+                            width: cardWidth,
+                            showArrow: true,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const KelolaPetaniScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  const Text(
+                    'Aktivitas Terbaru',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(height: 16),
+
+                  isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : recentActivities.isEmpty
+                      ? Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Belum ada aktivitas',
+                              style: TextStyle(color: AppColors.grey600),
+                            ),
+                          ),
+                        )
+                      : Column(
+                          children: recentActivities.map((order) {
+                            final status = order['status'] as String;
+                            final orderNumber = order['order_number'] as String;
+                            final total = order['total'];
+                            final orderItems =
+                                order['order_items'] as List<dynamic>? ?? [];
+
+                            // Get first product name
+                            String productName = 'Produk';
+                            if (orderItems.isNotEmpty) {
+                              final firstItem =
+                                  orderItems[0] as Map<String, dynamic>;
+                              final product =
+                                  firstItem['product'] as Map<String, dynamic>?;
+                              productName = product?['name'] ?? 'Produk';
+                            }
+
+                            // Format total
+                            final formattedTotal =
+                                'Rp ${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+
+                            // Calculate time ago
+                            String timeAgo = '';
+                            DateTime? timestamp;
+
+                            try {
+                              if (status == 'completed' &&
+                                  order['completed_at'] != null) {
+                                timestamp = DateTime.parse(
+                                  order['completed_at'],
+                                );
+                              } else if (status == 'shipped' &&
+                                  order['shipped_at'] != null) {
+                                timestamp = DateTime.parse(order['shipped_at']);
+                              } else if (status == 'processing' &&
+                                  order['processing_at'] != null) {
+                                timestamp = DateTime.parse(
+                                  order['processing_at'],
+                                );
+                              } else if (status == 'paid' &&
+                                  order['paid_at'] != null) {
+                                timestamp = DateTime.parse(order['paid_at']);
+                              } else if (status == 'rejected' &&
+                                  order['rejected_at'] != null) {
+                                timestamp = DateTime.parse(
+                                  order['rejected_at'],
+                                );
+                              } else if (order['pending_payment_at'] != null) {
+                                timestamp = DateTime.parse(
+                                  order['pending_payment_at'],
+                                );
+                              }
+
+                              if (timestamp != null) {
+                                final difference = DateTime.now().difference(
+                                  timestamp,
+                                );
+                                if (difference.inMinutes < 60) {
+                                  timeAgo =
+                                      '${difference.inMinutes} menit lalu';
+                                } else if (difference.inHours < 24) {
+                                  timeAgo = '${difference.inHours} jam lalu';
+                                } else {
+                                  timeAgo = '${difference.inDays} hari lalu';
+                                }
+                              }
+                            } catch (e) {
+                              timeAgo = 'Baru saja';
+                            }
+
+                            // Map status to display values
+                            IconData icon;
+                            Color iconColor;
+                            String statusLabel;
+                            Color statusColor;
+                            String activityTitle;
+
+                            switch (status) {
+                              case 'pending_payment':
+                                icon = Icons.shopping_bag_outlined;
+                                iconColor = AppColors.warning;
+                                statusLabel = 'Menunggu';
+                                statusColor = AppColors.warning;
+                                activityTitle = 'Order baru #$orderNumber';
+                                break;
+                              case 'paid':
+                                icon = Icons.payment;
+                                iconColor = AppColors.info;
+                                statusLabel = 'Dibayar';
+                                statusColor = AppColors.info;
+                                activityTitle = 'Pembayaran #$orderNumber';
+                                break;
+                              case 'processing':
+                                icon = Icons.inventory_2_outlined;
+                                iconColor = AppColors.info;
+                                statusLabel = 'Dikemas';
+                                statusColor = AppColors.info;
+                                activityTitle = 'Pengemasan #$orderNumber';
+                                break;
+                              case 'shipped':
+                                icon = Icons.local_shipping_outlined;
+                                iconColor = AppColors.info;
+                                statusLabel = 'Dikirim';
+                                statusColor = AppColors.info;
+                                activityTitle = 'Pengiriman #$orderNumber';
+                                break;
+                              case 'completed':
+                                icon = Icons.check_circle_outline;
+                                iconColor = AppColors.success;
+                                statusLabel = 'Selesai';
+                                statusColor = AppColors.success;
+                                activityTitle = 'Selesai #$orderNumber';
+                                break;
+                              case 'rejected':
+                                icon = Icons.cancel_outlined;
+                                iconColor = AppColors.danger;
+                                statusLabel = 'Ditolak';
+                                statusColor = AppColors.danger;
+                                activityTitle = 'Ditolak #$orderNumber';
+                                break;
+                              default:
+                                icon = Icons.help_outline;
+                                iconColor = AppColors.grey600;
+                                statusLabel = 'Unknown';
+                                statusColor = AppColors.grey600;
+                                activityTitle = 'Order #$orderNumber';
+                            }
+
+                            return _activityCard(
+                              icon: icon,
+                              iconColor: iconColor,
+                              title: activityTitle,
+                              subtitle: '$productName - $formattedTotal',
+                              time: timeAgo,
+                              status: statusLabel,
+                              statusColor: statusColor,
+                            );
+                          }).toList(),
+                        ),
+
+                  const SizedBox(height: 80),
+                ],
+              ),
             ),
           ),
         ),
