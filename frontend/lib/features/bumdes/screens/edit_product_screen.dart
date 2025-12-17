@@ -145,7 +145,8 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           selectedVarietas = productVariety;
         } else {
           // If variety doesn't exist in list, set to first available or null
-          selectedVarietas = (selectedKategori != null &&
+          selectedVarietas =
+              (selectedKategori != null &&
                   varietiesByCategory.containsKey(selectedKategori) &&
                   varietiesByCategory[selectedKategori]!.isNotEmpty)
               ? varietiesByCategory[selectedKategori]!.first
@@ -1248,9 +1249,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
-                    value: (selectedVarietas != null &&
-                            varietiesByCategory[selectedKategori]!
-                                .contains(selectedVarietas))
+                    value:
+                        (selectedVarietas != null &&
+                            varietiesByCategory[selectedKategori]!.contains(
+                              selectedVarietas,
+                            ))
                         ? selectedVarietas
                         : null,
                     decoration: const InputDecoration(
