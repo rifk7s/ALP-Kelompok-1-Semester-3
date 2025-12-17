@@ -21,6 +21,12 @@ class _RegisterFormState extends State<RegisterForm> {
   final _passwordController = TextEditingController();
   final _addressController = TextEditingController();
 
+  // Keys untuk shake animation
+  final _nameShakeKey = GlobalKey<ShakeWidgetState>();
+  final _phoneShakeKey = GlobalKey<ShakeWidgetState>();
+  final _passwordShakeKey = GlobalKey<ShakeWidgetState>();
+  final _addressShakeKey = GlobalKey<ShakeWidgetState>();
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -33,15 +39,33 @@ class _RegisterFormState extends State<RegisterForm> {
   Future<void> _handleRegister() async {
     if (_isLoading) return;
 
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _addressController.text.isEmpty) {
+    // Validation dengan shake animation
+    bool hasError = false;
+
+    if (_nameController.text.isEmpty) {
+      _nameShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_phoneController.text.isEmpty) {
+      _phoneShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_passwordController.text.isEmpty) {
+      _passwordShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_addressController.text.isEmpty) {
+      _addressShakeKey.currentState?.shake();
+      hasError = true;
+    }
+
+    if (hasError) {
       SnackBarHelper.showError(context, 'Semua field harus diisi');
       return;
     }
 
     if (_passwordController.text.length < 8) {
+      _passwordShakeKey.currentState?.shake();
       SnackBarHelper.showError(context, 'Kata sandi minimal 8 karakter');
       return;
     }
@@ -107,9 +131,14 @@ class _RegisterFormState extends State<RegisterForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _nameController,
-          decoration: const InputDecoration(hintText: 'Masukkan Nama Lengkap'),
+        ShakeWidget(
+          key: _nameShakeKey,
+          child: TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              hintText: 'Masukkan Nama Lengkap',
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -117,10 +146,13 @@ class _RegisterFormState extends State<RegisterForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _phoneController,
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
+        ShakeWidget(
+          key: _phoneShakeKey,
+          child: TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
+          ),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -128,21 +160,24 @@ class _RegisterFormState extends State<RegisterForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _passwordController,
-          obscureText: !_isPasswordVisible,
-          decoration: InputDecoration(
-            hintText: 'Masukkan Kata Sandi',
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                color: AppColors.textSecondary,
+        ShakeWidget(
+          key: _passwordShakeKey,
+          child: TextFormField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            decoration: InputDecoration(
+              hintText: 'Masukkan Kata Sandi',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
               ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordVisible = !_isPasswordVisible;
-                });
-              },
             ),
           ),
         ),
@@ -152,10 +187,13 @@ class _RegisterFormState extends State<RegisterForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _addressController,
-          maxLines: 2,
-          decoration: const InputDecoration(hintText: 'Masukkan Alamat'),
+        ShakeWidget(
+          key: _addressShakeKey,
+          child: TextFormField(
+            controller: _addressController,
+            maxLines: 2,
+            decoration: const InputDecoration(hintText: 'Masukkan Alamat'),
+          ),
         ),
         const SizedBox(height: 24),
         ElevatedButton(

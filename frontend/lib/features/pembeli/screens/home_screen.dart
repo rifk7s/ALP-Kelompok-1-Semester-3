@@ -33,6 +33,8 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> products = [];
   bool isLoadingCategories = true;
   bool isLoadingProducts = true;
+  bool hasErrorCategories = false;
+  bool hasErrorProducts = false;
   int cartItemCount = 0;
   int unreadNotificationCount = 0;
 
@@ -82,10 +84,12 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         categories = data;
         isLoadingCategories = false;
+        hasErrorCategories = false;
       });
     } catch (e) {
       setState(() {
         isLoadingCategories = false;
+        hasErrorCategories = true;
       });
       if (mounted) {
         SnackBarHelper.showError(context, 'Gagal memuat kategori: $e');
@@ -112,10 +116,12 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         products = data;
         isLoadingProducts = false;
+        hasErrorProducts = false;
       });
     } catch (e) {
       setState(() {
         isLoadingProducts = false;
+        hasErrorProducts = true;
       });
       if (mounted) {
         SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
@@ -345,6 +351,8 @@ class _HomePageState extends State<HomePage> {
 
                 isLoadingCategories
                     ? const Center(child: CircularProgressIndicator())
+                    : hasErrorCategories
+                    ? _buildCategoryError()
                     : SizedBox(
                         height: 45,
                         child: ListView.builder(
@@ -395,6 +403,8 @@ class _HomePageState extends State<HomePage> {
                           child: CircularProgressIndicator(),
                         ),
                       )
+                    : hasErrorProducts
+                    ? _buildProductsError()
                     : products.isEmpty
                     ? const Padding(
                         padding: EdgeInsets.all(40),
@@ -433,6 +443,48 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryError() {
+    return Container(
+      height: 45,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Center(
+        child: TextButton.icon(
+          onPressed: loadCategories,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: const Text('Gagal memuat. Coba lagi'),
+          style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductsError() {
+    return Padding(
+      padding: const EdgeInsets.all(40),
+      child: Center(
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
+            const SizedBox(height: 12),
+            const Text(
+              'Gagal memuat produk',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => loadProducts(categoryId: _selectedCategoryId),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+            ),
+          ],
         ),
       ),
     );

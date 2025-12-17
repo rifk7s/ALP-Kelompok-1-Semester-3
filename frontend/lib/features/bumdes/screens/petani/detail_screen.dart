@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:intl/intl.dart';
 import 'edit_screen.dart';
 import '../product_detail_screen.dart';
@@ -212,33 +213,13 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.danger,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: AppColors.textDark),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadPetaniDetail,
-                    child: const Text('Coba Lagi'),
-                  ),
-                ],
-              ),
-            )
-          : _buildContent(),
+      body: RetryableContent(
+        isLoading: _isLoading,
+        hasError: _errorMessage != null,
+        errorMessage: _errorMessage,
+        onRetry: _loadPetaniDetail,
+        child: _buildContent(),
+      ),
     );
   }
 

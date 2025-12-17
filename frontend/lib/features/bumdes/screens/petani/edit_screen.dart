@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 
 class EditPetaniScreen extends StatefulWidget {
   final PetaniData petani;
@@ -15,6 +16,7 @@ class EditPetaniScreen extends StatefulWidget {
 class _EditPetaniScreenState extends State<EditPetaniScreen> {
   final _formKey = GlobalKey<FormState>();
   final _petaniService = PetaniService();
+  final _nameShakeKey = GlobalKey<ShakeWidgetState>();
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -43,7 +45,13 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // Trigger shake animation on validation failure
+      if (_nameController.text.trim().isEmpty) {
+        _nameShakeKey.currentState?.shake();
+      }
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
@@ -126,34 +134,37 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Masukkan nama petani',
-                  filled: true,
-                  fillColor: AppColors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.greyLight),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.primary,
-                      width: 2,
+              ShakeWidget(
+                key: _nameShakeKey,
+                child: TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: 'Masukkan nama petani',
+                    filled: true,
+                    fillColor: AppColors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.greyLight),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Nama petani wajib diisi';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nama petani wajib diisi';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 20),

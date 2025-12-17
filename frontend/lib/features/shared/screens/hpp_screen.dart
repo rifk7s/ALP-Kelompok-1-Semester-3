@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:intl/intl.dart';
 
 class HppPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class _HppPageState extends State<HppPage> {
   Map<String, List<dynamic>> hppByCategory = {};
   String latestUpdateDate = '-';
   bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -24,7 +26,10 @@ class _HppPageState extends State<HppPage> {
   }
 
   Future<void> _loadHppData() async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+      hasError = false;
+    });
 
     try {
       final data = await HppPriceService.getHppPrices();
@@ -60,12 +65,16 @@ class _HppPageState extends State<HppPage> {
           latestUpdateDate = _formatDate(latestDate);
         }
         isLoading = false;
+        hasError = false;
       });
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error loading HPP data: $e');
       }
-      setState(() => isLoading = false);
+      setState(() {
+        isLoading = false;
+        hasError = true;
+      });
     }
   }
 
@@ -119,135 +128,137 @@ class _HppPageState extends State<HppPage> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppColors.hppHeader,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.black.withValues(alpha: 0.08),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+        child: RetryableContent(
+          isLoading: isLoading,
+          hasError: hasError,
+          errorMessage: 'Gagal memuat data harga acuan',
+          onRetry: _loadHppData,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppColors.hppHeader,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withValues(alpha: 0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  "Harga Pembelian Pemerintah",
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
+                          const Expanded(
+                            child: Text(
+                              "Harga Pembelian Pemerintah",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.black.withValues(
-                                    alpha: 0.15,
-                                  ),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: const Text(
-                                  "Data resmi",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "Update terakhir: $latestUpdateDate",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            "Sumber: Badan Pangan Nasional (Bulog)",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.black.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: const Text(
+                              "Data resmi",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Update terakhir: $latestUpdateDate",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "Sumber: Badan Pangan Nasional (Bulog)",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                    const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-                    // Dynamic categories and varieties
-                    ...hppByCategory.entries.map((entry) {
-                      String categoryName = entry.key;
-                      List<dynamic> items = entry.value;
+                // Dynamic categories and varieties
+                ...hppByCategory.entries.map((entry) {
+                  String categoryName = entry.key;
+                  List<dynamic> items = entry.value;
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle(categoryName),
-                          ...items.map(
-                            (item) => _buildItem(
-                              title: item['variety'],
-                              price: '${_formatPrice(item['price_per_kg'])}/kg',
-                              date: _formatDate(
-                                DateTime.parse(item['effective_date']),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                        ],
-                      );
-                    }),
-
-                    Center(
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                            elevation: 3,
-                          ),
-                          onPressed: _loadHppData,
-                          child: const Text(
-                            "Segarkan Data",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(categoryName),
+                      ...items.map(
+                        (item) => _buildItem(
+                          title: item['variety'],
+                          price: '${_formatPrice(item['price_per_kg'])}/kg',
+                          date: _formatDate(
+                            DateTime.parse(item['effective_date']),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 28),
+                    ],
+                  );
+                }),
 
-                    const SizedBox(height: 10),
-                  ],
+                Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        elevation: 3,
+                      ),
+                      onPressed: _loadHppData,
+                      child: const Text(
+                        "Segarkan Data",
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
