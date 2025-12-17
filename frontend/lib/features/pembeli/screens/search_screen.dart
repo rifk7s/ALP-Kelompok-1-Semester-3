@@ -352,7 +352,7 @@ Widget productCard({
                     locale: 'id',
                     symbol: 'Rp ',
                     decimalDigits: 0,
-                  ).format(product['price'] ?? 0),
+                  ).format(_parsePrice(product)),
                   style: const TextStyle(
                     color: AppColors.danger,
                     fontWeight: FontWeight.bold,
@@ -394,4 +394,13 @@ Widget productCard({
       ),
     ),
   );
+}
+
+// Helper function to robustly parse price from product map
+int _parsePrice(Map<String, dynamic> product) {
+  final price = product['price_per_kg'] ?? product['price'];
+  if (price is int) return price;
+  if (price is double) return price.round();
+  if (price is String) return int.tryParse(price) ?? double.tryParse(price)?.round() ?? 0;
+  return 0;
 }
