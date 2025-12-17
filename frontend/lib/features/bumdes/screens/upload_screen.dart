@@ -41,6 +41,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   final _masaSimpanController = TextEditingController();
   final _infoTambahanController = TextEditingController();
 
+  // Shake key for validation
+  final _namaProdukShakeKey = GlobalKey<ShakeWidgetState>();
+
   String? masaSimpanNote;
 
   final ImagePicker _picker = ImagePicker();
@@ -80,7 +83,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       final token = await StorageService.getToken();
 
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       // Load categories
@@ -119,7 +122,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         isLoading = false;
       });
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error loading data: $e');
+        SnackBarHelper.showError(context, 'Gagal memuat data: $e');
       }
     }
   }
@@ -179,6 +182,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   Future<void> submitProduct() async {
     // Validation
     if (_namaProdukController.text.isEmpty) {
+      _namaProdukShakeKey.currentState?.shake();
       SnackBarHelper.showError(context, 'Nama produk harus diisi');
       return;
     }
@@ -266,7 +270,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       });
 
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error: $e');
+        SnackBarHelper.showError(context, 'Terjadi kesalahan: $e');
       }
     }
   }
@@ -538,78 +542,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
-          elevation: 1,
-          centerTitle: true,
-          title: const Text(
-            "Kelola Data Petani",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textLight,
-            ),
-          ),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    // Show error state if data failed to load
-    if (categories.isEmpty || hppPrices.isEmpty) {
-      return Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
-          elevation: 1,
-          centerTitle: true,
-          title: const Text(
-            "Kelola Data Petani",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textLight,
-            ),
-          ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: AppColors.danger,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Gagal memuat data',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text('Silakan coba lagi'),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  loadData();
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Coba Lagi'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    // Check if data failed to load
+    final bool hasError =
+        !isLoading && (categories.isEmpty || hppPrices.isEmpty);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -626,478 +561,442 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          sectionCard(
-            title: "Foto Produk",
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: pickImages,
-                  icon: const Icon(Icons.add_a_photo),
-                  label: const Text("Upload Foto"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+      body: RetryableContent(
+        isLoading: isLoading,
+        hasError: hasError,
+        errorMessage: 'Gagal memuat data kategori dan harga',
+        onRetry: () {
+          setState(() => isLoading = true);
+          loadData();
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            sectionCard(
+              title: "Foto Produk",
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: pickImages,
+                    icon: const Icon(Icons.add_a_photo),
+                    label: const Text("Unggah Foto"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                if (selectedImages.isNotEmpty)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: selectedImages.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 1.0,
-                        ),
-                    itemBuilder: (_, i) {
-                      return Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              selectedImages[i],
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
+                  if (selectedImages.isNotEmpty)
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: selectedImages.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 1.0,
                           ),
-                          Positioned(
-                            right: 4,
-                            top: 4,
-                            child: InkWell(
-                              onTap: () =>
-                                  setState(() => selectedImages.removeAt(i)),
-                              child: const CircleAvatar(
-                                backgroundColor: AppColors.textMuted,
-                                radius: 12,
-                                child: Icon(
-                                  Icons.close,
-                                  color: AppColors.white,
-                                  size: 16,
+                      itemBuilder: (_, i) {
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                selectedImages[i],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                            Positioned(
+                              right: 4,
+                              top: 4,
+                              child: InkWell(
+                                onTap: () =>
+                                    setState(() => selectedImages.removeAt(i)),
+                                child: const CircleAvatar(
+                                  backgroundColor: AppColors.textMuted,
+                                  radius: 12,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: AppColors.white,
+                                    size: 16,
+                                  ),
                                 ),
                               ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+
+            sectionCard(
+              title: "Informasi Utama",
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  inputLabel("Nama Produk *"),
+                  ShakeWidget(
+                    key: _namaProdukShakeKey,
+                    child: TextField(
+                      controller: _namaProdukController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.shopping_bag),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  inputLabel("Kontributor Petani *"),
+
+                  // Display added contributors
+                  if (petaniContributors.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Urutan FIFO (teratas dijual pertama):',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...petaniContributors.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final contrib = entry.value;
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${index + 1}',
+                                        style: const TextStyle(
+                                          color: AppColors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          contrib['petani_name'],
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${contrib['contributed_kg']} kg',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textMuted,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Panen: ${_formatDate(contrib['harvest_date'])}',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textMuted,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: AppColors.primary,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      _editContributor(index, contrib);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: AppColors.danger,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        petaniContributors.removeAt(index);
+                                        // Update total stock
+                                        final total = petaniContributors
+                                            .fold<double>(
+                                              0,
+                                              (sum, c) =>
+                                                  sum +
+                                                  (c['contributed_kg'] as num)
+                                                      .toDouble(),
+                                            );
+                                        _jumlahController.text = total
+                                            .toStringAsFixed(2);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                          const Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Total:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                '${petaniContributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble()).toStringAsFixed(2)} kg',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Add new contributor
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Harvest date picker
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              selectedHarvestDate = picked;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.border),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_today, size: 20),
+                              const SizedBox(width: 10),
+                              Text(
+                                selectedHarvestDate == null
+                                    ? "Pilih tanggal panen"
+                                    : "${selectedHarvestDate!.day} ${_bulan(selectedHarvestDate!.month)} ${selectedHarvestDate!.year}",
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Petani, kg, and add button row
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<int>(
+                              initialValue: selectedPetaniId,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.person),
+                                hintText: 'Pilih Petani',
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              items: petaniList
+                                  .where((p) => p.isActive)
+                                  .map(
+                                    (p) => DropdownMenuItem<int>(
+                                      value: p.id,
+                                      child: Text(
+                                        p.name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) {
+                                setState(() {
+                                  selectedPetaniId = v;
+                                  if (v != null) {
+                                    final petani = petaniList.firstWhere(
+                                      (p) => p.id == v,
+                                    );
+                                    selectedPetani = petani.name;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _kontribusiController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'kg',
+                                prefixIcon: Icon(Icons.scale),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            width: 56,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Validation dengan early return
+                                if (selectedPetaniId == null) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Pilih petani terlebih dahulu',
+                                  );
+                                  return;
+                                }
+
+                                if (selectedHarvestDate == null) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Pilih tanggal panen',
+                                  );
+                                  return;
+                                }
+
+                                final kg = double.tryParse(
+                                  _kontribusiController.text,
+                                );
+                                if (kg == null || kg <= 0) {
+                                  SnackBarHelper.showError(
+                                    context,
+                                    'Masukkan jumlah kg yang valid',
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  petaniContributors.add({
+                                    'petani_id': selectedPetaniId!,
+                                    'petani_name': selectedPetani!,
+                                    'contributed_kg': kg,
+                                    'harvest_date': selectedHarvestDate!
+                                        .toIso8601String()
+                                        .split('T')[0],
+                                  });
+
+                                  // Update total stock
+                                  final total = petaniContributors.fold<double>(
+                                    0,
+                                    (sum, contrib) =>
+                                        sum +
+                                        (contrib['contributed_kg'] as num)
+                                            .toDouble(),
+                                  );
+                                  _jumlahController.text = total
+                                      .toStringAsFixed(2);
+
+                                  // Reset fields
+                                  selectedPetaniId = null;
+                                  selectedPetani = null;
+                                  selectedHarvestDate = null;
+                                  _kontribusiController.clear();
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                              child: const Icon(Icons.add),
                             ),
                           ),
                         ],
-                      );
-                    },
-                  ),
-              ],
-            ),
-          ),
-
-          sectionCard(
-            title: "Informasi Utama",
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                inputLabel("Nama Produk *"),
-                TextField(
-                  controller: _namaProdukController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.shopping_bag),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                inputLabel("Kontributor Petani *"),
-
-                // Display added contributors
-                if (petaniContributors.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Urutan FIFO (teratas dijual pertama):',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ...petaniContributors.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final contrib = entry.value;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${index + 1}',
-                                      style: const TextStyle(
-                                        color: AppColors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        contrib['petani_name'],
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${contrib['contributed_kg']} kg',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.textMuted,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Panen: ${_formatDate(contrib['harvest_date'])}',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: AppColors.textMuted,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: AppColors.primary,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    _editContributor(index, contrib);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: AppColors.danger,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      petaniContributors.removeAt(index);
-                                      // Update total stock
-                                      final total = petaniContributors
-                                          .fold<double>(
-                                            0,
-                                            (sum, c) =>
-                                                sum +
-                                                (c['contributed_kg'] as num)
-                                                    .toDouble(),
-                                          );
-                                      _jumlahController.text = total
-                                          .toStringAsFixed(2);
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                        const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Total:',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '${petaniContributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble()).toStringAsFixed(2)} kg',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                // Add new contributor
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Harvest date picker
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          setState(() {
-                            selectedHarvestDate = picked;
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.calendar_today, size: 20),
-                            const SizedBox(width: 10),
-                            Text(
-                              selectedHarvestDate == null
-                                  ? "Pilih tanggal panen"
-                                  : "${selectedHarvestDate!.day} ${_bulan(selectedHarvestDate!.month)} ${selectedHarvestDate!.year}",
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Petani, kg, and add button row
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: DropdownButtonFormField<int>(
-                            initialValue: selectedPetaniId,
-                            isExpanded: true,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.person),
-                              hintText: 'Pilih Petani',
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: petaniList
-                                .where((p) => p.isActive)
-                                .map(
-                                  (p) => DropdownMenuItem<int>(
-                                    value: p.id,
-                                    child: Text(
-                                      p.name,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) {
-                              setState(() {
-                                selectedPetaniId = v;
-                                if (v != null) {
-                                  final petani = petaniList.firstWhere(
-                                    (p) => p.id == v,
-                                  );
-                                  selectedPetani = petani.name;
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _kontribusiController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'kg',
-                              prefixIcon: Icon(Icons.scale),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          width: 56,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Validation dengan early return
-                              if (selectedPetaniId == null) {
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Pilih petani terlebih dahulu',
-                                );
-                                return;
-                              }
-
-                              if (selectedHarvestDate == null) {
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Pilih tanggal panen',
-                                );
-                                return;
-                              }
-
-                              final kg = double.tryParse(
-                                _kontribusiController.text,
-                              );
-                              if (kg == null || kg <= 0) {
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Masukkan jumlah kg yang valid',
-                                );
-                                return;
-                              }
-
-                              setState(() {
-                                petaniContributors.add({
-                                  'petani_id': selectedPetaniId!,
-                                  'petani_name': selectedPetani!,
-                                  'contributed_kg': kg,
-                                  'harvest_date': selectedHarvestDate!
-                                      .toIso8601String()
-                                      .split('T')[0],
-                                });
-
-                                // Update total stock
-                                final total = petaniContributors.fold<double>(
-                                  0,
-                                  (sum, contrib) =>
-                                      sum +
-                                      (contrib['contributed_kg'] as num)
-                                          .toDouble(),
-                                );
-                                _jumlahController.text = total.toStringAsFixed(
-                                  2,
-                                );
-
-                                // Reset fields
-                                selectedPetaniId = null;
-                                selectedPetani = null;
-                                selectedHarvestDate = null;
-                                _kontribusiController.clear();
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: const Icon(Icons.add),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                inputLabel("Kategori *"),
-                DropdownButtonFormField<int>(
-                  initialValue: selectedKategoriId,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.category),
+                    ],
                   ),
-                  items: categories
-                      .map(
-                        (c) => DropdownMenuItem<int>(
-                          value: c['id'],
-                          child: Text(
-                            c['name'],
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    setState(() {
-                      selectedKategoriId = v;
-                      final category = categories.firstWhere(
-                        (c) => c['id'] == v,
-                      );
-                      selectedKategori = category['name'];
-                      selectedVarietas = null; // Reset variety
+                  const SizedBox(height: 14),
 
-                      // Update price based on category
-                      final price = getPriceForSelection();
-                      if (price != null) {
-                        _hargaController.text = rupiah.format(price.toInt());
-                      }
-                    });
-                  },
-                ),
-
-                if (selectedKategori != null && getPriceForSelection() != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      "ℹ️ HPP $selectedKategori: Rp ${getPriceForSelection()!.toInt()}/kg",
-                      style: const TextStyle(color: AppColors.textDark),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          sectionCard(
-            title: "Detail Produk",
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (selectedKategori != null &&
-                    varietiesByCategory.containsKey(selectedKategori) &&
-                    varietiesByCategory[selectedKategori]!.length > 1) ...[
-                  inputLabel("Varietas *"),
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedVarietas,
+                  inputLabel("Kategori *"),
+                  DropdownButtonFormField<int>(
+                    initialValue: selectedKategoriId,
                     isExpanded: true,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.grass),
+                      prefixIcon: Icon(Icons.category),
                     ),
-                    items: varietiesByCategory[selectedKategori]!
+                    items: categories
                         .map(
-                          (v) => DropdownMenuItem<String>(
-                            value: v,
-                            child: Text(v, overflow: TextOverflow.ellipsis),
+                          (c) => DropdownMenuItem<int>(
+                            value: c['id'],
+                            child: Text(
+                              c['name'],
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         )
                         .toList(),
                     onChanged: (v) {
                       setState(() {
-                        selectedVarietas = v;
-                        // Update price based on variety
+                        selectedKategoriId = v;
+                        final category = categories.firstWhere(
+                          (c) => c['id'] == v,
+                        );
+                        selectedKategori = category['name'];
+                        selectedVarietas = null; // Reset variety
+
+                        // Update price based on category
                         final price = getPriceForSelection();
                         if (price != null) {
                           _hargaController.text = rupiah.format(price.toInt());
@@ -1105,96 +1004,154 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 14),
-                ],
 
-                const SizedBox(height: 14),
-
-                inputLabel("Harga per Kg *"),
-                TextField(
-                  controller: _hargaController,
-                  keyboardType: TextInputType.number,
-                  readOnly: true,
-                  enabled: false,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.price_change),
-                    filled: true,
-                    fillColor: AppColors.grey100,
-                  ),
-                  style: const TextStyle(color: AppColors.textMuted),
-                ),
-
-                const SizedBox(height: 14),
-
-                inputLabel("Jumlah Stok (kg) *"),
-                TextField(
-                  controller: _jumlahController,
-                  keyboardType: TextInputType.number,
-                  readOnly: true,
-                  enabled: false,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.numbers),
-                    filled: true,
-                    fillColor: AppColors.grey100,
-                    hintText: 'Auto-calculated from contributions',
-                  ),
-                  style: const TextStyle(color: AppColors.textMuted),
-                ),
-              ],
-            ),
-          ),
-
-          sectionCard(
-            title: "Lainnya",
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                inputLabel("Info Tambahan"),
-                TextField(
-                  maxLines: 3,
-                  controller: _infoTambahanController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isSubmitting ? null : submitProduct,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: AppColors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      "SIMPAN PRODUK",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                  if (selectedKategori != null &&
+                      getPriceForSelection() != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        "ℹ️ HPP $selectedKategori: Rp ${getPriceForSelection()!.toInt()}/kg",
+                        style: const TextStyle(color: AppColors.textDark),
                       ),
                     ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            sectionCard(
+              title: "Detail Produk",
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (selectedKategori != null &&
+                      varietiesByCategory.containsKey(selectedKategori) &&
+                      varietiesByCategory[selectedKategori]!.length > 1) ...[
+                    inputLabel("Varietas *"),
+                    DropdownButtonFormField<String>(
+                      value:
+                          (selectedVarietas != null &&
+                              varietiesByCategory[selectedKategori]!.contains(
+                                selectedVarietas,
+                              ))
+                          ? selectedVarietas
+                          : null,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.grass),
+                      ),
+                      items: varietiesByCategory[selectedKategori]!
+                          .map(
+                            (v) => DropdownMenuItem<String>(
+                              value: v,
+                              child: Text(v, overflow: TextOverflow.ellipsis),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          selectedVarietas = v;
+                          // Update price based on variety
+                          final price = getPriceForSelection();
+                          if (price != null) {
+                            _hargaController.text = rupiah.format(
+                              price.toInt(),
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
+                  const SizedBox(height: 14),
+
+                  inputLabel("Harga per Kg *"),
+                  TextField(
+                    controller: _hargaController,
+                    keyboardType: TextInputType.number,
+                    readOnly: true,
+                    enabled: false,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.price_change),
+                      filled: true,
+                      fillColor: AppColors.grey100,
+                    ),
+                    style: const TextStyle(color: AppColors.textMuted),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  inputLabel("Jumlah Stok (kg) *"),
+                  TextField(
+                    controller: _jumlahController,
+                    keyboardType: TextInputType.number,
+                    readOnly: true,
+                    enabled: false,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.numbers),
+                      filled: true,
+                      fillColor: AppColors.grey100,
+                      hintText: 'Auto-calculated from contributions',
+                    ),
+                    style: const TextStyle(color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+
+            sectionCard(
+              title: "Lainnya",
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  inputLabel("Info Tambahan"),
+                  TextField(
+                    maxLines: 3,
+                    controller: _infoTambahanController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isSubmitting ? null : submitProduct,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "SIMPAN PRODUK",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

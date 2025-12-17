@@ -186,7 +186,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    userProfile?.name ?? 'User',
+                                    userProfile?.name ?? 'Pengguna',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 
 class TambahPetaniScreen extends StatefulWidget {
   const TambahPetaniScreen({super.key});
@@ -14,31 +15,32 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
   final _petaniService = PetaniService();
   bool _isLoading = false;
 
+  // Controllers
+  final _namaController = TextEditingController();
+  final _hpController = TextEditingController();
+  final _alamatController = TextEditingController();
+
+  // Shake keys
+  final _namaShakeKey = GlobalKey<ShakeWidgetState>();
+
+  @override
+  void dispose() {
+    _namaController.dispose();
+    _hpController.dispose();
+    _alamatController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final namaController = TextEditingController();
-    final hpController = TextEditingController();
-    final alamatController = TextEditingController();
-
     Future<void> handleSave() async {
-      final nama = namaController.text.trim();
-      final hp = hpController.text.trim();
-      final alamat = alamatController.text.trim();
+      final nama = _namaController.text.trim();
+      final hp = _hpController.text.trim();
+      final alamat = _alamatController.text.trim();
 
       if (nama.isEmpty) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text("Gagal"),
-            content: const Text("Nama petani wajib diisi."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-        );
+        _namaShakeKey.currentState?.shake();
+        SnackBarHelper.showError(context, 'Nama petani wajib diisi');
         return;
       }
 
@@ -50,7 +52,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         // Get token from storage
         final token = await StorageService.getToken();
         if (token == null) {
-          throw Exception('Token tidak ditemukan. Silakan login kembali.');
+          throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
         }
 
         // Prepare data
@@ -106,7 +108,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text("Error"),
+            title: const Text("Kesalahan"),
             content: Text(e.toString().replaceAll('Exception: ', '')),
             actions: [
               TextButton(
@@ -147,17 +149,20 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           children: [
-            customInput("Nama Lengkap *", namaController),
+            ShakeWidget(
+              key: _namaShakeKey,
+              child: customInput("Nama Lengkap *", _namaController),
+            ),
             const SizedBox(height: 18),
 
             customInput(
               "Nomor HP *",
-              hpController,
+              _hpController,
               keyboard: TextInputType.phone,
             ),
             const SizedBox(height: 18),
 
-            customInput("Alamat (Opsional)", alamatController, maxLines: 3),
+            customInput("Alamat (Opsional)", _alamatController, maxLines: 3),
             const SizedBox(height: 35),
 
             SizedBox(

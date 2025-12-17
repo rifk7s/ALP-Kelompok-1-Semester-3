@@ -47,7 +47,7 @@ class _ProductPageState extends State<ProductPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading products: $e')));
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
       }
     }
   }

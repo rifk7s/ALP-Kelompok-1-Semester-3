@@ -193,7 +193,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       if (token == null) {
         setState(() => _saving = false);
-        _showError('Sesi telah berakhir, silakan login kembali');
+        _showError('Sesi telah berakhir, silakan masuk kembali');
         return;
       }
 

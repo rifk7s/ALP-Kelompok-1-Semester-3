@@ -22,6 +22,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
+  bool _hasError = false;
 
   final List<String> _statusFlow = [
     'pending_payment',
@@ -44,17 +45,31 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
   }
 
   Future<void> _loadOrders() async {
-    setState(() => _isLoading = true);
-
-    final orders = await AdminService.getOrdersByStatus();
-    if (kDebugMode) {
-      debugPrint('Loaded ${orders.length} orders');
-    }
-
     setState(() {
-      _orders = orders;
-      _isLoading = false;
+      _isLoading = true;
+      _hasError = false;
     });
+
+    try {
+      final orders = await AdminService.getOrdersByStatus();
+      if (kDebugMode) {
+        debugPrint('Loaded ${orders.length} orders');
+      }
+
+      setState(() {
+        _orders = orders;
+        _isLoading = false;
+        _hasError = false;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error loading orders: $e');
+      }
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
   }
 
   @override
@@ -382,12 +397,16 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: _statusFlow.map(_buildOrderListWithRefresh).toList(),
-            ),
+      body: RetryableContent(
+        isLoading: _isLoading,
+        hasError: _hasError,
+        errorMessage: 'Gagal memuat data transaksi',
+        onRetry: _loadOrders,
+        child: TabBarView(
+          controller: _tabController,
+          children: _statusFlow.map(_buildOrderListWithRefresh).toList(),
+        ),
+      ),
     );
   }
 

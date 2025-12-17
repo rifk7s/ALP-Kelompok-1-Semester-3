@@ -147,7 +147,7 @@ class _ContactPageState extends State<ContactPage> {
                   : _currentUserId == null
                   ? const Center(
                       child: Text(
-                        'Silakan login untuk melihat pesan',
+                        'Silakan masuk untuk melihat pesan',
                         style: TextStyle(color: AppColors.textMuted),
                       ),
                     )
@@ -223,7 +223,7 @@ class _ContactPageState extends State<ContactPage> {
                               (id) => id != _currentUserId,
                               orElse: () => '',
                             );
-                            final otherName = names[otherUserId] ?? 'User';
+                            final otherName = names[otherUserId] ?? 'Pengguna';
                             final otherImage = images[otherUserId] ?? '';
                             final lastMessage = data['lastMessage'] ?? '';
                             final lastTime =

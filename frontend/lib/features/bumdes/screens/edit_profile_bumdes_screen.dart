@@ -193,7 +193,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
 
       if (token == null) {
         setState(() => _saving = false);
-        _showError('Sesi telah berakhir, silakan login kembali');
+        _showError('Sesi telah berakhir, silakan masuk kembali');
         return;
       }
 

@@ -129,7 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 8),
 
                         Text(
-                          _user?['name'] ?? 'User',
+                          _user?['name'] ?? 'Pengguna',
                           style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 
@@ -249,6 +250,226 @@ class DialogManager {
             child: Text(confirmText ?? 'OK'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// ShakeWidget - Animasi shake untuk form validation error
+/// Usage: Wrap TextField dengan ShakeWidget, lalu panggil shakeKey.currentState?.shake()
+class ShakeWidget extends StatefulWidget {
+  final Widget child;
+  final double shakeOffset;
+  final int shakeCount;
+  final Duration duration;
+
+  const ShakeWidget({
+    super.key,
+    required this.child,
+    this.shakeOffset = 10.0,
+    this.shakeCount = 3,
+    this.duration = const Duration(milliseconds: 400),
+  });
+
+  @override
+  State<ShakeWidget> createState() => ShakeWidgetState();
+}
+
+class ShakeWidgetState extends State<ShakeWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: _ShakeCurve(widget.shakeCount),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Trigger shake animation
+  void shake() {
+    _controller.forward(from: 0.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      child: widget.child,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_animation.value * widget.shakeOffset, 0),
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+/// Custom curve untuk efek shake bolak-balik
+class _ShakeCurve extends Curve {
+  final int count;
+
+  const _ShakeCurve(this.count);
+
+  @override
+  double transformInternal(double t) {
+    return math.sin(t * math.pi * count * 2) * (1 - t);
+  }
+}
+
+/// RetryableContent - Widget untuk menampilkan error state dengan tombol retry
+/// Usage: Wrap konten dengan RetryableContent, set hasError dan onRetry
+class RetryableContent extends StatelessWidget {
+  final bool isLoading;
+  final bool hasError;
+  final String? errorMessage;
+  final VoidCallback onRetry;
+  final Widget child;
+  final Widget? loadingWidget;
+  final IconData? errorIcon;
+
+  const RetryableContent({
+    super.key,
+    required this.isLoading,
+    required this.hasError,
+    required this.onRetry,
+    required this.child,
+    this.errorMessage,
+    this.loadingWidget,
+    this.errorIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return loadingWidget ?? const Center(child: CircularProgressIndicator());
+    }
+
+    if (hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                errorIcon ?? Icons.error_outline,
+                size: 64,
+                color: AppColors.danger,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage ?? 'Terjadi kesalahan saat memuat data',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba Lagi'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return child;
+  }
+}
+
+/// EmptyStateWidget - Widget untuk menampilkan state kosong
+class EmptyStateWidget extends StatelessWidget {
+  final String message;
+  final String? subMessage;
+  final IconData? icon;
+  final VoidCallback? onAction;
+  final String? actionLabel;
+
+  const EmptyStateWidget({
+    super.key,
+    required this.message,
+    this.subMessage,
+    this.icon,
+    this.onAction,
+    this.actionLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon ?? Icons.inbox_outlined,
+              size: 64,
+              color: AppColors.textMuted,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
+              ),
+            ),
+            if (subMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                subMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+            if (onAction != null && actionLabel != null) ...[
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(actionLabel!),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

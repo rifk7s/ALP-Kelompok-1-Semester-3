@@ -22,6 +22,10 @@ class _LoginFormState extends State<LoginForm> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Keys untuk shake animation
+  final _phoneShakeKey = GlobalKey<ShakeWidgetState>();
+  final _passwordShakeKey = GlobalKey<ShakeWidgetState>();
+
   @override
   void dispose() {
     _phoneController.dispose();
@@ -32,7 +36,20 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _handleLogin() async {
     if (_isLoading) return;
 
-    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+    // Validation dengan shake animation
+    bool hasError = false;
+
+    if (_phoneController.text.isEmpty) {
+      _phoneShakeKey.currentState?.shake();
+      hasError = true;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _passwordShakeKey.currentState?.shake();
+      hasError = true;
+    }
+
+    if (hasError) {
       SnackBarHelper.showError(context, 'Nomor HP dan kata sandi harus diisi');
       return;
     }
@@ -79,10 +96,13 @@ class _LoginFormState extends State<LoginForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _phoneController,
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
+        ShakeWidget(
+          key: _phoneShakeKey,
+          child: TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
+          ),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -90,21 +110,24 @@ class _LoginFormState extends State<LoginForm> {
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _passwordController,
-          obscureText: !_isPasswordVisible,
-          decoration: InputDecoration(
-            hintText: 'Masukkan Kata Sandi',
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                color: AppColors.textSecondary,
+        ShakeWidget(
+          key: _passwordShakeKey,
+          child: TextFormField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            decoration: InputDecoration(
+              hintText: 'Masukkan Kata Sandi',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
               ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordVisible = !_isPasswordVisible;
-                });
-              },
             ),
           ),
         ),
@@ -161,7 +184,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Login untuk melanjutkan',
+              'Masuk untuk melanjutkan',
               style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],

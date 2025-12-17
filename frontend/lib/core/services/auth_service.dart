@@ -196,7 +196,7 @@ class AuthService {
         await StorageService.clearAll();
         return AuthResult(
           success: false,
-          message: 'Sesi telah berakhir, silakan login kembali',
+          message: 'Sesi telah berakhir, silakan masuk kembali',
           isUnauthorized: true,
         );
       } else {
