@@ -137,8 +137,20 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           }
         }
 
-        // Set variety
-        selectedVarietas = widget.product['variety'];
+        // Set variety - only if it exists in the varieties list
+        final productVariety = widget.product['variety'];
+        if (selectedKategori != null &&
+            varietiesByCategory.containsKey(selectedKategori) &&
+            varietiesByCategory[selectedKategori]!.contains(productVariety)) {
+          selectedVarietas = productVariety;
+        } else {
+          // If variety doesn't exist in list, set to first available or null
+          selectedVarietas = (selectedKategori != null &&
+                  varietiesByCategory.containsKey(selectedKategori) &&
+                  varietiesByCategory[selectedKategori]!.isNotEmpty)
+              ? varietiesByCategory[selectedKategori]!.first
+              : null;
+        }
 
         // Set harvest date
         if (widget.product['harvest_date'] != null) {
@@ -1236,7 +1248,11 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                     varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
-                    initialValue: selectedVarietas,
+                    value: (selectedVarietas != null &&
+                            varietiesByCategory[selectedKategori]!
+                                .contains(selectedVarietas))
+                        ? selectedVarietas
+                        : null,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.grass),

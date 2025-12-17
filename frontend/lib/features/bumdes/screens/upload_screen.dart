@@ -1080,7 +1080,11 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                     varietiesByCategory[selectedKategori]!.length > 1) ...[
                   inputLabel("Varietas *"),
                   DropdownButtonFormField<String>(
-                    initialValue: selectedVarietas,
+                    value: (selectedVarietas != null &&
+                            varietiesByCategory[selectedKategori]!
+                                .contains(selectedVarietas))
+                        ? selectedVarietas
+                        : null,
                     isExpanded: true,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
