@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
         isLoadingCategories = false;
       });
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error loading categories: $e');
+        SnackBarHelper.showError(context, 'Gagal memuat kategori: $e');
       }
     }
   }
@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage> {
         isLoadingProducts = false;
       });
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error loading products: $e');
+        SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
       }
     }
   }

@@ -97,7 +97,7 @@ class ChatService {
     if (userId == null) return;
 
     final user = await StorageService.getUser();
-    final senderName = user?['name'] ?? 'User';
+    final senderName = user?['name'] ?? 'Pengguna';
 
     final chatRef = _firestore.collection('chats').doc(chatId);
     final chatDoc = await chatRef.get();
@@ -203,7 +203,7 @@ class ChatService {
 
     if (!chatDoc.exists) {
       final user = await StorageService.getUser();
-      final senderName = user?['name'] ?? 'User';
+      final senderName = user?['name'] ?? 'Pengguna';
 
       await chatRef.set({
         'participants': [userId, recipientId],

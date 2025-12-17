@@ -76,7 +76,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             ),
             elevation: 2,
             child: SwitchListTile(
-              title: const Text("Update Aplikasi"),
+              title: const Text("Pembaruan Aplikasi"),
               value: appUpdateNotification,
               onChanged: (val) {
                 setState(() {

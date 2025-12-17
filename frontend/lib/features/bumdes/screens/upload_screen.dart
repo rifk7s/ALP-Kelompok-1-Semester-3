@@ -80,7 +80,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       final token = await StorageService.getToken();
 
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       // Load categories
@@ -119,7 +119,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         isLoading = false;
       });
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error loading data: $e');
+        SnackBarHelper.showError(context, 'Gagal memuat data: $e');
       }
     }
   }
@@ -266,7 +266,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       });
 
       if (mounted) {
-        SnackBarHelper.showError(context, 'Error: $e');
+        SnackBarHelper.showError(context, 'Terjadi kesalahan: $e');
       }
     }
   }
@@ -637,7 +637,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 ElevatedButton.icon(
                   onPressed: pickImages,
                   icon: const Icon(Icons.add_a_photo),
-                  label: const Text("Upload Foto"),
+                  label: const Text("Unggah Foto"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),

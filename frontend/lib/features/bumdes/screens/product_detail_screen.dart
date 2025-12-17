@@ -131,7 +131,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       await ProductService.deleteProduct(

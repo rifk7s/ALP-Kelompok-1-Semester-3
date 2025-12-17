@@ -38,7 +38,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       final data = await _petaniService.fetchPetaniDetail(
@@ -183,7 +183,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading product: $e')));
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
       }
     }
   }

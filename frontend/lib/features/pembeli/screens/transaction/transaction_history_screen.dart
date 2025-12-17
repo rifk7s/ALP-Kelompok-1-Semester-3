@@ -164,7 +164,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       final difference = deadline.difference(now);
 
       if (difference.isNegative) {
-        return 'Expired';
+        return 'Kedaluwarsa';
       }
 
       final hours = difference.inHours;
@@ -1446,12 +1446,18 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
       case 'pending':
       case 'pending_payment':
         return 'Menunggu Pembayaran';
+      case 'paid':
+        return 'Pembayaran Dikonfirmasi';
       case 'processing':
         return 'Sedang Diproses';
+      case 'shipped':
+        return 'Sedang Dikirim';
       case 'completed':
         return 'Pesanan Selesai';
       case 'rejected':
         return 'Pembayaran Ditolak';
+      case 'cancelled':
+        return 'Dibatalkan';
       default:
         return status;
     }

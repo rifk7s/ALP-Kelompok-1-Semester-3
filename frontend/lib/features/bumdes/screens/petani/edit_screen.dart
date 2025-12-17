@@ -50,7 +50,7 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       await _petaniService.updatePetani(

@@ -141,7 +141,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         final difference = deadline.difference(now);
 
         if (difference.isNegative) {
-          setState(() => _timeLeft = 'Expired');
+          setState(() => _timeLeft = 'Kedaluwarsa');
           return;
         }
 

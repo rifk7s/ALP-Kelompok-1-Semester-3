@@ -50,7 +50,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         // Get token from storage
         final token = await StorageService.getToken();
         if (token == null) {
-          throw Exception('Token tidak ditemukan. Silakan login kembali.');
+          throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
         }
 
         // Prepare data
@@ -106,7 +106,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text("Error"),
+            title: const Text("Kesalahan"),
             content: Text(e.toString().replaceAll('Exception: ', '')),
             actions: [
               TextButton(

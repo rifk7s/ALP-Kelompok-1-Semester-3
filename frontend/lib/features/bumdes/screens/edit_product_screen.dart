@@ -85,7 +85,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       final token = await StorageService.getToken();
 
       if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
       // Load categories
@@ -195,7 +195,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading data: $e'),
+            content: Text('Gagal memuat data: $e'),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -334,7 +334,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
       }
     }
   }

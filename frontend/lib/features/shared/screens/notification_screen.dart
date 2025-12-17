@@ -243,13 +243,13 @@ class _NotificationPageState extends State<NotificationPage> {
 
             // Get the other participant's info
             String recipientId = '';
-            String recipientName = 'User';
+            String recipientName = 'Pengguna';
             String? recipientImage;
 
             for (final participantId in participants) {
               if (participantId != currentUserId) {
                 recipientId = participantId;
-                recipientName = participantNames[participantId] ?? 'User';
+                recipientName = participantNames[participantId] ?? 'Pengguna';
                 recipientImage = participantImages[participantId];
                 break;
               }
@@ -296,7 +296,7 @@ class _NotificationPageState extends State<NotificationPage> {
           if (mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text('Error membuka chat: $e')));
+            ).showSnackBar(SnackBar(content: Text('Gagal membuka chat: $e')));
           }
         }
       }
