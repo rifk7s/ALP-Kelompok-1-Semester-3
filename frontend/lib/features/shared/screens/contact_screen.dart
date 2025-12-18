@@ -199,7 +199,7 @@ class _ContactPageState extends State<ContactPage> {
 
                         return ListView.separated(
                           itemCount: chats.length,
-                          separatorBuilder: (_, __) => const Divider(
+                          separatorBuilder: (context, index) => const Divider(
                             height: 1,
                             thickness: 1,
                             color: AppColors.divider,

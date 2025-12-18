@@ -185,7 +185,7 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
 
                         return ListView.separated(
                           itemCount: chats.length,
-                          separatorBuilder: (_, __) => const Divider(
+                          separatorBuilder: (context, index) => const Divider(
                             height: 1,
                             thickness: 1,
                             color: AppColors.divider,

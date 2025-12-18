@@ -9,7 +9,7 @@ class StorageService {
 
   // Secure storage untuk data sensitif (tokens)
   static const _secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
   );
 
   // Save token dengan enkripsi
