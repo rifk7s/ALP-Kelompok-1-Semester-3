@@ -401,7 +401,8 @@ int _parsePrice(Map<String, dynamic> product) {
   final price = product['price_per_kg'] ?? product['price'];
   if (price is int) return price;
   if (price is double) return price.round();
-  if (price is String)
+  if (price is String) {
     return int.tryParse(price) ?? double.tryParse(price)?.round() ?? 0;
+  }
   return 0;
 }
