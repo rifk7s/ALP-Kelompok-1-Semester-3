@@ -602,7 +602,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                               width: 64,
                               height: 64,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorBuilder: (context, error, stackTrace) => Container(
                                 width: 64,
                                 height: 64,
                                 color: AppColors.grey200,
@@ -665,7 +665,7 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                                     width: 64,
                                     height: 64,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
+                                    errorBuilder: (context, error, stackTrace) => Container(
                                       width: 64,
                                       height: 64,
                                       color: AppColors.grey200,
