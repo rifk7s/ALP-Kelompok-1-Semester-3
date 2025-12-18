@@ -242,57 +242,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: const Text('Daftar Sebagai Pembeli'),
                     ),
                     const SizedBox(height: 24),
-                    const Row(
-                      children: [
-                        Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'atau',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          ),
-                        ),
-                        Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Ingin daftar sebagai petani?',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Datang ke kantor BUMDes:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.danger,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Jl. Desa Sengka No. 10',
-                            style: TextStyle(color: AppColors.textPrimary),
-                          ),
-                          const Text(
-                            '0811-2222-3333',
-                            style: TextStyle(color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // const Row(
+                    //   children: [
+                    //     Expanded(child: Divider()),
+                    //     Padding(
+                    //       padding: EdgeInsets.symmetric(horizontal: 16),
+                    //       child: Text(
+                    //         'atau',
+                    //         style: TextStyle(color: AppColors.textSecondary),
+                    //       ),
+                    //     ),
+                    //     Expanded(child: Divider()),
+                    //   ],
+                    // ),
+                    // const SizedBox(height: 24),
+                    // Container(
+                    //   padding: const EdgeInsets.all(16),
+                    //   decoration: BoxDecoration(
+                    //     border: Border.all(color: AppColors.border),
+                    //     borderRadius: BorderRadius.circular(12),
+                    //   ),
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       const Text(
+                    //         'Ingin daftar sebagai petani?',
+                    //         style: TextStyle(
+                    //           fontWeight: FontWeight.bold,
+                    //           fontSize: 16,
+                    //           color: AppColors.textPrimary,
+                    //         ),
+                    //       ),
+                    //       const SizedBox(height: 4),
+                    //       const Text(
+                    //         'Datang ke kantor BUMDes:',
+                    //         style: TextStyle(
+                    //           fontWeight: FontWeight.bold,
+                    //           color: AppColors.danger,
+                    //         ),
+                    //       ),
+                    //       const SizedBox(height: 4),
+                    //       const Text(
+                    //         'Jl. Desa Sengka No. 10',
+                    //         style: TextStyle(color: AppColors.textPrimary),
+                    //       ),
+                    //       const Text(
+                    //         '0811-2222-3333',
+                    //         style: TextStyle(color: AppColors.textPrimary),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
                     const SizedBox(height: 32),
                   ],
                 ),
