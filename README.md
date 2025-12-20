@@ -14,7 +14,9 @@ A full-stack mobile application built with Flutter (frontend) and Laravel (backe
 
 ## Documentation
 
-**📖 Full setup guides:**
+> [!NOTE]
+> Full setup guides are available for both backend and frontend components.
+
 - **[Backend Setup](backend/README.md)** - Laravel API, Firebase, database configuration
 - **[Frontend Setup](frontend/README.md)** - Flutter app, Firebase configuration, API connection
 
@@ -43,6 +45,7 @@ A full-stack mobile application built with Flutter (frontend) and Laravel (backe
 - [![SQLite](https://img.shields.io/badge/SQLite-07405E?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 - [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/)
 
+> [!TIP]
 > Choose either SQLite or MySQL - configurable in `.env`
 
 ## Quick Start
@@ -63,6 +66,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
+> [!NOTE]
 > **Next steps:** See [backend/README.md](backend/README.md) for:
 > - PHP gRPC extension installation
 > - Firebase credentials setup
@@ -76,6 +80,7 @@ cd frontend
 flutter pub get
 ```
 
+> [!NOTE]
 > **Next steps:** See [frontend/README.md](frontend/README.md) for:
 > - Firebase config files (`google-services.json`, `GoogleService-Info.plist`)
 > - Environment variables (`.env` file)
@@ -115,9 +120,14 @@ flutter run
 
 ## Common Issues
 
+> [!WARNING]
+> Common configuration issues and their solutions are listed below. Address these before seeking additional help.
+
 ### Backend not reachable from mobile
 
-Run backend with network binding:
+> [!IMPORTANT]
+> Run backend with network binding to allow mobile devices/emulators to connect.
+
 ```bash
 cd backend
 php artisan serve --host=0.0.0.0 --port=8000
@@ -127,11 +137,17 @@ Update IP in `frontend/lib/core/services/api_config.dart` if needed.
 
 ### Firebase configuration missing
 
+> [!CAUTION]
+> The application will not function without proper Firebase configuration for both backend and frontend.
+
 Both frontend and backend need Firebase setup:
 - **Backend:** Service account JSON → [backend/README.md](backend/README.md#4-configure-firebase-credentials)
 - **Frontend:** Config files + `.env` → [frontend/README.md](frontend/README.md#firebase-configuration-required)
 
 ### Database errors
+
+> [!TIP]
+> Most database errors can be resolved by ensuring the database file/instance exists and credentials are correct.
 
 **SQLite:**
 ```bash
@@ -144,6 +160,7 @@ php artisan migrate
 
 ---
 
-**📖 For detailed troubleshooting:**
-- [Backend troubleshooting](backend/README.md#troubleshooting)
-- [Frontend troubleshooting](frontend/README.md#troubleshooting)
+> [!NOTE]
+> For detailed troubleshooting:
+> - [Backend troubleshooting](backend/README.md#troubleshooting)
+> - [Frontend troubleshooting](frontend/README.md#troubleshooting)
