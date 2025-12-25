@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/register_screen.dart';
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -138,13 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RegisterScreen(),
-                                  ),
-                                );
+                                // Open combined auth screen and show register tab
+                                context.goNamed('auth', extra: {'isLogin': false});
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -176,7 +170,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      initialValue: '0813-5635-3033',
                       decoration: const InputDecoration(
                         hintText: 'Masukkan Email atau Nomor HP',
                       ),
@@ -192,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       obscureText: !_isPasswordVisible,
-                      initialValue: '********',
                       decoration: InputDecoration(
                         hintText: 'Masukkan Kata Sandi',
                         suffixIcon: IconButton(
@@ -248,13 +240,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const StartPageBumdes(), // PERBAIKAN
-                          ),
-                        );
+                        // keep within AuthScreen animation: go to auth route (login tab)
+                        context.goNamed('auth', extra: {'isLogin': true});
                       },
                       child: const Text('Masuk'),
                     ),

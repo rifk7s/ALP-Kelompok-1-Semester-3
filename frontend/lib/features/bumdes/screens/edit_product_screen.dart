@@ -8,8 +8,13 @@ import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
-import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/product/bloc/product_bloc.dart';
+import 'package:frontend/features/product/bloc/product_event.dart';
+import 'package:frontend/features/product/bloc/product_state.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
+import 'package:frontend/features/product/cubit/product_editing_cubit.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -59,7 +64,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   Map<String, List<String>> varietiesByCategory = {};
 
   bool isLoading = true;
-  bool isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -200,6 +205,13 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           );
         }
       });
+
+      // Initialize editing state with product payload
+      if (mounted) {
+        try {
+          context.read<ProductEditingCubit>().initialize(widget.product);
+        } catch (_) {}
+      }
     } catch (e) {
       debugPrint('Error loading data: $e');
       setState(() {
@@ -235,8 +247,6 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   }
 
   Future<void> submitUpdate() async {
-    if (isSubmitting) return;
-
     // Validation
     if (_namaProdukController.text.isEmpty) {
       SnackBarHelper.showError(context, 'Nama produk harus diisi');
@@ -290,91 +300,45 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       return;
     }
 
-    setState(() {
-      isSubmitting = true;
-    });
+    // Dispatch update event to bloc
+    final editingNow = context.read<ProductEditingCubit>().state;
 
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) {
-        throw Exception('Token tidak ditemukan');
-      }
+    final event = ProductUpdateRequested(
+      productId: widget.product['id'],
+      name: _namaProdukController.text,
+      categoryId: selectedKategoriId!,
+      variety: selectedVarietas ?? 'Standard',
+      harvestDate: tanggalPanen!.toIso8601String().split('T')[0],
+      storageDays: int.tryParse(_masaSimpanController.text) ?? 0,
+      pricePerKg: price,
+      stockKg: double.parse(_jumlahController.text),
+      description: _infoTambahanController.text.isEmpty
+          ? null
+          : _infoTambahanController.text,
+      petaniContributors: editingNow.petaniContributors,
+      newImages: editingNow.selectedImages.isNotEmpty ? editingNow.selectedImages : null,
+      imageIdsToDelete: editingNow.imagesToDelete.isNotEmpty ? editingNow.imagesToDelete : null,
+    );
 
-      // Determine variety - use selected variety or "Standard" if none
-      String variety = selectedVarietas ?? 'Standard';
-
-      // Parse storage days, default to 0 if empty
-      int storageDays = int.tryParse(_masaSimpanController.text) ?? 0;
-
-      final response = await ProductService.updateProduct(
-        productId: widget.product['id'],
-        token: token,
-        name: _namaProdukController.text,
-        categoryId: selectedKategoriId!,
-        variety: variety,
-        harvestDate: tanggalPanen!.toIso8601String().split('T')[0],
-        storageDays: storageDays,
-        pricePerKg: price,
-        stockKg: double.parse(_jumlahController.text),
-        description: _infoTambahanController.text.isEmpty
-            ? null
-            : _infoTambahanController.text,
-        petaniContributors: petaniContributors,
-        newImages: selectedImages.isNotEmpty ? selectedImages : null,
-        imageIdsToDelete: imagesToDelete.isNotEmpty ? imagesToDelete : null,
-      );
-
-      setState(() {
-        isSubmitting = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Produk berhasil diperbarui!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-
-        // Return the updated product
-        Navigator.pop(context, response['product']);
-      }
-    } catch (e) {
-      setState(() {
-        isSubmitting = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
-      }
-    }
+    context.read<ProductBloc>().add(event);
   }
 
   Future<void> pickImages() async {
-    if (selectedImages.length >= 5) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
-      return;
-    }
-
     final picked = await _picker.pickMultiImage();
     if (!mounted) return;
 
     if (picked.isNotEmpty) {
-      if (selectedImages.length + picked.length > 5) {
+      final editing = context.read<ProductEditingCubit>().state;
+      if (editing.selectedImages.length + picked.length > 5) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Total foto tidak boleh lebih dari 5")),
         );
+        return;
       }
 
-      setState(() {
-        selectedImages.addAll(
-          picked.take(5 - selectedImages.length).map((e) => File(e.path)),
-        );
-      });
+      for (final e in picked) {
+        context.read<ProductEditingCubit>().addImage(File(e.path));
+      }
     }
   }
 
@@ -499,8 +463,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                           }
                         });
                       },
-                    ),
-                    const SizedBox(height: 16),
+                      ),
                     // Kg input
                     TextField(
                       controller: editKgController,
@@ -565,15 +528,21 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     );
 
     if (result != null) {
-      setState(() {
-        petaniContributors[index] = result;
-        // Update total stock
-        final total = petaniContributors.fold<double>(
+      if (!mounted) return;
+      // Update contributor via cubit
+      final editing = context.read<ProductEditingCubit>().state;
+      final updated = List<Map<String, dynamic>>.from(editing.petaniContributors);
+      if (index >= 0 && index < updated.length) {
+        updated[index] = result;
+        context.read<ProductEditingCubit>().updateContributor(index, result);
+
+        // Update total shown in controller
+        final total = updated.fold<double>(
           0,
           (sum, c) => sum + (c['contributed_kg'] as num).toDouble(),
         );
         _jumlahController.text = total.toStringAsFixed(2);
-      });
+      }
     }
   }
 
@@ -695,24 +664,48 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 1,
-        centerTitle: true,
-        title: const Text(
-          "Kelola Data Petani",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textLight,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ProductBloc(repository: ProductRepository())),
+        BlocProvider(create: (_) => ProductEditingCubit()),
+      ],
+      child: BlocListener<ProductBloc, ProductState>(
+        listener: (context, state) {
+          if (state is ProductSuccess && state.product != null) {
+            // show success and pop with updated product
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Produk berhasil diperbarui!'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            if (context.mounted) {
+              Navigator.pop(context, state.product);
+            }
+          } else if (state is ProductFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Terjadi kesalahan: ${state.error}')),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 1,
+            centerTitle: true,
+            title: const Text(
+              "Kelola Data Petani",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textLight,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
           sectionCard(
             title: "Foto Produk",
             child: Column(
@@ -728,24 +721,26 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Display existing images from database
-                if (existingImages.isNotEmpty)
-                  GridView.builder(
+                // Display existing images from database (from cubit)
+                BlocBuilder<ProductEditingCubit, ProductEditing>(builder: (context, state) {
+                  final editing = state;
+                  final existing = editing.existingImages;
+                  final marked = editing.imagesToDelete;
+                  if (existing.isEmpty) return const SizedBox.shrink();
+
+                  return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: existingImages.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 1.0,
-                        ),
+                    itemCount: existing.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 1.0,
+                    ),
                     itemBuilder: (_, i) {
-                      final image = existingImages[i];
-                      final isMarkedForDeletion = imagesToDelete.contains(
-                        image['id'],
-                      );
+                      final image = existing[i];
+                      final isMarkedForDeletion = marked.contains(image['id']);
 
                       return Stack(
                         children: [
@@ -772,13 +767,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                             top: 4,
                             child: InkWell(
                               onTap: () {
-                                setState(() {
-                                  if (isMarkedForDeletion) {
-                                    imagesToDelete.remove(image['id']);
-                                  } else {
-                                    imagesToDelete.add(image['id']);
-                                  }
-                                });
+                                context.read<ProductEditingCubit>().toggleExistingImageDeletion(image['id']);
                               },
                               child: CircleAvatar(
                                 backgroundColor: isMarkedForDeletion
@@ -786,9 +775,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                     : AppColors.textMuted,
                                 radius: 12,
                                 child: Icon(
-                                  isMarkedForDeletion
-                                      ? Icons.undo
-                                      : Icons.close,
+                                  isMarkedForDeletion ? Icons.undo : Icons.close,
                                   color: AppColors.white,
                                   size: 16,
                                 ),
@@ -798,30 +785,34 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                         ],
                       );
                     },
-                  ),
+                  );
+                }),
 
-                // Display newly selected images
-                if (selectedImages.isNotEmpty)
-                  Padding(
+                // Display newly selected images (from cubit)
+                BlocBuilder<ProductEditingCubit, ProductEditing>(builder: (context, state) {
+                  final editing = state;
+                  final imgs = editing.selectedImages;
+                  if (imgs.isEmpty) return const SizedBox.shrink();
+
+                  return Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: selectedImages.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 1.0,
-                          ),
+                      itemCount: imgs.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 1.0,
+                      ),
                       itemBuilder: (_, i) {
                         return Stack(
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(
-                                selectedImages[i],
+                                imgs[i],
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
@@ -831,8 +822,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                               right: 4,
                               top: 4,
                               child: InkWell(
-                                onTap: () =>
-                                    setState(() => selectedImages.removeAt(i)),
+                                onTap: () => context.read<ProductEditingCubit>().removeSelectedImage(i),
                                 child: const CircleAvatar(
                                   backgroundColor: AppColors.textMuted,
                                   radius: 12,
@@ -870,7 +860,8 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                         );
                       },
                     ),
-                  ),
+                  );
+                }),
               ],
             ),
           ),
@@ -991,20 +982,14 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                     size: 20,
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      petaniContributors.removeAt(index);
-                                      // Update total stock
-                                      final total = petaniContributors
-                                          .fold<double>(
-                                            0,
-                                            (sum, c) =>
-                                                sum +
-                                                (c['contributed_kg'] as num)
-                                                    .toDouble(),
-                                          );
-                                      _jumlahController.text = total
-                                          .toStringAsFixed(2);
-                                    });
+                                    final editing = context.read<ProductEditingCubit>().state;
+                                    final updated = List<Map<String, dynamic>>.from(editing.petaniContributors);
+                                    if (index >= 0 && index < updated.length) {
+                                      updated.removeAt(index);
+                                      context.read<ProductEditingCubit>().removeContributor(index);
+                                      final total = updated.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble());
+                                      _jumlahController.text = total.toStringAsFixed(2);
+                                    }
                                   },
                                 ),
                               ],
@@ -1152,34 +1137,30 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                                 return;
                               }
 
-                              setState(() {
-                                petaniContributors.add({
-                                  'petani_id': selectedPetaniId!,
-                                  'petani_name': selectedPetani!,
-                                  'contributed_kg': kg,
-                                  'harvest_date': selectedHarvestDate!
-                                      .toIso8601String()
-                                      .split('T')[0],
-                                });
+                              // Dispatch add contributor to bloc
 
-                                // Update total stock
-                                final total = petaniContributors.fold<double>(
-                                  0,
-                                  (sum, contrib) =>
-                                      sum +
-                                      (contrib['contributed_kg'] as num)
-                                          .toDouble(),
-                                );
-                                _jumlahController.text = total.toStringAsFixed(
-                                  2,
-                                );
+                              final contrib = {
+                                'petani_id': selectedPetaniId!,
+                                'petani_name': selectedPetani!,
+                                'contributed_kg': kg,
+                                'harvest_date': selectedHarvestDate!.toIso8601String().split('T')[0],
+                              };
+                              final editing = context.read<ProductEditingCubit>().state;
+                              final afterAdd = List<Map<String, dynamic>>.from(editing.petaniContributors)..add(contrib);
+                              context.read<ProductEditingCubit>().addContributor(contrib);
 
-                                // Reset fields
-                                selectedPetaniId = null;
-                                selectedPetani = null;
-                                selectedHarvestDate = null;
-                                _kontribusiController.clear();
-                              });
+                              // Update total stock
+                              final total = afterAdd.fold<double>(
+                                0,
+                                (sum, contrib) => sum + (contrib['contributed_kg'] as num).toDouble(),
+                              );
+                              _jumlahController.text = total.toStringAsFixed(2);
+
+                              // Reset fields
+                              selectedPetaniId = null;
+                              selectedPetani = null;
+                              selectedHarvestDate = null;
+                              _kontribusiController.clear();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -1339,35 +1320,42 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isSubmitting ? null : submitUpdate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: AppColors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      "SIMPAN PERUBAHAN",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                final isLoading = state is ProductLoading;
+                return ElevatedButton(
+                  onPressed: isLoading ? null : submitUpdate,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "SIMPAN PERUBAHAN",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                );
+              },
             ),
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }

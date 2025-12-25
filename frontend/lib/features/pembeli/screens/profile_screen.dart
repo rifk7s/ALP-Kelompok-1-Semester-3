@@ -28,6 +28,18 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUser() async {
+    final token = await StorageService.getToken();
+
+    // If no auth token is present, navigate to auth screen so user can login/register
+    if (token == null) {
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
     final user = await StorageService.getUser();
     if (mounted) {
       setState(() => _user = user);

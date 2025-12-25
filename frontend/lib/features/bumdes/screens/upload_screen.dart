@@ -7,8 +7,13 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
-import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/product/bloc/product_bloc.dart';
+import 'package:frontend/features/product/bloc/product_event.dart';
+import 'package:frontend/features/product/bloc/product_state.dart';
+import 'package:frontend/features/product/cubit/product_editing_cubit.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -116,6 +121,13 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         varietiesByCategory = varieties;
         isLoading = false;
       });
+
+      // Initialize editing state in ProductEditingCubit
+      if (mounted) {
+        try {
+          context.read<ProductEditingCubit>().initialize(null);
+        } catch (_) {}
+      }
     } catch (e) {
       debugPrint('Error loading data: $e');
       setState(() {
@@ -187,7 +199,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       return;
     }
 
-    if (petaniContributors.isEmpty) {
+    // use contributors from ProductEditingCubit
+    final editing = context.read<ProductEditingCubit>().state;
+
+    if (editing.petaniContributors.isEmpty) {
       SnackBarHelper.showError(
         context,
         'Tambahkan minimal 1 kontributor petani',
@@ -196,7 +211,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     }
 
     // Validate total contributions match stock
-    final totalContributions = petaniContributors.fold<double>(
+    final totalContributions = editing.petaniContributors.fold<double>(
       0,
       (sum, contrib) => sum + (contrib['contributed_kg'] as num).toDouble(),
     );
@@ -234,69 +249,44 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       return;
     }
 
-    setState(() {
-      isSubmitting = true;
-    });
+    // Dispatch event to ProductBloc
+    final editingNow = context.read<ProductEditingCubit>().state;
 
-    try {
-      // Determine variety - use selected variety or "Standard" if none
-      String variety = selectedVarietas ?? 'Standard';
+    final event = ProductCreateRequested(
+      name: _namaProdukController.text,
+      categoryId: selectedKategoriId!,
+      variety: selectedVarietas ?? 'Standard',
+      storageDays: int.tryParse(_masaSimpanController.text) ?? 0,
+      pricePerKg: price,
+      stockKg: double.parse(_jumlahController.text),
+      description: _infoTambahanController.text.isEmpty
+          ? null
+          : _infoTambahanController.text,
+      petaniContributors: editingNow.petaniContributors,
+      images: editingNow.selectedImages.isEmpty ? null : editingNow.selectedImages,
+    );
 
-      // Parse storage days, default to 0 if empty
-      int storageDays = int.tryParse(_masaSimpanController.text) ?? 0;
-
-      await ProductService.createProduct(
-        name: _namaProdukController.text,
-        categoryId: selectedKategoriId!,
-        variety: variety,
-        storageDays: storageDays,
-        pricePerKg: price,
-        stockKg: double.parse(_jumlahController.text),
-        description: _infoTambahanController.text.isEmpty
-            ? null
-            : _infoTambahanController.text,
-        petaniContributors: petaniContributors,
-        images: selectedImages.isEmpty ? null : selectedImages,
-      );
-
-      setState(() {
-        isSubmitting = false;
-      });
-
-      showSuccessPopup();
-    } catch (e) {
-      setState(() {
-        isSubmitting = false;
-      });
-
-      if (mounted) {
-        SnackBarHelper.showError(context, 'Terjadi kesalahan: $e');
-      }
-    }
+    context.read<ProductBloc>().add(event);
   }
 
   Future<void> pickImages() async {
-    if (selectedImages.length >= 5) {
-      SnackBarHelper.showError(context, "Maksimal 5 foto");
-      return;
-    }
-
     final picked = await _picker.pickMultiImage();
     if (!mounted) return;
 
     if (picked.isNotEmpty) {
-      if (selectedImages.length + picked.length > 5) {
+      final editing = context.read<ProductEditingCubit>().state;
+
+      if (editing.selectedImages.length + picked.length > 5) {
         SnackBarHelper.showError(
           context,
           "Total foto tidak boleh lebih dari 5",
         );
+        // Add as many as possible
       }
 
-      setState(() {
-        selectedImages.addAll(
-          picked.take(5 - selectedImages.length).map((e) => File(e.path)),
-        );
-      });
+      for (final e in picked.take(5 - editing.selectedImages.length)) {
+        context.read<ProductEditingCubit>().addImage(File(e.path));
+      }
     }
   }
 
@@ -546,32 +536,45 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     final bool hasError =
         !isLoading && (categories.isEmpty || hppPrices.isEmpty);
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 1,
-        centerTitle: true,
-        title: const Text(
-          "Upload Produk",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textLight,
-          ),
-        ),
-      ),
-      body: RetryableContent(
-        isLoading: isLoading,
-        hasError: hasError,
-        errorMessage: 'Gagal memuat data kategori dan harga',
-        onRetry: () {
-          setState(() => isLoading = true);
-          loadData();
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ProductBloc(repository: ProductRepository())),
+        BlocProvider(create: (_) => ProductEditingCubit()),
+      ],
+      child: BlocListener<ProductBloc, ProductState>(
+        listener: (context, state) {
+          if (state is ProductSuccess) {
+            showSuccessPopup();
+          } else if (state is ProductFailure) {
+            SnackBarHelper.showError(context, state.error);
+          }
         },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 1,
+            centerTitle: true,
+            title: const Text(
+              "Upload Produk",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textLight,
+              ),
+            ),
+          ),
+          body: RetryableContent(
+            isLoading: isLoading,
+            hasError: hasError,
+            errorMessage: 'Gagal memuat data kategori dan harga',
+            onRetry: () {
+              setState(() => isLoading = true);
+              loadData();
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
             sectionCard(
               title: "Foto Produk",
               child: Column(
@@ -587,25 +590,28 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  if (selectedImages.isNotEmpty)
-                    GridView.builder(
+                  BlocBuilder<ProductEditingCubit, ProductEditing>(builder: (context, state) {
+                    final editing = state;
+                    final imgs = editing.selectedImages;
+                    if (imgs.isEmpty) return const SizedBox.shrink();
+
+                    return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: selectedImages.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 1.0,
-                          ),
+                      itemCount: imgs.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 1.0,
+                      ),
                       itemBuilder: (_, i) {
                         return Stack(
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(
-                                selectedImages[i],
+                                imgs[i],
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
@@ -615,8 +621,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                               right: 4,
                               top: 4,
                               child: InkWell(
-                                onTap: () =>
-                                    setState(() => selectedImages.removeAt(i)),
+                                onTap: () => context.read<ProductEditingCubit>().removeSelectedImage(i),
                                 child: const CircleAvatar(
                                   backgroundColor: AppColors.textMuted,
                                   radius: 12,
@@ -631,7 +636,8 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                           ],
                         );
                       },
-                    ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -656,145 +662,139 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
                   inputLabel("Kontributor Petani *"),
 
-                  // Display added contributors
-                  if (petaniContributors.isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Urutan FIFO (teratas dijual pertama):',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textMuted,
-                              fontStyle: FontStyle.italic,
-                            ),
+// Display added contributors (from Bloc)
+                BlocBuilder<ProductEditingCubit, ProductEditing>(builder: (context, state) {
+                  final editing = state;
+                  final contributors = editing.petaniContributors;
+                  if (contributors.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Urutan FIFO (teratas dijual pertama):',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                            fontStyle: FontStyle.italic,
                           ),
-                          const SizedBox(height: 8),
-                          ...petaniContributors.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final contrib = entry.value;
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: const TextStyle(
-                                          color: AppColors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...contributors.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final contrib = entry.value;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: const TextStyle(
+                                        color: AppColors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          contrib['petani_name'],
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${contrib['contributed_kg']} kg',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textMuted,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Panen: ${_formatDate(contrib['harvest_date'])}',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.textMuted,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: AppColors.primary,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      _editContributor(index, contrib);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: AppColors.danger,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        petaniContributors.removeAt(index);
-                                        // Update total stock
-                                        final total = petaniContributors
-                                            .fold<double>(
-                                              0,
-                                              (sum, c) =>
-                                                  sum +
-                                                  (c['contributed_kg'] as num)
-                                                      .toDouble(),
-                                            );
-                                        _jumlahController.text = total
-                                            .toStringAsFixed(2);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                '${petaniContributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble()).toStringAsFixed(2)} kg',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
                                 ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        contrib['petani_name'],
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${contrib['contributed_kg']} kg',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Panen: ${_formatDate(contrib['harvest_date'])}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textMuted,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    _editContributor(index, contrib);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: AppColors.danger,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    context.read<ProductEditingCubit>().removeContributor(index);
+                                    // Update total shown in controller
+                                    final total = contributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble());
+                                    _jumlahController.text = total.toStringAsFixed(2);
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${contributors.fold<double>(0, (sum, c) => sum + (c['contributed_kg'] as num).toDouble()).toStringAsFixed(2)} kg',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                  );
+                }),
 
                   // Add new contributor
                   Column(
@@ -925,33 +925,32 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                                   return;
                                 }
 
-                                setState(() {
-                                  petaniContributors.add({
-                                    'petani_id': selectedPetaniId!,
-                                    'petani_name': selectedPetani!,
-                                    'contributed_kg': kg,
-                                    'harvest_date': selectedHarvestDate!
-                                        .toIso8601String()
-                                        .split('T')[0],
-                                  });
+                                // Create contributor object
+                                final contrib = {
+                                  'petani_id': selectedPetaniId!,
+                                  'petani_name': selectedPetani!,
+                                  'contributed_kg': kg,
+                                  'harvest_date': selectedHarvestDate!.toIso8601String().split('T')[0],
+                                };
 
-                                  // Update total stock
-                                  final total = petaniContributors.fold<double>(
-                                    0,
-                                    (sum, contrib) =>
-                                        sum +
-                                        (contrib['contributed_kg'] as num)
-                                            .toDouble(),
-                                  );
-                                  _jumlahController.text = total
-                                      .toStringAsFixed(2);
+                                final editing = context.read<ProductEditingCubit>().state;
+                                final afterAdd = List<Map<String, dynamic>>.from(editing.petaniContributors)..add(contrib);
 
-                                  // Reset fields
-                                  selectedPetaniId = null;
-                                  selectedPetani = null;
-                                  selectedHarvestDate = null;
-                                  _kontribusiController.clear();
-                                });
+                                // Add contributor via cubit
+                                context.read<ProductEditingCubit>().addContributor(contrib);
+
+                                // Update total stock shown in controller
+                                final total = afterAdd.fold<double>(
+                                  0,
+                                  (sum, contrib) => sum + (contrib['contributed_kg'] as num).toDouble(),
+                                );
+                                _jumlahController.text = total.toStringAsFixed(2);
+
+                                // Reset fields
+                                selectedPetaniId = null;
+                                selectedPetani = null;
+                                selectedHarvestDate = null;
+                                _kontribusiController.clear();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
@@ -1123,36 +1122,43 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isSubmitting ? null : submitProduct,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: AppColors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        "SIMPAN PRODUK",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  final isLoading = state is ProductLoading;
+                  return ElevatedButton(
+                    onPressed: isLoading ? null : submitProduct,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: AppColors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "SIMPAN PRODUK",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }

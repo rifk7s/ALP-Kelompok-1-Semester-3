@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'upload_screen.dart';
-import 'product_detail_screen.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -137,11 +135,7 @@ class _ProductPageState extends State<ProductPage> {
         backgroundColor: AppColors.primary,
         elevation: 4,
         onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const UploadProdukScreen()),
-          );
-          // Reload products if a new product was added
+          final result = await context.push('/product/upload');
           if (result == true) {
             loadProducts();
           }
@@ -163,7 +157,7 @@ class _ProductPageState extends State<ProductPage> {
                 left: 0,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                 ),
               ),
               const Center(
@@ -177,12 +171,7 @@ class _ProductPageState extends State<ProductPage> {
                 child: IconButton(
                   icon: const Icon(Icons.notifications_outlined),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationPage(),
-                      ),
-                    );
+                    context.pushNamed('notifications');
                   },
                 ),
               ),
@@ -288,18 +277,7 @@ class _ProductPageState extends State<ProductPage> {
 
     return GestureDetector(
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailPage(
-              product: product,
-              onUpdate: (updatedProduct) {
-                // Reload entire list to get fresh data
-                loadProducts();
-              },
-            ),
-          ),
-        );
+        await context.push('/product/${product['id']}', extra: product);
 
         // Reload products after returning from detail screen
         // This handles both edit and delete operations

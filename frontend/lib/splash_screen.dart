@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/features/pembeli/screens/start_page.dart';
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+// navigation handled by router (go_router) using named routes
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -68,30 +68,26 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _startAnimation() async {
-    // Check for existing session while showing splash
-    _checkExistingSession();
+    // Check for existing session while showing splash (await so we decide correct target)
+    await _checkExistingSession();
 
     // Entrance: dot moves to center
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      setState(() {
-        _isDotCenter = true;
-      });
-
-      // Wait for dot animation, then start exit sequence
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (!mounted) return;
-        setState(() {
-          _isExiting = true;
-        });
-
-        // Start exit animation
-        _exitController.forward().then((_) {
-          if (!mounted) return;
-          _navigateToHome();
-        });
-      });
+    if (!mounted) return;
+    setState(() {
+      _isDotCenter = true;
     });
+
+    // Wait for dot animation, then start exit sequence
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    setState(() {
+      _isExiting = true;
+    });
+
+    // Start exit animation
+    await _exitController.forward();
+    if (!mounted) return;
+    _navigateToHome();
   }
 
   Future<void> _checkExistingSession() async {
@@ -104,35 +100,15 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToHome() {
-    // Route based on user role
-    final Widget targetPage = _userRole == 'bumdes'
-        ? const StartPageBumdes()
-        : const StartPage();
-
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: (context, animation, secondaryAnimation) => targetPage,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // Scale up slightly from 0.95 to 1.0 for a subtle "emerge" effect
-          final scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          );
-
-          // Fade in
-          final fadeAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          );
-
-          return FadeTransition(
-            opacity: fadeAnimation,
-            child: ScaleTransition(scale: scaleAnimation, child: child),
-          );
-        },
-      ),
-    );
+    // Route based on user role and navigate using GoRouter
+    if (_userRole == 'bumdes') {
+      context.goNamed('start_bumdes');
+    } else if (_userRole != null) {
+      context.goNamed('start');
+    } else {
+      // No authenticated user found, go to login
+      context.goNamed('login');
+    }
   }
 
   @override

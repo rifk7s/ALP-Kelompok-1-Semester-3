@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/features/auth/widgets/login_form.dart';
 import 'package:frontend/features/auth/widgets/register_form.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final bool initialIsLogin;
+  const AuthScreen({super.key, this.initialIsLogin = true});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -20,6 +22,8 @@ class _AuthScreenState extends State<AuthScreen>
   @override
   void initState() {
     super.initState();
+    _isLogin = widget.initialIsLogin;
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -32,6 +36,11 @@ class _AuthScreenState extends State<AuthScreen>
     _glowAnimation = Tween<double>(begin: 0.0, end: 15.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    // We'll load a hidden Offstage SvgPicture in the widget tree so the
+    // Google SVG is parsed and cached on first build (avoids first-frame blank).
+    // (Precache helpers from flutter_svg vary between versions; Offstage ensures
+    // the widget is built without depending on package internals.)
   }
 
   @override
@@ -119,6 +128,14 @@ class _AuthScreenState extends State<AuthScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Warm-up Google SVG early so it shows immediately inside LoginForm
+                    Offstage(
+                      child: SvgPicture.asset(
+                        'assets/svgs/google_icon.svg',
+                        width: 1,
+                        height: 1,
+                      ),
+                    ),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       transitionBuilder:

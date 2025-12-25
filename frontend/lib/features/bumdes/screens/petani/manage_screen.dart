@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'add_screen.dart';
-import 'detail_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -56,10 +55,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
   }
 
   Future<void> _navigateToAddScreen() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const TambahPetaniScreen()),
-    );
+    final result = await context.push('/petani/add');
 
     // If result is true, reload the list
     if (result == true) {
@@ -68,12 +64,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
   }
 
   Future<void> _navigateToDetailScreen(PetaniData petani) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PetaniDetailScreen(petaniId: petani.id),
-      ),
-    );
+    final result = await context.push('/petani/${petani.id}');
 
     // If result is true (deleted), reload the list
     if (result == true) {

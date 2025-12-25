@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router.dart';
 // import 'package:frontend/features/auth/screens/auth_screen.dart';
-import 'package:frontend/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -23,10 +23,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'PanenKi\'',
       theme: AppTheme.theme,
-      home: const SplashScreen(),
+      routerConfig: router,
     );
   }
 }

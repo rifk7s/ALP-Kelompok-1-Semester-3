@@ -6,9 +6,8 @@ import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/product_service.dart';
-import 'package:frontend/features/shared/screens/chat_detail_page.dart';
-import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -203,7 +202,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       children: [
         IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         const Expanded(
           child: Center(
@@ -219,10 +218,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CartPage()),
-                );
+                context.pushNamed('cart');
               },
             ),
             // Badge counter
@@ -391,19 +387,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               );
               if (!mounted) return;
               if (chatId != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      chatId: chatId,
-                      name: bumdes.name,
-                      image: imageUrl.isNotEmpty
-                          ? imageUrl
-                          : "assets/images/logo.png",
-                      recipientId: bumdes.id,
-                    ),
-                  ),
-                );
+                await context.push('/chat/$chatId', extra: {
+                  'chatId': chatId,
+                  'name': bumdes.name,
+                  'image': imageUrl.isNotEmpty ? imageUrl : 'assets/images/logo.png',
+                  'recipientId': bumdes.id.toString(),
+                });
               }
             },
             child: const Icon(

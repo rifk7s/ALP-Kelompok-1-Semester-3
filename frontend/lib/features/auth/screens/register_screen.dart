@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/auth/screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -109,12 +109,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginScreen(),
-                                  ),
-                                );
+                                // Open combined auth screen and show login tab
+                                context.goNamed('auth', extra: {'isLogin': true});
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -173,7 +169,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      initialValue: 'Abdulrahman',
                       decoration: const InputDecoration(
                         hintText: 'Masukkan Nama Lengkap',
                       ),
@@ -188,7 +183,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      initialValue: '0813-5635-3033',
                       decoration: const InputDecoration(
                         hintText: 'Masukkan Nomor HP',
                       ),
@@ -204,7 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       obscureText: !_isPasswordVisible,
-                      initialValue: '********',
                       decoration: InputDecoration(
                         hintText: 'Masukkan Kata Sandi',
                         suffixIcon: IconButton(
@@ -237,9 +230,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('Daftar Sebagai Pembeli'),
+                    Theme(
+                      data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          minimumSize: const Size(double.infinity, 48),
+                        ).copyWith(
+                          overlayColor: WidgetStateProperty.all(Colors.transparent),
+                        ),
+                        onPressed: () {
+                          // keep within AuthScreen animation: open register tab
+                          context.goNamed('auth', extra: {'isLogin': false});
+                        },
+                        child: const Text('Daftar Sebagai Pembeli'),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     // const Row(

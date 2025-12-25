@@ -28,6 +28,18 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
   }
 
   Future<void> _loadUser() async {
+    final token = await StorageService.getToken();
+
+    // If no auth token is present, ensure user is redirected to auth screen
+    if (token == null) {
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
     final user = await StorageService.getUser();
     if (mounted) {
       setState(() => _user = user);

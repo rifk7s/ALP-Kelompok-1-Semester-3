@@ -3,16 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
-import 'package:frontend/features/shared/screens/notification_screen.dart';
+// notifications are routed via go_router
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
-import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -186,12 +185,7 @@ class _HomePageState extends State<HomePage> {
                               IconButton(
                                 icon: const Icon(Icons.shopping_cart_outlined),
                                 onPressed: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const CartPage(),
-                                    ),
-                                  );
+                                  await context.pushNamed('cart');
                                   // Reload cart count when returning from cart page
                                   loadCartCount();
                                 },
@@ -231,13 +225,7 @@ class _HomePageState extends State<HomePage> {
                               child: const Icon(Icons.notifications_outlined),
                             ),
                             onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NotificationPage(),
-                                ),
-                              );
+                              await context.pushNamed('notifications');
                               loadUnreadNotificationCount(); // Refresh count after returning
                             },
                           ),
@@ -549,12 +537,7 @@ Widget productCard({
   return GestureDetector(
     onTap: () {
       if (context != null && !isSoldOut) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailPage(product: product),
-          ),
-        );
+        context.push('/product/${product['id']}', extra: product);
       }
     },
     child: Opacity(
