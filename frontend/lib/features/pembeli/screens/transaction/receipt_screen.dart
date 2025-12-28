@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 class ReceiptPage extends StatelessWidget {
@@ -173,7 +174,8 @@ class ReceiptPage extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
+                // Navigate to start page (home with bottom navigation)
+                context.go('/start');
               },
               child: const Text(
                 "Kembali ke Home",
