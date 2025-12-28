@@ -38,7 +38,8 @@ final router = GoRouter(
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
             final id = state.pathParameters['id'];
-            final productMap = extra ?? (id != null ? {'id': int.tryParse(id)} : {});
+            final productMap =
+                extra ?? (id != null ? {'id': int.tryParse(id)} : {});
             return ProductDetailPage(product: productMap);
           },
         ),
@@ -82,7 +83,8 @@ final router = GoRouter(
         GoRoute(
           path: RoutePaths.petaniDetail,
           name: RouteNames.petaniDetail,
-          builder: (context, state) => Placeholder(), // TODO: Import PetaniDetailScreen
+          builder: (context, state) =>
+              Placeholder(), // TODO: Import PetaniDetailScreen
         ),
         GoRoute(
           path: RoutePaths.chat,
@@ -122,7 +124,10 @@ final router = GoRouter(
           const SizedBox(height: 16),
           const Text('Halaman tidak ditemukan', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 8),
-          Text(state.uri.toString(), style: const TextStyle(color: Colors.grey)),
+          Text(
+            state.uri.toString(),
+            style: const TextStyle(color: Colors.grey),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.go(RoutePaths.splash),

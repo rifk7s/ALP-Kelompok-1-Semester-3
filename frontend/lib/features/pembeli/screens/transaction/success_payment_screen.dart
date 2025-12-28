@@ -23,12 +23,15 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      
+
       // Navigate to receipt using go_router
       context.push(
         Uri(
           path: '/receipt',
-          queryParameters: {'id': widget.orderId, 'total': widget.total.toString()},
+          queryParameters: {
+            'id': widget.orderId,
+            'total': widget.total.toString(),
+          },
         ).toString(),
       );
     });

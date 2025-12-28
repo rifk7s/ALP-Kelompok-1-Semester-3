@@ -387,12 +387,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               );
               if (!mounted) return;
               if (chatId != null) {
-                await context.push('/chat/$chatId', extra: {
-                  'chatId': chatId,
-                  'name': bumdes.name,
-                  'image': imageUrl.isNotEmpty ? imageUrl : 'assets/images/logo.png',
-                  'recipientId': bumdes.id.toString(),
-                });
+                await context.push(
+                  '/chat/$chatId',
+                  extra: {
+                    'chatId': chatId,
+                    'name': bumdes.name,
+                    'image': imageUrl.isNotEmpty
+                        ? imageUrl
+                        : 'assets/images/logo.png',
+                    'recipientId': bumdes.id.toString(),
+                  },
+                );
               }
             },
             child: const Icon(

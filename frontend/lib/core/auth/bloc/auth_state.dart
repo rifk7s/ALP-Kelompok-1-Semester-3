@@ -7,11 +7,7 @@ class AuthState {
   final Map<String, dynamic>? user;
   final String? role;
 
-  const AuthState({
-    this.status = AuthStatus.unknown,
-    this.user,
-    this.role,
-  });
+  const AuthState({this.status = AuthStatus.unknown, this.user, this.role});
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
   bool get isUnknown => status == AuthStatus.unknown;

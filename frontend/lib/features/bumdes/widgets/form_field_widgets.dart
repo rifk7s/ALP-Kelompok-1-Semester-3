@@ -88,9 +88,7 @@ class _BumdesPriceFieldState extends State<BumdesPriceField> {
       style: !widget.enabled || widget.readOnly
           ? const TextStyle(color: AppColors.textMuted)
           : null,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );
   }
 }
@@ -132,9 +130,7 @@ class BumdesNumberField extends StatelessWidget {
       style: !enabled || readOnly
           ? const TextStyle(color: AppColors.textMuted)
           : null,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );
   }
 }

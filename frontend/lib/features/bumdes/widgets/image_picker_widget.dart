@@ -10,7 +10,8 @@ import 'package:frontend/core/services/api_config.dart';
 class BumdesImagePicker extends StatefulWidget {
   final List<File> selectedImages;
   final List<Map<String, dynamic>>? existingImages;
-  final List<Map<String, dynamic>>? existingImageUrls; // URLs from backend storage
+  final List<Map<String, dynamic>>?
+  existingImageUrls; // URLs from backend storage
   final Function(List<File>) onImagesChanged;
   final Function(List<int>)? onImagesToDelete;
   final bool isEnabled;
@@ -36,7 +37,8 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
   @override
   void initState() {
     super.initState();
-    _imagesToDelete = widget.existingImages
+    _imagesToDelete =
+        widget.existingImages
             ?.where((img) => img['marked_for_delete'] == true)
             .map<int>((img) => img['id'] as int)
             .toList() ??
@@ -59,11 +61,7 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _buildNewImageWidgets(),
-        ),
+        Wrap(spacing: 8, runSpacing: 8, children: _buildNewImageWidgets()),
         const SizedBox(height: 16),
       ]);
     }
@@ -80,11 +78,7 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _buildExistingImageWidgets(),
-        ),
+        Wrap(spacing: 8, runSpacing: 8, children: _buildExistingImageWidgets()),
         const SizedBox(height: 16),
       ]);
     }
@@ -181,7 +175,8 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
     }
 
     // Add image URLs from backend storage
-    if (widget.existingImageUrls != null && widget.existingImageUrls!.isNotEmpty) {
+    if (widget.existingImageUrls != null &&
+        widget.existingImageUrls!.isNotEmpty) {
       allImages.addAll(widget.existingImageUrls!);
     }
 
@@ -227,7 +222,7 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
                     child: CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
                           ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
+                                loadingProgress.expectedTotalBytes!
                           : null,
                     ),
                   ),
@@ -268,9 +263,9 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
       final currentCount = widget.selectedImages.length;
       if (currentCount >= 5) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Maksimal 5 foto")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
         }
         return;
       }
@@ -291,7 +286,9 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
       if (currentCount + images.length > 5) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Total foto tidak boleh lebih dari 5")),
+            const SnackBar(
+              content: Text("Total foto tidak boleh lebih dari 5"),
+            ),
           );
         }
         // Only add up to the limit
@@ -315,9 +312,9 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memilih gambar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memilih gambar: $e')));
       }
     }
   }

@@ -108,9 +108,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
       }
     }
   }
@@ -150,13 +150,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ProductBloc(
-            repository: ProductRepository(),
-          ),
+          create: (_) => ProductBloc(repository: ProductRepository()),
         ),
-        BlocProvider(
-          create: (_) => ProductEditingCubit(),
-        ),
+        BlocProvider(create: (_) => ProductEditingCubit()),
       ],
       child: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
@@ -241,7 +237,8 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           PetaniContributorList(
             contributors: petaniContributors,
             isEnabled: true,
-            onEdit: (index) => _editContributor(index, petaniContributors[index]),
+            onEdit: (index) =>
+                _editContributor(index, petaniContributors[index]),
             onDelete: (index) {
               setState(() {
                 petaniContributors.removeAt(index);
@@ -282,14 +279,17 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
             onChanged: (value) {
               setState(() {
                 selectedKategori = value;
-                selectedKategoriId = categories
-                    .firstWhere((cat) => cat['name'] == value)['id'];
+                selectedKategoriId = categories.firstWhere(
+                  (cat) => cat['name'] == value,
+                )['id'];
                 selectedVarietas = null;
 
                 // Update price based on category
                 final price = getPriceForSelection();
                 if (price != null) {
-                  _hargaController.text = ProductConstants.rupiah.format(price.toInt());
+                  _hargaController.text = ProductConstants.rupiah.format(
+                    price.toInt(),
+                  );
                 }
               });
             },
@@ -307,8 +307,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
               ),
               items: varietiesByCategory[selectedKategori]!
                   .map<DropdownMenuItem<String>>((v) {
-                return DropdownMenuItem<String>(value: v, child: Text(v));
-              }).toList(),
+                    return DropdownMenuItem<String>(value: v, child: Text(v));
+                  })
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   selectedVarietas = value;
@@ -316,7 +317,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   // Update price based on variety
                   final price = getPriceForSelection();
                   if (price != null) {
-                    _hargaController.text = ProductConstants.rupiah.format(price.toInt());
+                    _hargaController.text = ProductConstants.rupiah.format(
+                      price.toInt(),
+                    );
                   }
                 });
               },
@@ -346,10 +349,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
               padding: const EdgeInsets.only(top: 6, left: 12),
               child: Text(
                 "ℹ️ HPP $selectedKategori${selectedVarietas != null ? ' ($selectedVarietas)' : ''}: Rp ${price.toInt()}/kg",
-                style: const TextStyle(
-                  color: AppColors.textDark,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: AppColors.textDark, fontSize: 12),
               ),
             ),
           const SizedBox(height: 14),
@@ -425,10 +425,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
               )
             : const Text(
                 "UPLOAD PRODUK",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     );
@@ -438,10 +435,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => PetaniContributorDialog(
-        petaniList: petaniList.map((p) => {
-          'id': p.id,
-          'name': p.name,
-        }).toList(),
+        petaniList: petaniList
+            .map((p) => {'id': p.id, 'name': p.name})
+            .toList(),
       ),
     );
 
@@ -458,10 +454,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       context: context,
       builder: (context) => PetaniContributorDialog(
         initialData: contrib,
-        petaniList: petaniList.map((p) => {
-          'id': p.id,
-          'name': p.name,
-        }).toList(),
+        petaniList: petaniList
+            .map((p) => {'id': p.id, 'name': p.name})
+            .toList(),
       ),
     );
 
@@ -485,16 +480,16 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     // Validation
     if (_namaProdukController.text.isEmpty) {
       _namaProdukShakeKey.currentState?.shake();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama produk harus diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nama produk harus diisi')));
       return;
     }
 
     if (selectedKategori == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kategori harus dipilih')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kategori harus dipilih')));
       return;
     }
 
@@ -508,9 +503,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     // Get price from HPP
     final price = getPriceForSelection();
     if (price == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Harga tidak ditemukan')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Harga tidak ditemukan')));
       return;
     }
 
@@ -535,9 +530,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       ctx.read<ProductBloc>().add(event);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengupload produk: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal mengupload produk: $e')));
         setState(() => isSubmitting = false);
       }
     }

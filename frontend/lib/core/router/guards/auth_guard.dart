@@ -13,7 +13,8 @@ class RouteGuards {
     AuthStatus authStatus,
   ) {
     final isAuthenticated = authStatus == AuthStatus.authenticated;
-    final isAuthRoute = state.matchedLocation.startsWith('/login') ||
+    final isAuthRoute =
+        state.matchedLocation.startsWith('/login') ||
         state.matchedLocation.startsWith('/register') ||
         state.matchedLocation.startsWith('/auth') ||
         state.matchedLocation == '/start' ||
@@ -62,4 +63,3 @@ class RouteGuards {
     return null;
   }
 }
-

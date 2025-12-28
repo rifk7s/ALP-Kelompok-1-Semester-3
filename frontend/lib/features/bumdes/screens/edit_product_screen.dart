@@ -109,9 +109,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
       }
     }
   }
@@ -166,7 +166,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     // Set existing images
     if (product['product_images'] != null) {
       existingImages = List<Map<String, dynamic>>.from(
-        (product['product_images'] as List).map((img) => Map<String, dynamic>.from(img)),
+        (product['product_images'] as List).map(
+          (img) => Map<String, dynamic>.from(img),
+        ),
       );
     }
 
@@ -226,13 +228,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ProductBloc(
-            repository: ProductRepository(),
-          ),
+          create: (_) => ProductBloc(repository: ProductRepository()),
         ),
-        BlocProvider(
-          create: (_) => ProductEditingCubit(),
-        ),
+        BlocProvider(create: (_) => ProductEditingCubit()),
       ],
       child: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
@@ -314,7 +312,8 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           PetaniContributorList(
             contributors: petaniContributors,
             isEnabled: true,
-            onEdit: (index) => _editContributor(index, petaniContributors[index]),
+            onEdit: (index) =>
+                _editContributor(index, petaniContributors[index]),
             onDelete: (index) {
               setState(() {
                 petaniContributors.removeAt(index);
@@ -355,14 +354,17 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
             onChanged: (value) {
               setState(() {
                 selectedKategori = value;
-                selectedKategoriId = categories
-                    .firstWhere((cat) => cat['name'] == value)['id'];
+                selectedKategoriId = categories.firstWhere(
+                  (cat) => cat['name'] == value,
+                )['id'];
                 selectedVarietas = null;
 
                 // Update price based on category
                 final price = getPriceForSelection();
                 if (price != null) {
-                  _hargaController.text = ProductConstants.rupiah.format(price.toInt());
+                  _hargaController.text = ProductConstants.rupiah.format(
+                    price.toInt(),
+                  );
                 }
               });
             },
@@ -380,8 +382,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
               ),
               items: varietiesByCategory[selectedKategori]!
                   .map<DropdownMenuItem<String>>((v) {
-                return DropdownMenuItem<String>(value: v, child: Text(v));
-              }).toList(),
+                    return DropdownMenuItem<String>(value: v, child: Text(v));
+                  })
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   selectedVarietas = value;
@@ -389,7 +392,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   // Update price based on variety
                   final price = getPriceForSelection();
                   if (price != null) {
-                    _hargaController.text = ProductConstants.rupiah.format(price.toInt());
+                    _hargaController.text = ProductConstants.rupiah.format(
+                      price.toInt(),
+                    );
                   }
                 });
               },
@@ -419,10 +424,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
               padding: const EdgeInsets.only(top: 6, left: 12),
               child: Text(
                 "ℹ️ HPP $selectedKategori${selectedVarietas != null ? ' ($selectedVarietas)' : ''}: Rp ${price.toInt()}/kg",
-                style: const TextStyle(
-                  color: AppColors.textDark,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: AppColors.textDark, fontSize: 12),
               ),
             ),
           const SizedBox(height: 14),
@@ -494,10 +496,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
               )
             : const Text(
                 "SIMPAN PERUBAHAN",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     );
@@ -507,10 +506,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => PetaniContributorDialog(
-        petaniList: petaniList.map((p) => {
-          'id': p.id,
-          'name': p.name,
-        }).toList(),
+        petaniList: petaniList
+            .map((p) => {'id': p.id, 'name': p.name})
+            .toList(),
       ),
     );
 
@@ -527,10 +525,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       context: context,
       builder: (context) => PetaniContributorDialog(
         initialData: contrib,
-        petaniList: petaniList.map((p) => {
-          'id': p.id,
-          'name': p.name,
-        }).toList(),
+        petaniList: petaniList
+            .map((p) => {'id': p.id, 'name': p.name})
+            .toList(),
       ),
     );
 
@@ -553,16 +550,16 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   Future<void> _submitUpdate(BuildContext ctx) async {
     // Validation
     if (_namaProdukController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama produk harus diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nama produk harus diisi')));
       return;
     }
 
     if (selectedKategori == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kategori harus dipilih')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kategori harus dipilih')));
       return;
     }
 
@@ -576,9 +573,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     // Get price from HPP
     final price = getPriceForSelection();
     if (price == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Harga tidak ditemukan')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Harga tidak ditemukan')));
       return;
     }
 
@@ -608,9 +605,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
       ctx.read<ProductBloc>().add(event);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
     }
   }
 }

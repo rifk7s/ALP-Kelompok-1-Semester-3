@@ -92,12 +92,15 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                                 width: 70,
                                 height: 70,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  width: 70,
-                                  height: 70,
-                                  color: AppColors.grey200,
-                                  child: const Icon(Icons.image_not_supported),
-                                ),
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: 70,
+                                      height: 70,
+                                      color: AppColors.grey200,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                      ),
+                                    ),
                               )
                             : Container(
                                 width: 70,

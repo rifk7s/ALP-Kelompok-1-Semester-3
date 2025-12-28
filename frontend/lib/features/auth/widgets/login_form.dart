@@ -170,14 +170,17 @@ class _LoginFormState extends State<LoginForm> {
         Column(
           children: [
             Theme(
-              data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
+              data: Theme.of(
+                context,
+              ).copyWith(splashFactory: NoSplash.splashFactory),
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  minimumSize: const Size(double.infinity, 48),
-                ).copyWith(
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
-                ),
+                style:
+                    ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      minimumSize: const Size(double.infinity, 48),
+                    ).copyWith(
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
                 onPressed: _isLoading ? null : _handleLogin,
                 child: _isLoading
                     ? const SizedBox(
@@ -230,7 +233,8 @@ class _LoginFormState extends State<LoginForm> {
                 'assets/svgs/google_icon.svg',
                 height: 24,
                 width: 24,
-                placeholderBuilder: (context) => const SizedBox(width: 24, height: 24),
+                placeholderBuilder: (context) =>
+                    const SizedBox(width: 24, height: 24),
               ),
               const SizedBox(width: 12),
               const Text('Masuk menggunakan Google'),

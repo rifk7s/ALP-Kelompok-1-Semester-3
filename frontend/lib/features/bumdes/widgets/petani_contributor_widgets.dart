@@ -150,7 +150,9 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
 
     if (widget.initialData?['harvest_date'] != null) {
       try {
-        _selectedHarvestDate = DateTime.parse(widget.initialData!['harvest_date']);
+        _selectedHarvestDate = DateTime.parse(
+          widget.initialData!['harvest_date'],
+        );
       } catch (e) {
         _selectedHarvestDate = null;
       }
@@ -166,7 +168,9 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.initialData == null ? 'Tambah Kontributor' : 'Edit Kontributor'),
+      title: Text(
+        widget.initialData == null ? 'Tambah Kontributor' : 'Edit Kontributor',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -188,8 +192,11 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
               onChanged: (value) {
                 setState(() {
                   _selectedPetaniId = value;
-                  _selectedPetaniName = widget.petaniList
-                      .firstWhere((p) => p['id'] == value)['name'] as String;
+                  _selectedPetaniName =
+                      widget.petaniList.firstWhere(
+                            (p) => p['id'] == value,
+                          )['name']
+                          as String;
                 });
               },
             ),
@@ -228,10 +235,7 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Batal'),
         ),
-        ElevatedButton(
-          onPressed: _handleSubmit,
-          child: const Text('Simpan'),
-        ),
+        ElevatedButton(onPressed: _handleSubmit, child: const Text('Simpan')),
       ],
     );
   }
@@ -259,15 +263,15 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
       return;
     }
     if (_selectedPetaniId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih petani')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pilih petani')));
       return;
     }
     if (_selectedHarvestDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih tanggal panen')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pilih tanggal panen')));
       return;
     }
 
@@ -285,8 +289,19 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
 
   String _getMonthName(int month) {
     const months = [
-      "", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-      "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+      "",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
     ];
     return months[month];
   }

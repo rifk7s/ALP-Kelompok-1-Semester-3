@@ -138,7 +138,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: GestureDetector(
                               onTap: () {
                                 // Open combined auth screen and show register tab
-                                context.goNamed('auth', extra: {'isLogin': false});
+                                context.goNamed(
+                                  'auth',
+                                  extra: {'isLogin': false},
+                                );
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(

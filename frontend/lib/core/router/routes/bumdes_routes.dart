@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
-import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
+import 'package:frontend/features/bumdes/screens/product_detail_screen.dart'
+    as bumdes;
 import 'package:frontend/features/bumdes/screens/upload_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/add_screen.dart';
@@ -40,8 +41,12 @@ class BumdesRoutes {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final id = state.pathParameters['id'];
-          final productMap = extra ?? (id != null ? {'id': int.tryParse(id)} : {});
-          return bumdes.ProductDetailPage(product: productMap, onUpdate: (_) {});
+          final productMap =
+              extra ?? (id != null ? {'id': int.tryParse(id)} : {});
+          return bumdes.ProductDetailPage(
+            product: productMap,
+            onUpdate: (_) {},
+          );
         },
       ),
       GoRoute(

@@ -110,7 +110,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: GestureDetector(
                               onTap: () {
                                 // Open combined auth screen and show login tab
-                                context.goNamed('auth', extra: {'isLogin': true});
+                                context.goNamed(
+                                  'auth',
+                                  extra: {'isLogin': true},
+                                );
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -231,14 +234,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
                     Theme(
-                      data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
+                      data: Theme.of(
+                        context,
+                      ).copyWith(splashFactory: NoSplash.splashFactory),
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          minimumSize: const Size(double.infinity, 48),
-                        ).copyWith(
-                          overlayColor: WidgetStateProperty.all(Colors.transparent),
-                        ),
+                        style:
+                            ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              minimumSize: const Size(double.infinity, 48),
+                            ).copyWith(
+                              overlayColor: WidgetStateProperty.all(
+                                Colors.transparent,
+                              ),
+                            ),
                         onPressed: () {
                           // keep within AuthScreen animation: open register tab
                           context.goNamed('auth', extra: {'isLogin': false});

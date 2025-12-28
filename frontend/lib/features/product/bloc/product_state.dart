@@ -8,6 +8,7 @@ abstract class ProductState extends Equatable {
 }
 
 class ProductInitial extends ProductState {}
+
 class ProductLoading extends ProductState {}
 
 /// State used while editing a product (create or update)
@@ -39,7 +40,12 @@ class ProductEditing extends ProductState {
   }
 
   @override
-  List<Object?> get props => [petaniContributors, selectedImages, existingImages, imagesToDelete];
+  List<Object?> get props => [
+    petaniContributors,
+    selectedImages,
+    existingImages,
+    imagesToDelete,
+  ];
 }
 
 class ProductSuccess extends ProductState {

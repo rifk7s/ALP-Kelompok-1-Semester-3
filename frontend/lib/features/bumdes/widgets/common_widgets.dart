@@ -59,11 +59,7 @@ class BumdesInputLabel extends StatelessWidget {
   final String text;
   final bool required;
 
-  const BumdesInputLabel(
-    this.text, {
-    super.key,
-    this.required = false,
-  });
+  const BumdesInputLabel(this.text, {super.key, this.required = false});
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +125,7 @@ class BumdesEmptyState extends StatelessWidget {
 class BumdesLoadingIndicator extends StatelessWidget {
   final String? message;
 
-  const BumdesLoadingIndicator({
-    super.key,
-    this.message,
-  });
+  const BumdesLoadingIndicator({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +138,7 @@ class BumdesLoadingIndicator extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-              ),
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ],
         ],

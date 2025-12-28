@@ -12,13 +12,18 @@ class ProductEditingCubit extends Cubit<ProductEditing> {
     }
 
     final contributions = (product['product_contributions'] as List? ?? [])
-        .map((contrib) => {
-              'petani_id': contrib['petani']['id'],
-              'petani_name': contrib['petani']['name'],
-              'contributed_kg': double.parse(contrib['contributed_kg'].toString()),
-              'harvest_date': contrib['harvest_date'] ??
-                  DateTime.now().toIso8601String().split('T')[0],
-            })
+        .map(
+          (contrib) => {
+            'petani_id': contrib['petani']['id'],
+            'petani_name': contrib['petani']['name'],
+            'contributed_kg': double.parse(
+              contrib['contributed_kg'].toString(),
+            ),
+            'harvest_date':
+                contrib['harvest_date'] ??
+                DateTime.now().toIso8601String().split('T')[0],
+          },
+        )
         .toList()
         .cast<Map<String, dynamic>>();
 
@@ -27,12 +32,14 @@ class ProductEditingCubit extends Cubit<ProductEditing> {
         .toList()
         .cast<Map<String, dynamic>>();
 
-    emit(ProductEditing(
-      petaniContributors: contributions,
-      selectedImages: const [],
-      existingImages: existingImages,
-      imagesToDelete: const [],
-    ));
+    emit(
+      ProductEditing(
+        petaniContributors: contributions,
+        selectedImages: const [],
+        existingImages: existingImages,
+        imagesToDelete: const [],
+      ),
+    );
   }
 
   void addContributor(Map<String, dynamic> contributor) {

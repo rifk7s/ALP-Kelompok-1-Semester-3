@@ -20,29 +20,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isLoggedIn) {
       final user = await StorageService.getUser();
       final role = user?['role'] as String?;
-      emit(
-        AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
-          role: role,
-        ),
-      );
+      emit(AuthState(status: AuthStatus.authenticated, user: user, role: role));
     } else {
       emit(const AuthState(status: AuthStatus.unauthenticated));
     }
   }
 
-  Future<void> _onLoggedIn(
-    AuthLoggedIn event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onLoggedIn(AuthLoggedIn event, Emitter<AuthState> emit) async {
     final role = event.user['role'] as String?;
     emit(
-      AuthState(
-        status: AuthStatus.authenticated,
-        user: event.user,
-        role: role,
-      ),
+      AuthState(status: AuthStatus.authenticated, user: event.user, role: role),
     );
   }
 

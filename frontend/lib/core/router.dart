@@ -7,7 +7,8 @@ import 'package:frontend/features/pembeli/screens/home_screen.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
-import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
+import 'package:frontend/features/bumdes/screens/product_detail_screen.dart'
+    as bumdes;
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
@@ -38,12 +39,14 @@ final GoRouter router = GoRouter(
     GoRoute(
       name: 'register',
       path: '/register',
-      pageBuilder: (context, state) => NoTransitionPage(child: const AuthScreen(initialIsLogin: false)),
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: const AuthScreen(initialIsLogin: false)),
     ),
     GoRoute(
       name: 'login',
       path: '/login',
-      pageBuilder: (context, state) => NoTransitionPage(child: const AuthScreen(initialIsLogin: true)),
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: const AuthScreen(initialIsLogin: true)),
     ),
     // Combined auth screen (animated login/register)
     GoRoute(
@@ -51,8 +54,12 @@ final GoRouter router = GoRouter(
       path: '/auth',
       pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        final initialIsLogin = extra == null || extra['isLogin'] == null ? true : (extra['isLogin'] as bool);
-        return NoTransitionPage(child: AuthScreen(initialIsLogin: initialIsLogin));
+        final initialIsLogin = extra == null || extra['isLogin'] == null
+            ? true
+            : (extra['isLogin'] as bool);
+        return NoTransitionPage(
+          child: AuthScreen(initialIsLogin: initialIsLogin),
+        );
       },
     ),
     GoRoute(
@@ -92,17 +99,23 @@ final GoRouter router = GoRouter(
         // Build product map from extra or path param
         final extra = state.extra as Map<String, dynamic>?;
         final id = state.pathParameters['id'];
-        final productMap = extra ?? (id != null ? {'id': int.tryParse(id)} : {});
+        final productMap =
+            extra ?? (id != null ? {'id': int.tryParse(id)} : {});
 
         // Decide which detail page to show based on stored user role (role-based routing)
         // We use FutureBuilder to resolve stored user asynchronously without blocking the router.
         return FutureBuilder<Map<String, dynamic>?>(
           future: StorageService.getUser(),
           builder: (context, snapshot) {
-            final role = snapshot.data != null ? snapshot.data!['role'] as String? : null;
+            final role = snapshot.data != null
+                ? snapshot.data!['role'] as String?
+                : null;
 
             if (role == 'bumdes') {
-              return bumdes.ProductDetailPage(product: productMap, onUpdate: (_) {});
+              return bumdes.ProductDetailPage(
+                product: productMap,
+                onUpdate: (_) {},
+              );
             }
 
             // Default to pembeli detail for other roles or unauthenticated sessions
@@ -132,11 +145,24 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final id = state.pathParameters['id'] ?? '';
-        final chatId = extra != null && extra['chatId'] != null ? extra['chatId'] as String : id;
-        final name = extra != null && extra['name'] != null ? extra['name'] as String : (extra?['name'] ?? '');
-        final image = extra != null && extra['image'] != null ? extra['image'] as String : (extra?['image'] ?? 'assets/images/logo.png');
-        final recipientId = extra != null && extra['recipientId'] != null ? extra['recipientId'] as String : (extra?['recipientId'] ?? '');
-        return ChatDetailPage(chatId: chatId, name: name, image: image, recipientId: recipientId);
+        final chatId = extra != null && extra['chatId'] != null
+            ? extra['chatId'] as String
+            : id;
+        final name = extra != null && extra['name'] != null
+            ? extra['name'] as String
+            : (extra?['name'] ?? '');
+        final image = extra != null && extra['image'] != null
+            ? extra['image'] as String
+            : (extra?['image'] ?? 'assets/images/logo.png');
+        final recipientId = extra != null && extra['recipientId'] != null
+            ? extra['recipientId'] as String
+            : (extra?['recipientId'] ?? '');
+        return ChatDetailPage(
+          chatId: chatId,
+          name: name,
+          image: image,
+          recipientId: recipientId,
+        );
       },
     ),
   ],

@@ -602,12 +602,15 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                               width: 64,
                               height: 64,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 64,
-                                height: 64,
-                                color: AppColors.grey200,
-                                child: const Icon(Icons.image_not_supported),
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    color: AppColors.grey200,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                    ),
+                                  ),
                             )
                           : Container(
                               width: 64,
@@ -665,14 +668,16 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
                                     width: 64,
                                     height: 64,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      width: 64,
-                                      height: 64,
-                                      color: AppColors.grey200,
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                      ),
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                              width: 64,
+                                              height: 64,
+                                              color: AppColors.grey200,
+                                              child: const Icon(
+                                                Icons.image_not_supported,
+                                              ),
+                                            ),
                                   )
                                 : Container(
                                     width: 64,

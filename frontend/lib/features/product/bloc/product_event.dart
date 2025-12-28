@@ -7,6 +7,7 @@ abstract class ProductEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
+
 class ProductCreateRequested extends ProductEvent {
   final String name;
   final int categoryId;
@@ -31,7 +32,14 @@ class ProductCreateRequested extends ProductEvent {
   });
 
   @override
-  List<Object?> get props => [name, categoryId, variety, storageDays, pricePerKg, stockKg];
+  List<Object?> get props => [
+    name,
+    categoryId,
+    variety,
+    storageDays,
+    pricePerKg,
+    stockKg,
+  ];
 }
 
 class ProductUpdateRequested extends ProductEvent {
@@ -64,6 +72,14 @@ class ProductUpdateRequested extends ProductEvent {
   });
 
   @override
-  List<Object?> get props => [productId, name, categoryId, variety, harvestDate, storageDays, pricePerKg, stockKg];
+  List<Object?> get props => [
+    productId,
+    name,
+    categoryId,
+    variety,
+    harvestDate,
+    storageDays,
+    pricePerKg,
+    stockKg,
+  ];
 }
-
