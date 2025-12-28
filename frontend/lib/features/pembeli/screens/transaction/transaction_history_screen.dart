@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
@@ -1025,7 +1026,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                       order['id'] as int,
                     );
 
-                    if (mounted) Navigator.pop(context); // Close loading
+                    if (mounted) context.pop(); // Close loading
 
                     if (!mounted) return;
 
@@ -1163,7 +1164,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                         order['id'] as int,
                       );
 
-                      if (mounted) Navigator.pop(context); // Close loading
+                      if (mounted) context.pop(); // Close loading
 
                       if (!mounted) return;
 
@@ -1346,7 +1347,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
               }
 
               // Close loading dialog
-              if (mounted) Navigator.pop(context);
+              if (mounted) context.pop();
 
               if (!stockValid) {
                 if (mounted) {
@@ -1515,7 +1516,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   ),
                   title: const Text('Lihat Struk/Invoice'),
                   onTap: () {
-                    Navigator.pop(context);
+                    context.pop();
                     final status = order['status']?.toString() ?? '';
                     Navigator.push(
                       context,
@@ -1533,7 +1534,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   leading: const Icon(Icons.timeline, color: AppColors.primary),
                   title: const Text('Lihat Status & Pelacakan'),
                   onTap: () {
-                    Navigator.pop(context);
+                    context.pop();
                     _openTracking(order);
                   },
                 ),
@@ -1544,7 +1545,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
                   ),
                   title: const Text('Chat BUMDes'),
                   onTap: () {
-                    Navigator.pop(context);
+                    context.pop();
                     _openChat(order);
                   },
                 ),

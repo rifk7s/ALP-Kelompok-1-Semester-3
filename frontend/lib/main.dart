@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router.dart';
-// import 'package:frontend/features/auth/screens/auth_screen.dart';
+import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -20,13 +21,21 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'PanenKi\'',
-      theme: AppTheme.theme,
-      routerConfig: router,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthBloc()..add(AuthStarted()),
+        ),
+        // Add other BLoCs here as needed
+      ],
+      child: MaterialApp.router(
+        title: 'PanenKi\'',
+        theme: AppTheme.theme,
+        routerConfig: router,
+      ),
     );
   }
 }
+

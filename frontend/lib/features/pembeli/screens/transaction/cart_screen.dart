@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -234,7 +235,7 @@ class _CartPageState extends State<CartPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.pop(),
               child: const Text(
                 "Batal",
                 style: TextStyle(color: AppColors.primary),
@@ -244,7 +245,7 @@ class _CartPageState extends State<CartPage> {
               onPressed: () {
                 final qty = double.tryParse(controller.text) ?? 0;
                 if (qty <= 0) {
-                  Navigator.pop(context);
+                  context.pop();
                   return;
                 }
                 if (qty > stockKg) {
@@ -254,7 +255,7 @@ class _CartPageState extends State<CartPage> {
                   );
                   return;
                 }
-                Navigator.pop(context);
+                context.pop();
                 changeQty(item, qty.toDouble());
               },
               style: ElevatedButton.styleFrom(
@@ -781,7 +782,7 @@ class _CartPageState extends State<CartPage> {
 
                             // Close loading indicator
                             if (!context.mounted) return;
-                            Navigator.pop(context);
+                            context.pop();
 
                             if (!stockValid) {
                               SnackBarHelper.showError(

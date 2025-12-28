@@ -106,7 +106,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       builder: (context) => AlertDialog(
         title: const Text("Konfirmasi Hapus"),
         content: Text(
-          "Apakah Anda yakin ingin menghapus produk ${currentProduct['name']}?",
+          "Apakah Anda yakin ingin menghapus produk ${currentProduct['name']?.toString() ?? 'Produk'}?",
         ),
         actions: [
           TextButton(
@@ -211,7 +211,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          currentProduct['name'],
+          currentProduct['name']?.toString() ?? 'Produk',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,

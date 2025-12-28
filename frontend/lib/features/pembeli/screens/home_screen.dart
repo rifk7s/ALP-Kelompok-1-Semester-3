@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'package:frontend/features/pembeli/screens/search_screen.dart';
-// notifications are routed via go_router
-import 'package:frontend/features/shared/screens/hpp_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/api_config.dart';
-import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
-
-final NumberFormat rupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: "Rp ",
-  decimalDigits: 0,
-);
+import 'package:frontend/features/bumdes/utils/product_constants.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -185,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                               IconButton(
                                 icon: const Icon(Icons.shopping_cart_outlined),
                                 onPressed: () async {
-                                  await context.pushNamed('cart');
+                                  await context.push('/cart');
                                   // Reload cart count when returning from cart page
                                   loadCartCount();
                                 },
@@ -225,7 +216,7 @@ class _HomePageState extends State<HomePage> {
                               child: const Icon(Icons.notifications_outlined),
                             ),
                             onPressed: () async {
-                              await context.pushNamed('notifications');
+                              await context.push('/notifications');
                               loadUnreadNotificationCount(); // Refresh count after returning
                             },
                           ),
@@ -241,12 +232,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SearchPage(),
-                        ),
-                      );
+                      context.push('/search');
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -281,12 +267,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HppPage(),
-                        ),
-                      );
+                      context.push('/hpp');
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
@@ -598,7 +579,7 @@ Widget productCard({
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['name'],
+                    product['name']?.toString() ?? 'Produk',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -611,7 +592,7 @@ Widget productCard({
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${rupiah.format(pricePerKg.toInt())}/kg',
+                    '${ProductConstants.rupiah.format(pricePerKg.toInt())}/kg',
                     style: TextStyle(
                       color: isSoldOut ? AppColors.grey600 : AppColors.danger,
                       fontWeight: FontWeight.bold,

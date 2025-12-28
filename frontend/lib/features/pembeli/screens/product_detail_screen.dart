@@ -300,7 +300,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          product['name'],
+          product['name']?.toString() ?? 'Produk',
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),

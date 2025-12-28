@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 import 'package:frontend/splash_screen.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 
@@ -6,7 +7,9 @@ import 'package:frontend/features/pembeli/screens/home_screen.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
+import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:frontend/features/bumdes/screens/upload_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
@@ -58,17 +61,6 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const HomePage(),
     ),
     GoRoute(
-      name: 'product_detail',
-      path: '/product/:id',
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        // if extra is not provided, attempt to build a minimal product map from pathParameters
-        final id = state.pathParameters['id'];
-        final product = extra ?? (id != null ? {'id': int.tryParse(id)} : {});
-        return ProductDetailPage(product: product);
-      },
-    ),
-    GoRoute(
       name: 'cart',
       path: '/cart',
       builder: (context, state) => const CartPage(),
@@ -83,6 +75,7 @@ final GoRouter router = GoRouter(
       path: '/product/upload',
       builder: (context, state) => const UploadProdukScreen(),
     ),
+    // Ensure edit route is matched before the generic product/:id route
     GoRoute(
       name: 'edit_product',
       path: '/product/edit/:id',
@@ -90,6 +83,32 @@ final GoRouter router = GoRouter(
         // product data can be passed via `extra`
         final product = state.extra as Map<String, dynamic>?;
         return EditProdukScreen(product: product ?? {});
+      },
+    ),
+    GoRoute(
+      name: 'product_detail',
+      path: '/product/:id',
+      builder: (context, state) {
+        // Build product map from extra or path param
+        final extra = state.extra as Map<String, dynamic>?;
+        final id = state.pathParameters['id'];
+        final productMap = extra ?? (id != null ? {'id': int.tryParse(id)} : {});
+
+        // Decide which detail page to show based on stored user role (role-based routing)
+        // We use FutureBuilder to resolve stored user asynchronously without blocking the router.
+        return FutureBuilder<Map<String, dynamic>?>(
+          future: StorageService.getUser(),
+          builder: (context, snapshot) {
+            final role = snapshot.data != null ? snapshot.data!['role'] as String? : null;
+
+            if (role == 'bumdes') {
+              return bumdes.ProductDetailPage(product: productMap, onUpdate: (_) {});
+            }
+
+            // Default to pembeli detail for other roles or unauthenticated sessions
+            return ProductDetailPage(product: productMap);
+          },
+        );
       },
     ),
     // Petani routes

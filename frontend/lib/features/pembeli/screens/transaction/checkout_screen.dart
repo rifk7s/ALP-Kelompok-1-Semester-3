@@ -452,6 +452,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 _box(
                   child: TextField(
                     maxLines: 3,
+                    textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       hintText: "Tulis catatan di sini...",
                       border: OutlineInputBorder(

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
 
 class SuccessPaymentScreen extends StatefulWidget {
   final int total;
@@ -23,15 +23,13 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ReceiptPage(
-            total: widget.total,
-            orderId: widget.orderId,
-            orderStatus: 'paid',
-          ),
-        ),
+      
+      // Navigate to receipt using go_router
+      context.push(
+        Uri(
+          path: '/receipt',
+          queryParameters: {'id': widget.orderId, 'total': widget.total.toString()},
+        ).toString(),
       );
     });
   }
