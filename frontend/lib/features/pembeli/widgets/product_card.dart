@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/api_config.dart';
-import 'package:frontend/features/bumdes/utils/product_constants.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -108,7 +108,7 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${ProductConstants.rupiah.format(pricePerKg.toInt())}/kg',
+                      '${CurrencyFormatter.rupiah.format(pricePerKg.toInt())}/kg',
                       style: TextStyle(
                         fontSize: 13,
                         color: isSoldOut ? AppColors.grey600 : AppColors.danger,

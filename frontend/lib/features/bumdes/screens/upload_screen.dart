@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
@@ -16,7 +17,6 @@ import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/form_field_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/petani_contributor_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/image_picker_widget.dart';
-import 'package:frontend/features/bumdes/utils/product_constants.dart';
 
 /// Refactored Upload Product Screen
 /// Uses shared widgets instead of duplicating code
@@ -287,7 +287,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 // Update price based on category
                 final price = getPriceForSelection();
                 if (price != null) {
-                  _hargaController.text = ProductConstants.rupiah.format(
+                  _hargaController.text = CurrencyFormatter.rupiah.format(
                     price.toInt(),
                   );
                 }
@@ -317,7 +317,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                   // Update price based on variety
                   final price = getPriceForSelection();
                   if (price != null) {
-                    _hargaController.text = ProductConstants.rupiah.format(
+                    _hargaController.text = CurrencyFormatter.rupiah.format(
                       price.toInt(),
                     );
                   }

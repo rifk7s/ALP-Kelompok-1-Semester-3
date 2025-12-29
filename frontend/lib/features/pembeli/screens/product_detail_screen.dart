@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
@@ -40,28 +41,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   String _formatDate(String? isoString) {
-    if (isoString == null || isoString.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(isoString);
-      const months = [
-        '',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-      ];
-      return '${date.day} ${months[date.month]} ${date.year}';
-    } catch (e) {
-      return '-';
-    }
+    return DateFormatter.formatDateFromIso(isoString);
   }
 
   @override

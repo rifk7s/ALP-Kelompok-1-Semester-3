@@ -5,6 +5,7 @@ import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/product/bloc/product_bloc.dart';
 import 'package:frontend/features/product/bloc/product_state.dart';
@@ -15,7 +16,6 @@ import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/form_field_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/petani_contributor_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/image_picker_widget.dart';
-import 'package:frontend/features/bumdes/utils/product_constants.dart';
 
 /// Refactored Edit Product Screen
 /// Uses shared widgets instead of duplicating code
@@ -160,7 +160,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     // Set price using HPP data
     final price = getPriceForSelection();
     if (price != null) {
-      _hargaController.text = ProductConstants.rupiah.format(price.toInt());
+      _hargaController.text = CurrencyFormatter.rupiah.format(price.toInt());
     }
 
     // Set existing images
@@ -362,7 +362,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                 // Update price based on category
                 final price = getPriceForSelection();
                 if (price != null) {
-                  _hargaController.text = ProductConstants.rupiah.format(
+                  _hargaController.text = CurrencyFormatter.rupiah.format(
                     price.toInt(),
                   );
                 }
@@ -392,7 +392,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
                   // Update price based on variety
                   final price = getPriceForSelection();
                   if (price != null) {
-                    _hargaController.text = ProductConstants.rupiah.format(
+                    _hargaController.text = CurrencyFormatter.rupiah.format(
                       price.toInt(),
                     );
                   }

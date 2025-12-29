@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
 import 'edit_product_screen.dart';
 
@@ -434,28 +435,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   String _formatDate(String? isoString) {
-    if (isoString == null || isoString.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(isoString);
-      const months = [
-        '',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-      ];
-      return '${date.day} ${months[date.month]} ${date.year}';
-    } catch (e) {
-      return '-';
-    }
+    return DateFormatter.formatDateFromIso(isoString);
   }
 
   Widget _additionalInfo() {

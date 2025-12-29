@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
 
 class HppPage extends StatefulWidget {
@@ -79,21 +80,7 @@ class _HppPageState extends State<HppPage> {
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    return DateFormatter.formatDateFull(date);
   }
 
   String _formatPrice(dynamic price) {
