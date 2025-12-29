@@ -179,7 +179,9 @@ class _LoginFormState extends State<LoginForm> {
                       backgroundColor: AppColors.primary,
                       minimumSize: const Size(double.infinity, 48),
                     ).copyWith(
-                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                      overlayColor: WidgetStateProperty.all(
+                        AppColors.transparent,
+                      ),
                     ),
                 onPressed: _isLoading ? null : _handleLogin,
                 child: _isLoading

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 
 class SuccessPaymentScreen extends StatefulWidget {
   final int total;
@@ -27,11 +28,8 @@ class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
       // Navigate to receipt using go_router
       context.push(
         Uri(
-          path: '/receipt',
-          queryParameters: {
-            'id': widget.orderId,
-            'total': widget.total.toString(),
-          },
+          path: RoutePaths.receipt.replaceAll(':id', widget.orderId),
+          queryParameters: {'total': widget.total.toString()},
         ).toString(),
       );
     });

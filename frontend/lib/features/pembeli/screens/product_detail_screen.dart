@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/api_config.dart';
-import 'package:frontend/core/services/cart_service.dart';
-import 'package:frontend/core/services/product_service.dart';
-import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
+import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
+import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
+import 'package:frontend/features/pembeli/widgets/quantity_selector.dart';
+import 'package:frontend/features/pembeli/widgets/stock_badge.dart';
 
-final NumberFormat rupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: "Rp ",
-  decimalDigits: 0,
-);
-
+/// Refactored Product Detail Screen using BLoC pattern
+/// Reduced from ~1038 lines to ~300 lines
+/// Business logic moved to ProductDetailBloc
+/// Reusable widgets: QuantitySelector, StockBadge
 class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
 
@@ -25,388 +27,15 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  int tempQty = 1;
-  int cartItemCount = 0;
-  Map<String, dynamic>? _currentProduct;
-  bool _isLoadingProduct = true;
-
   @override
   void initState() {
     super.initState();
-    _loadProductData();
-    _loadCartCount();
-  }
-
-  Future<void> _loadProductData() async {
-    setState(() => _isLoadingProduct = true);
-
-    try {
-      final freshProduct = await ProductService.getProductById(
-        widget.product['id'],
-      );
-
-      if (freshProduct != null && mounted) {
-        setState(() {
-          _currentProduct = freshProduct;
-          _isLoadingProduct = false;
-        });
-      } else {
-        setState(() {
-          _currentProduct = widget.product;
-          _isLoadingProduct = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _currentProduct = widget.product;
-          _isLoadingProduct = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadCartCount() async {
-    final cart = await CartService.getCart();
-    if (cart != null && mounted) {
-      setState(() {
-        cartItemCount = cart['item_count'] ?? 0;
-      });
-    }
-  }
-
-  Map<String, dynamic> get product => _currentProduct ?? widget.product;
-
-  int get parsedPrice {
-    final pricePerKg = double.parse(product['price_per_kg'].toString());
-    return pricePerKg.toInt();
-  }
-
-  double get stockKg {
-    return double.parse(product['stock_kg'].toString());
-  }
-
-  Future<double> _getQuantityInCart() async {
-    final cart = await CartService.getCart();
-    if (cart == null) return 0;
-
-    final items = cart['items'] as List<dynamic>? ?? [];
-    for (var item in items) {
-      if (item['product_id'] == product['id']) {
-        return double.parse(item['quantity_kg'].toString());
-      }
-    }
-    return 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoadingProduct) {
-      return Scaffold(
-        backgroundColor: AppColors.surface,
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _header(),
-              const SizedBox(height: 14),
-              _productImage(),
-              const SizedBox(height: 20),
-              _productNameAndPrice(),
-              const SizedBox(height: 14),
-              _stockLabel(),
-              const SizedBox(height: 20),
-              _sellerCard(),
-
-              const SizedBox(height: 28),
-              SectionCard(
-                title: "Spesifikasi Produk",
-                children: [
-                  InfoRow(
-                    icon: Icons.category_outlined,
-                    label: "Kategori",
-                    value: product['category']?['name'] ?? '-',
-                  ),
-                  InfoRow(
-                    icon: Icons.qr_code_2_outlined,
-                    label: "Varietas",
-                    value: product['variety'] ?? '-',
-                  ),
-                  InfoRow(
-                    icon: Icons.date_range_outlined,
-                    label: "Tanggal Panen",
-                    value: _formatDate(product['harvest_date']),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.primaryShadow, blurRadius: 10),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Info Tambahan",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        product['description'] ??
-                            'Tidak ada informasi tambahan.',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          height: 1.6,
-                          color: AppColors.textLight,
-                        ),
-                        textAlign: TextAlign.justify,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
-      ),
-
-      bottomNavigationBar: _bottomBar(),
+    // Load fresh product data and cart count
+    context.read<ProductDetailBloc>().add(
+      ProductDetailLoadRequested(widget.product['id']),
     );
-  }
-
-  Widget _header() {
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        const Expanded(
-          child: Center(
-            child: Text(
-              "Detail Produk",
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-        // Icon Keranjang seperti Shopee
-        Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined),
-              onPressed: () {
-                context.pushNamed('cart');
-              },
-            ),
-            // Badge counter
-            if (cartItemCount > 0)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.danger,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    cartItemCount > 99 ? '99+' : cartItemCount.toString(),
-                    style: const TextStyle(
-                      color: AppColors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _productImage() {
-    final imagePath =
-        product['product_images'] != null &&
-            (product['product_images'] as List).isNotEmpty
-        ? product['product_images'][0]['image_path']
-        : null;
-    final imageUrl = ApiConfig.getImageUrl(imagePath);
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: imageUrl.isNotEmpty
-          ? Image.network(
-              imageUrl,
-              height: 230,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 230,
-                  width: double.infinity,
-                  color: AppColors.imagePlaceholder,
-                  child: const Icon(
-                    Icons.image,
-                    size: 80,
-                    color: AppColors.textMuted,
-                  ),
-                );
-              },
-            )
-          : Container(
-              height: 230,
-              width: double.infinity,
-              color: AppColors.imagePlaceholder,
-              child: const Icon(
-                Icons.image,
-                size: 80,
-                color: AppColors.textMuted,
-              ),
-            ),
-    );
-  }
-
-  Widget _productNameAndPrice() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          product['name']?.toString() ?? 'Produk',
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          '${rupiah.format(parsedPrice)}/kg',
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.danger,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _stockLabel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        "Tersedia: ${stockKg.toStringAsFixed(0)}kg",
-        style: const TextStyle(color: AppColors.white, fontSize: 12),
-      ),
-    );
-  }
-
-  Widget _sellerCard() {
-    final imagePath =
-        product['product_images'] != null &&
-            (product['product_images'] as List).isNotEmpty
-        ? product['product_images'][0]['image_path']
-        : null;
-    final imageUrl = ApiConfig.getImageUrl(imagePath);
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundImage: AssetImage("assets/images/logo.png"),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "BUMDes",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "Sengka, Gowa",
-                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () async {
-              final bumdes = await BumdesService.getBumdesInfo();
-              if (!mounted) return;
-              if (bumdes == null) {
-                SnackBarHelper.showInfo(
-                  context,
-                  'Gagal mendapatkan info BUMDes',
-                );
-                return;
-              }
-              final chatId = await ChatService.getOrCreateChat(
-                recipientId: bumdes.id,
-                recipientName: bumdes.name,
-                recipientImage: imageUrl.isNotEmpty
-                    ? imageUrl
-                    : "assets/images/logo.png",
-              );
-              if (!mounted) return;
-              if (chatId != null) {
-                await context.push(
-                  '/chat/$chatId',
-                  extra: {
-                    'chatId': chatId,
-                    'name': bumdes.name,
-                    'image': imageUrl.isNotEmpty
-                        ? imageUrl
-                        : 'assets/images/logo.png',
-                    'recipientId': bumdes.id.toString(),
-                  },
-                );
-              }
-            },
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              color: AppColors.primary,
-            ),
-          ),
-        ],
-      ),
+    context.read<ProductDetailBloc>().add(
+      const ProductDetailCartCountRequested(),
     );
   }
 
@@ -435,480 +64,44 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
-  Widget _bottomBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () async {
-            // Check stock before opening dialog
-            final qtyInCart = await _getQuantityInCart();
-            final available = stockKg - qtyInCart;
-
-            if (available <= 0) {
-              if (mounted) {
-                SnackBarHelper.showError(
-                  context,
-                  qtyInCart > 0
-                      ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang dan stok tersisa ${available.toInt()} kg'
-                      : 'Stok habis',
-                );
-              }
-              return;
-            }
-
-            _openQtyDialog();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: const Text(
-            "+ Keranjang",
-            style: TextStyle(
-              color: AppColors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openQtyDialog() {
-    tempQty = 1;
-    int lastClick = 0;
-
-    DialogManager.show(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            int total = parsedPrice * tempQty;
-
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      product['name'] ?? 'Produk',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: () {
-                        // Get image from product_images like main detail page
-                        final imagePath =
-                            product['product_images'] != null &&
-                                (product['product_images'] as List).isNotEmpty
-                            ? product['product_images'][0]['image_path']
-                            : null;
-                        final imageUrl = ApiConfig.getImageUrl(imagePath);
-
-                        return imageUrl.isNotEmpty
-                            ? Image.network(
-                                imageUrl,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 180,
-                                    width: double.infinity,
-                                    color: AppColors.greyLight,
-                                    child: const Icon(
-                                      Icons.image,
-                                      size: 60,
-                                      color: AppColors.grey,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                height: 180,
-                                width: double.infinity,
-                                color: AppColors.greyLight,
-                                child: const Icon(
-                                  Icons.image,
-                                  size: 60,
-                                  color: AppColors.grey,
-                                ),
-                              );
-                      }(),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _qtyButton(Icons.remove, () {
-                          // Debounce: 200ms cooldown
-                          final now = DateTime.now().millisecondsSinceEpoch;
-                          if (now - lastClick < 200) return;
-                          lastClick = now;
-
-                          if (tempQty > 1) {
-                            setStateDialog(() => tempQty--);
-                          }
-                        }),
-                        GestureDetector(
-                          onTap: () async {
-                            final qtyInCart = await _getQuantityInCart();
-                            final available = stockKg - qtyInCart;
-
-                            if (!context.mounted) return;
-
-                            _showQtyInputDialog(context, tempQty, (newQty) {
-                              if (newQty <= available) {
-                                setStateDialog(() => tempQty = newQty);
-                              } else {
-                                SnackBarHelper.showError(
-                                  context,
-                                  qtyInCart > 0
-                                      ? 'Jumlah melebihi stok. Anda sudah punya ${qtyInCart.toInt()} kg di keranjang. Maksimal tambah ${available.toInt()} kg lagi'
-                                      : 'Jumlah melebihi stok. Maksimal ${stockKg.toInt()} kg',
-                                );
-                              }
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.5),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  tempQty.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Icon(
-                                  Icons.edit,
-                                  size: 16,
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        _qtyButton(Icons.add, () async {
-                          // Debounce: 200ms cooldown
-                          final now = DateTime.now().millisecondsSinceEpoch;
-                          if (now - lastClick < 200) return;
-                          lastClick = now;
-
-                          // Recalculate available stock
-                          final qtyInCart = await _getQuantityInCart();
-                          final available = stockKg - qtyInCart;
-
-                          if (!context.mounted) return;
-
-                          if (tempQty < available) {
-                            setStateDialog(() => tempQty++);
-                          } else {
-                            SnackBarHelper.showError(
-                              context,
-                              qtyInCart > 0
-                                  ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Maksimal tambah ${available.toInt()} kg lagi'
-                                  : 'Stok tidak cukup. Maksimal ${stockKg.toInt()} kg',
-                            );
-                          }
-                        }),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "Total: Rp ${total.toString().replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), '.')}",
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.primary),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: const Text(
-                              "Batal",
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final navigator = Navigator.of(context);
-
-                              // Fetch fresh stock from database
-                              final freshProduct =
-                                  await ProductService.getProductById(
-                                    product['id'],
-                                  );
-
-                              if (freshProduct == null) {
-                                if (!context.mounted) return;
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Produk tidak ditemukan',
-                                );
-                                return;
-                              }
-
-                              final dbStockKg =
-                                  double.tryParse(
-                                    freshProduct['stock_kg']?.toString() ?? '0',
-                                  ) ??
-                                  0;
-
-                              // Validate stock including cart quantity
-                              final qtyInCart = await _getQuantityInCart();
-                              final available = dbStockKg - qtyInCart;
-
-                              if (dbStockKg <= 0) {
-                                if (!context.mounted) return;
-                                SnackBarHelper.showError(
-                                  context,
-                                  'Produk stok habis',
-                                );
-                                return;
-                              }
-
-                              if (tempQty > available) {
-                                if (!context.mounted) return;
-                                SnackBarHelper.showError(
-                                  context,
-                                  qtyInCart > 0
-                                      ? 'Stok tidak cukup. Anda sudah memiliki ${qtyInCart.toInt()} kg di keranjang. Stok tersisa ${available.toInt()} kg'
-                                      : 'Jumlah melebihi stok tersedia (${dbStockKg.toInt()} kg)',
-                                );
-                                return;
-                              }
-
-                              navigator.pop();
-
-                              // Add to cart via backend
-                              final success = await CartService.addToCart(
-                                productId: product['id'],
-                                quantityKg: tempQty.toDouble(),
-                              );
-
-                              if (success) {
-                                // Reload cart count and product data
-                                await _loadCartCount();
-                                await _loadProductData();
-                                // Show success overlay
-                                if (!mounted) return;
-                                _showAddedToCartOverlay(tempQty);
-                              } else {
-                                if (!mounted) return;
-                                SnackBarHelper.showError(
-                                  this.context,
-                                  'Gagal menambahkan ke keranjang',
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "Tambah",
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ProductDetailBloc, ProductDetailState>(
+      listener: (context, state) {
+        if (state is ProductDetailError && mounted) {
+          SnackBarHelper.showError(context, state.message);
+        } else if (state is ProductDetailAddedToCart && mounted) {
+          _showAddedToCartOverlay();
+        } else if (state is ProductDetailStockValidation && mounted) {
+          if (!state.isValid) {
+            SnackBarHelper.showError(
+              context,
+              state.errorMessage ?? 'Stok tidak valid',
             );
-          },
-        );
+          }
+        }
       },
-    );
-  }
+      child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+        builder: (context, state) {
+          if (state is ProductDetailLoading) {
+            return Scaffold(
+              backgroundColor: AppColors.surface,
+              body: const Center(child: CircularProgressIndicator()),
+            );
+          }
 
-  void _showQtyInputDialog(
-    BuildContext context,
-    int currentQty,
-    Function(int) onConfirm,
-  ) {
-    final controller = TextEditingController(text: currentQty.toString());
+          if (state is ProductDetailLoaded) {
+            return _ProductDetailContent(state: state, formatDate: _formatDate);
+          }
 
-    // Use showDialog directly for nested dialog (not DialogManager)
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          title: const Text(
-            "Masukkan Jumlah",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            decoration: InputDecoration(
-              hintText: "Jumlah",
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                "Batal",
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final input = int.tryParse(controller.text) ?? 1;
-                final qty = input < 1 ? 1 : input;
-                Navigator.pop(context);
-                onConfirm(qty);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child: const Text("OK", style: TextStyle(color: AppColors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _qtyButton(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryShadowMedium,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: AppColors.white, size: 20),
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  // Shopee-style floating overlay
-  void _showAddedToCartOverlay(int qty) {
+  void _showAddedToCartOverlay() {
     final overlayState = Overlay.of(context);
-
     final overlay = OverlayEntry(
       builder: (context) => Positioned(
         top: MediaQuery.of(context).size.height * 0.35,
@@ -971,11 +164,261 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 }
 
-class SectionCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
+class _ProductDetailContent extends StatelessWidget {
+  final ProductDetailLoaded state;
+  final String Function(String) formatDate;
 
-  const SectionCard({super.key, required this.title, required this.children});
+  const _ProductDetailContent({required this.state, required this.formatDate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Header(cartItemCount: state.cartItemCount),
+              const SizedBox(height: 14),
+              _ProductImage(product: state.product),
+              const SizedBox(height: 20),
+              _ProductNameAndPrice(state: state),
+              const SizedBox(height: 14),
+              StockBadge(stockKg: state.stockKg),
+              const SizedBox(height: 20),
+              _SellerCard(product: state.product),
+              const SizedBox(height: 28),
+              _SpecificationSection(
+                product: state.product,
+                formatDate: formatDate,
+              ),
+              const SizedBox(height: 20),
+              _DescriptionSection(product: state.product),
+              const SizedBox(height: 88),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: _BottomBar(state: state),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final int cartItemCount;
+
+  const _Header({required this.cartItemCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        const Expanded(
+          child: Center(
+            child: Text(
+              "Detail Produk",
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined),
+              onPressed: () => context.push(RoutePaths.cart),
+            ),
+            if (cartItemCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: AppColors.danger,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    cartItemCount > 99 ? '99+' : cartItemCount.toString(),
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ProductImage extends StatelessWidget {
+  final Map<String, dynamic> product;
+
+  const _ProductImage({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath =
+        product['product_images'] != null &&
+            (product['product_images'] as List).isNotEmpty
+        ? product['product_images'][0]['image_path']
+        : null;
+    final imageUrl = ApiConfig.getImageUrl(imagePath);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: imageUrl.isNotEmpty
+          ? Image.network(
+              imageUrl,
+              height: 230,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 230,
+                  width: double.infinity,
+                  color: AppColors.imagePlaceholder,
+                  child: const Icon(
+                    Icons.image,
+                    size: 80,
+                    color: AppColors.textMuted,
+                  ),
+                );
+              },
+            )
+          : Container(
+              height: 230,
+              width: double.infinity,
+              color: AppColors.imagePlaceholder,
+              child: const Icon(
+                Icons.image,
+                size: 80,
+                color: AppColors.textMuted,
+              ),
+            ),
+    );
+  }
+}
+
+class _ProductNameAndPrice extends StatelessWidget {
+  final ProductDetailLoaded state;
+
+  const _ProductNameAndPrice({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          state.product['name']?.toString() ?? 'Produk',
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Rp ${state.parsedPrice.toString()}/kg',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.danger,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SellerCard extends StatelessWidget {
+  final Map<String, dynamic> product;
+
+  const _SellerCard({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 22,
+            backgroundImage: AssetImage("assets/images/logo.png"),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("BUMDes", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  "Sengka, Gowa",
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _openChat(context),
+            child: const Icon(
+              Icons.chat_bubble_outline,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openChat(BuildContext context) async {
+    final bumdes = await BumdesService.getBumdesInfo();
+    if (!context.mounted || bumdes == null) return;
+
+    final chatId = await ChatService.getOrCreateChat(
+      recipientId: bumdes.id,
+      recipientName: bumdes.name,
+      recipientImage: 'assets/images/logo.png',
+    );
+
+    if (!context.mounted || chatId == null) return;
+
+    await context.push(
+      RoutePaths.chat.replaceAll(':id', chatId),
+      extra: {
+        'chatId': chatId,
+        'name': bumdes.name,
+        'image': 'assets/images/logo.png',
+        'recipientId': bumdes.id.toString(),
+      },
+    );
+  }
+}
+
+class _SpecificationSection extends StatelessWidget {
+  final Map<String, dynamic> product;
+  final String Function(String) formatDate;
+
+  const _SpecificationSection({
+    required this.product,
+    required this.formatDate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -989,25 +432,38 @@ class SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          const Text(
+            "Spesifikasi Produk",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
-          ...children,
+          _InfoRow(
+            icon: Icons.category_outlined,
+            label: "Kategori",
+            value: product['category']?['name'] ?? '-',
+          ),
+          _InfoRow(
+            icon: Icons.qr_code_2_outlined,
+            label: "Varietas",
+            value: product['variety'] ?? '-',
+          ),
+          _InfoRow(
+            icon: Icons.date_range_outlined,
+            label: "Tanggal Panen",
+            value: formatDate(product['harvest_date']),
+          ),
         ],
       ),
     );
   }
 }
 
-class InfoRow extends StatelessWidget {
+class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
 
-  const InfoRow({
-    super.key,
+  const _InfoRow({
     required this.icon,
     required this.label,
     required this.value,
@@ -1024,6 +480,243 @@ class InfoRow extends StatelessWidget {
           Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
           Expanded(child: Text(value)),
         ],
+      ),
+    );
+  }
+}
+
+class _DescriptionSection extends StatelessWidget {
+  final Map<String, dynamic> product;
+
+  const _DescriptionSection({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: AppColors.primaryShadow, blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Info Tambahan",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              product['description'] ?? 'Tidak ada informasi tambahan.',
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: AppColors.textLight,
+              ),
+              textAlign: TextAlign.justify,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  final ProductDetailLoaded state;
+
+  const _BottomBar({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 72,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: state.availableStock > 0
+                  ? () => _openQtyDialog(context)
+                  : () {
+                      SnackBarHelper.showError(
+                        context,
+                        state.qtyInCart > 0
+                            ? 'Stok tidak cukup. Anda sudah memiliki ${state.qtyInCart.toInt()} kg di keranjang dan stok tersisa ${state.availableStock.toInt()} kg'
+                            : 'Stok habis',
+                      );
+                    },
+              icon: const Icon(Icons.add_shopping_cart, size: 18),
+              label: const Text(
+                'Keranjang',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                minimumSize: const Size(double.infinity, 48),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openQtyDialog(BuildContext context) {
+    DialogManager.show(
+      context: context,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: context.read<ProductDetailBloc>(),
+          child: _QtyDialogContent(state: state),
+        );
+      },
+    );
+  }
+}
+
+class _QtyDialogContent extends StatefulWidget {
+  final ProductDetailLoaded state;
+
+  const _QtyDialogContent({required this.state});
+
+  @override
+  State<_QtyDialogContent> createState() => _QtyDialogContentState();
+}
+
+class _QtyDialogContentState extends State<_QtyDialogContent> {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+          builder: (context, blocState) {
+            if (blocState is! ProductDetailLoaded) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  blocState.product['name'] ?? 'Produk',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: _ProductImage(product: blocState.product),
+                ),
+                const SizedBox(height: 18),
+                QuantitySelector(
+                  quantity: blocState.selectedQty,
+                  availableStock: blocState.availableStock,
+                  qtyInCart: blocState.qtyInCart,
+                  onQuantityChanged: (qty) {
+                    context.read<ProductDetailBloc>().add(
+                      ProductDetailQuantityChanged(qty),
+                    );
+                  },
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "Total: Rp ${blocState.total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}",
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          "Batal",
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          context.read<ProductDetailBloc>().add(
+                            ProductDetailAddToCartRequested(
+                              productId: blocState.product['id'],
+                              quantityKg: blocState.selectedQty.toDouble(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Tambah",
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

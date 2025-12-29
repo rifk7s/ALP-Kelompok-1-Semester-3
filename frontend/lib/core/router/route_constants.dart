@@ -12,6 +12,7 @@ class RoutePaths {
   static const String notifications = '/notifications';
   static const String productDetail = '/product/:id';
   static const String search = '/search';
+  static const String hpp = '/hpp';
 
   // Bumdes
   static const String bumdesHome = '/bumdes';
@@ -50,6 +51,7 @@ class RouteNames {
   static const String notifications = 'notifications';
   static const String productDetail = 'product_detail';
   static const String search = 'search';
+  static const String hpp = 'hpp';
   static const String productUpload = 'upload';
   static const String productEdit = 'edit_product';
   static const String petaniAdd = 'petani_add';

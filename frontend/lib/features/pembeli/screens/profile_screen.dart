@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
@@ -101,10 +102,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
 
-            const SizedBox(height: 5),
+            const SizedBox(height: AppSpacing.xl),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageHorizontal,
+              ),
               child: Row(
                 children: [
                   const CircleAvatar(
@@ -201,11 +204,13 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: AppSpacing.xxxl),
 
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pageHorizontal,
+                ),
                 child: Column(
                   children: [
                     profileCard('Pesanan Saya', Icons.description_outlined, () {
@@ -216,7 +221,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       );
                     }),
-                    const SizedBox(height: 12),
 
                     profileCard('Harga HPP', Icons.price_change_outlined, () {
                       Navigator.push(
@@ -224,7 +228,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const HppPage()),
                       );
                     }),
-                    const SizedBox(height: 12),
 
                     profileCard('Pengaturan', Icons.settings_outlined, () {
                       Navigator.push(
@@ -232,7 +235,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
                       );
                     }),
-                    const SizedBox(height: 12),
 
                     profileCard('Bantuan', Icons.help_outline, () {
                       Navigator.push(
@@ -240,7 +242,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const HelpPage()),
                       );
                     }),
-                    const SizedBox(height: 25),
+
+                    const SizedBox(height: AppSpacing.xxl),
 
                     SizedBox(
                       width: double.infinity,
@@ -400,19 +403,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      color: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Icon(icon, color: AppColors.textLight),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap,
-      ),
-    );
+    return AppCards.actionButtonSimple(icon: icon, title: title, onTap: onTap);
   }
 }

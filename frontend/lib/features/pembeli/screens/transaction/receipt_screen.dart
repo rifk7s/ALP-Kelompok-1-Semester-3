@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 
 class ReceiptPage extends StatelessWidget {
   final int total;
@@ -175,7 +176,7 @@ class ReceiptPage extends StatelessWidget {
               ),
               onPressed: () {
                 // Navigate to start page (home with bottom navigation)
-                context.go('/start');
+                context.go(RoutePaths.start);
               },
               child: const Text(
                 "Kembali ke Home",

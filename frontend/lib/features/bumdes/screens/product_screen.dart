@@ -5,6 +5,7 @@ import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/router/route_constants.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -135,7 +136,7 @@ class _ProductPageState extends State<ProductPage> {
         backgroundColor: AppColors.primary,
         elevation: 4,
         onPressed: () async {
-          final result = await context.push('/product/upload');
+          final result = await context.push(RoutePaths.productUpload);
           if (result == true) {
             loadProducts();
           }
@@ -277,7 +278,10 @@ class _ProductPageState extends State<ProductPage> {
 
     return GestureDetector(
       onTap: () async {
-        await context.push('/product/${product['id']}', extra: product);
+        await context.push(
+          RoutePaths.productDetail.replaceAll(':id', '${product['id']}'),
+          extra: product,
+        );
 
         // Reload products after returning from detail screen
         // This handles both edit and delete operations

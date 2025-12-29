@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'report_screen.dart';
 
@@ -33,12 +34,15 @@ class HelpPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageHorizontal,
+          vertical: AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             helpCard("Hubungi CS", Icons.phone_in_talk_outlined, _contactCS),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
 
             helpCard("Laporan Masalah", Icons.report_problem_outlined, () {
               Navigator.push(
@@ -46,7 +50,7 @@ class HelpPage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const ReportPage()),
               );
             }),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
@@ -57,7 +61,9 @@ class HelpPage extends StatelessWidget {
     return Card(
       elevation: 2,
       color: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+      ),
       child: ListTile(
         leading: Icon(icon, color: AppColors.textLight),
         title: Text(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
-import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
+import 'package:frontend/core/router/route_constants.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -112,7 +114,7 @@ class _SearchPageState extends State<SearchPage> {
           automaticallyImplyLeading: false,
           titleSpacing: 0,
           title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Row(
               children: [
                 IconButton(
@@ -127,13 +129,15 @@ class _SearchPageState extends State<SearchPage> {
                     height: 45,
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(100),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.full),
                       border: Border.all(
                         color: AppColors.shadowLight,
                         width: 1,
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                    ),
                     child: Row(
                       children: [
                         const Icon(
@@ -223,7 +227,7 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   Expanded(
                     child: searchHistory.isNotEmpty
                         ? ListView.builder(
@@ -279,18 +283,16 @@ Widget productCard({
   return GestureDetector(
     onTap: () {
       if (context != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailPage(product: product),
-          ),
+        context.push(
+          RoutePaths.productDetail.replaceAll(':id', '${product['id']}'),
+          extra: product,
         );
       }
     },
     child: Container(
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
         boxShadow: const [
           BoxShadow(
             color: AppColors.shadowLight,
@@ -335,7 +337,7 @@ Widget productCard({
                   ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -346,7 +348,7 @@ Widget productCard({
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   NumberFormat.currency(
                     locale: 'id',
@@ -358,7 +360,7 @@ Widget productCard({
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   "Stok: ${product['stock_kg'] ?? 0}kg",
                   style: const TextStyle(
@@ -366,7 +368,7 @@ Widget productCard({
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
                     const Icon(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/app_cards.dart';
 import 'notifikasi_setting_screen.dart';
 import 'security_screen.dart';
 import 'about_screen.dart';
@@ -25,7 +26,10 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageHorizontal,
+          vertical: AppSpacing.sm,
+        ),
         children: [
           _settingItem(
             context,
@@ -33,14 +37,14 @@ class SettingsPage extends StatelessWidget {
             Icons.notifications_outlined,
             const NotificationSettingsPage(),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           _settingItem(
             context,
             "Keamanan Akun",
             Icons.lock_outline,
             const SecuritySettingsPage(),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           _settingItem(
             context,
             "Tentang Aplikasi",
@@ -61,7 +65,9 @@ class SettingsPage extends StatelessWidget {
     return Card(
       elevation: 2,
       color: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+      ),
       child: ListTile(
         leading: Icon(icon, color: AppColors.textLight),
         title: Text(

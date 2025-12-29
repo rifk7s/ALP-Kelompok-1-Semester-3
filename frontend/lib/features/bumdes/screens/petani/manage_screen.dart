@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/router/route_constants.dart';
 
 class KelolaPetaniScreen extends StatefulWidget {
   const KelolaPetaniScreen({super.key});
@@ -55,7 +56,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
   }
 
   Future<void> _navigateToAddScreen() async {
-    final result = await context.push('/petani/add');
+    final result = await context.push(RoutePaths.petaniAdd);
 
     // If result is true, reload the list
     if (result == true) {
@@ -64,7 +65,9 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
   }
 
   Future<void> _navigateToDetailScreen(PetaniData petani) async {
-    final result = await context.push('/petani/${petani.id}');
+    final result = await context.push(
+      RoutePaths.petaniDetail.replaceAll(':id', '${petani.id}'),
+    );
 
     // If result is true (deleted), reload the list
     if (result == true) {

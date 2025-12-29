@@ -244,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               minimumSize: const Size(double.infinity, 48),
                             ).copyWith(
                               overlayColor: WidgetStateProperty.all(
-                                Colors.transparent,
+                                AppColors.transparent,
                               ),
                             ),
                         onPressed: () {
