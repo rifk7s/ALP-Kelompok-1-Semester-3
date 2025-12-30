@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/widgets/app_cards.dart';
+import 'package:frontend/core/widgets/app_spacing.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/widgets/app_cards.dart';
+import 'package:frontend/core/widgets/app_spacing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelpPage extends StatelessWidget {

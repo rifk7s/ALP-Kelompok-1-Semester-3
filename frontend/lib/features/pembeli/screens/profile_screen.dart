@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
@@ -92,11 +91,11 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
 
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: 20),
 
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pageHorizontal,
+                horizontal: 20,
               ),
               child: Row(
                 children: [
@@ -194,12 +193,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
 
-            const SizedBox(height: AppSpacing.xxxl),
+            const SizedBox(height: 32),
 
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pageHorizontal,
+                  horizontal: 20,
                 ),
                 child: Column(
                   children: [
@@ -219,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       context.push(RoutePaths.help);
                     }),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: 24),
 
                     SizedBox(
                       width: double.infinity,
@@ -374,6 +373,23 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {
-    return AppCards.actionButtonSimple(icon: icon, title: title, onTap: onTap);
+    return Card(
+      elevation: 2,
+      color: AppColors.cardBackground,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.textLight, size: 24),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: AppColors.textSecondary,
+        ),
+        onTap: onTap,
+      ),
+    );
   }
 }

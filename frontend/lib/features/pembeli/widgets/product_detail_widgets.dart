@@ -420,119 +420,129 @@ class _ProductDetailQtyDialogState extends State<ProductDetailQtyDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
-          buildWhen: (previous, current) {
-            if (previous is ProductDetailLoaded && current is ProductDetailLoaded) {
-              return previous.selectedQty != current.selectedQty ||
-                  previous.availableStock != current.availableStock;
-            }
-            return current is ProductDetailLoaded;
-          },
-          builder: (context, blocState) {
-            if (blocState is! ProductDetailLoaded) {
-              return const SizedBox.shrink();
-            }
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+            buildWhen: (previous, current) {
+              if (previous is ProductDetailLoaded && current is ProductDetailLoaded) {
+                return previous.selectedQty != current.selectedQty ||
+                    previous.availableStock != current.availableStock;
+              }
+              return current is ProductDetailLoaded;
+            },
+            builder: (context, blocState) {
+              if (blocState is! ProductDetailLoaded) {
+                return const SizedBox.shrink();
+              }
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  blocState.product['name'] ?? 'Produk',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: ProductDetailImage(product: blocState.product),
-                ),
-                const SizedBox(height: 18),
-                QuantitySelector(
-                  quantity: blocState.selectedQty,
-                  availableStock: blocState.availableStock,
-                  qtyInCart: blocState.qtyInCart,
-                  onQuantityChanged: (qty) {
-                    context.read<ProductDetailBloc>().add(
-                      ProductDetailQuantityChanged(qty),
-                    );
-                  },
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    "Total: Rp ${blocState.total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}",
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                Row(
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.primary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text(
-                          "Batal",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Text(
+                      blocState.product['name'] ?? 'Produk',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: SizedBox(
+                        height: 150,
+                        child: ProductDetailImage(product: blocState.product),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    QuantitySelector(
+                      quantity: blocState.selectedQty,
+                      availableStock: blocState.availableStock,
+                      qtyInCart: blocState.qtyInCart,
+                      onQuantityChanged: (qty) {
+                        context.read<ProductDetailBloc>().add(
+                          ProductDetailQuantityChanged(qty),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "Total: Rp ${blocState.total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}",
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          context.read<ProductDetailBloc>().add(
-                            ProductDetailAddToCartRequested(
-                              productId: blocState.product['id'],
-                              quantityKg: blocState.selectedQty.toDouble(),
+                    const SizedBox(height: 22),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            child: const Text(
+                              "Batal",
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          "Tambah",
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              context.read<ProductDetailBloc>().add(
+                                ProductDetailAddToCartRequested(
+                                  productId: blocState.product['id'],
+                                  quantityKg: blocState.selectedQty.toDouble(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Tambah",
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
