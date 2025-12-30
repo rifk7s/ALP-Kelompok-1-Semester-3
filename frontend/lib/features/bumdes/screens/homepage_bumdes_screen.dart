@@ -306,7 +306,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                             width: cardWidth,
                             showArrow: true,
                             onTap: () {
-                              context.push(RoutePaths.bumdesHome, extra: {'initialTab': 1});
+                              context.push(RoutePaths.petaniManage);
                             },
                           ),
                         ],

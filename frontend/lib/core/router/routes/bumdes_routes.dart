@@ -5,6 +5,7 @@ import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/add_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/detail_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/edit_screen.dart';
+import 'package:frontend/features/bumdes/screens/petani/manage_screen.dart';
 import 'package:frontend/core/router/route_constants.dart';
 
 /// Bumdes feature routes - NO ShellRoute, using direct GoRoute
@@ -30,9 +31,15 @@ class BumdesRoutes {
         path: RoutePaths.productEdit,
         name: RouteNames.productEdit,
         builder: (context, state) {
-          final product = state.extra as Map<String, dynamic>?;
+          final extra = state.extra as Map<String, dynamic>?;
+          final product = extra?['product'] as Map<String, dynamic>?;
           return EditProdukScreen(product: product ?? {});
         },
+      ),
+      GoRoute(
+        path: RoutePaths.petaniManage,
+        name: RouteNames.petaniManage,
+        builder: (context, state) => const KelolaPetaniScreen(),
       ),
       GoRoute(
         path: RoutePaths.petaniAdd,

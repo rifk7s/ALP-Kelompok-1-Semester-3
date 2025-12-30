@@ -18,6 +18,7 @@ class RoutePaths {
   static const String bumdesHome = '/bumdes';
   static const String productUpload = '/product/upload';
   static const String productEdit = '/product/edit/:id';
+  static const String petaniManage = '/petani/manage';
   static const String petaniAdd = '/petani/add';
   static const String petaniDetail = '/petani/:id';
   static const String petaniEdit = '/petani/edit/:id';
@@ -55,6 +56,7 @@ class RouteNames {
   static const String hpp = 'hpp';
   static const String productUpload = 'upload';
   static const String productEdit = 'edit_product';
+  static const String petaniManage = 'petani_manage';
   static const String petaniAdd = 'petani_add';
   static const String petaniDetail = 'petani_detail';
   static const String petaniEdit = 'petani_edit';
