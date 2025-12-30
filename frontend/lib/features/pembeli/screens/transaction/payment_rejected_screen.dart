@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:intl/intl.dart';
 
 class PaymentRejectedScreen extends StatefulWidget {
@@ -49,12 +50,7 @@ class _PaymentRejectedScreenState extends State<PaymentRejectedScreen>
     // Auto navigate to "Pesanan Saya" after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const TransactionHistoryPage(initialTab: 2),
-        ),
-      );
+      context.go(RoutePaths.pembeliHome);
     });
   }
 

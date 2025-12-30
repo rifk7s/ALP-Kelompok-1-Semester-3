@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/order_service.dart';
-import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<Map<String, dynamic>> cart;
@@ -100,17 +101,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
           debugPrint('Order created successfully, navigating...');
         }
         // Navigate to waiting payment screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => WaitingPaymentPage(
-              orderId: order['id'] as int?,
-              orderNumber: order['order_number'] ?? '',
-              totalPayment: (order['total'] is int)
-                  ? order['total']
-                  : int.tryParse(order['total']?.toString() ?? '0'),
-            ),
-          ),
+        context.replace(
+          RoutePaths.paymentWaiting,
+          extra: {
+            'order_id': order['id'] as int?,
+            'order_number': order['order_number'] ?? '',
+            'total': (order['total'] is int)
+                ? order['total']
+                : int.tryParse(order['total']?.toString() ?? '0'),
+          },
         );
       } else if (mounted) {
         SnackBarHelper.showError(context, 'Gagal membuat pesanan');

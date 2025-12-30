@@ -4,6 +4,7 @@ import 'package:frontend/features/bumdes/screens/upload_screen.dart';
 import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/add_screen.dart';
 import 'package:frontend/features/bumdes/screens/petani/detail_screen.dart';
+import 'package:frontend/features/bumdes/screens/petani/edit_screen.dart';
 import 'package:frontend/core/router/route_constants.dart';
 
 /// Bumdes feature routes - NO ShellRoute, using direct GoRoute
@@ -14,7 +15,11 @@ class BumdesRoutes {
       GoRoute(
         path: RoutePaths.bumdesHome,
         name: RouteNames.bumdesHome,
-        builder: (context, state) => const StartPageBumdes(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final initialTab = extra?['initialTab'] as int? ?? 0;
+          return StartPageBumdes(initialTab: initialTab);
+        },
       ),
       GoRoute(
         path: RoutePaths.productUpload,
@@ -41,6 +46,15 @@ class BumdesRoutes {
           final idStr = state.pathParameters['id'] ?? '';
           final petaniId = int.tryParse(idStr) ?? 0;
           return PetaniDetailScreen(petaniId: petaniId);
+        },
+      ),
+      GoRoute(
+        path: RoutePaths.petaniEdit,
+        name: RouteNames.petaniEdit,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final petani = extra?['petani'];
+          return EditPetaniScreen(petani: petani);
         },
       ),
     ];

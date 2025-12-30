@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'upload_screen.dart';
-import 'package:frontend/features/shared/screens/notification_screen.dart';
-import 'petani/manage_screen.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -251,12 +250,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                           ),
                         ),
                         onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const NotificationPage(),
-                            ),
-                          );
+                          await context.push(RoutePaths.notifications);
                           _loadUnreadCount(); // Refresh count after returning
                         },
                       ),
@@ -312,12 +306,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                             width: cardWidth,
                             showArrow: true,
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const KelolaPetaniScreen(),
-                                ),
-                              );
+                              context.push(RoutePaths.bumdesHome, extra: {'initialTab': 1});
                             },
                           ),
                         ],
@@ -503,10 +492,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
         backgroundColor: AppColors.primary,
         elevation: 4,
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => UploadProdukScreen()),
-          );
+          context.push(RoutePaths.productUpload);
         },
         child: const Icon(Icons.add, size: 28, color: AppColors.white),
       ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:intl/intl.dart';
-import 'edit_screen.dart';
-import '../product_detail_screen.dart';
 
 class PetaniDetailScreen extends StatefulWidget {
   final int petaniId;
@@ -75,9 +75,9 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
           _petaniData!['is_active'] == 1 || _petaniData!['is_active'] == true,
     );
 
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => EditPetaniScreen(petani: petaniData)),
+    final result = await context.push<bool>(
+      RoutePaths.petaniEdit,
+      extra: {'petani': petaniData},
     );
 
     // If result is true, reload the detail
@@ -163,17 +163,9 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       if (mounted) Navigator.pop(context);
 
       if (fullProduct != null && mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailPage(
-              product: fullProduct,
-              onUpdate: (updatedProduct) {
-                // Reload petani detail to get updated product info
-                _loadPetaniDetail();
-              },
-            ),
-          ),
+        context.push(
+          RoutePaths.productDetail,
+          extra: {'product': fullProduct, 'isBumdes': true},
         );
       }
     } catch (e) {

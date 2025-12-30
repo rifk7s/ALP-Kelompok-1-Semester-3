@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/features/auth/screens/auth_screen.dart';
-import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
-
-import 'package:frontend/features/shared/screens/setting_screen.dart';
-import 'package:frontend/features/shared/screens/help_screen.dart';
-import 'package:frontend/features/shared/screens/hpp_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -34,10 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // If no auth token is present, navigate to auth screen so user can login/register
     if (token == null) {
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AuthScreen()),
-        (route) => false,
-      );
+      context.go(RoutePaths.login);
       return;
     }
 
@@ -73,21 +65,19 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: GestureDetector(
                       onTap: () async {
                         // Navigate to edit profile with current user data
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfilePage(
-                              initialProfile: _user != null
-                                  ? Profile(
-                                      id: _user!['id'] as int,
-                                      name: _user!['name'] as String,
-                                      phone: _user!['phone'] as String?,
-                                      address: _user!['address'] as String?,
-                                      email: _user!['email'] as String?,
-                                    )
-                                  : null,
-                            ),
-                          ),
+                        final result = await context.push<bool>(
+                          RoutePaths.editProfile,
+                          extra: {
+                            'initialProfile': _user != null
+                                ? Profile(
+                                    id: _user!['id'] as int,
+                                    name: _user!['name'] as String,
+                                    phone: _user!['phone'] as String?,
+                                    address: _user!['address'] as String?,
+                                    email: _user!['email'] as String?,
+                                  )
+                                : null,
+                          },
                         );
 
                         // Reload user data if profile was updated
@@ -214,33 +204,19 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   children: [
                     profileCard('Pesanan Saya', Icons.description_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const TransactionHistoryPage(),
-                        ),
-                      );
+                      context.push(RoutePaths.transactionHistory);
                     }),
 
                     profileCard('Harga HPP', Icons.price_change_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HppPage()),
-                      );
+                      context.push(RoutePaths.hpp);
                     }),
 
                     profileCard('Pengaturan', Icons.settings_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SettingsPage()),
-                      );
+                      context.push(RoutePaths.settings);
                     }),
 
                     profileCard('Bantuan', Icons.help_outline, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HelpPage()),
-                      );
+                      context.push(RoutePaths.help);
                     }),
 
                     const SizedBox(height: AppSpacing.xxl),
@@ -333,20 +309,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            // Cache the navigator before popping dialog
-                            final navigator = Navigator.of(context);
-                            navigator.pop();
+                            // Cache context before async gap
+                            final router = GoRouter.of(context);
+                            Navigator.of(context).pop();
 
                             await AuthService.logout();
 
                             if (!mounted) return;
 
-                            navigator.pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (context) => const AuthScreen(),
-                              ),
-                              (route) => false,
-                            );
+                            router.go(RoutePaths.login);
                           },
                           child: Container(
                             width: 88,

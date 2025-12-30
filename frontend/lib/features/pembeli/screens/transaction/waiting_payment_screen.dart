@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'payment_confirmed_screen.dart';
-import 'payment_rejected_screen.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int? orderId;
@@ -69,27 +69,23 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
           // Payment confirmed! Navigate to success screen
           _countdownTimer?.cancel();
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PaymentConfirmedScreen(
-                total: totalPayment,
-                orderId: orderNumber,
-              ),
-            ),
+          context.replace(
+            RoutePaths.paymentSuccess,
+            extra: {
+              'order_id': orderNumber,
+              'total': totalPayment,
+            },
           );
         } else if (status['status'] == 'rejected') {
           // Payment rejected! Navigate to rejected screen
           _countdownTimer?.cancel();
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PaymentRejectedScreen(
-                total: totalPayment,
-                orderId: orderNumber,
-              ),
-            ),
+          context.replace(
+            RoutePaths.paymentRejected,
+            extra: {
+              'order_id': orderNumber,
+              'total': totalPayment,
+            },
           );
         } else {
           // Show message that payment is still pending

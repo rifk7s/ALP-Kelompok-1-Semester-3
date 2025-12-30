@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:intl/intl.dart';
-import 'chat_bumdes_screen.dart';
 
 class ContactBumdesPage extends StatefulWidget {
   const ContactBumdesPage({super.key});
@@ -84,12 +84,7 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                         IconButton(
                           icon: const Icon(Icons.notifications_outlined),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const NotificationPage(),
-                              ),
-                            );
+                            context.push(RoutePaths.notifications);
                           },
                         ),
                       ],
@@ -279,18 +274,16 @@ class _ContactBumdesPageState extends State<ContactBumdesPage> {
                                 ],
                               ),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ChatBumdesPage(
-                                      chatId: doc.id,
-                                      name: otherName,
-                                      image: otherImage.isNotEmpty
-                                          ? otherImage
-                                          : 'assets/images/logo.png',
-                                      recipientId: otherUserId,
-                                    ),
-                                  ),
+                                context.push(
+                                  RoutePaths.chat,
+                                  extra: {
+                                    'chatId': doc.id,
+                                    'name': otherName,
+                                    'image': otherImage.isNotEmpty
+                                        ? otherImage
+                                        : 'assets/images/logo.png',
+                                    'recipientId': otherUserId,
+                                  },
                                 );
                               },
                             );

@@ -9,10 +9,6 @@ import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
-import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 
@@ -32,10 +28,8 @@ class TransactionActionsController {
 
     if (!context.mounted || chatId == null) return;
 
-    // Use GoRouter for navigation
-    final router = GoRouter.of(context);
-    router.push(
-      RoutePaths.chat.replaceAll(':id', chatId),
+    context.push(
+      RoutePaths.chat,
       extra: {
         'chatId': chatId,
         'name': bumdes.name,
@@ -50,17 +44,15 @@ class TransactionActionsController {
     BuildContext context,
     Map<String, dynamic> order,
   ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WaitingPaymentPage(
-          orderId: order['id'] as int?,
-          orderNumber: order['order_number'] ?? order['id']?.toString(),
-          totalPayment: (order['total'] is int)
-              ? order['total']
-              : int.tryParse(order['total']?.toString() ?? '0'),
-        ),
-      ),
+    context.push(
+      RoutePaths.paymentWaiting,
+      extra: {
+        'order_id': order['id'] as int?,
+        'order_number': order['order_number'] ?? order['id']?.toString(),
+        'total': (order['total'] is int)
+            ? order['total']
+            : int.tryParse(order['total']?.toString() ?? '0'),
+      },
     );
   }
 
@@ -112,20 +104,16 @@ class TransactionActionsController {
         ? ApiConfig.getImageUrl(imagePath)
         : null;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => OrderTrackingPage(
-          order: {
-            'id': order['order_number'] ?? order['id']?.toString(),
-            'seller': 'BUMDes Desa Sengka',
-            'productImage': imageUrl,
-            'statusText': _getStageLabel(status),
-            'timestamps': timestamps,
-            'isRejected': status == 'rejected',
-          },
-        ),
-      ),
+    context.push(
+      RoutePaths.orderTracking,
+      extra: {
+        'id': order['order_number'] ?? order['id']?.toString(),
+        'seller': 'BUMDes Desa Sengka',
+        'productImage': imageUrl,
+        'statusText': _getStageLabel(status),
+        'timestamps': timestamps,
+        'isRejected': status == 'rejected',
+      },
     );
   }
 
@@ -162,15 +150,13 @@ class TransactionActionsController {
                   onTap: () {
                     context.pop();
                     final status = order['status']?.toString() ?? '';
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ReceiptPage(
-                          orderId: orderIdStr,
-                          total: totalInt,
-                          orderStatus: status,
-                        ),
-                      ),
+                    context.push(
+                      RoutePaths.receipt.replaceAll(':id', orderIdStr),
+                      extra: {
+                        'order_id': orderIdStr,
+                        'total': totalInt,
+                        'order_status': status,
+                      },
                     );
                   },
                 ),
@@ -310,11 +296,12 @@ class TransactionActionsController {
     }
 
     if (!context.mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CheckoutPage(cart: cartItems, total: totalPayment),
-      ),
+    context.push(
+      RoutePaths.checkout,
+      extra: {
+        'cart': cartItems,
+        'total': totalPayment,
+      },
     );
   }
 

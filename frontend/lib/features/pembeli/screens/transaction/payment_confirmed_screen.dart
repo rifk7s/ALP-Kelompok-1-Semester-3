@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:intl/intl.dart';
 
 class PaymentConfirmedScreen extends StatefulWidget {
@@ -47,15 +48,13 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
     // Auto navigate to receipt after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ReceiptPage(
-              total: widget.total,
-              orderId: widget.orderId,
-              orderStatus: 'paid',
-            ),
-          ),
+        context.replace(
+          RoutePaths.receipt.replaceAll(':id', widget.orderId),
+          extra: {
+            'order_id': widget.orderId,
+            'total': widget.total,
+            'order_status': 'paid',
+          },
         );
       }
     });

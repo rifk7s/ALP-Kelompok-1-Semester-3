@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/features/auth/screens/auth_screen.dart';
-import 'package:frontend/features/bumdes/screens/edit_profile_bumdes_screen.dart';
-import 'package:frontend/features/bumdes/screens/product_screen.dart';
-import 'package:frontend/features/shared/screens/hpp_screen.dart';
-
-import 'package:frontend/features/shared/screens/setting_screen.dart';
-import 'package:frontend/features/shared/screens/help_screen.dart';
 
 class ProfileBumdesPage extends StatefulWidget {
   const ProfileBumdesPage({super.key});
@@ -33,10 +28,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
     // If no auth token is present, ensure user is redirected to auth screen
     if (token == null) {
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AuthScreen()),
-        (route) => false,
-      );
+      context.go(RoutePaths.login);
       return;
     }
 
@@ -71,22 +63,21 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                     right: 0,
                     child: GestureDetector(
                       onTap: () async {
-                        // Navigate to edit profile with current user data
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfileBumdesPage(
-                              initialProfile: _user != null
-                                  ? Profile(
-                                      id: _user!['id'] as int,
-                                      name: _user!['name'] as String,
-                                      phone: _user!['phone'] as String?,
-                                      address: _user!['address'] as String?,
-                                      email: _user!['email'] as String?,
-                                    )
-                                  : null,
-                            ),
-                          ),
+                        // Navigate to edit profile - BUMDES uses same edit profile route
+                        final result = await context.push<bool>(
+                          RoutePaths.editProfile,
+                          extra: {
+                            'initialProfile': _user != null
+                                ? Profile(
+                                    id: _user!['id'] as int,
+                                    name: _user!['name'] as String,
+                                    phone: _user!['phone'] as String?,
+                                    address: _user!['address'] as String?,
+                                    email: _user!['email'] as String?,
+                                  )
+                                : null,
+                            'isBumdes': true,
+                          },
                         );
 
                         // Reload user data if profile was updated
@@ -209,34 +200,22 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                 child: Column(
                   children: [
                     profileCard('Produk', Icons.inventory_2_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ProductPage()),
-                      );
+                      context.push(RoutePaths.bumdesHome, extra: {'initialTab': 1});
                     }),
                     const SizedBox(height: 12),
 
                     profileCard('Harga HPP', Icons.price_change_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HppPage()),
-                      );
+                      context.push(RoutePaths.hpp);
                     }),
                     const SizedBox(height: 12),
 
                     profileCard('Pengaturan', Icons.settings_outlined, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SettingsPage()),
-                      );
+                      context.push(RoutePaths.settings);
                     }),
                     const SizedBox(height: 12),
 
                     profileCard('Bantuan', Icons.help_outline, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HelpPage()),
-                      );
+                      context.push(RoutePaths.help);
                     }),
                     const SizedBox(height: 25),
 
@@ -328,20 +307,15 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            // Cache the navigator before popping dialog
-                            final navigator = Navigator.of(context);
-                            navigator.pop();
+                            // Cache context before async gap
+                            final router = GoRouter.of(context);
+                            Navigator.of(context).pop();
 
                             await AuthService.logout();
 
                             if (!mounted) return;
 
-                            navigator.pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (context) => const AuthScreen(),
-                              ),
-                              (route) => false,
-                            );
+                            router.go(RoutePaths.login);
                           },
                           child: Container(
                             width: 88,

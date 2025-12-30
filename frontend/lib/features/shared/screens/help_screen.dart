@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_cards.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'report_screen.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -45,9 +44,19 @@ class HelpPage extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
 
             helpCard("Laporan Masalah", Icons.report_problem_outlined, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ReportPage()),
+              // ReportPage - keep as modal or create route if needed
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Fitur Laporan'),
+                  content: const Text('Fitur ini akan segera hadir!'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
               );
             }),
             const SizedBox(height: AppSpacing.md),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/widgets/app_cards.dart';
-import 'notifikasi_setting_screen.dart';
-import 'security_screen.dart';
-import 'about_screen.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -35,21 +34,21 @@ class SettingsPage extends StatelessWidget {
             context,
             "Notifikasi",
             Icons.notifications_outlined,
-            const NotificationSettingsPage(),
+            RoutePaths.notifications,
           ),
           const SizedBox(height: AppSpacing.sm),
           _settingItem(
             context,
             "Keamanan Akun",
             Icons.lock_outline,
-            const SecuritySettingsPage(),
+            RoutePaths.settings,
           ),
           const SizedBox(height: AppSpacing.sm),
           _settingItem(
             context,
             "Tentang Aplikasi",
             Icons.info_outline,
-            const AboutAppPage(),
+            RoutePaths.about,
           ),
         ],
       ),
@@ -60,7 +59,7 @@ class SettingsPage extends StatelessWidget {
     BuildContext context,
     String title,
     IconData icon,
-    Widget page,
+    String routePath,
   ) {
     return Card(
       elevation: 2,
@@ -76,7 +75,7 @@ class SettingsPage extends StatelessWidget {
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+          context.push(routePath);
         },
       ),
     );

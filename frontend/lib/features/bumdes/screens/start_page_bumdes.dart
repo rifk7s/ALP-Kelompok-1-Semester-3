@@ -10,14 +10,22 @@ import 'package:frontend/features/bumdes/screens/contact_bumdes_screen.dart';
 import 'package:frontend/features/bumdes/screens/profil_bumdes_screen.dart';
 
 class StartPageBumdes extends StatefulWidget {
-  const StartPageBumdes({super.key});
+  final int initialTab;
+
+  const StartPageBumdes({super.key, this.initialTab = 0});
 
   @override
   State<StartPageBumdes> createState() => _StartPageBumdesState();
 }
 
 class _StartPageBumdesState extends State<StartPageBumdes> {
-  int _page = 0;
+  late int _page;
+
+  @override
+  void initState() {
+    super.initState();
+    _page = widget.initialTab;
+  }
 
   void _goToChat() {
     setState(() {

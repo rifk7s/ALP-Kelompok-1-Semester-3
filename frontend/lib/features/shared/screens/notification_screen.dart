@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/order_service.dart';
-import 'package:frontend/core/services/admin_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
-import 'package:frontend/features/bumdes/screens/transaction_bumdes_screen.dart';
-import 'package:frontend/features/shared/screens/chat_detail_page.dart';
-import 'package:frontend/features/bumdes/screens/chat_bumdes_screen.dart';
 import 'package:intl/intl.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -126,36 +123,8 @@ class _NotificationPageState extends State<NotificationPage> {
         if (isBumdes) {
           // Navigate to BUMDes transaction page
           try {
-            final orders = await AdminService.getOrdersByStatus();
-            final order = orders.firstWhere(
-              (o) => o['id'].toString() == relatedId,
-              orElse: () => <String, dynamic>{},
-            );
-
-            int initialTab = 0;
-            if (order.isNotEmpty) {
-              final status = order['status'] as String?;
-              if (kDebugMode) {
-                debugPrint('Order status: $status for order ID: $relatedId');
-              }
-              if (status == 'pending_payment' || status == 'paid') {
-                initialTab = 0; // Baru
-              } else if (status == 'processing') {
-                initialTab = 1; // Sedang Dikemas
-              } else if (status == 'shipped') {
-                initialTab = 2; // Dikirim
-              } else if (status == 'completed' || status == 'rejected') {
-                initialTab = 3; // Selesai
-              }
-            }
-
             if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BumdesTransactionPage(initialTab: initialTab),
-                ),
-              );
+              context.push(RoutePaths.bumdesHome, extra: {'initialTab': 2});
             }
           } catch (e) {
             if (kDebugMode) {
@@ -163,10 +132,7 @@ class _NotificationPageState extends State<NotificationPage> {
             }
             // If error, just navigate to transaction page
             if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => BumdesTransactionPage()),
-              );
+              context.push(RoutePaths.bumdesHome, extra: {'initialTab': 2});
             }
           }
         } else {
@@ -196,13 +162,7 @@ class _NotificationPageState extends State<NotificationPage> {
             }
 
             if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      TransactionHistoryPage(initialTab: initialTab),
-                ),
-              );
+              context.push(RoutePaths.transactionHistory, extra: {'initialTab': initialTab});
             }
           } catch (e) {
             if (kDebugMode) {
@@ -210,10 +170,7 @@ class _NotificationPageState extends State<NotificationPage> {
             }
             // If error, just navigate to transaction history
             if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => TransactionHistoryPage()),
-              );
+              context.push(RoutePaths.transactionHistory);
             }
           }
         }
@@ -222,11 +179,6 @@ class _NotificationPageState extends State<NotificationPage> {
       // Navigate to chat
       if (relatedId != null && mounted) {
         try {
-          // Get user role to determine which chat screen to use
-          final user = await StorageService.getUser();
-          final userRole = user?['role'] as String?;
-          final isBumdes = userRole == 'admin' || userRole == 'bumdes';
-
           // Sign in to Firebase first
           await ChatService.signInToFirebase();
 
@@ -256,31 +208,15 @@ class _NotificationPageState extends State<NotificationPage> {
             }
 
             if (mounted) {
-              if (isBumdes) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatBumdesPage(
-                      chatId: relatedId,
-                      name: recipientName,
-                      image: recipientImage,
-                      recipientId: recipientId,
-                    ),
-                  ),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatDetailPage(
-                      chatId: relatedId,
-                      name: recipientName,
-                      image: recipientImage ?? '',
-                      recipientId: recipientId,
-                    ),
-                  ),
-                );
-              }
+              context.push(
+                RoutePaths.chat,
+                extra: {
+                  'chatId': relatedId,
+                  'name': recipientName,
+                  'image': recipientImage ?? '',
+                  'recipientId': recipientId,
+                },
+              );
             }
           } else {
             if (mounted) {

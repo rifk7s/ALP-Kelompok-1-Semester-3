@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
-import 'edit_product_screen.dart';
 
 final NumberFormat rupiah = NumberFormat.currency(
   locale: 'id_ID',
@@ -56,11 +57,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.primary),
             onPressed: () async {
-              final result = await Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditProdukScreen(product: currentProduct),
-                ),
+              final result = await context.push<Map<String, dynamic>>(
+                RoutePaths.productEdit,
+                extra: {'product': currentProduct},
               );
               if (result != null) {
                 setState(() {

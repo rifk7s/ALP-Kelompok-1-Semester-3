@@ -20,6 +20,7 @@ class RoutePaths {
   static const String productEdit = '/product/edit/:id';
   static const String petaniAdd = '/petani/add';
   static const String petaniDetail = '/petani/:id';
+  static const String petaniEdit = '/petani/edit/:id';
   static const String chat = '/chat/:id';
 
   // Shared
@@ -56,6 +57,7 @@ class RouteNames {
   static const String productEdit = 'edit_product';
   static const String petaniAdd = 'petani_add';
   static const String petaniDetail = 'petani_detail';
+  static const String petaniEdit = 'petani_edit';
   static const String chat = 'chat';
   static const String profile = 'profile';
   static const String editProfile = 'edit_profile';
