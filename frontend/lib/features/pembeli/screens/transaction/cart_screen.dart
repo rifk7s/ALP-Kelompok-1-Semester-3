@@ -96,30 +96,38 @@ class _CartContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Cart Items List
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.cartItems.length,
-                  itemBuilder: (context, i) {
-                    final item = state.cartItems[i];
-                    final product = item['product'];
-                    final stockKg =
-                        double.tryParse(
-                          product['stock_kg']?.toString() ?? '0',
-                        ) ??
-                        0;
-                    final isSelected = state.selectedItems[item['id']] ?? false;
-                    final isUpdating = state.updatingItems.contains(item['id']);
+        // Scrollable content area
+        SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 0,
+            right: 0,
+            bottom: 200, // Space for bottom sheet
+            top: 0,
+          ),
+          child: Column(
+            children: [
+              // Cart Items List
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: state.cartItems.length,
+                itemBuilder: (context, i) {
+                  final item = state.cartItems[i];
+                  final product = item['product'];
+                  final stockKg =
+                      double.tryParse(
+                        product['stock_kg']?.toString() ?? '0',
+                      ) ??
+                      0;
+                  final isSelected = state.selectedItems[item['id']] ?? false;
+                  final isUpdating = state.updatingItems.contains(item['id']);
 
-                    return CartItemCard(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CartItemCard(
                       item: item,
                       isSelected: isSelected,
                       isUpdating: isUpdating,
@@ -142,65 +150,68 @@ class _CartContent extends StatelessWidget {
                           CartItemRemoved(item['id']),
                         );
                       },
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
+              ),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                // Recommendations Section
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Rekomendasi Produk",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+              // Recommendations Section
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Rekomendasi Produk",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: state.recommendations.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.74,
-                  ),
-                  itemBuilder: (context, i) {
-                    final product = state.recommendations[i];
-                    return ProductCard(
-                      product: product,
-                      onTap: () {
-                        context.push(
-                          RoutePaths.productDetail.replaceAll(
-                            ':id',
-                            '${product['id']}',
-                          ),
-                          extra: product,
-                        );
-                      },
-                    );
-                  },
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: state.recommendations.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.74,
                 ),
-
-                const SizedBox(height: 130),
-              ],
-            ),
+                itemBuilder: (context, i) {
+                  final product = state.recommendations[i];
+                  return ProductCard(
+                    product: product,
+                    onTap: () {
+                      context.push(
+                        RoutePaths.productDetail.replaceAll(
+                          ':id',
+                          '${product['id']}',
+                        ),
+                        extra: product,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ),
 
-        // Bottom Sheet with Total and Checkout Button
-        _CartBottomSheet(state: state, formatRupiah: formatRupiah),
+        // Bottom Sheet with Total and Checkout Button - positioned at bottom
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: _CartBottomSheet(state: state, formatRupiah: formatRupiah),
+        ),
       ],
     );
   }
@@ -247,12 +258,19 @@ class _CartBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: MediaQuery.of(context).padding.bottom > 0
+            ? MediaQuery.of(context).padding.bottom + 12
+            : 16,
+      ),
+      decoration: const BoxDecoration(
         color: AppColors.surface,
-        boxShadow: const [
-          BoxShadow(color: AppColors.shadowLight, blurRadius: 8),
-        ],
+        border: Border(
+          top: BorderSide(color: AppColors.divider, width: 1),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -278,31 +296,40 @@ class _CartBottomSheet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Total and Checkout Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Total Pembayaran",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    formatRupiah(state.totalPrice),
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Total Pembayaran",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      formatRupiah(state.totalPrice),
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.45,
+              const SizedBox(width: 12),
+              Expanded(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -316,7 +343,11 @@ class _CartBottomSheet extends StatelessWidget {
                       : () => _handleCheckout(context),
                   child: const Text(
                     "Buat Pesanan",
-                    style: TextStyle(color: AppColors.white, fontSize: 14),
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

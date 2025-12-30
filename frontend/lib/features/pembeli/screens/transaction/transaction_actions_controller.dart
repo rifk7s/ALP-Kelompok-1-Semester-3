@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
@@ -23,25 +24,25 @@ class TransactionActionsController {
   static Future<void> openChat(BuildContext context) async {
     final bumdes = await BumdesService.getBumdesInfo();
     if (!context.mounted || bumdes == null) return;
-    
+
     final chatId = await ChatService.getOrCreateChat(
       recipientId: bumdes.id,
       recipientName: bumdes.name,
       recipientImage: 'assets/images/logo.png',
     );
-    
+
     if (!context.mounted || chatId == null) return;
-    
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChatDetailPage(
-          chatId: chatId,
-          name: bumdes.name,
-          image: 'assets/images/logo.png',
-          recipientId: bumdes.id,
-        ),
-      ),
+
+    // Use GoRouter for navigation
+    final router = GoRouter.of(context);
+    router.push(
+      RoutePaths.chat.replaceAll(':id', chatId),
+      extra: {
+        'chatId': chatId,
+        'name': bumdes.name,
+        'image': 'assets/images/logo.png',
+        'recipientId': bumdes.id,
+      },
     );
   }
 

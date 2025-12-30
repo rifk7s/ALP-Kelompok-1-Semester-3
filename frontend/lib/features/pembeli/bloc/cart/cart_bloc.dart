@@ -250,6 +250,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartStockValidated event,
     Emitter<CartState> emit,
   ) async {
+    // Save current state before validation
+    final currentState = state;
+    if (currentState is! CartLoaded) return;
+
     bool stockValid = true;
     String? errorMsg;
 
@@ -294,10 +298,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       CartStockValidationResult(isValid: stockValid, errorMessage: errorMsg),
     );
 
-    // Return to previous state after emitting validation result
-    final currentState = state;
-    if (currentState is CartLoaded) {
-      emit(currentState);
-    }
+    // Restore the original CartLoaded state with all selections intact
+    emit(currentState);
   }
 }

@@ -149,11 +149,24 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
         final cart = await CartService.getCart();
         final newCartCount = cart?['item_count'] ?? 0;
 
+        // Calculate new available stock
+        final newQtyInCart = await _getQtyInCartAsync(event.productId);
+
+        emit(
+          currentState.copyWith(
+            cartItemCount: newCartCount,
+            qtyInCart: newQtyInCart,
+          ),
+        );
+
+        // Emit added to cart state for UI feedback
         emit(ProductDetailAddedToCart(newCartCount));
 
-        // Reload product data to get fresh stock
-        add(ProductDetailLoadRequested(event.productId));
-        add(const ProductDetailCartCountRequested());
+        // Return to loaded state without triggering full reload
+        emit(currentState.copyWith(
+          cartItemCount: newCartCount,
+          qtyInCart: newQtyInCart,
+        ));
       } else {
         emit(const ProductDetailError('Gagal menambahkan ke keranjang'));
         emit(currentState);

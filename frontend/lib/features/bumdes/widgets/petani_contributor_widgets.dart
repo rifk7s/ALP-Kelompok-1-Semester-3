@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
-import 'package:intl/intl.dart';
 
 /// Widget for managing petani contributors list
 /// Displays contributors in FIFO order with edit/delete actions
@@ -54,11 +54,12 @@ class PetaniContributorList extends StatelessWidget {
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  // Text section with Flexible instead of Expanded
+                  Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           contrib['petani_name'] ?? 'Unknown',
@@ -66,6 +67,8 @@ class PetaniContributorList extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -74,26 +77,35 @@ class PetaniContributorList extends StatelessWidget {
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
+                  // Fixed spacing before buttons
+                  const SizedBox(width: 8),
+                  // Action buttons with fixed size
                   if (isEnabled)
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, size: 18),
-                          onPressed: () => onEdit(index),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                        InkWell(
+                          onTap: () => onEdit(index),
+                          customBorder: const CircleBorder(),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(Icons.edit, size: 18, color: AppColors.textSecondary),
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete, size: 18),
-                          onPressed: () => onDelete(index),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () => onDelete(index),
+                          customBorder: const CircleBorder(),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(Icons.delete, size: 18, color: AppColors.danger),
+                          ),
                         ),
                       ],
                     ),
@@ -107,13 +119,7 @@ class PetaniContributorList extends StatelessWidget {
   }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('d MMM y').format(date);
-    } catch (e) {
-      return '-';
-    }
+    return DateFormatter.formatDateFromIso(dateStr);
   }
 }
 
@@ -186,7 +192,11 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
               items: widget.petaniList.map<DropdownMenuItem<int>>((petani) {
                 return DropdownMenuItem<int>(
                   value: petani['id'] as int,
-                  child: Text(petani['name'] as String),
+                  child: Text(
+                    petani['name'] as String,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -284,25 +294,6 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day} ${_getMonthName(date.month)} ${date.year}';
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      "",
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "Mei",
-      "Jun",
-      "Jul",
-      "Agu",
-      "Sep",
-      "Okt",
-      "Nov",
-      "Des",
-    ];
-    return months[month];
+    return DateFormatter.formatDateShort(date);
   }
 }

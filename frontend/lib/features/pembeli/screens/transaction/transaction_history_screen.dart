@@ -114,39 +114,37 @@ class _OrderListTab extends StatelessWidget {
 
         final orders = bloc.getOrdersByStatus(statusCategory);
 
-        if (orders.isEmpty) {
-          return _buildEmptyState(statusCategory);
-        }
-
         return PullToRefresh(
           onRefresh: () => bloc.loadOrders(),
           color: AppColors.primary,
           backgroundColor: AppColors.surface,
           displacement: 36,
           strokeWidth: 2.5,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: orders.length,
-            itemBuilder: (context, index) {
-              final order = orders[index];
-              final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
-              final bloc = TransactionProvider.of(context);
+          child: orders.isEmpty
+              ? _buildEmptyState(statusCategory)
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    final order = orders[index];
+                    final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+                    final bloc = TransactionProvider.of(context);
 
-              return OrderCard(
-                order: order,
-                isExpanded: bloc.isOrderExpanded(orderId),
-                onToggleExpand: () => bloc.toggleOrderExpansion(orderId),
-                onProductTap: () => TransactionActionsController.openTracking(context, order),
-                onCancel: (id) async {
-                  await bloc.cancelOrder(id);
-                },
-                onComplete: (id) async {
-                  await bloc.completeOrder(id);
-                },
-              );
-            },
-          ),
+                    return OrderCard(
+                      order: order,
+                      isExpanded: bloc.isOrderExpanded(orderId),
+                      onToggleExpand: () => bloc.toggleOrderExpansion(orderId),
+                      onProductTap: () => TransactionActionsController.openTracking(context, order),
+                      onCancel: (id) async {
+                        await bloc.cancelOrder(id);
+                      },
+                      onComplete: (id) async {
+                        await bloc.completeOrder(id);
+                      },
+                    );
+                  },
+                ),
         );
       },
     );

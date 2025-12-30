@@ -10,11 +10,6 @@ import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/payment_confirmed_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/payment_rejected_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
 import 'package:frontend/features/pembeli/screens/profile_screen.dart';
 import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
@@ -64,64 +59,6 @@ final router = GoRouter(
       builder: (context, state) => const CartPage(),
     ),
     GoRoute(
-      path: RoutePaths.checkout,
-      name: RouteNames.checkout,
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        return CheckoutPage(
-          cart: extra?['cart'] ?? [],
-          total: extra?['total'] ?? 0,
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.paymentWaiting,
-      name: RouteNames.paymentWaiting,
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        return WaitingPaymentPage(
-          orderId: extra?['order_id'],
-          totalPayment: extra?['total'],
-          orderNumber: extra?['order_number']?.toString(),
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.paymentSuccess,
-      name: RouteNames.paymentSuccess,
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        return PaymentConfirmedScreen(
-          orderId: extra?['order_id']?.toString() ?? '',
-          total: extra?['total'] ?? 0,
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.paymentRejected,
-      name: RouteNames.paymentRejected,
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        return PaymentRejectedScreen(
-          orderId: extra?['order_id']?.toString() ?? '',
-          total: extra?['total'] ?? 0,
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.receipt,
-      name: RouteNames.receipt,
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        final id = state.pathParameters['id'] ?? '';
-        return ReceiptPage(
-          orderId: extra?['order_id']?.toString() ?? id,
-          total: extra?['total'] ?? 0,
-          orderStatus: extra?['order_status']?.toString() ?? 'completed',
-        );
-      },
-    ),
-    GoRoute(
       path: RoutePaths.notifications,
       name: RouteNames.notifications,
       builder: (context, state) => const NotificationPage(),
@@ -152,22 +89,7 @@ final router = GoRouter(
       builder: (context, state) => const AboutAppPage(),
     ),
 
-    // BUMDes product routes (STATIK - full screen, must be BEFORE dynamic :id route)
-    GoRoute(
-      path: RoutePaths.productUpload,
-      name: RouteNames.productUpload,
-      builder: (context, state) => const UploadProdukScreen(),
-    ),
-    GoRoute(
-      path: RoutePaths.productEdit,
-      name: RouteNames.productEdit,
-      builder: (context, state) {
-        final product = state.extra as Map<String, dynamic>?;
-        return EditProdukScreen(product: product ?? {});
-      },
-    ),
-
-    // Product detail route (DINAMIS - :id parameter, must be AFTER static routes)
+    // Product detail route (outside shell - full screen, shared for pembeli & bumdes)
     GoRoute(
       path: RoutePaths.productDetail,
       name: RouteNames.productDetail,
@@ -212,10 +134,25 @@ final router = GoRouter(
       },
     ),
 
-    // Chat route
+    // BUMDes product routes (STATIK - full screen, must be BEFORE dynamic :id route)
     GoRoute(
-      path: RoutePaths.chat,
-      name: RouteNames.chat,
+      path: RoutePaths.productUpload,
+      name: RouteNames.productUpload,
+      builder: (context, state) => const UploadProdukScreen(),
+    ),
+    GoRoute(
+      path: RoutePaths.productEdit,
+      name: RouteNames.productEdit,
+      builder: (context, state) {
+        final product = state.extra as Map<String, dynamic>?;
+        return EditProdukScreen(product: product ?? {});
+      },
+    ),
+
+    // Product detail route (DINAMIS - :id parameter, must be AFTER static routes)
+    GoRoute(
+      path: RoutePaths.productDetail,
+      name: RouteNames.productDetail,
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final id = state.pathParameters['id'] ?? '';
@@ -258,22 +195,22 @@ final router = GoRouter(
       path: RoutePaths.bumdesHome,
       name: RouteNames.bumdesHome,
       builder: (context, state) => const _BumdesNavigationWrapper(),
-    ),
-
-    // Petani routes (standalone - full screen)
-    GoRoute(
-      path: RoutePaths.petaniAdd,
-      name: RouteNames.petaniAdd,
-      builder: (context, state) => const TambahPetaniScreen(),
-    ),
-    GoRoute(
-      path: RoutePaths.petaniDetail,
-      name: RouteNames.petaniDetail,
-      builder: (context, state) {
-        final idStr = state.pathParameters['id'] ?? '';
-        final petaniId = int.tryParse(idStr) ?? 0;
-        return PetaniDetailScreen(petaniId: petaniId);
-      },
+      routes: [
+        GoRoute(
+          path: RoutePaths.petaniAdd,
+          name: RouteNames.petaniAdd,
+          builder: (context, state) => const TambahPetaniScreen(),
+        ),
+        GoRoute(
+          path: RoutePaths.petaniDetail,
+          name: RouteNames.petaniDetail,
+          builder: (context, state) {
+            final idStr = state.pathParameters['id'] ?? '';
+            final petaniId = int.tryParse(idStr) ?? 0;
+            return PetaniDetailScreen(petaniId: petaniId);
+          },
+        ),
+      ],
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

@@ -136,7 +136,8 @@ class _ProductPageState extends State<ProductPage> {
         backgroundColor: AppColors.primary,
         elevation: 4,
         onPressed: () async {
-          final result = await context.push(RoutePaths.productUpload);
+          // Gunakan pushNamed untuk lebih aman
+          final result = await context.pushNamed(RouteNames.productUpload);
           if (result == true) {
             loadProducts();
           }
@@ -280,7 +281,10 @@ class _ProductPageState extends State<ProductPage> {
       onTap: () async {
         await context.push(
           RoutePaths.productDetail.replaceAll(':id', '${product['id']}'),
-          extra: product,
+          extra: {
+            ...product,
+            'isBumdes': true,  // Flag untuk BUMDes product detail
+          },
         );
 
         // Reload products after returning from detail screen

@@ -1,19 +1,24 @@
 import 'dart:io';
 
 class ApiConfig {
-  // Android Emulator: 10.0.2.2 (special emulator IP)
+  // Android Emulator: 10.0.2.2 (special emulator IP yang selalu mengarah ke host machine)
+  // Ini TIDAK berubah meskipun IP komputer berubah - 10.0.2.2 adalah hardcoded alias
   // iOS Simulator & Physical device: IP komputer (localhost tidak work di iOS simulator!)
   // NOTE: Run backend with: php artisan serve --host=0.0.0.0 --port=8000
 
   // URLs for API endpoints
   static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
-  static const String _iosDeviceUrl =
-      'http://192.168.18.182:8000/api'; // IP komputer untuk semua iOS
+  static String _iosDeviceUrl = 'http://192.168.18.182:8000/api'; // IP komputer untuk semua iOS
 
   // Base URLs for images/storage
   static const String _androidEmulatorBase = 'http://10.0.2.2:8000';
-  static const String _iosDeviceBase =
-      'http://192.168.18.182:8000'; // IP komputer untuk semua iOS
+  static String _iosDeviceBase = 'http://192.168.18.182:8000'; // IP komputer untuk semua iOS
+
+  // Setter untuk update iOS IP secara dinamis (dipanggil dari settings atau config)
+  static void setIOSDeviceIP(String ip) {
+    _iosDeviceUrl = 'http://$ip:8000/api';
+    _iosDeviceBase = 'http://$ip:8000';
+  }
 
   static String get baseUrl {
     if (Platform.isAndroid) {

@@ -62,6 +62,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         }
       },
       child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+        buildWhen: (previous, current) {
+          // Only rebuild on these state changes to prevent unnecessary rebuilds
+          return current is ProductDetailLoading ||
+              current is ProductDetailLoaded ||
+              current is ProductDetailError;
+        },
         builder: (context, state) {
           if (state is ProductDetailLoading) {
             return Scaffold(
@@ -593,6 +599,14 @@ class _QtyDialogContentState extends State<_QtyDialogContent> {
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+          buildWhen: (previous, current) {
+            // Only rebuild when qty or stock changes, not on cart count changes
+            if (previous is ProductDetailLoaded && current is ProductDetailLoaded) {
+              return previous.selectedQty != current.selectedQty ||
+                  previous.availableStock != current.availableStock;
+            }
+            return current is ProductDetailLoaded;
+          },
           builder: (context, blocState) {
             if (blocState is! ProductDetailLoaded) {
               return const SizedBox.shrink();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/router/route_constants.dart';
 // navigation handled by router (go_router) using named routes
 import 'package:go_router/go_router.dart';
 
@@ -102,12 +103,12 @@ class _SplashScreenState extends State<SplashScreen>
   void _navigateToHome() {
     // Route based on user role and navigate using GoRouter
     if (_userRole == 'bumdes') {
-      context.goNamed('start_bumdes');
+      context.goNamed(RouteNames.bumdesHome);
     } else if (_userRole != null) {
-      context.goNamed('start');
+      context.goNamed(RouteNames.pembeliHome);
     } else {
       // No authenticated user found, go to login
-      context.goNamed('login');
+      context.goNamed(RouteNames.login);
     }
   }
 
