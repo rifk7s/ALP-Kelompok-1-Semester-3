@@ -22,14 +22,10 @@ import 'package:frontend/features/shared/screens/setting_screen.dart';
 import 'package:frontend/features/shared/screens/help_screen.dart';
 import 'package:frontend/features/shared/screens/about_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
-import 'package:frontend/features/bumdes/screens/upload_screen.dart';
-import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/add_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/detail_screen.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+import 'package:frontend/core/router/routes/bumdes_routes.dart';
 
 /// Main GoRouter configuration with Bloc integration
 final router = GoRouter(
@@ -46,6 +42,9 @@ final router = GoRouter(
 
     // Pembeli routes with ShellRoute for bottom navigation
     PembeliRoutes.pembeliShellRoute,
+
+    // BUMDES routes - NO ShellRoute, StartPageBumdes has its own bottom nav
+    ...BumdesRoutes.getRoutes(),
 
     // Additional pembeli routes (outside shell - full screen)
     GoRoute(
@@ -152,22 +151,7 @@ final router = GoRouter(
       builder: (context, state) => const AboutAppPage(),
     ),
 
-    // BUMDes product routes (STATIK - full screen, must be BEFORE dynamic :id route)
-    GoRoute(
-      path: RoutePaths.productUpload,
-      name: RouteNames.productUpload,
-      builder: (context, state) => const UploadProdukScreen(),
-    ),
-    GoRoute(
-      path: RoutePaths.productEdit,
-      name: RouteNames.productEdit,
-      builder: (context, state) {
-        final product = state.extra as Map<String, dynamic>?;
-        return EditProdukScreen(product: product ?? {});
-      },
-    ),
-
-    // Product detail route (DINAMIS - :id parameter, must be AFTER static routes)
+    // Product detail route (DINAMIS - :id parameter, shared for pembeli & bumdes)
     GoRoute(
       path: RoutePaths.productDetail,
       name: RouteNames.productDetail,
@@ -176,10 +160,10 @@ final router = GoRouter(
         final id = state.pathParameters['id'];
         final productMap =
             extra ?? (id != null ? {'id': int.tryParse(id)} : null);
-        
+
         // Check if this is for BUMDes (has 'isBumdes' flag)
         final isBumdes = productMap?['isBumdes'] == true;
-        
+
         if (isBumdes) {
           // BUMDes product detail - with edit/delete capability
           return bumdes.ProductDetailPage(
@@ -212,7 +196,7 @@ final router = GoRouter(
       },
     ),
 
-    // Chat route
+    // Chat route (shared for pembeli and bumdes)
     GoRoute(
       path: RoutePaths.chat,
       name: RouteNames.chat,
@@ -250,29 +234,6 @@ final router = GoRouter(
         return OrderTrackingPage(
           order: extra ?? {'id': id},
         );
-      },
-    ),
-
-    // Bumdes routes
-    GoRoute(
-      path: RoutePaths.bumdesHome,
-      name: RouteNames.bumdesHome,
-      builder: (context, state) => const _BumdesNavigationWrapper(),
-    ),
-
-    // Petani routes (standalone - full screen)
-    GoRoute(
-      path: RoutePaths.petaniAdd,
-      name: RouteNames.petaniAdd,
-      builder: (context, state) => const TambahPetaniScreen(),
-    ),
-    GoRoute(
-      path: RoutePaths.petaniDetail,
-      name: RouteNames.petaniDetail,
-      builder: (context, state) {
-        final idStr = state.pathParameters['id'] ?? '';
-        final petaniId = int.tryParse(idStr) ?? 0;
-        return PetaniDetailScreen(petaniId: petaniId);
       },
     ),
   ],
@@ -334,16 +295,5 @@ class _AuthListenable extends ChangeNotifier {
   void dispose() {
     // Don't dispose - this will be managed by GoRouter
     super.dispose();
-  }
-}
-
-/// Navigation wrapper for Bumdes - maintains bottom navigation
-class _BumdesNavigationWrapper extends StatelessWidget {
-  const _BumdesNavigationWrapper();
-
-  @override
-  Widget build(BuildContext context) {
-    // Use the actual StartPageBumdes
-    return const StartPageBumdes();
   }
 }

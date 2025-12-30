@@ -9,7 +9,6 @@ import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
-import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';

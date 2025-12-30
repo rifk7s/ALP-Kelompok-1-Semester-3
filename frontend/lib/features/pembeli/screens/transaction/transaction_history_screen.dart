@@ -22,6 +22,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   late TabController _tabController;
   late TransactionBloc _bloc;
 
+  // Tab index: 2 = Selesai
+  static const int _tabCompleted = 2;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +42,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     _tabController.dispose();
     _bloc.dispose();
     super.dispose();
+  }
+
+  /// Switch to completed tab after completing an order
+  void _switchToCompletedTab() {
+    _tabController.animateTo(_tabCompleted);
   }
 
   @override
@@ -75,10 +83,16 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            _OrderListTab(statusCategory: 'pending'),
-            _OrderListTab(statusCategory: 'processing'),
-            _OrderListTab(statusCategory: 'completed'),
+          children: [
+            _OrderListTab(
+              statusCategory: 'pending',
+              onComplete: _switchToCompletedTab,
+            ),
+            _OrderListTab(
+              statusCategory: 'processing',
+              onComplete: _switchToCompletedTab,
+            ),
+            const _OrderListTab(statusCategory: 'completed'),
           ],
         ),
       ),
@@ -89,8 +103,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
 /// Separate widget for each tab's content
 class _OrderListTab extends StatelessWidget {
   final String statusCategory;
+  final VoidCallback? onComplete;
 
-  const _OrderListTab({required this.statusCategory});
+  const _OrderListTab({
+    required this.statusCategory,
+    this.onComplete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +158,10 @@ class _OrderListTab extends StatelessWidget {
                         await bloc.cancelOrder(id);
                       },
                       onComplete: (id) async {
-                        await bloc.completeOrder(id);
+                        final success = await bloc.completeOrder(id);
+                        if (success && onComplete != null) {
+                          onComplete!();
+                        }
                       },
                     );
                   },
