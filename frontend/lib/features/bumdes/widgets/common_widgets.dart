@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 /// Common UI widgets used across bumdes screens
@@ -121,7 +122,7 @@ class BumdesEmptyState extends StatelessWidget {
   }
 }
 
-/// Loading indicator widget
+/// Loading indicator widget with spinkit animation
 class BumdesLoadingIndicator extends StatelessWidget {
   final String? message;
 
@@ -133,7 +134,95 @@ class BumdesLoadingIndicator extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(),
+          SpinKitCircle(
+            color: AppColors.primary,
+            size: 50.0,
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              message!,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Small loading indicator for buttons and inline loading
+class BumdesSmallLoadingIndicator extends StatelessWidget {
+  final Color? color;
+  final double size;
+
+  const BumdesSmallLoadingIndicator({
+    super.key,
+    this.color,
+    this.size = 20.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SpinKitThreeBounce(
+      color: color ?? AppColors.primary,
+      size: size,
+    );
+  }
+}
+
+/// Full screen loading overlay with primary theme color
+class BumdesFullScreenLoading extends StatelessWidget {
+  final String? message;
+
+  const BumdesFullScreenLoading({super.key, this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.white,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SpinKitFadingCircle(
+              color: AppColors.primary,
+              size: 60.0,
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 24),
+              Text(
+                message!,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading indicator with pulse animation
+class BumdesPulseLoadingIndicator extends StatelessWidget {
+  final String? message;
+
+  const BumdesPulseLoadingIndicator({super.key, this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SpinKitPulse(
+            color: AppColors.primary,
+            size: 50.0,
+          ),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(

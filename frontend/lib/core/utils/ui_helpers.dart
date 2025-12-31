@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 /// Simple reusable pull-to-refresh wrapper.
@@ -356,7 +357,12 @@ class RetryableContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return loadingWidget ?? const Center(child: CircularProgressIndicator());
+      return loadingWidget ?? const Center(
+        child: SpinKitCircle(
+          color: AppColors.primary,
+          size: 50.0,
+        ),
+      );
     }
 
     if (hasError) {

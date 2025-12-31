@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
@@ -18,6 +19,7 @@ class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
   bool _isLoading = false;
+  bool _isSuccess = false;
 
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -25,6 +27,27 @@ class _LoginFormState extends State<LoginForm> {
   // Keys untuk shake animation
   final _phoneShakeKey = GlobalKey<ShakeWidgetState>();
   final _passwordShakeKey = GlobalKey<ShakeWidgetState>();
+
+  Widget _buildSuccessIcon() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: const Icon(
+              Icons.check_rounded,
+              color: AppColors.white,
+              size: 24,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -57,29 +80,37 @@ class _LoginFormState extends State<LoginForm> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await AuthService.login(
-        phone: _phoneController.text,
-        password: _passwordController.text,
-      );
+      // Minimum loading duration untuk menampilkan animasi
+      final loginResult = await Future.wait([
+        AuthService.login(
+          phone: _phoneController.text,
+          password: _passwordController.text,
+        ),
+        Future.delayed(const Duration(milliseconds: 800)), // Minimum 800ms loading
+      ]).then((value) => value[0]);
 
       if (!mounted) return;
 
-      if (result.success) {
-        SnackBarHelper.showSuccess(
-          context,
-          result.message ?? 'Login berhasil!',
-        );
+      if (loginResult.success) {
+        // Show success animation before navigation
+        setState(() => _isSuccess = true);
 
-        final role = result.user?['role'] ?? 'pembeli';
+        // Wait for success animation
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        if (!mounted) return;
+
+        final role = loginResult.user?['role'] ?? 'pembeli';
         if (role == 'bumdes') {
           context.pushReplacementSmooth(const StartPageBumdes());
         } else {
           context.pushReplacementSmooth(const StartPage());
         }
       } else {
-        SnackBarHelper.showError(context, result.message ?? 'Login gagal');
+        setState(() => _isLoading = false);
+        SnackBarHelper.showError(context, loginResult.message ?? 'Login gagal');
       }
-    } finally {
+    } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -169,31 +200,41 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 24),
         Column(
           children: [
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(splashFactory: NoSplash.splashFactory),
-              child: ElevatedButton(
-                style:
-                    ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size(double.infinity, 48),
-                    ).copyWith(
-                      overlayColor: WidgetStateProperty.all(
-                        AppColors.transparent,
-                      ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeInOutCubic,
+              decoration: BoxDecoration(
+                color: _isSuccess
+                    ? AppColors.success
+                    : _isLoading
+                        ? AppColors.grey400
+                        : AppColors.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Theme(
+                data: Theme.of(
+                  context,
+                ).copyWith(splashFactory: NoSplash.splashFactory),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    minimumSize: const Size(double.infinity, 48),
+                  ).copyWith(
+                    overlayColor: WidgetStateProperty.all(
+                      AppColors.transparent,
                     ),
-                onPressed: _isLoading ? null : _handleLogin,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.white,
-                        ),
-                      )
-                    : const Text('Masuk'),
+                  ),
+                  onPressed: _isLoading || _isSuccess ? null : _handleLogin,
+                  child: _isSuccess
+                      ? _buildSuccessIcon()
+                      : _isLoading
+                          ? const AppSmallLoadingIndicator(
+                              color: AppColors.white,
+                              size: 20.0,
+                            )
+                          : const Text('Masuk'),
+                ),
               ),
             ),
             const SizedBox(height: 8),
