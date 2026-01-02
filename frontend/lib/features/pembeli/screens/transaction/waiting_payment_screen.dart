@@ -42,9 +42,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
     if (widget.orderId != null) {
       _loadOrderDetails();
     } else {
-      setState(() {
-        isLoading = false;
-      });
+      isLoading = false;
     }
     _startCountdownTimer();
   }
@@ -130,6 +128,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   }
 
   void _updateCountdown() {
+    if (!mounted) return;
     if (orderDetails?['payment_deadline'] != null) {
       try {
         final deadline = DateTime.parse(orderDetails!['payment_deadline']);
@@ -163,6 +162,8 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   Future<void> _loadOrderDetails() async {
     try {
       final orders = await OrderService.getOrders();
+      if (!mounted) return;
+      
       final order = orders.firstWhere(
         (o) => o['id'] == widget.orderId,
         orElse: () => {},
@@ -187,7 +188,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
       if (kDebugMode) {
         debugPrint('Error loading order details: $e');
       }
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 

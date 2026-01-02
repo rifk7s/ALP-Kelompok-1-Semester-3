@@ -10,6 +10,7 @@ import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
+import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/payment_confirmed_screen.dart';
@@ -68,6 +69,11 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
       path: RoutePaths.cart,
       name: RouteNames.cart,
       builder: (context, state) => const CartPage(),
+    ),
+    GoRoute(
+      path: RoutePaths.transactionHistory,
+      name: RouteNames.transactionHistory,
+      builder: (context, state) => const TransactionHistoryPage(),
     ),
     GoRoute(
       path: RoutePaths.checkout,
