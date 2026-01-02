@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/router.dart';
+import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
@@ -57,10 +58,18 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (context) => HomeBloc()),
         // Add other BLoCs here as needed
       ],
-      child: MaterialApp.router(
-        title: 'PanenKi\'',
-        theme: AppTheme.theme,
-        routerConfig: _router,
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (previous, current) =>
+            previous.status != current.status &&
+            current.status == AuthStatus.unauthenticated,
+        listener: (context, state) {
+          _router.go(RoutePaths.login);
+        },
+        child: MaterialApp.router(
+          title: 'PanenKi\'',
+          theme: AppTheme.theme,
+          routerConfig: _router,
+        ),
       ),
     );
   }

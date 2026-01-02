@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
+import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -308,15 +310,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            // Cache context before async gap
-                            final router = GoRouter.of(context);
+                            final authBloc = context.read<AuthBloc>();
                             Navigator.of(context).pop();
-
                             await AuthService.logout();
-
-                            if (!mounted) return;
-
-                            router.go(RoutePaths.login);
+                            authBloc.add(AuthLoggedOut());
                           },
                           child: Container(
                             width: 88,

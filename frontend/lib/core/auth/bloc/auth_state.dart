@@ -2,7 +2,7 @@ part of 'auth_bloc.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
-class AuthState {
+class AuthState extends Equatable {
   final AuthStatus status;
   final Map<String, dynamic>? user;
   final String? role;
@@ -24,5 +24,6 @@ class AuthState {
     );
   }
 
+  @override
   List<Object?> get props => [status, user, role];
 }

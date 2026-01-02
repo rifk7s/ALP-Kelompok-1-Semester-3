@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -93,6 +95,11 @@ class _RegisterFormState extends State<RegisterForm> {
         if (!mounted) return;
 
         if (loginResult.success) {
+          // Update AuthBloc with logged-in user
+          if (mounted && loginResult.user != null) {
+            context.read<AuthBloc>().add(AuthLoggedIn(loginResult.user!));
+          }
+
           SnackBarHelper.showSuccess(
             context,
             'Registrasi berhasil! Selamat datang.',
