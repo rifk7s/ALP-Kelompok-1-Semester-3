@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 // navigation handled by router (go_router) using named routes
 import 'package:go_router/go_router.dart';
 
@@ -95,8 +97,17 @@ class _SplashScreenState extends State<SplashScreen>
     final result = await AuthService.getMe();
     if (result.success && result.user != null) {
       _userRole = result.user!['role'];
+      // Update AuthBloc with logged-in user
+      if (mounted) {
+        context.read<AuthBloc>().add(AuthLoggedIn(result.user!));
+      }
       // Sign in to Firebase if token exists
       await ChatService.signInToFirebase();
+    } else {
+      // Explicitly set unauthenticated if no valid session
+      if (mounted) {
+        context.read<AuthBloc>().add(const AuthStatusChanged(false));
+      }
     }
   }
 

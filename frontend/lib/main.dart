@@ -8,6 +8,7 @@ import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_blo
 import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
@@ -21,14 +22,36 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AuthBloc _authBloc;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = AuthBloc()..add(AuthStarted());
+    _router = createRouter(_authBloc);
+  }
+
+  @override
+  void dispose() {
+    _authBloc.close();
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => AuthBloc()..add(AuthStarted())),
+        BlocProvider.value(value: _authBloc),
         BlocProvider(create: (context) => CartBloc()),
         BlocProvider(create: (context) => ProductDetailBloc()),
         BlocProvider(create: (context) => HomeBloc()),
@@ -37,7 +60,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'PanenKi\'',
         theme: AppTheme.theme,
-        routerConfig: router,
+        routerConfig: _router,
       ),
     );
   }

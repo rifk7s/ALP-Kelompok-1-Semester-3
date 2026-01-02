@@ -8,16 +8,48 @@ class ApiConfig {
 
   // URLs for API endpoints
   static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
-  static String _iosDeviceUrl = 'http://192.168.18.182:8000/api'; // IP komputer untuk semua iOS
+  
+  // iOS IPs - Priority order: tries cafe first (current location), then home
+  static const String _homeIP = '192.168.18.182'; // Home IP (primary, keep this)
+  static const String _cafeIP = '192.168.1.24';    // Cafe IP (current)
+  
+  // List of IPs to try in priority order
+  static const List<String> _ipPriority = [_cafeIP, _homeIP];
+  
+  // Connection timeout for faster IP mismatch detection (in seconds)
+  static const int connectionTimeout = 5;
+  static const int receiveTimeout = 10;
+  
+  // Current active IP (defaults to first in priority list)
+  static String _currentIP = _ipPriority.first;
+  
+  static String _iosDeviceUrl = 'http://$_currentIP:8000/api';
 
   // Base URLs for images/storage
   static const String _androidEmulatorBase = 'http://10.0.2.2:8000';
-  static String _iosDeviceBase = 'http://192.168.18.182:8000'; // IP komputer untuk semua iOS
+  static String _iosDeviceBase = 'http://$_currentIP:8000';
 
-  // Setter untuk update iOS IP secara dinamis (dipanggil dari settings atau config)
+  // Get all available IPs to try
+  static List<String> get availableIPs => _ipPriority;
+  
+  // Get current active IP
+  static String get currentIP => _currentIP;
+
+  // Set active iOS IP (call this when home IP fails to auto-switch to cafe)
   static void setIOSDeviceIP(String ip) {
+    _currentIP = ip;
     _iosDeviceUrl = 'http://$ip:8000/api';
     _iosDeviceBase = 'http://$ip:8000';
+  }
+  
+  // Try next IP in priority list (useful for automatic fallback)
+  static bool tryNextIP() {
+    final currentIndex = _ipPriority.indexOf(_currentIP);
+    if (currentIndex < _ipPriority.length - 1) {
+      setIOSDeviceIP(_ipPriority[currentIndex + 1]);
+      return true;
+    }
+    return false; // No more IPs to try
   }
 
   static String get baseUrl {

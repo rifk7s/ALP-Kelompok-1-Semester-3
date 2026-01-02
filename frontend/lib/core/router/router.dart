@@ -28,14 +28,21 @@ import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as 
 import 'package:frontend/core/router/routes/bumdes_routes.dart';
 
 /// Main GoRouter configuration with Bloc integration
-final router = GoRouter(
+/// Creates router with AuthBloc stream for reactive auth changes
+GoRouter createRouter(AuthBloc authBloc) => GoRouter(
   initialLocation: RoutePaths.splash,
   debugLogDiagnostics: true,
   redirect: (BuildContext context, GoRouterState state) {
-    final authStatus = context.read<AuthBloc>().state.status;
+    final authStatus = authBloc.state.status;
+    
+    // While auth is still loading (unknown), don't redirect from splash
+    if (authStatus == AuthStatus.unknown && state.matchedLocation == '/') {
+      return null;
+    }
+    
     return RouteGuards.requireAuth(context, state, authStatus);
   },
-  refreshListenable: _AuthListenable(),
+  refreshListenable: GoRouterRefreshStream(authBloc.stream),
   routes: [
     // Auth routes (splash, login, register, start)
     ...AuthRoutes.routes,
@@ -289,11 +296,11 @@ final router = GoRouter(
   ),
 );
 
-/// Custom Listenable to trigger router refresh when auth state changes
-class _AuthListenable extends ChangeNotifier {
-  @override
-  void dispose() {
-    // Don't dispose - this will be managed by GoRouter
-    super.dispose();
+/// Custom Listenable that wraps a Stream to trigger router refresh
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final Stream<dynamic> _stream;
+  
+  GoRouterRefreshStream(Stream<dynamic> stream) : _stream = stream {
+    _stream.listen((_) => notifyListeners());
   }
 }
