@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
@@ -214,11 +215,7 @@ class TransactionActionsController {
     });
 
     // Show loading dialog while checking stock
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    showLoadingDialog(context, message: 'Memeriksa stok...');
 
     // Check stock availability for all products before proceeding
     bool stockValid = true;

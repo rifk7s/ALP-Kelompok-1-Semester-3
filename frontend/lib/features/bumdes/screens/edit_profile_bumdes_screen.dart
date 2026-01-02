@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class EditProfileBumdesPage extends StatefulWidget {
   final Profile? initialProfile;
@@ -118,13 +119,9 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
                   ),
                 ),
                 child: _saving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: AppColors.white,
-                          strokeWidth: 2,
-                        ),
+                    ? const AppSmallLoadingIndicator(
+                        color: AppColors.white,
+                        size: 20.0,
                       )
                     : const Text(
                         "Simpan Perubahan",

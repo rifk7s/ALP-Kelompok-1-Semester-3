@@ -8,6 +8,7 @@ import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class WaitingPaymentPage extends StatefulWidget {
   final int? orderId;
@@ -54,7 +55,13 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
     setState(() => isCheckingStatus = true);
 
     try {
-      final status = await OrderService.checkOrderStatus(widget.orderId!);
+      // Run status check and minimum delay in parallel
+      final results = await Future.wait([
+        OrderService.checkOrderStatus(widget.orderId!),
+        Future.delayed(const Duration(milliseconds: 800)),
+      ]);
+      
+      final status = results[0] as Map<String, dynamic>?;
 
       if (status != null && mounted) {
         if (kDebugMode) {
@@ -66,6 +73,10 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         if (status['is_paid'] == true || status['status'] == 'paid') {
           // Payment confirmed! Navigate to success screen
           _countdownTimer?.cancel();
+          
+          // Small delay to let user see the loading complete before transition
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (!mounted) return;
 
           context.replace(
             RoutePaths.paymentSuccess,
@@ -77,6 +88,10 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         } else if (status['status'] == 'rejected') {
           // Payment rejected! Navigate to rejected screen
           _countdownTimer?.cancel();
+          
+          // Small delay to let user see the loading complete before transition
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (!mounted) return;
 
           context.replace(
             RoutePaths.paymentRejected,
@@ -260,7 +275,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
               ),
             ),
           ),
-          body: const Center(child: CircularProgressIndicator()),
+          body: const Center(child: AppLoadingIndicator()),
         ),
       );
     }
@@ -500,15 +515,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
                             ? null
                             : _refreshStatus,
                         icon: (isCheckingStatus || isProcessing)
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.white,
-                                  ),
-                                ),
+                            ? const AppSmallLoadingIndicator(
+                                color: AppColors.white,
+                                size: 18.0,
                               )
                             : const Icon(Icons.refresh),
                         label: const Text(

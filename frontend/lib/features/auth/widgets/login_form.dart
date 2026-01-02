@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/auth/bloc/auth_bloc.dart';
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
-import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -94,24 +91,17 @@ class _LoginFormState extends State<LoginForm> {
       if (!mounted) return;
 
       if (loginResult.success) {
-        // Update AuthBloc with logged-in user
-        if (mounted && loginResult.user != null) {
-          context.read<AuthBloc>().add(AuthLoggedIn(loginResult.user!));
-        }
-
-        // Show success animation before navigation
+        // Show success animation first (before updating auth state)
         setState(() => _isSuccess = true);
 
-        // Wait for success animation
-        await Future.delayed(const Duration(milliseconds: 800));
+        // Wait for success animation to complete
+        await Future.delayed(const Duration(milliseconds: 1000));
 
         if (!mounted) return;
 
-        final role = loginResult.user?['role'] ?? 'pembeli';
-        if (role == 'bumdes') {
-          context.pushReplacementSmooth(const StartPageBumdes());
-        } else {
-          context.pushReplacementSmooth(const StartPage());
+        // Now update AuthBloc - this will trigger router redirect
+        if (loginResult.user != null) {
+          context.read<AuthBloc>().add(AuthLoggedIn(loginResult.user!));
         }
       } else {
         setState(() => _isLoading = false);

@@ -3,6 +3,7 @@ import 'package:frontend/splash_screen.dart';
 import 'package:frontend/features/auth/screens/auth_screen.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/utils/page_transitions.dart';
 
 /// Auth feature routes
 class AuthRoutes {
@@ -21,19 +22,19 @@ class AuthRoutes {
       path: RoutePaths.auth,
       name: RouteNames.auth,
       pageBuilder: (context, state) =>
-          const NoTransitionPage(child: AuthScreen(initialIsLogin: true)),
+          FadeTransitionPage(child: const AuthScreen(initialIsLogin: true)),
     ),
     GoRoute(
       path: RoutePaths.login,
       name: RouteNames.login,
       pageBuilder: (context, state) =>
-          const NoTransitionPage(child: AuthScreen(initialIsLogin: true)),
+          FadeTransitionPage(child: const AuthScreen(initialIsLogin: true)),
     ),
     GoRoute(
       path: RoutePaths.register,
       name: RouteNames.register,
       pageBuilder: (context, state) =>
-          const NoTransitionPage(child: AuthScreen(initialIsLogin: false)),
+          FadeTransitionPage(child: const AuthScreen(initialIsLogin: false)),
     ),
   ];
 }

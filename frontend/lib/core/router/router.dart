@@ -27,6 +27,7 @@ import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
 import 'package:frontend/core/router/routes/bumdes_routes.dart';
+import 'package:frontend/core/utils/page_transitions.dart';
 
 /// Main GoRouter configuration with Bloc integration
 /// Creates router with AuthBloc stream for reactive auth changes
@@ -89,47 +90,55 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
     GoRoute(
       path: RoutePaths.paymentWaiting,
       name: RouteNames.paymentWaiting,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        return WaitingPaymentPage(
-          orderId: extra?['order_id'],
-          totalPayment: extra?['total'],
-          orderNumber: extra?['order_number']?.toString(),
+        return FadeTransitionPage(
+          child: WaitingPaymentPage(
+            orderId: extra?['order_id'],
+            totalPayment: extra?['total'],
+            orderNumber: extra?['order_number']?.toString(),
+          ),
         );
       },
     ),
     GoRoute(
       path: RoutePaths.paymentSuccess,
       name: RouteNames.paymentSuccess,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        return PaymentConfirmedScreen(
-          orderId: extra?['order_id']?.toString() ?? '',
-          total: extra?['total'] ?? 0,
+        return FadeTransitionPage(
+          child: PaymentConfirmedScreen(
+            orderId: extra?['order_id']?.toString() ?? '',
+            total: extra?['total'] ?? 0,
+          ),
         );
       },
     ),
     GoRoute(
       path: RoutePaths.paymentRejected,
       name: RouteNames.paymentRejected,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        return PaymentRejectedScreen(
-          orderId: extra?['order_id']?.toString() ?? '',
-          total: extra?['total'] ?? 0,
+        return FadeTransitionPage(
+          child: PaymentRejectedScreen(
+            orderId: extra?['order_id']?.toString() ?? '',
+            total: extra?['total'] ?? 0,
+          ),
         );
       },
     ),
     GoRoute(
       path: RoutePaths.receipt,
       name: RouteNames.receipt,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final id = state.pathParameters['id'] ?? '';
-        return ReceiptPage(
-          orderId: extra?['order_id']?.toString() ?? id,
-          total: extra?['total'] ?? 0,
-          orderStatus: extra?['order_status']?.toString() ?? 'completed',
+        return FadeTransitionPage(
+          child: ReceiptPage(
+            orderId: extra?['order_id']?.toString() ?? id,
+            total: extra?['total'] ?? 0,
+            orderStatus: extra?['order_status']?.toString() ?? 'completed',
+          ),
         );
       },
     ),

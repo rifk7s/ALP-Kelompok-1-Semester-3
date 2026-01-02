@@ -5,8 +5,10 @@ import 'package:frontend/core/router/router.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
@@ -63,6 +65,9 @@ class _MyAppState extends State<MyApp> {
             previous.status != current.status &&
             current.status == AuthStatus.unauthenticated,
         listener: (context, state) {
+          // Reset all BLoCs when user logs out
+          context.read<HomeBloc>().add(const HomeReset());
+          context.read<CartBloc>().add(const CartReset());
           _router.go(RoutePaths.login);
         },
         child: MaterialApp.router(

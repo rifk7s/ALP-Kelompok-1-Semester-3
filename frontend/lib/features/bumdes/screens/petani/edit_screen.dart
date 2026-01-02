@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class EditPetaniScreen extends StatefulWidget {
   final PetaniData petani;
@@ -288,15 +289,9 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
                     ),
                   ),
                   child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.white,
-                            ),
-                          ),
+                      ? const AppSmallLoadingIndicator(
+                          color: AppColors.white,
+                          size: 20.0,
                         )
                       : const Text(
                           'Simpan Perubahan',

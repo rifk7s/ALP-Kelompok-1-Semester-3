@@ -69,3 +69,8 @@ class CartStockValidated extends CartEvent {
   @override
   List<Object?> get props => [selectedItems];
 }
+
+/// Reset cart state (used when user logs out)
+class CartReset extends CartEvent {
+  const CartReset();
+}

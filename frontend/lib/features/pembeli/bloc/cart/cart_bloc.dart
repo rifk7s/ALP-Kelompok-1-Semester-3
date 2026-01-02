@@ -16,6 +16,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartSelectAllToggled>(_onSelectAllToggled);
     on<CartRecommendationsLoadRequested>(_onRecommendationsLoadRequested);
     on<CartStockValidated>(_onStockValidated);
+    on<CartReset>(_onReset);
+  }
+
+  void _onReset(CartReset event, Emitter<CartState> emit) {
+    emit(CartInitial());
   }
 
   Future<void> _onLoadRequested(

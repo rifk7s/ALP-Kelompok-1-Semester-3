@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_state.dart';
@@ -61,7 +62,7 @@ class _CartPageState extends State<CartPage> {
         },
         builder: (context, state) {
           if (state is CartLoading && state.showSpinner) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
 
           if (state is CartLoaded) {
@@ -230,18 +231,18 @@ class _CartBottomSheet extends StatelessWidget {
         .where((item) => state.selectedItems[item['id']] == true)
         .toList();
 
-    // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    // Show loading with message
+    showLoadingDialog(context, message: 'Memeriksa stok...');
 
-    // Validate stock
-    context.read<CartBloc>().add(CartStockValidated(selectedCart));
-
-    // Wait a bit for validation to complete
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Validate stock with minimum visible delay
+    await Future.wait([
+      Future(() {
+        if (context.mounted) {
+          context.read<CartBloc>().add(CartStockValidated(selectedCart));
+        }
+      }),
+      Future.delayed(const Duration(milliseconds: 1200)),
+    ]);
 
     if (!context.mounted) return;
 

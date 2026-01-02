@@ -9,6 +9,7 @@ import 'package:frontend/core/services/api_config.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<Map<String, dynamic>> cart;
@@ -82,21 +83,36 @@ class _CheckoutPageState extends State<CheckoutPage> {
       debugPrint('Creating order started');
     }
 
+    // Show loading dialog
+    showLoadingDialog(context, message: 'Memproses pesanan...');
+
     try {
       if (kDebugMode) {
         debugPrint('Calling OrderService.createOrder...');
       }
-      final order = await OrderService.createOrder(
-        shippingAddress: userProfile?.address,
-        shippingCost: ongkir,
-        serviceFee: biayaLayanan,
-      );
+      
+      // Run order creation and minimum delay in parallel
+      final results = await Future.wait([
+        OrderService.createOrder(
+          shippingAddress: userProfile?.address,
+          shippingCost: ongkir,
+          serviceFee: biayaLayanan,
+        ),
+        Future.delayed(const Duration(milliseconds: 1500)),
+      ]);
+      
+      final order = results[0] as Map<String, dynamic>?;
 
       if (kDebugMode) {
         debugPrint('Order result: $order');
       }
 
-      if (order != null && mounted) {
+      if (!mounted) return;
+      
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      if (order != null) {
         if (kDebugMode) {
           debugPrint('Order created successfully, navigating...');
         }
@@ -179,7 +195,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         child: isLoadingProfile
                             ? const Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [CircularProgressIndicator()],
+                                children: [AppSmallLoadingIndicator()],
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,13 +541,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                     onPressed: isCreatingOrder ? null : _createOrder,
                     child: isCreatingOrder
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.white,
-                            ),
+                        ? const AppSmallLoadingIndicator(
+                            color: AppColors.white,
+                            size: 20.0,
                           )
                         : const Text(
                             "Buat Pesanan",

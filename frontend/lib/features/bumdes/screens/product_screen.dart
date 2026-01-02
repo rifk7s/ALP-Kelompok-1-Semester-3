@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/router/route_constants.dart';
@@ -84,7 +85,7 @@ class _ProductPageState extends State<ProductPage> {
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppColors.surface,
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: AppLoadingIndicator()),
       );
     }
 

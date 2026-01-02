@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/transaction/transaction_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/transaction/transaction_provider.dart';
 import 'package:frontend/features/pembeli/widgets/transaction/order_card.dart';
@@ -125,7 +126,7 @@ class _OrderListTab extends StatelessWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             children: const [
               SizedBox(height: 200),
-              Center(child: CircularProgressIndicator()),
+              Center(child: AppLoadingIndicator()),
             ],
           );
         }

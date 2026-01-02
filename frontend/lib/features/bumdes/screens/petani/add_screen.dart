@@ -3,6 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class TambahPetaniScreen extends StatefulWidget {
   const TambahPetaniScreen({super.key});
@@ -177,13 +178,9 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
                   ),
                 ),
                 child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: AppColors.white,
-                          strokeWidth: 2,
-                        ),
+                    ? const AppSmallLoadingIndicator(
+                        color: AppColors.white,
+                        size: 20.0,
                       )
                     : const Text(
                         "Simpan",

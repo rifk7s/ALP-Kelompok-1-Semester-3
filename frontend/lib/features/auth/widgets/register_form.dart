@@ -5,6 +5,7 @@ import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -206,13 +207,9 @@ class _RegisterFormState extends State<RegisterForm> {
         ElevatedButton(
           onPressed: _isLoading ? null : _handleRegister,
           child: _isLoading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.white,
-                  ),
+              ? const AppSmallLoadingIndicator(
+                  color: AppColors.white,
+                  size: 20.0,
                 )
               : const Text('Daftar Sebagai Pembeli'),
         ),

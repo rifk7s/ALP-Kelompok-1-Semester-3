@@ -1,4 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+/// Custom GoRouter page with smooth fade transition
+/// Use this for auth routes to provide polished logout/login transitions
+class FadeTransitionPage<T> extends CustomTransitionPage<T> {
+  FadeTransitionPage({
+    required super.child,
+    super.key,
+    super.transitionDuration = const Duration(milliseconds: 500),
+    super.reverseTransitionDuration = const Duration(milliseconds: 400),
+  }) : super(
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final fadeAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            );
+
+            final scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+            );
+            
+            final slideAnimation = Tween<Offset>(
+              begin: const Offset(0.0, 0.02),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+            );
+
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: ScaleTransition(
+                scale: scaleAnimation,
+                child: SlideTransition(
+                  position: slideAnimation,
+                  child: child,
+                ),
+              ),
+            );
+          },
+        );
+}
 
 /// Custom page route with smooth staggered animation
 /// Combines fade, scale, and slide transitions for a polished effect
@@ -88,27 +135,6 @@ class DramaticPageRoute<T> extends PageRouteBuilder<T> {
             CurvedAnimation(
               parent: animation,
               curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
-            ),
-          );
-
-          // Old page fades out and slides left
-          final secondarySlideAnimation = Tween<Offset>(
-            begin: Offset.zero,
-            end: const Offset(-0.3, 0.0),
-          ).animate(
-            CurvedAnimation(
-              parent: secondaryAnimation,
-              curve: Curves.easeIn,
-            ),
-          );
-
-          final secondaryFadeAnimation = Tween<double>(
-            begin: 1.0,
-            end: 0.0,
-          ).animate(
-            CurvedAnimation(
-              parent: secondaryAnimation,
-              curve: Curves.easeIn,
             ),
           );
 

@@ -41,3 +41,8 @@ class HomeNotificationCountRequested extends HomeEvent {
 class HomeRefreshRequested extends HomeEvent {
   const HomeRefreshRequested();
 }
+
+/// Reset home state (used when user logs out)
+class HomeReset extends HomeEvent {
+  const HomeReset();
+}

@@ -13,6 +13,7 @@ import 'package:frontend/features/product/bloc/product_state.dart';
 import 'package:frontend/features/product/bloc/product_event.dart';
 import 'package:frontend/features/product/repository/product_repository.dart';
 import 'package:frontend/features/product/cubit/product_editing_cubit.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/form_field_widgets.dart';
 import 'package:frontend/features/bumdes/widgets/petani_contributor_widgets.dart';
@@ -415,13 +416,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           ),
         ),
         child: state is ProductLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: AppColors.white,
-                  strokeWidth: 2,
-                ),
+            ? const AppSmallLoadingIndicator(
+                color: AppColors.white,
+                size: 20.0,
               )
             : const Text(
                 "UPLOAD PRODUK",

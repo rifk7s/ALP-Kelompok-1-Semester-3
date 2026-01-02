@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -282,7 +283,7 @@ class _NotificationPageState extends State<NotificationPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: AppLoadingIndicator())
           : _notifications.isEmpty
           ? Center(
               child: Column(

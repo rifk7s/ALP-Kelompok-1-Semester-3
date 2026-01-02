@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
@@ -67,7 +68,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           if (state is ProductDetailLoading) {
             return Scaffold(
               backgroundColor: AppColors.surface,
-              body: const Center(child: CircularProgressIndicator()),
+              body: const Center(child: AppLoadingIndicator()),
             );
           }
 

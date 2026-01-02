@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/screens/transaction/transaction_actions_controller.dart';
 
 /// Action buttons for pending orders
@@ -88,11 +89,7 @@ class PendingOrderActions extends StatelessWidget {
     if (confirm != true || !context.mounted) return;
 
     // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    showLoadingDialog(context, message: 'Membatalkan pesanan...');
 
     final success = await onCancel(order['id'] as int);
 
@@ -212,11 +209,7 @@ class ProcessingOrderActions extends StatelessWidget {
     if (confirm != true || !context.mounted) return;
 
     // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    showLoadingDialog(context, message: 'Membatalkan pesanan...');
 
     final success = await onCancel(order['id'] as int);
 

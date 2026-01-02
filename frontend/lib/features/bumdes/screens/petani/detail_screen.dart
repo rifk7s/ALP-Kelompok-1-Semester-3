@@ -6,6 +6,7 @@ import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:intl/intl.dart';
 
 class PetaniDetailScreen extends StatefulWidget {
@@ -149,11 +150,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
     if (productId == null) return;
 
     // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    showLoadingDialog(context, message: 'Memuat detail produk...');
 
     try {
       // Fetch full product data with all relationships

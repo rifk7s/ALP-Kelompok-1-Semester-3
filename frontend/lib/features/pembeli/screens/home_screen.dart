@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
@@ -280,7 +281,7 @@ class _CategoriesSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (isLoading)
-          const Center(child: CircularProgressIndicator())
+          const Center(child: AppLoadingIndicator())
         else if (categories.isEmpty)
           const SizedBox()
         else
@@ -391,16 +392,43 @@ class _ProductsSection extends StatelessWidget {
           const Center(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
+              child: AppLoadingIndicator(),
             ),
           )
         else if (hasError)
-          const Padding(
-            padding: EdgeInsets.all(40),
+          Padding(
+            padding: const EdgeInsets.all(40),
             child: Center(
-              child: Text(
-                'Gagal memuat produk',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    size: 48,
+                    color: AppColors.grey400,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Gagal memuat produk',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<HomeBloc>().add(const HomeRefreshRequested());
+                    },
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: const Text('Coba Lagi'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           )

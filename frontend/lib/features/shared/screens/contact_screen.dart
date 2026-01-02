@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:intl/intl.dart';
 
 class ContactPage extends StatefulWidget {
@@ -132,7 +133,7 @@ class _ContactPageState extends State<ContactPage> {
 
             Expanded(
               child: !_isInitialized
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: AppLoadingIndicator())
                   : _currentUserId == null
                   ? const Center(
                       child: Text(
@@ -146,7 +147,7 @@ class _ContactPageState extends State<ContactPage> {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: AppLoadingIndicator(),
                           );
                         }
 

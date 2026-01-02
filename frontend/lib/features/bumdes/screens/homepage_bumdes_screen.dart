@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/product_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/services/storage_service.dart';
@@ -323,7 +324,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
                   const SizedBox(height: 16),
 
                   isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(child: AppLoadingIndicator())
                       : recentActivities.isEmpty
                       ? Container(
                           padding: const EdgeInsets.all(32),

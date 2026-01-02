@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/shared/widgets/typing_indicator.dart'
     show TypingBubble;
 
@@ -193,7 +194,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting &&
                     !snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppLoadingIndicator());
                 }
 
                 final messages = snapshot.data?.docs ?? [];

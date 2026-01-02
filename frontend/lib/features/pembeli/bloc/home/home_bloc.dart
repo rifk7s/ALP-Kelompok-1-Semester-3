@@ -15,6 +15,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeCartCountRequested>(_onCartCountRequested);
     on<HomeNotificationCountRequested>(_onNotificationCountRequested);
     on<HomeRefreshRequested>(_onRefreshRequested);
+    on<HomeReset>(_onReset);
+  }
+
+  void _onReset(HomeReset event, Emitter<HomeState> emit) {
+    emit(HomeInitial());
   }
 
   Future<void> _onCategoriesLoadRequested(
@@ -169,25 +174,48 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     final currentState = state;
-    if (currentState is! HomeLoaded) return;
+    if (currentState is! HomeLoaded) {
+      // If not loaded yet, trigger full load
+      add(const HomeCategoriesLoadRequested());
+      add(const HomeProductsLoadRequested());
+      return;
+    }
 
-    // Refresh all data
-    await Future.wait([
-      // Reload categories
-      CategoryService.getCategories().then((data) {
-        emit(currentState.copyWith(categories: data));
-      }),
-      // Reload products
-      ProductService.getProducts(
-        categoryId: currentState.selectedCategoryId,
-      ).then((data) {
-        data.sort((a, b) {
-          if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
-          if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
-          return 0;
-        });
-        emit(currentState.copyWith(products: data));
-      }),
-    ]);
+    // Show loading state while keeping old data reference for fallback
+    emit(const HomeLoading(isLoadingCategories: true, isLoadingProducts: true));
+
+    try {
+      // Refresh all data in parallel
+      final results = await Future.wait([
+        CategoryService.getCategories(),
+        ProductService.getProducts(
+          categoryId: currentState.selectedCategoryId,
+        ),
+      ]);
+
+      final categories = results[0];
+      final products = results[1];
+
+      // Sort products: active first, then sold_out
+      products.sort((a, b) {
+        if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
+        if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
+        return 0;
+      });
+
+      emit(HomeLoaded(
+        categories: categories,
+        products: products,
+        selectedCategoryId: currentState.selectedCategoryId,
+        cartItemCount: currentState.cartItemCount,
+        unreadNotificationCount: currentState.unreadNotificationCount,
+      ));
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error refreshing home data: $e');
+      }
+      // Emit error state so UI shows retry button
+      emit(const HomeError(message: 'Gagal memuat data. Periksa koneksi internet Anda.'));
+    }
   }
 }
