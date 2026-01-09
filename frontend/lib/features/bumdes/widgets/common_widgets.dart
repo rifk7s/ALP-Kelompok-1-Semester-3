@@ -73,7 +73,7 @@ class BumdesInputLabel extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
+              color: AppColors.textPrimary,
             ),
           ),
           if (required)

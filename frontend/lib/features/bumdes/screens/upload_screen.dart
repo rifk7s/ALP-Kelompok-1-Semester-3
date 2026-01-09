@@ -181,6 +181,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
               appBar: AppBar(
                 title: const Text('Upload Produk'),
                 backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
               ),
               body: isLoading
                   ? const BumdesLoadingIndicator(message: 'Memuat data...')
@@ -213,7 +214,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const BumdesInputLabel("Nama Produk *", required: true),
+          const BumdesInputLabel("Nama Produk", required: true),
           TextField(
             controller: _namaProdukController,
             key: _namaProdukShakeKey,
@@ -234,7 +235,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const BumdesInputLabel("Petani *", required: true),
+          const BumdesInputLabel("Petani", required: true),
           PetaniContributorList(
             contributors: petaniContributors,
             isEnabled: true,
@@ -264,7 +265,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const BumdesInputLabel("Kategori *", required: true),
+          const BumdesInputLabel("Kategori", required: true),
           DropdownButtonFormField<String>(
             initialValue: selectedKategori,
             decoration: const InputDecoration(
@@ -299,7 +300,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
               varietiesByCategory[selectedKategori!] != null &&
               varietiesByCategory[selectedKategori!]!.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const BumdesInputLabel("Varietas *", required: true),
+            const BumdesInputLabel("Varietas", required: true),
             DropdownButtonFormField<String>(
               initialValue: selectedVarietas,
               decoration: const InputDecoration(

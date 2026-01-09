@@ -258,6 +258,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
               appBar: AppBar(
                 title: const Text('Edit Produk'),
                 backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
               ),
               body: isLoading
                   ? const BumdesLoadingIndicator(message: 'Memuat data...')
