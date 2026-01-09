@@ -357,12 +357,10 @@ class RetryableContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return loadingWidget ?? const Center(
-        child: SpinKitCircle(
-          color: AppColors.primary,
-          size: 50.0,
-        ),
-      );
+      return loadingWidget ??
+          const Center(
+            child: SpinKitCircle(color: AppColors.primary, size: 50.0),
+          );
     }
 
     if (hasError) {

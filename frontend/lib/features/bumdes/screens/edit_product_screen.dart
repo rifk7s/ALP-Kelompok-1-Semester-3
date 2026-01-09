@@ -488,10 +488,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
           ),
         ),
         child: state is ProductLoading
-            ? const AppSmallLoadingIndicator(
-                color: AppColors.white,
-                size: 20.0,
-              )
+            ? const AppSmallLoadingIndicator(color: AppColors.white, size: 20.0)
             : const Text(
                 "SIMPAN PERUBAHAN",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

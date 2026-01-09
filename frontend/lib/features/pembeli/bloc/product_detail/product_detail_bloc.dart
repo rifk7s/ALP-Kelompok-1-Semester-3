@@ -163,10 +163,12 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
         emit(ProductDetailAddedToCart(newCartCount));
 
         // Return to loaded state without triggering full reload
-        emit(currentState.copyWith(
-          cartItemCount: newCartCount,
-          qtyInCart: newQtyInCart,
-        ));
+        emit(
+          currentState.copyWith(
+            cartItemCount: newCartCount,
+            qtyInCart: newQtyInCart,
+          ),
+        );
       } else {
         emit(const ProductDetailError('Gagal menambahkan ke keranjang'));
         emit(currentState);

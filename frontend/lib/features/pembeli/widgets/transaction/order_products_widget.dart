@@ -54,16 +54,15 @@ class OrderProductsWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         '${products[0]['qty'] ?? 0} kg',
-                        style: TextStyle(fontSize: 12, color: AppColors.grey600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey600,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: AppColors.grey600,
-                  size: 24,
-                ),
+                Icon(Icons.chevron_right, color: AppColors.grey600, size: 24),
               ],
             ),
           ),
@@ -74,39 +73,45 @@ class OrderProductsWidget extends StatelessWidget {
 
             // Show expanded products if order is expanded
             if (isExpanded)
-              ...products.skip(1).map((product) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: ProductImageWidget(
-                            imagePath: product['image'] as String?,
+              ...products
+                  .skip(1)
+                  .map(
+                    (product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: ProductImageWidget(
+                              imagePath: product['image'] as String?,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product['name']?.toString() ?? 'Produk',
-                                style: const TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${product['qty'] ?? 0} kg',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.grey600,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product['name']?.toString() ?? 'Produk',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${product['qty'] ?? 0} kg',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.grey600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
 
             // "Lihat Semua" button
             InkWell(
@@ -148,7 +153,7 @@ class OrderProductsWidget extends StatelessWidget {
 /// Parse order items from backend format to products list
 List<Map<String, dynamic>> parseOrderItems(dynamic orderItems) {
   final items = orderItems as List? ?? [];
-  
+
   return items.map((item) {
     if (item is Map<String, dynamic> && item['product'] != null) {
       // Backend format

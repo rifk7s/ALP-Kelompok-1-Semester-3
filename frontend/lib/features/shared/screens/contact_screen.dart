@@ -146,9 +146,7 @@ class _ContactPageState extends State<ContactPage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                            child: AppLoadingIndicator(),
-                          );
+                          return const Center(child: AppLoadingIndicator());
                         }
 
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {

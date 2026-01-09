@@ -25,7 +25,8 @@ import 'package:frontend/features/shared/screens/about_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
-import 'package:frontend/features/bumdes/screens/product_detail_screen.dart' as bumdes;
+import 'package:frontend/features/bumdes/screens/product_detail_screen.dart'
+    as bumdes;
 import 'package:frontend/core/router/routes/bumdes_routes.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 
@@ -36,12 +37,12 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
   debugLogDiagnostics: true,
   redirect: (BuildContext context, GoRouterState state) {
     final authStatus = authBloc.state.status;
-    
+
     // While auth is still loading (unknown), don't redirect from splash
     if (authStatus == AuthStatus.unknown && state.matchedLocation == '/') {
       return null;
     }
-    
+
     return RouteGuards.requireAuth(context, state, authStatus);
   },
   refreshListenable: GoRouterRefreshStream(authBloc.stream),
@@ -205,9 +206,16 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: AppColors.danger),
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.danger,
+                    ),
                     SizedBox(height: 16),
-                    Text('Produk tidak ditemukan', style: TextStyle(fontSize: 16)),
+                    Text(
+                      'Produk tidak ditemukan',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ],
                 ),
               ),
@@ -253,9 +261,7 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final id = state.pathParameters['id'] ?? '';
-        return OrderTrackingPage(
-          order: extra ?? {'id': id},
-        );
+        return OrderTrackingPage(order: extra ?? {'id': id});
       },
     ),
   ],
@@ -270,7 +276,11 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: AppColors.danger),
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppColors.danger,
+                ),
                 const SizedBox(height: 24),
                 const Text(
                   'Halaman tidak ditemukan',
@@ -280,7 +290,10 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
                 const SizedBox(height: 12),
                 Text(
                   state.uri.toString(),
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -289,7 +302,7 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
                     // Check user role and navigate accordingly
                     final authState = context.read<AuthBloc>().state;
                     final role = authState.user?['role'];
-                    
+
                     if (role == 'bumdes') {
                       context.go(RoutePaths.bumdesHome);
                     } else {
@@ -299,7 +312,10 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
                   icon: const Icon(Icons.home),
                   label: const Text('Kembali ke Beranda'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                   ),
                 ),
               ],
@@ -314,7 +330,7 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
 /// Custom Listenable that wraps a Stream to trigger router refresh
 class GoRouterRefreshStream extends ChangeNotifier {
   late final Stream<dynamic> _stream;
-  
+
   GoRouterRefreshStream(Stream<dynamic> stream) : _stream = stream {
     _stream.listen((_) => notifyListeners());
   }

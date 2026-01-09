@@ -12,11 +12,13 @@ class TransactionProvider extends InheritedWidget {
   });
 
   static TransactionBloc of(BuildContext context) {
-    final provider = context.dependOnInheritedWidgetOfExactType<TransactionProvider>();
+    final provider = context
+        .dependOnInheritedWidgetOfExactType<TransactionProvider>();
     assert(provider != null, 'No TransactionProvider found in context');
     return provider!.bloc;
   }
 
   @override
-  bool updateShouldNotify(TransactionProvider oldWidget) => bloc != oldWidget.bloc;
+  bool updateShouldNotify(TransactionProvider oldWidget) =>
+      bloc != oldWidget.bloc;
 }

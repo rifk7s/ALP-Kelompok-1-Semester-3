@@ -96,9 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 20),
 
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   const CircleAvatar(
@@ -199,9 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
                     profileCard('Pesanan Saya', Icons.description_outlined, () {

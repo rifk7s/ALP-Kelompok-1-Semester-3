@@ -106,10 +106,7 @@ class _OrderListTab extends StatelessWidget {
   final String statusCategory;
   final VoidCallback? onComplete;
 
-  const _OrderListTab({
-    required this.statusCategory,
-    this.onComplete,
-  });
+  const _OrderListTab({required this.statusCategory, this.onComplete});
 
   @override
   Widget build(BuildContext context) {
@@ -147,14 +144,19 @@ class _OrderListTab extends StatelessWidget {
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
                     final order = orders[index];
-                    final orderId = order['order_number'] ?? order['id']?.toString() ?? '';
+                    final orderId =
+                        order['order_number'] ?? order['id']?.toString() ?? '';
                     final bloc = TransactionProvider.of(context);
 
                     return OrderCard(
                       order: order,
                       isExpanded: bloc.isOrderExpanded(orderId),
                       onToggleExpand: () => bloc.toggleOrderExpansion(orderId),
-                      onProductTap: () => TransactionActionsController.openTracking(context, order),
+                      onProductTap: () =>
+                          TransactionActionsController.openTracking(
+                            context,
+                            order,
+                          ),
                       onCancel: (id) async {
                         await bloc.cancelOrder(id);
                       },

@@ -36,7 +36,11 @@ class ProductImageWidget extends StatelessWidget {
             width: width,
             height: height,
             color: AppColors.grey200,
-            child: Icon(Icons.image, size: width / 2.5, color: AppColors.greyMedium),
+            child: Icon(
+              Icons.image,
+              size: width / 2.5,
+              color: AppColors.greyMedium,
+            ),
           );
         },
         loadingBuilder: (context, child, loadingProgress) {
@@ -45,22 +49,29 @@ class ProductImageWidget extends StatelessWidget {
             width: width,
             height: height,
             color: AppColors.grey200,
-            child: const Center(
-              child: AppSmallLoadingIndicator(size: 20.0),
-            ),
+            child: const Center(child: AppSmallLoadingIndicator(size: 20.0)),
           );
         },
       );
     } else if (imagePath != null && imagePath!.startsWith('assets/')) {
       // Static asset image
-      return Image.asset(imagePath!, width: width, height: height, fit: BoxFit.cover);
+      return Image.asset(
+        imagePath!,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
     } else {
       // Placeholder
       return Container(
         width: width,
         height: height,
         color: AppColors.grey200,
-        child: Icon(Icons.image, size: width / 2.5, color: AppColors.greyMedium),
+        child: Icon(
+          Icons.image,
+          size: width / 2.5,
+          color: AppColors.greyMedium,
+        ),
       );
     }
   }
@@ -113,17 +124,13 @@ class PendingOrderInfo extends StatelessWidget {
   final Map<String, dynamic> order;
   final String? timeLeft;
 
-  const PendingOrderInfo({
-    super.key,
-    required this.order,
-    this.timeLeft,
-  });
+  const PendingOrderInfo({super.key, required this.order, this.timeLeft});
 
   @override
   Widget build(BuildContext context) {
     final deadline = order['payment_deadline'] ?? order['deadline'];
     String deadlineText = '-';
-    
+
     if (deadline != null) {
       if (deadline is String && deadline.contains('-')) {
         deadlineText = DateFormatter.formatDateTime(deadline);

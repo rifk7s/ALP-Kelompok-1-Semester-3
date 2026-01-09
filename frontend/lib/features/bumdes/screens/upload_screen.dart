@@ -417,10 +417,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           ),
         ),
         child: state is ProductLoading
-            ? const AppSmallLoadingIndicator(
-                color: AppColors.white,
-                size: 20.0,
-              )
+            ? const AppSmallLoadingIndicator(color: AppColors.white, size: 20.0)
             : const Text(
                 "UPLOAD PRODUK",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

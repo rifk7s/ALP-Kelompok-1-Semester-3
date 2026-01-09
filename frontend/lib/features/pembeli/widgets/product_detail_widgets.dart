@@ -428,7 +428,8 @@ class _ProductDetailQtyDialogState extends State<ProductDetailQtyDialog> {
           padding: const EdgeInsets.all(18),
           child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
             buildWhen: (previous, current) {
-              if (previous is ProductDetailLoaded && current is ProductDetailLoaded) {
+              if (previous is ProductDetailLoaded &&
+                  current is ProductDetailLoaded) {
                 return previous.selectedQty != current.selectedQty ||
                     previous.availableStock != current.availableStock;
               }

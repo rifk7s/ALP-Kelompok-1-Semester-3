@@ -34,7 +34,7 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     _exitController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -50,10 +50,11 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
         curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
       ),
     );
-    
-    _exitFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _exitController, curve: Curves.easeOut),
-    );
+
+    _exitFadeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _exitController, curve: Curves.easeOut));
 
     // Delay animation start to let page transition complete first
     Future.delayed(const Duration(milliseconds: 400), () {
@@ -67,17 +68,17 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
       _navigateToReceipt();
     });
   }
-  
+
   Future<void> _navigateToReceipt() async {
     if (!mounted || _isExiting) return;
-    
+
     setState(() => _isExiting = true);
-    
+
     // Play exit animation
     await _exitController.forward();
-    
+
     if (!mounted) return;
-    
+
     context.replace(
       RoutePaths.receipt.replaceAll(':id', widget.orderId),
       extra: {
@@ -154,84 +155,84 @@ class _PaymentConfirmedScreenState extends State<PaymentConfirmedScreen>
                   // Success message
                   FadeTransition(
                     opacity: _fadeAnimation,
-                  child: Column(
-                    children: [
-                      const Text(
-                        "Pembayaran Dikonfirmasi!",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Pembayaran Dikonfirmasi!",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Pesanan Anda sedang diproses",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.grey600,
+                        const SizedBox(height: 12),
+                        Text(
+                          "Pesanan Anda sedang diproses",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.grey600,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Order details card
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.black.withValues(alpha: 0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                        // Order details card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.black.withValues(alpha: 0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              _infoRow("Nomor Pesanan", widget.orderId),
+                              const Divider(height: 24),
+                              _infoRow(
+                                "Total Pembayaran",
+                                formatCurrency(widget.total),
+                                isHighlight: true,
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Column(
+
+                        const SizedBox(height: 32),
+
+                        // Loading indicator
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _infoRow("Nomor Pesanan", widget.orderId),
-                            const Divider(height: 24),
-                            _infoRow(
-                              "Total Pembayaran",
-                              formatCurrency(widget.total),
-                              isHighlight: true,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Loading indicator
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.grey400,
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.grey400,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            "Mengalihkan ke struk...",
-                            style: TextStyle(
-                              color: AppColors.grey600,
-                              fontSize: 14,
+                            const SizedBox(width: 12),
+                            Text(
+                              "Mengalihkan ke struk...",
+                              style: TextStyle(
+                                color: AppColors.grey600,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 ],
               ),
             ),

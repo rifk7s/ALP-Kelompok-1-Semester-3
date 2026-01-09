@@ -86,8 +86,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: widget.order['productImage'] != null &&
-                                widget.order['productImage'].toString().isNotEmpty
+                        child:
+                            widget.order['productImage'] != null &&
+                                widget.order['productImage']
+                                    .toString()
+                                    .isNotEmpty
                             ? Image.network(
                                 widget.order['productImage'],
                                 width: 70,

@@ -60,7 +60,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         OrderService.checkOrderStatus(widget.orderId!),
         Future.delayed(const Duration(milliseconds: 800)),
       ]);
-      
+
       final status = results[0] as Map<String, dynamic>?;
 
       if (status != null && mounted) {
@@ -73,32 +73,26 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         if (status['is_paid'] == true || status['status'] == 'paid') {
           // Payment confirmed! Navigate to success screen
           _countdownTimer?.cancel();
-          
+
           // Small delay to let user see the loading complete before transition
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
 
           context.replace(
             RoutePaths.paymentSuccess,
-            extra: {
-              'order_id': orderNumber,
-              'total': totalPayment,
-            },
+            extra: {'order_id': orderNumber, 'total': totalPayment},
           );
         } else if (status['status'] == 'rejected') {
           // Payment rejected! Navigate to rejected screen
           _countdownTimer?.cancel();
-          
+
           // Small delay to let user see the loading complete before transition
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
 
           context.replace(
             RoutePaths.paymentRejected,
-            extra: {
-              'order_id': orderNumber,
-              'total': totalPayment,
-            },
+            extra: {'order_id': orderNumber, 'total': totalPayment},
           );
         } else {
           // Show message that payment is still pending
@@ -178,7 +172,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
     try {
       final orders = await OrderService.getOrders();
       if (!mounted) return;
-      
+
       final order = orders.firstWhere(
         (o) => o['id'] == widget.orderId,
         orElse: () => {},

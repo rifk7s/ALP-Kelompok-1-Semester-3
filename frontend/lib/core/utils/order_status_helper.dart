@@ -124,16 +124,21 @@ class OrderStatusHelper {
         return orders.where((o) => o['status'] == 'pending_payment').toList();
       case 'processing':
         // Diproses: paid, processing, and shipped
-        return orders.where((o) =>
-          o['status'] == 'paid' ||
-          o['status'] == 'processing' ||
-          o['status'] == 'shipped'
-        ).toList();
+        return orders
+            .where(
+              (o) =>
+                  o['status'] == 'paid' ||
+                  o['status'] == 'processing' ||
+                  o['status'] == 'shipped',
+            )
+            .toList();
       case 'completed':
         // Selesai: completed and rejected
-        return orders.where((o) =>
-          o['status'] == 'completed' || o['status'] == 'rejected'
-        ).toList();
+        return orders
+            .where(
+              (o) => o['status'] == 'completed' || o['status'] == 'rejected',
+            )
+            .toList();
       default:
         return orders;
     }

@@ -202,7 +202,10 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                 child: Column(
                   children: [
                     profileCard('Produk', Icons.inventory_2_outlined, () {
-                      context.push(RoutePaths.bumdesHome, extra: {'initialTab': 1});
+                      context.push(
+                        RoutePaths.bumdesHome,
+                        extra: {'initialTab': 1},
+                      );
                     }),
                     const SizedBox(height: 12),
 

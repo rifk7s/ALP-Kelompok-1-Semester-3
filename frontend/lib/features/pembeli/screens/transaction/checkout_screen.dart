@@ -90,7 +90,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (kDebugMode) {
         debugPrint('Calling OrderService.createOrder...');
       }
-      
+
       // Run order creation and minimum delay in parallel
       final results = await Future.wait([
         OrderService.createOrder(
@@ -100,7 +100,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         Future.delayed(const Duration(milliseconds: 1500)),
       ]);
-      
+
       final order = results[0] as Map<String, dynamic>?;
 
       if (kDebugMode) {
@@ -108,7 +108,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       }
 
       if (!mounted) return;
-      
+
       // Close loading dialog
       Navigator.of(context).pop();
 

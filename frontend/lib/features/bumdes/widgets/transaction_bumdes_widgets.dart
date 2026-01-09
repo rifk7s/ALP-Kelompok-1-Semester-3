@@ -17,9 +17,15 @@ class BumdesOrderCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = TransactionBumdesHelper.getDisplayStatusColor(status, hasProofImage);
+    final color = TransactionBumdesHelper.getDisplayStatusColor(
+      status,
+      hasProofImage,
+    );
     final icon = TransactionBumdesHelper.getStatusIcon(status);
-    final text = TransactionBumdesHelper.getDisplayStatusLabel(status, hasProofImage);
+    final text = TransactionBumdesHelper.getDisplayStatusLabel(
+      status,
+      hasProofImage,
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -93,7 +99,7 @@ class BumdesOrderProductItem extends StatelessWidget {
                             strokeWidth: 2,
                             value: loadingProgress.expectedTotalBytes != null
                                 ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
+                                      loadingProgress.expectedTotalBytes!
                                 : null,
                           ),
                         ),
@@ -154,7 +160,10 @@ class BumdesOrderProductItem extends StatelessWidget {
             children: [
               Text(
                 productName,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -258,7 +267,8 @@ class BumdesOrderInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final buyer = order['buyer'] as Map<String, dynamic>?;
     final buyerName = buyer?['name'] ?? 'Pembeli';
-    final shippingAddress = order['shipping_address'] as String? ?? 'Alamat tidak tersedia';
+    final shippingAddress =
+        order['shipping_address'] as String? ?? 'Alamat tidak tersedia';
     final notes = order['notes'] as String? ?? '';
     final total = order['total'];
 
@@ -309,12 +319,19 @@ class BumdesOrderInfo extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   shippingAddress,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -336,12 +353,19 @@ class BumdesOrderInfo extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.sticky_note_2_outlined, size: 18, color: AppColors.primary),
+                  const Icon(
+                    Icons.sticky_note_2_outlined,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       notes,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textDark,
+                      ),
                     ),
                   ),
                 ],
@@ -370,7 +394,10 @@ class BumdesOrderProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final stageLabel = TransactionBumdesHelper.getStageLabel(status);
     final progress = TransactionBumdesHelper.getProgress(status);
-    final displayStatusColor = TransactionBumdesHelper.getDisplayStatusColor(status, hasProofImage);
+    final displayStatusColor = TransactionBumdesHelper.getDisplayStatusColor(
+      status,
+      hasProofImage,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
@@ -383,7 +410,10 @@ class BumdesOrderProgress extends StatelessWidget {
               children: [
                 Text(
                   stageLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
                 ),
                 Text(
                   '${(progress * 100).round()}%',

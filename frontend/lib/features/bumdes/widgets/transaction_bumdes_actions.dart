@@ -25,7 +25,9 @@ class BumdesOrderActions extends StatelessWidget {
 
     // For Baru (pending_payment/paid) and Dikemas (processing) tabs:
     // "Perbarui ke tahap berikutnya" is the primary CTA
-    if (status == 'pending_payment' || status == 'paid' || status == 'processing') {
+    if (status == 'pending_payment' ||
+        status == 'paid' ||
+        status == 'processing') {
       return Row(
         children: [
           Expanded(
@@ -108,7 +110,10 @@ class BumdesOrderActions extends StatelessWidget {
     );
   }
 
-  Future<void> _openChat(BuildContext context, Map<String, dynamic> order) async {
+  Future<void> _openChat(
+    BuildContext context,
+    Map<String, dynamic> order,
+  ) async {
     final buyer = order['buyer'] as Map<String, dynamic>?;
     final buyerName = buyer?['name'] ?? 'Pembeli';
     final buyerId = order['buyer_id']?.toString() ?? '';
@@ -120,12 +125,15 @@ class BumdesOrderActions extends StatelessWidget {
     );
 
     if (chatId != null && context.mounted) {
-      context.push(RoutePaths.chat, extra: {
-        'chatId': chatId,
-        'name': buyerName,
-        'image': null,
-        'recipientId': buyerId,
-      });
+      context.push(
+        RoutePaths.chat,
+        extra: {
+          'chatId': chatId,
+          'name': buyerName,
+          'image': null,
+          'recipientId': buyerId,
+        },
+      );
     }
   }
 }
@@ -189,21 +197,26 @@ class BumdesTrackingHelper {
 
     // Get first product image
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
-    final firstItem = orderItems.isNotEmpty ? orderItems[0] as Map<String, dynamic> : null;
+    final firstItem = orderItems.isNotEmpty
+        ? orderItems[0] as Map<String, dynamic>
+        : null;
     final product = firstItem?['product'] as Map<String, dynamic>?;
 
     // Get image URL using ApiConfig
     final imageUrl = TransactionBumdesHelper.getProductImageUrl(product);
 
-    context.push(RoutePaths.orderTracking, extra: {
-      'id': order['order_number'],
-      'seller': 'BUMDes Desa Sengka',
-      'productImage': imageUrl,
-      'statusText': getStageLabel(status),
-      'timestamps': timestamps,
-      'isRejected': status == 'rejected',
-      'isBumdes': true,  // Tandai bahwa ini dari BUMDes
-    });
+    context.push(
+      RoutePaths.orderTracking,
+      extra: {
+        'id': order['order_number'],
+        'seller': 'BUMDes Desa Sengka',
+        'productImage': imageUrl,
+        'statusText': getStageLabel(status),
+        'timestamps': timestamps,
+        'isRejected': status == 'rejected',
+        'isBumdes': true, // Tandai bahwa ini dari BUMDes
+      },
+    );
   }
 
   static String _formatDate(String? dateStr) {

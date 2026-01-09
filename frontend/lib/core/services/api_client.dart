@@ -66,10 +66,11 @@ class ApiClient {
   ApiException _createConnectionError(String baseMessage) {
     final currentIP = ApiConfig.currentIP;
     final allIPs = ApiConfig.availableIPs.join(', ');
-    
+
     return ApiException(
       baseMessage,
-      hint: 'Current IP: $currentIP\n'
+      hint:
+          'Current IP: $currentIP\n'
           'Available IPs: $allIPs\n'
           'Make sure backend is running and your IP matches.',
       isConnectionError: true,

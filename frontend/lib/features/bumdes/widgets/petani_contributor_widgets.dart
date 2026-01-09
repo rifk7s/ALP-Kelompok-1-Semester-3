@@ -95,7 +95,11 @@ class PetaniContributorList extends StatelessWidget {
                           customBorder: const CircleBorder(),
                           child: const Padding(
                             padding: EdgeInsets.all(4.0),
-                            child: Icon(Icons.edit, size: 18, color: AppColors.textSecondary),
+                            child: Icon(
+                              Icons.edit,
+                              size: 18,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -104,7 +108,11 @@ class PetaniContributorList extends StatelessWidget {
                           customBorder: const CircleBorder(),
                           child: const Padding(
                             padding: EdgeInsets.all(4.0),
-                            child: Icon(Icons.delete, size: 18, color: AppColors.danger),
+                            child: Icon(
+                              Icons.delete,
+                              size: 18,
+                              color: AppColors.danger,
+                            ),
                           ),
                         ),
                       ],

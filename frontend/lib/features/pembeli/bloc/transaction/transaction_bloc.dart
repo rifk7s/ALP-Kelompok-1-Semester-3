@@ -79,13 +79,16 @@ class TransactionBloc {
 
   /// Get orders by status category
   List<Map<String, dynamic>> getOrdersByStatus(String statusCategory) {
-    return OrderStatusHelper.filterOrdersByStatus(_state.orders, statusCategory);
+    return OrderStatusHelper.filterOrdersByStatus(
+      _state.orders,
+      statusCategory,
+    );
   }
 
   /// Update countdowns for pending orders
   void _updateCountdowns() {
     final newCountdowns = Map<String, String>.from(_state.countdowns);
-    
+
     for (var order in _state.orders) {
       if (order['status'] == 'pending_payment' &&
           order['payment_deadline'] != null) {
@@ -95,7 +98,7 @@ class TransactionBloc {
         );
       }
     }
-    
+
     emit(_state.copyWith(countdowns: newCountdowns));
   }
 

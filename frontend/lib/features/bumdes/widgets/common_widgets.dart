@@ -134,10 +134,7 @@ class BumdesLoadingIndicator extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SpinKitCircle(
-            color: AppColors.primary,
-            size: 50.0,
-          ),
+          SpinKitCircle(color: AppColors.primary, size: 50.0),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -156,18 +153,11 @@ class BumdesSmallLoadingIndicator extends StatelessWidget {
   final Color? color;
   final double size;
 
-  const BumdesSmallLoadingIndicator({
-    super.key,
-    this.color,
-    this.size = 20.0,
-  });
+  const BumdesSmallLoadingIndicator({super.key, this.color, this.size = 20.0});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitThreeBounce(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitThreeBounce(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -185,10 +175,7 @@ class BumdesFullScreenLoading extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SpinKitFadingCircle(
-              color: AppColors.primary,
-              size: 60.0,
-            ),
+            SpinKitFadingCircle(color: AppColors.primary, size: 60.0),
             if (message != null) ...[
               const SizedBox(height: 24),
               Text(
@@ -219,10 +206,7 @@ class BumdesPulseLoadingIndicator extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SpinKitPulse(
-            color: AppColors.primary,
-            size: 50.0,
-          ),
+          SpinKitPulse(color: AppColors.primary, size: 50.0),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(

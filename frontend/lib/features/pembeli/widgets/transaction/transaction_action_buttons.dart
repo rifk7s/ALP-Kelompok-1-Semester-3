@@ -50,10 +50,11 @@ class PendingOrderActions extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => TransactionActionsController.navigateToWaitingPayment(
-              context,
-              order,
-            ),
+            onPressed: () =>
+                TransactionActionsController.navigateToWaitingPayment(
+                  context,
+                  order,
+                ),
             style: _elevatedStyle(),
             child: const Text('Bayar Sekarang'),
           ),
@@ -270,7 +271,8 @@ class CompletedOrderActions extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => TransactionActionsController.buyAgain(context, order),
+            onPressed: () =>
+                TransactionActionsController.buyAgain(context, order),
             style: _elevatedStyle(),
             child: const Text('Beli Lagi'),
           ),

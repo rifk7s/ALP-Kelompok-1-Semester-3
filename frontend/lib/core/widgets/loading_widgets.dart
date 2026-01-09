@@ -4,7 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 
 /// Common loading indicators using flutter_spinkit
 /// These widgets provide consistent loading states across the app
-/// 
+///
 /// USAGE GUIDE BY CONTEXT:
 /// - Button loading: AppSmallLoadingIndicator (Ring - compact, clean)
 /// - Page/Content loading: AppLoadingIndicator (Circle - classic, reliable)
@@ -21,18 +21,11 @@ class AppLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitCircle(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitCircle(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -42,11 +35,7 @@ class AppSmallLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppSmallLoadingIndicator({
-    super.key,
-    this.size = 20.0,
-    this.color,
-  });
+  const AppSmallLoadingIndicator({super.key, this.size = 20.0, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +53,7 @@ class AppDotsLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppDotsLoadingIndicator({
-    super.key,
-    this.size = 30.0,
-    this.color,
-  });
+  const AppDotsLoadingIndicator({super.key, this.size = 30.0, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -85,18 +70,11 @@ class AppRippleLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppRippleLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppRippleLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitRipple(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitRipple(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -106,11 +84,7 @@ class AppDualRingLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppDualRingLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppDualRingLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +111,7 @@ class AppFullScreenLoading extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SpinKitFadingCircle(
-              color: AppColors.primary,
-              size: 60.0,
-            ),
+            SpinKitFadingCircle(color: AppColors.primary, size: 60.0),
             if (message != null) ...[
               const SizedBox(height: 24),
               Text(
@@ -179,10 +150,7 @@ class AppLoadingWithMessage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SpinKitCircle(
-            color: color ?? AppColors.primary,
-            size: size,
-          ),
+          SpinKitCircle(color: color ?? AppColors.primary, size: size),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -202,18 +170,11 @@ class AppPulseLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppPulseLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppPulseLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitPulse(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitPulse(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -223,18 +184,11 @@ class AppWaveLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppWaveLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppWaveLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitWave(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitWave(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -244,18 +198,11 @@ class AppRingLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppRingLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppRingLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitRing(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitRing(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -273,10 +220,7 @@ class AppFadingCircleLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitFadingCircle(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitFadingCircle(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -294,14 +238,11 @@ class AppChasingDotsLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitChasingDots(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitChasingDots(color: color ?? AppColors.primary, size: size);
   }
 }
 
-/// Spinning circle loading indicator  
+/// Spinning circle loading indicator
 /// Best for: 3D feel, product loading, modern UI
 class AppSpinningCircleLoadingIndicator extends StatelessWidget {
   final double size;
@@ -315,10 +256,7 @@ class AppSpinningCircleLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitSpinningCircle(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitSpinningCircle(color: color ?? AppColors.primary, size: size);
   }
 }
 
@@ -328,24 +266,17 @@ class AppCubeGridLoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppCubeGridLoadingIndicator({
-    super.key,
-    this.size = 50.0,
-    this.color,
-  });
+  const AppCubeGridLoadingIndicator({super.key, this.size = 50.0, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitCubeGrid(
-      color: color ?? AppColors.primary,
-      size: size,
-    );
+    return SpinKitCubeGrid(color: color ?? AppColors.primary, size: size);
   }
 }
 
 /// Shows a loading dialog overlay with customizable appearance
 /// Use this for action dialogs that need visible loading state
-/// 
+///
 /// [message] - Optional text to show below spinner (e.g., "Memproses pesanan...")
 /// [backgroundColor] - Dialog card background (default: cream/surface)
 void showLoadingDialog(BuildContext context, {String? message}) {

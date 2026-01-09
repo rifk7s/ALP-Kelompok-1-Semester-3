@@ -72,11 +72,13 @@ class TransactionBumdesBloc {
       emit(_state.copyWith(orders: orders, isLoading: false));
     } catch (e) {
       debugPrint('Error loading orders: $e');
-      emit(_state.copyWith(
-        isLoading: false,
-        hasError: true,
-        errorMessage: 'Gagal memuat data transaksi',
-      ));
+      emit(
+        _state.copyWith(
+          isLoading: false,
+          hasError: true,
+          errorMessage: 'Gagal memuat data transaksi',
+        ),
+      );
     }
   }
 

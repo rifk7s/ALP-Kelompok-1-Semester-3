@@ -410,19 +410,27 @@ class _ProductsSection extends StatelessWidget {
                   const SizedBox(height: 12),
                   const Text(
                     'Gagal memuat produk',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () {
-                      context.read<HomeBloc>().add(const HomeRefreshRequested());
+                      context.read<HomeBloc>().add(
+                        const HomeRefreshRequested(),
+                      );
                     },
                     icon: const Icon(Icons.refresh, size: 18),
                     label: const Text('Coba Lagi'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

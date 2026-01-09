@@ -73,7 +73,9 @@ class TransactionActionsController {
     // For rejected orders, only show 2 stages
     if (status == 'rejected') {
       if (pendingPaymentAt != null) {
-        timestamps['Pesanan Dibuat'] = DateFormatter.formatDateTime(pendingPaymentAt);
+        timestamps['Pesanan Dibuat'] = DateFormatter.formatDateTime(
+          pendingPaymentAt,
+        );
       }
       if (rejectedAt != null) {
         timestamps['Ditolak'] = DateFormatter.formatDateTime(rejectedAt);
@@ -81,7 +83,9 @@ class TransactionActionsController {
     } else {
       // Normal order flow
       if (pendingPaymentAt != null) {
-        timestamps['Pesanan Dibuat'] = DateFormatter.formatDateTime(pendingPaymentAt);
+        timestamps['Pesanan Dibuat'] = DateFormatter.formatDateTime(
+          pendingPaymentAt,
+        );
       }
       if (processingAt != null) {
         timestamps['Dikemas'] = DateFormatter.formatDateTime(processingAt);
@@ -146,7 +150,10 @@ class TransactionActionsController {
                 ),
                 const SizedBox(height: 12),
                 ListTile(
-                  leading: const Icon(Icons.receipt_long, color: AppColors.primary),
+                  leading: const Icon(
+                    Icons.receipt_long,
+                    color: AppColors.primary,
+                  ),
                   title: const Text('Lihat Struk/Invoice'),
                   onTap: () {
                     context.pop();
@@ -170,7 +177,10 @@ class TransactionActionsController {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: AppColors.primary,
+                  ),
                   title: const Text('Chat BUMDes'),
                   onTap: () {
                     context.pop();
@@ -186,7 +196,10 @@ class TransactionActionsController {
   }
 
   /// Handle "Beli Lagi" action
-  static Future<void> buyAgain(BuildContext context, Map<String, dynamic> order) async {
+  static Future<void> buyAgain(
+    BuildContext context,
+    Map<String, dynamic> order,
+  ) async {
     // Extract products from order_items
     final orderItems = order['order_items'] as List<dynamic>? ?? [];
 
@@ -241,7 +254,8 @@ class TransactionActionsController {
           break;
         }
 
-        final dbStockKg = double.tryParse(freshProduct['stock_kg']?.toString() ?? '0') ?? 0;
+        final dbStockKg =
+            double.tryParse(freshProduct['stock_kg']?.toString() ?? '0') ?? 0;
 
         if (dbStockKg <= 0) {
           stockValid = false;
@@ -251,7 +265,8 @@ class TransactionActionsController {
 
         if (qty > dbStockKg) {
           stockValid = false;
-          errorMsg = 'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
+          errorMsg =
+              'Stok "${item['product']['name']}" tidak mencukupi. Tersedia: ${dbStockKg.toInt()} kg, Dibutuhkan: ${qty.toInt()} kg';
           break;
         }
       } catch (e) {
@@ -275,7 +290,10 @@ class TransactionActionsController {
     final cleared = await CartService.clearCart();
     if (!cleared) {
       if (!context.mounted) return;
-      SnackBarHelper.showError(context, 'Gagal menyiapkan keranjang. Coba lagi.');
+      SnackBarHelper.showError(
+        context,
+        'Gagal menyiapkan keranjang. Coba lagi.',
+      );
       return;
     }
 
@@ -283,11 +301,17 @@ class TransactionActionsController {
       final productId = (item['id'] as int?) ?? 0;
       final qty = double.tryParse(item['quantity_kg'].toString()) ?? 0;
 
-      final ok = await CartService.addToCart(productId: productId, quantityKg: qty);
+      final ok = await CartService.addToCart(
+        productId: productId,
+        quantityKg: qty,
+      );
 
       if (!ok) {
         if (!context.mounted) return;
-        SnackBarHelper.showError(context, 'Gagal menambahkan produk ke keranjang.');
+        SnackBarHelper.showError(
+          context,
+          'Gagal menambahkan produk ke keranjang.',
+        );
         return;
       }
     }
@@ -295,10 +319,7 @@ class TransactionActionsController {
     if (!context.mounted) return;
     context.push(
       RoutePaths.checkout,
-      extra: {
-        'cart': cartItems,
-        'total': totalPayment,
-      },
+      extra: {'cart': cartItems, 'total': totalPayment},
     );
   }
 

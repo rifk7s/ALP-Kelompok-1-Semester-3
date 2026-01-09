@@ -119,9 +119,7 @@ class _CartContent extends StatelessWidget {
                   final item = state.cartItems[i];
                   final product = item['product'];
                   final stockKg =
-                      double.tryParse(
-                        product['stock_kg']?.toString() ?? '0',
-                      ) ??
+                      double.tryParse(product['stock_kg']?.toString() ?? '0') ??
                       0;
                   final isSelected = state.selectedItems[item['id']] ?? false;
                   final isUpdating = state.updatingItems.contains(item['id']);
@@ -165,10 +163,7 @@ class _CartContent extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "Rekomendasi Produk",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -269,9 +264,7 @@ class _CartBottomSheet extends StatelessWidget {
       ),
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

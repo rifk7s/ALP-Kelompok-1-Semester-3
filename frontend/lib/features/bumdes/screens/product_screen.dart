@@ -284,7 +284,7 @@ class _ProductPageState extends State<ProductPage> {
           RoutePaths.productDetail.replaceAll(':id', '${product['id']}'),
           extra: {
             ...product,
-            'isBumdes': true,  // Flag untuk BUMDes product detail
+            'isBumdes': true, // Flag untuk BUMDes product detail
           },
         );
 

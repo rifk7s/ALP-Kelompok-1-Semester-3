@@ -10,41 +10,33 @@ class FadeTransitionPage<T> extends CustomTransitionPage<T> {
     super.transitionDuration = const Duration(milliseconds: 500),
     super.reverseTransitionDuration = const Duration(milliseconds: 400),
   }) : super(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final fadeAnimation = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            );
+         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+           final fadeAnimation = CurvedAnimation(
+             parent: animation,
+             curve: Curves.easeInOut,
+           );
 
-            final scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              ),
-            );
-            
-            final slideAnimation = Tween<Offset>(
-              begin: const Offset(0.0, 0.02),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              ),
-            );
+           final scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+             CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+           );
 
-            return FadeTransition(
-              opacity: fadeAnimation,
-              child: ScaleTransition(
-                scale: scaleAnimation,
-                child: SlideTransition(
-                  position: slideAnimation,
-                  child: child,
-                ),
-              ),
-            );
-          },
-        );
+           final slideAnimation =
+               Tween<Offset>(
+                 begin: const Offset(0.0, 0.02),
+                 end: Offset.zero,
+               ).animate(
+                 CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+               );
+
+           return FadeTransition(
+             opacity: fadeAnimation,
+             child: ScaleTransition(
+               scale: scaleAnimation,
+               child: SlideTransition(position: slideAnimation, child: child),
+             ),
+           );
+         },
+       );
 }
 
 /// Custom page route with smooth staggered animation
@@ -106,21 +98,16 @@ class DramaticPageRoute<T> extends PageRouteBuilder<T> {
         reverseTransitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           // Slide from right
-          final slideAnimation = Tween<Offset>(
-            begin: const Offset(1.0, 0.0),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
-          );
+          final slideAnimation =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
 
           // Fade in
-          final fadeAnimation = Tween<double>(
-            begin: 0.0,
-            end: 1.0,
-          ).animate(
+          final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
             CurvedAnimation(
               parent: animation,
               curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
@@ -128,10 +115,7 @@ class DramaticPageRoute<T> extends PageRouteBuilder<T> {
           );
 
           // Scale from slightly larger
-          final scaleAnimation = Tween<double>(
-            begin: 1.05,
-            end: 1.0,
-          ).animate(
+          final scaleAnimation = Tween<double>(begin: 1.05, end: 1.0).animate(
             CurvedAnimation(
               parent: animation,
               curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
@@ -142,10 +126,7 @@ class DramaticPageRoute<T> extends PageRouteBuilder<T> {
             position: slideAnimation,
             child: FadeTransition(
               opacity: fadeAnimation,
-              child: ScaleTransition(
-                scale: scaleAnimation,
-                child: child,
-              ),
+              child: ScaleTransition(scale: scaleAnimation, child: child),
             ),
           );
         },

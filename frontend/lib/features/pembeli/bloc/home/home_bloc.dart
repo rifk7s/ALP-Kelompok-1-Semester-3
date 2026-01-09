@@ -188,9 +188,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Refresh all data in parallel
       final results = await Future.wait([
         CategoryService.getCategories(),
-        ProductService.getProducts(
-          categoryId: currentState.selectedCategoryId,
-        ),
+        ProductService.getProducts(categoryId: currentState.selectedCategoryId),
       ]);
 
       final categories = results[0];
@@ -203,19 +201,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         return 0;
       });
 
-      emit(HomeLoaded(
-        categories: categories,
-        products: products,
-        selectedCategoryId: currentState.selectedCategoryId,
-        cartItemCount: currentState.cartItemCount,
-        unreadNotificationCount: currentState.unreadNotificationCount,
-      ));
+      emit(
+        HomeLoaded(
+          categories: categories,
+          products: products,
+          selectedCategoryId: currentState.selectedCategoryId,
+          cartItemCount: currentState.cartItemCount,
+          unreadNotificationCount: currentState.unreadNotificationCount,
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error refreshing home data: $e');
       }
       // Emit error state so UI shows retry button
-      emit(const HomeError(message: 'Gagal memuat data. Periksa koneksi internet Anda.'));
+      emit(
+        const HomeError(
+          message: 'Gagal memuat data. Periksa koneksi internet Anda.',
+        ),
+      );
     }
   }
 }

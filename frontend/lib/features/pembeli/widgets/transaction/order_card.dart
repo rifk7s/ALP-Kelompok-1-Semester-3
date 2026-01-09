@@ -27,9 +27,10 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = order['status'] as String;
-    
+
     // Parse products
-    final orderItems = order['order_items'] as List? ?? order['products'] as List? ?? [];
+    final orderItems =
+        order['order_items'] as List? ?? order['products'] as List? ?? [];
     final products = parseOrderItems(orderItems);
 
     if (products.isEmpty) {
@@ -55,10 +56,7 @@ class OrderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          OrderCardHeader(
-            status: status,
-            orderNumber: orderId,
-          ),
+          OrderCardHeader(status: status, orderNumber: orderId),
 
           // Seller info
           Padding(
@@ -116,10 +114,7 @@ class OrderCard extends StatelessWidget {
     final status = order['status'] as String;
 
     if (status == 'pending' || status == 'pending_payment') {
-      return PendingOrderActions(
-        order: order,
-        onCancel: onCancel,
-      );
+      return PendingOrderActions(order: order, onCancel: onCancel);
     }
 
     if (status == 'processing' || status == 'paid' || status == 'shipped') {

@@ -85,7 +85,9 @@ class _LoginFormState extends State<LoginForm> {
           phone: _phoneController.text,
           password: _passwordController.text,
         ),
-        Future.delayed(const Duration(milliseconds: 800)), // Minimum 800ms loading
+        Future.delayed(
+          const Duration(milliseconds: 800),
+        ), // Minimum 800ms loading
       ]).then((value) => value[0]);
 
       if (!mounted) return;
@@ -204,8 +206,8 @@ class _LoginFormState extends State<LoginForm> {
                 color: _isSuccess
                     ? AppColors.success
                     : _isLoading
-                        ? AppColors.grey400
-                        : AppColors.primary,
+                    ? AppColors.grey400
+                    : AppColors.primary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Theme(
@@ -213,24 +215,25 @@ class _LoginFormState extends State<LoginForm> {
                   context,
                 ).copyWith(splashFactory: NoSplash.splashFactory),
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    minimumSize: const Size(double.infinity, 48),
-                  ).copyWith(
-                    overlayColor: WidgetStateProperty.all(
-                      AppColors.transparent,
-                    ),
-                  ),
+                  style:
+                      ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        minimumSize: const Size(double.infinity, 48),
+                      ).copyWith(
+                        overlayColor: WidgetStateProperty.all(
+                          AppColors.transparent,
+                        ),
+                      ),
                   onPressed: _isLoading || _isSuccess ? null : _handleLogin,
                   child: _isSuccess
                       ? _buildSuccessIcon()
                       : _isLoading
-                          ? const AppSmallLoadingIndicator(
-                              color: AppColors.white,
-                              size: 20.0,
-                            )
-                          : const Text('Masuk'),
+                      ? const AppSmallLoadingIndicator(
+                          color: AppColors.white,
+                          size: 20.0,
+                        )
+                      : const Text('Masuk'),
                 ),
               ),
             ),

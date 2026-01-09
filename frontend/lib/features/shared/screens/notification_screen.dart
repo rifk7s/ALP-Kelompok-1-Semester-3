@@ -163,7 +163,10 @@ class _NotificationPageState extends State<NotificationPage> {
             }
 
             if (mounted) {
-              context.push(RoutePaths.transactionHistory, extra: {'initialTab': initialTab});
+              context.push(
+                RoutePaths.transactionHistory,
+                extra: {'initialTab': initialTab},
+              );
             }
           } catch (e) {
             if (kDebugMode) {

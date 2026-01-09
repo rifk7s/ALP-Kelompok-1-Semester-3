@@ -103,7 +103,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
           onRetry: _loadOrders,
           child: TabBarView(
             controller: _tabController,
-            children: _statusFlow.map((status) => _buildOrderList(status)).toList(),
+            children: _statusFlow
+                .map((status) => _buildOrderList(status))
+                .toList(),
           ),
         );
       },
@@ -215,9 +217,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
         const SnackBar(content: Text('Status berhasil diperbarui')),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memperbarui status')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal memperbarui status')));
     }
   }
 
