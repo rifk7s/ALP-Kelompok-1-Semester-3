@@ -6,7 +6,7 @@ import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/services/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/product/bloc/product_bloc.dart';
 import 'package:frontend/features/product/bloc/product_state.dart';

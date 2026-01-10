@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'api_config.dart';
-import 'storage_service.dart';
+import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 
 class OrderService {
   static Future<Map<String, dynamic>?> createOrder({

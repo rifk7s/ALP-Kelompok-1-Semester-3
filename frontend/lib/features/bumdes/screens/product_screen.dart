@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/product_service.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';

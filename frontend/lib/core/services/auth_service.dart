@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'api_config.dart';
-import 'storage_service.dart';
+import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'chat_service.dart';
 
 const Duration _timeout = Duration(seconds: 30);

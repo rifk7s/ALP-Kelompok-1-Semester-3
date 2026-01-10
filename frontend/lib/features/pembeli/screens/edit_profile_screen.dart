@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class EditProfilePage extends StatefulWidget {

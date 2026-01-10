@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/services/auth_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/auth/bloc/auth_bloc.dart';
 

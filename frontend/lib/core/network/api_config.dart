@@ -9,16 +9,16 @@ class ApiConfig {
   // URLs for API endpoints
   static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
 
-  // iOS IPs - Priority order: tries cafe first (current location), then home
+  // iOS IPs - Priority order: tries home first, then cafe as fallback
   static const String _homeIP =
-      '192.168.18.182'; // Home IP (primary, keep this)
-  static const String _cafeIP = '192.168.1.24'; // Cafe IP (current)
+      '192.168.18.242'; // Home IP (primary)
+  static const String _cafeIP = '192.168.1.24'; // Cafe IP (fallback)
 
-  // List of IPs to try in priority order
-  static const List<String> _ipPriority = [_cafeIP, _homeIP];
+  // List of IPs to try in priority order (home first!)
+  static const List<String> _ipPriority = [_homeIP, _cafeIP];
 
-  // Connection timeout for faster IP mismatch detection (in seconds)
-  static const int connectionTimeout = 5;
+  // Connection timeout - very short for fast failure detection
+  static const int connectionTimeout = 2;
   static const int receiveTimeout = 10;
 
   // Current active IP (defaults to first in priority list)

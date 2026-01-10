@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 
 class HppPriceService {
   // Fetch all HPP prices

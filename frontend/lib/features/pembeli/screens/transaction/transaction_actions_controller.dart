@@ -8,7 +8,7 @@ import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/services/bumdes_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/product_service.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/utils/date_formatter.dart';

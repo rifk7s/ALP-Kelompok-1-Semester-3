@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/services/product_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
 

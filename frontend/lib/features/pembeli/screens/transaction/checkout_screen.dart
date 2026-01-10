@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/services/order_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 

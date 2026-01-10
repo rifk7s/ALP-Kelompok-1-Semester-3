@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 
 class CartItemCard extends StatelessWidget {
   final Map<String, dynamic> item;

@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'storage_service.dart';
-import 'api_config.dart';
+import 'package:frontend/core/storage/storage_service.dart';
+import 'package:frontend/core/network/api_config.dart';
 
 class ChatService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;

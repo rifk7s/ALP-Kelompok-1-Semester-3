@@ -3,7 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/utils/order_status_helper.dart';
-import 'package:frontend/core/services/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 
 /// Widget for displaying product image with fallback

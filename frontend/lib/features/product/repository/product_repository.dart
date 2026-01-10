@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:frontend/core/services/product_service.dart';
-import 'package:frontend/core/services/storage_service.dart';
+import 'package:frontend/core/storage/storage_service.dart';
 
 class ProductRepository {
   Future<void> createProduct({

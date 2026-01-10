@@ -54,25 +54,31 @@ class ApiClient {
   Future<http.Response> _executeWithFallback(
     Future<http.Response> Function() request,
   ) async {
-    try {
-      return await request();
-    } on TimeoutException {
-      throw _createConnectionError('Connection timeout');
-    } on SocketException catch (e) {
-      throw _createConnectionError('Cannot connect: ${e.message}');
+    // Try all available IPs
+    for (var i = 0; i < ApiConfig.availableIPs.length; i++) {
+      try {
+        return await request();
+      } on TimeoutException {
+        if (!ApiConfig.tryNextIP()) {
+          throw _createConnectionError('Connection failed');
+        }
+      } on SocketException {
+        if (!ApiConfig.tryNextIP()) {
+          throw _createConnectionError('Connection failed');
+        }
+      }
     }
+    throw _createConnectionError('Connection failed');
   }
 
   ApiException _createConnectionError(String baseMessage) {
-    final currentIP = ApiConfig.currentIP;
     final allIPs = ApiConfig.availableIPs.join(', ');
 
     return ApiException(
       baseMessage,
       hint:
-          'Current IP: $currentIP\n'
-          'Available IPs: $allIPs\n'
-          'Make sure backend is running and your IP matches.',
+          'Tried IPs: $allIPs\n'
+          'Make sure backend is running on one of these IPs.',
       isConnectionError: true,
     );
   }
