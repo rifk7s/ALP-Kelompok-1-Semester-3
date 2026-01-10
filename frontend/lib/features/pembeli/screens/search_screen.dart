@@ -5,7 +5,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_spacing.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/network/api_config.dart';
-import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
 import 'package:frontend/core/router/route_constants.dart';
 

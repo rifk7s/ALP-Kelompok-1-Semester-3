@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
-import 'package:frontend/core/services/category_service.dart';
-import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/features/product/service/category_service.dart';
+import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/services/cart_service.dart';
 import 'package:frontend/core/services/notification_service.dart';
 

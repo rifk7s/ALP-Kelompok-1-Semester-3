@@ -5,7 +5,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
-import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/services/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/services/admin_service.dart';

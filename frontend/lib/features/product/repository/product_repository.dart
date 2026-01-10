@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class ProductRepository {

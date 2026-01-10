@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_state.dart';
 import 'package:frontend/core/services/cart_service.dart';
-import 'package:frontend/core/services/product_service.dart';
+import 'package:frontend/features/product/service/product_service.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   int _lastQtyChangeClick = 0;
