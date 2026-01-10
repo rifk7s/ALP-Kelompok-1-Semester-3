@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/features/bumdes/service/admin_service.dart';
 
 /// Transaction Bumdes state
 class TransactionBumdesState {

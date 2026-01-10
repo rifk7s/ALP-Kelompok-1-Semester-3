@@ -3,11 +3,11 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/bumdes/screens/homepage_bumdes_screen.dart';
-import 'package:frontend/features/bumdes/screens/product_screen.dart';
-import 'package:frontend/features/bumdes/screens/transaction_bumdes_screen.dart';
-import 'package:frontend/features/bumdes/screens/contact_bumdes_screen.dart';
-import 'package:frontend/features/bumdes/screens/profil_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/homepage_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/product_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/transaction_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/contact_bumdes_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/profil_bumdes_screen.dart';
 
 class StartPageBumdes extends StatefulWidget {
   final int initialTab;

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/product/service/category_service.dart';
 import 'package:frontend/core/services/hpp_price_service.dart';
-import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,11 +12,11 @@ import 'package:frontend/features/product/bloc/product_state.dart';
 import 'package:frontend/features/product/bloc/product_event.dart';
 import 'package:frontend/features/product/repository/product_repository.dart';
 import 'package:frontend/features/product/cubit/product_editing_cubit.dart';
-import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/common_widgets.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
-import 'package:frontend/features/bumdes/widgets/form_field_widgets.dart';
-import 'package:frontend/features/bumdes/widgets/petani_contributor_widgets.dart';
-import 'package:frontend/features/bumdes/widgets/image_picker_widget.dart';
+import 'package:frontend/features/bumdes/view/widgets/form_field_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/petani_contributor_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/image_picker_widget.dart';
 
 /// Refactored Edit Product Screen
 /// Uses shared widgets instead of duplicating code

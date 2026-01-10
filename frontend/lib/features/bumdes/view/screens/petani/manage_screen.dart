@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/router/route_constants.dart';

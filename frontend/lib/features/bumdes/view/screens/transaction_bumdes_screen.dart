@@ -3,8 +3,8 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/bumdes/bloc/transaction_bumdes_bloc.dart';
 import 'package:frontend/features/bumdes/utils/transaction_bumdes_helper.dart';
-import 'package:frontend/features/bumdes/widgets/transaction_bumdes_widgets.dart';
-import 'package:frontend/features/bumdes/widgets/transaction_bumdes_actions.dart';
+import 'package:frontend/features/bumdes/view/widgets/transaction_bumdes_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/transaction_bumdes_actions.dart';
 
 class BumdesTransactionPage extends StatefulWidget {
   final int? initialTab;

@@ -25,7 +25,7 @@ import 'package:frontend/features/shared/screens/about_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
-import 'package:frontend/features/bumdes/screens/product_detail_screen.dart'
+import 'package:frontend/features/bumdes/view/screens/product_detail_screen.dart'
     as bumdes;
 import 'package:frontend/core/router/routes/bumdes_routes.dart';
 import 'package:frontend/core/utils/page_transitions.dart';

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/core/services/bumdes_service.dart';
+import 'package:frontend/features/bumdes/service/bumdes_service.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';

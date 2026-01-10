@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
-import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/common_widgets.dart';
 
 /// Widget for managing petani contributors list
 /// Displays contributors in FIFO order with edit/delete actions

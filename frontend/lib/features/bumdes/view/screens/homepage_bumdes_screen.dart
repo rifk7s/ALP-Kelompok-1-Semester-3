@@ -6,9 +6,9 @@ import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/product/service/product_service.dart';
-import 'package:frontend/core/services/petani_service.dart';
+import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/services/admin_service.dart';
+import 'package:frontend/features/bumdes/service/admin_service.dart';
 import 'package:frontend/core/services/notification_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
 

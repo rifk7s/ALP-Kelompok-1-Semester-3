@@ -1,11 +1,11 @@
 import 'package:go_router/go_router.dart';
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
-import 'package:frontend/features/bumdes/screens/upload_screen.dart';
-import 'package:frontend/features/bumdes/screens/edit_product_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/add_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/detail_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/edit_screen.dart';
-import 'package:frontend/features/bumdes/screens/petani/manage_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/start_page_bumdes.dart';
+import 'package:frontend/features/bumdes/view/screens/upload_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/edit_product_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/petani/add_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/petani/detail_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/petani/edit_screen.dart';
+import 'package:frontend/features/bumdes/view/screens/petani/manage_screen.dart';
 import 'package:frontend/core/router/route_constants.dart';
 
 /// Bumdes feature routes - NO ShellRoute, using direct GoRoute
