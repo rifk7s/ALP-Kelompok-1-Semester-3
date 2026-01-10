@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 
 /// Guards for protected routes
 class RouteGuards {

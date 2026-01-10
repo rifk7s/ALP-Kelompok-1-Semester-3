@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:frontend/splash_screen.dart';
-import 'package:frontend/features/auth/screens/auth_screen.dart';
+import 'package:frontend/features/auth/view/screens/auth_screen.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/page_transitions.dart';

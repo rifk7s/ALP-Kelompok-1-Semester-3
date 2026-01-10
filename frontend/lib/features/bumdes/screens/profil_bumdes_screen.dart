@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/features/auth/service/auth_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 
 class ProfileBumdesPage extends StatefulWidget {
   const ProfileBumdesPage({super.key});

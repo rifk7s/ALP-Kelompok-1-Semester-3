@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/page_transitions.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'package:frontend/core/services/auth_service.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/service/auth_service.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/screens/start_page.dart';
 

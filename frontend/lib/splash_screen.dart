@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/auth_service.dart';
+import 'package:frontend/features/auth/service/auth_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 // navigation handled by router (go_router) using named routes
 import 'package:go_router/go_router.dart';
 

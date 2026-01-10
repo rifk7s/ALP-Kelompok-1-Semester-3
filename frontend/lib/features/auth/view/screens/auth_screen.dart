@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/features/auth/widgets/login_form.dart';
-import 'package:frontend/features/auth/widgets/register_form.dart';
+import 'package:frontend/features/auth/view/widgets/login_form.dart';
+import 'package:frontend/features/auth/view/widgets/register_form.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool initialIsLogin;

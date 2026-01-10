@@ -6,7 +6,7 @@ import 'package:frontend/core/router/guards/auth_guard.dart';
 import 'package:frontend/core/router/routes/auth_routes.dart';
 import 'package:frontend/core/router/routes/pembeli_routes.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/screens/search_screen.dart';
 import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';

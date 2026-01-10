@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/router.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
