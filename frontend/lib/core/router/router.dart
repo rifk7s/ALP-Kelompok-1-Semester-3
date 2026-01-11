@@ -7,24 +7,25 @@ import 'package:frontend/core/router/routes/auth_routes.dart';
 import 'package:frontend/core/router/routes/pembeli_routes.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/bloc/auth_bloc.dart';
-import 'package:frontend/features/pembeli/screens/product_detail_screen.dart';
-import 'package:frontend/features/pembeli/screens/search_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/cart_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/checkout_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/waiting_payment_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/payment_confirmed_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/payment_rejected_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/receipt_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/product_detail_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/search_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/cart_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/transaction_history_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/checkout_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/waiting_payment_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/payment_confirmed_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/payment_rejected_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/receipt_screen.dart';
 import 'package:frontend/features/shared/screens/notification_screen.dart';
-import 'package:frontend/features/pembeli/screens/profile_screen.dart';
-import 'package:frontend/features/pembeli/screens/edit_profile_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/profile_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/edit_profile_screen.dart';
+import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/features/shared/screens/setting_screen.dart';
 import 'package:frontend/features/shared/screens/help_screen.dart';
 import 'package:frontend/features/shared/screens/about_screen.dart';
 import 'package:frontend/features/shared/screens/hpp_screen.dart';
 import 'package:frontend/features/shared/screens/chat_detail_page.dart';
-import 'package:frontend/features/pembeli/screens/transaction/order_track_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/bumdes/view/screens/product_detail_screen.dart'
     as bumdes;
 import 'package:frontend/core/router/routes/bumdes_routes.dart';
@@ -156,7 +157,12 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
     GoRoute(
       path: RoutePaths.editProfile,
       name: RouteNames.editProfile,
-      builder: (context, state) => const EditProfilePage(),
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        return EditProfilePage(
+          initialProfile: extra?['initialProfile'] as Profile?,
+        );
+      },
     ),
     GoRoute(
       path: RoutePaths.settings,

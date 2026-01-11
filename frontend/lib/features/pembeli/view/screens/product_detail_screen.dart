@@ -7,8 +7,8 @@ import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
-import 'package:frontend/features/pembeli/widgets/stock_badge.dart';
-import 'package:frontend/features/pembeli/widgets/product_detail_widgets.dart';
+import 'package:frontend/features/pembeli/view/widgets/stock_badge.dart';
+import 'package:frontend/features/pembeli/view/widgets/product_detail_widgets.dart';
 
 /// Refactored Product Detail Screen using BLoC pattern
 /// Reduced from ~1038 lines to ~717 lines → Now ~150 lines after widget extraction

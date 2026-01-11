@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/core/utils/order_status_helper.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 

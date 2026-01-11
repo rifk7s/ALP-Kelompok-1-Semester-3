@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/hpp_price_service.dart';
+import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:intl/intl.dart';

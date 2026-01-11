@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
-import 'package:frontend/features/pembeli/screens/home_screen.dart';
-import 'package:frontend/features/pembeli/screens/profile_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/home_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/profile_screen.dart';
 import 'package:frontend/features/shared/screens/contact_screen.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_history_screen.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/transaction_history_screen.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
 

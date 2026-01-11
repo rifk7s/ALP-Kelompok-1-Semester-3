@@ -8,7 +8,7 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/services/profile_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/services/order_service.dart';
+import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 
 class CheckoutPage extends StatefulWidget {

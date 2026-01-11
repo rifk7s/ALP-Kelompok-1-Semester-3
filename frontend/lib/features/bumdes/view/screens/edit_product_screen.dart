@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/product/service/category_service.dart';
-import 'package:frontend/core/services/hpp_price_service.dart';
+import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';

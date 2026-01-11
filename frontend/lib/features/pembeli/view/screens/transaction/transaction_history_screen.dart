@@ -4,8 +4,8 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/transaction/transaction_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/transaction/transaction_provider.dart';
-import 'package:frontend/features/pembeli/widgets/transaction/order_card.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_actions_controller.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/order_card.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/transaction_actions_controller.dart';
 
 /// Refactored Transaction History Screen
 /// Uses Bloc for state management and separated widgets for UI

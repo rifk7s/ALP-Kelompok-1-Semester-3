@@ -9,8 +9,8 @@ import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_state.dart';
-import 'package:frontend/features/pembeli/widgets/product_card.dart';
-import 'package:frontend/features/pembeli/widgets/cart_item_card.dart';
+import 'package:frontend/features/pembeli/view/widgets/product_card.dart';
+import 'package:frontend/features/pembeli/view/widgets/cart_item_card.dart';
 
 /// Refactored Cart Screen using BLoC pattern
 /// Reduced from ~983 lines to ~220 lines

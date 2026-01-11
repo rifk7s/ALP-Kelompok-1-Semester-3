@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
-import 'package:frontend/features/pembeli/widgets/transaction/transaction_card_widgets.dart';
-import 'package:frontend/features/pembeli/widgets/transaction/order_products_widget.dart';
-import 'package:frontend/features/pembeli/widgets/transaction/transaction_action_buttons.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/transaction_card_widgets.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/order_products_widget.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/transaction_action_buttons.dart';
 
 /// Main order card widget
 class OrderCard extends StatelessWidget {

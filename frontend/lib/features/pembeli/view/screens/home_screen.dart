@@ -8,7 +8,7 @@ import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
-import 'package:frontend/features/pembeli/widgets/product_card.dart';
+import 'package:frontend/features/pembeli/view/widgets/product_card.dart';
 
 /// Refactored Home Screen using BLoC pattern
 /// Reduced from ~668 lines to ~250 lines

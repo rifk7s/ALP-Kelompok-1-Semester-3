@@ -4,7 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/features/product/service/category_service.dart';
-import 'package:frontend/core/services/hpp_price_service.dart';
+import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

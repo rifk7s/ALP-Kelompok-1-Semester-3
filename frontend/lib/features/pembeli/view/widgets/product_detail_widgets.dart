@@ -10,7 +10,7 @@ import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
-import 'package:frontend/features/pembeli/widgets/quantity_selector.dart';
+import 'package:frontend/features/pembeli/view/widgets/quantity_selector.dart';
 
 /// Widget components for Product Detail Screen
 /// Extracted from product_detail_screen.dart to reduce file size

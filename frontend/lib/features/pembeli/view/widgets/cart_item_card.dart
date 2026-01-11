@@ -143,12 +143,14 @@ class CartItemCard extends StatelessWidget {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          _QuantitySelector(
-                            qty: qty,
-                            isUpdating: isUpdating,
-                            isOutOfStock: isOutOfStock,
-                            stockKg: stockKg,
-                            onChanged: onQuantityChanged,
+                          Expanded(
+                            child: _QuantitySelector(
+                              qty: qty,
+                              isUpdating: isUpdating,
+                              isOutOfStock: isOutOfStock,
+                              stockKg: stockKg,
+                              onChanged: onQuantityChanged,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           IconButton(
@@ -208,38 +210,40 @@ class _QuantitySelector extends StatelessWidget {
             icon: const Icon(Icons.remove, size: 18),
             padding: const EdgeInsets.all(4),
           ),
-          InkWell(
-            onTap: (isUpdating || isOutOfStock)
-                ? null
-                : () => _showQtyInputDialog(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
+          Flexible(
+            child: InkWell(
+              onTap: (isUpdating || isOutOfStock)
+                  ? null
+                  : () => _showQtyInputDialog(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    qty.toStringAsFixed(0),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      qty.toStringAsFixed(0),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.edit,
-                    size: 14,
-                    color: (isUpdating || isOutOfStock)
-                        ? AppColors.grey
-                        : AppColors.primary,
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.edit,
+                      size: 14,
+                      color: (isUpdating || isOutOfStock)
+                          ? AppColors.grey
+                          : AppColors.primary,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

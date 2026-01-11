@@ -6,7 +6,7 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/core/services/chat_service.dart';
 import 'package:frontend/features/bumdes/service/bumdes_service.dart';
-import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/features/pembeli/service/cart_service.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';

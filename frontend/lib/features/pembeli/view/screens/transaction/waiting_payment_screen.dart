@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/services/order_service.dart';
-import 'package:frontend/core/services/cart_service.dart';
+import 'package:frontend/features/pembeli/service/order_service.dart';
+import 'package:frontend/features/pembeli/service/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 

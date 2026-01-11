@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
-import 'package:frontend/features/pembeli/screens/transaction/transaction_actions_controller.dart';
+import 'package:frontend/features/pembeli/view/screens/transaction/transaction_actions_controller.dart';
 
 /// Action buttons for pending orders
 class PendingOrderActions extends StatelessWidget {

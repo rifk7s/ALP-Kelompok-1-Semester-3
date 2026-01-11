@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
-import 'package:frontend/features/pembeli/widgets/transaction/transaction_card_widgets.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/transaction_card_widgets.dart';
 
 /// Widget for displaying order products list
 class OrderProductsWidget extends StatelessWidget {
