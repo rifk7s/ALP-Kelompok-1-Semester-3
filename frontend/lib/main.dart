@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/router.dart';
 import 'package:frontend/core/router/route_constants.dart';
@@ -22,6 +23,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   Intl.defaultLocale = 'id_ID';
   await initializeDateFormatting('id_ID', null);
+
+  // Setup dependency injection
+  setupLocator();
+
   runApp(const MyApp());
 }
 
@@ -33,19 +38,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late final AuthBloc _authBloc;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
-    _authBloc = AuthBloc()..add(AuthStarted());
-    _router = createRouter(_authBloc);
+    // Initialize AuthBloc on app start
+    sl<AuthBloc>().add(AuthStarted());
+    // Create router with AuthBloc for reactive auth changes
+    _router = createRouter(sl<AuthBloc>());
   }
 
   @override
   void dispose() {
-    _authBloc.close();
     _router.dispose();
     super.dispose();
   }
@@ -54,11 +59,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: _authBloc),
-        BlocProvider(create: (context) => CartBloc()),
-        BlocProvider(create: (context) => ProductDetailBloc()),
-        BlocProvider(create: (context) => HomeBloc()),
-        // Add other BLoCs here as needed
+        BlocProvider.value(value: sl<AuthBloc>()),
+        BlocProvider.value(value: sl<CartBloc>()),
+        BlocProvider.value(value: sl<HomeBloc>()),
+        BlocProvider.value(value: sl<ProductDetailBloc>()),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (previous, current) =>

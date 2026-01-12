@@ -2,13 +2,20 @@ import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_state.dart';
-import 'package:frontend/features/pembeli/service/cart_service.dart';
-import 'package:frontend/features/product/service/product_service.dart';
+import 'package:frontend/features/pembeli/repository/cart_repository.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
+  final CartRepository _cartRepository;
+  final ProductRepository _productRepository;
   int _lastQtyChangeClick = 0;
 
-  CartBloc() : super(CartInitial()) {
+  CartBloc({
+    required CartRepository cartRepository,
+    required ProductRepository productRepository,
+  })  : _cartRepository = cartRepository,
+        _productRepository = productRepository,
+        super(CartInitial()) {
     on<CartLoadRequested>(_onLoadRequested);
     on<CartItemQuantityChanged>(_onQuantityChanged);
     on<CartItemRemoved>(_onItemRemoved);
@@ -32,7 +39,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
 
     try {
-      final cart = await CartService.getCart();
+      final cart = await _cartRepository.getCart();
       if (kDebugMode) {
         debugPrint('Cart response: $cart');
       }
@@ -123,9 +130,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
     try {
       if (event.newQty <= 0) {
-        await CartService.removeFromCart(item['id']);
+        await _cartRepository.removeFromCart(item['id']);
       } else {
-        final success = await CartService.updateCartItem(
+        final success = await _cartRepository.updateCartItem(
           cartId: item['id'],
           quantityKg: event.newQty,
         );
@@ -153,7 +160,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     try {
-      final success = await CartService.removeFromCart(event.cartId);
+      final success = await _cartRepository.removeFromCart(event.cartId);
       if (!success) {
         emit(CartError('Gagal menghapus item'));
         return;
@@ -214,7 +221,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     try {
-      final products = await ProductService.getProducts();
+      final products = await _productRepository.getProducts();
       final productsWithStock = products
           .where((p) {
             final stockKg =
@@ -268,7 +275,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final cartQty = double.parse(item['quantity_kg'].toString());
 
       try {
-        final freshProduct = await ProductService.getProductById(productId);
+        final freshProduct = await _productRepository.getProductById(productId);
 
         if (freshProduct == null) {
           stockValid = false;

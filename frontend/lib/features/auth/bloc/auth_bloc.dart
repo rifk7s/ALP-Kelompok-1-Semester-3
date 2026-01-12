@@ -1,12 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/core/storage/storage_service.dart';
+import 'package:frontend/features/auth/repository/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(const AuthState()) {
+  final AuthRepository _repository;
+
+  AuthBloc({required AuthRepository repository})
+      : _repository = repository,
+        super(const AuthState()) {
     on<AuthStarted>(_onAuthStarted);
     on<AuthLoggedIn>(_onLoggedIn);
     on<AuthLoggedOut>(_onLoggedOut);
@@ -17,9 +21,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthStarted event,
     Emitter<AuthState> emit,
   ) async {
-    final isLoggedIn = await StorageService.isLoggedIn();
+    final isLoggedIn = await _repository.isLoggedIn();
     if (isLoggedIn) {
-      final user = await StorageService.getUser();
+      final user = await _repository.getStoredUser();
       final role = user?['role'] as String?;
       emit(AuthState(status: AuthStatus.authenticated, user: user, role: role));
     } else {
@@ -38,7 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoggedOut event,
     Emitter<AuthState> emit,
   ) async {
-    await StorageService.clearAll();
+    await _repository.clearStorage();
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 

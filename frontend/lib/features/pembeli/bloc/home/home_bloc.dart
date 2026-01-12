@@ -2,13 +2,27 @@ import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
-import 'package:frontend/features/product/service/category_service.dart';
-import 'package:frontend/features/product/service/product_service.dart';
-import 'package:frontend/features/pembeli/service/cart_service.dart';
-import 'package:frontend/features/shared/service/notification_service.dart';
+import 'package:frontend/features/product/repository/category_repository.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
+import 'package:frontend/features/pembeli/repository/cart_repository.dart';
+import 'package:frontend/features/shared/repository/notification_repository.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(HomeInitial()) {
+  final CategoryRepository _categoryRepository;
+  final ProductRepository _productRepository;
+  final CartRepository _cartRepository;
+  final NotificationRepository _notificationRepository;
+
+  HomeBloc({
+    required CategoryRepository categoryRepository,
+    required ProductRepository productRepository,
+    required CartRepository cartRepository,
+    required NotificationRepository notificationRepository,
+  })  : _categoryRepository = categoryRepository,
+        _productRepository = productRepository,
+        _cartRepository = cartRepository,
+        _notificationRepository = notificationRepository,
+        super(HomeInitial()) {
     on<HomeCategoriesLoadRequested>(_onCategoriesLoadRequested);
     on<HomeProductsLoadRequested>(_onProductsLoadRequested);
     on<HomeCategorySelected>(_onCategorySelected);
@@ -35,7 +49,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     try {
-      final data = await CategoryService.getCategories();
+      final data = await _categoryRepository.getCategories();
 
       // Re-check the state after the async operation
       // This handles the race condition where products might have loaded first
@@ -75,7 +89,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     try {
-      final data = await ProductService.getProducts(
+      final data = await _productRepository.getProducts(
         categoryId: event.categoryId,
       );
 
@@ -140,7 +154,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (currentState is! HomeLoaded) return;
 
     try {
-      final cartData = await CartService.getCart();
+      final cartData = await _cartRepository.getCart();
       if (cartData != null) {
         final items = cartData['items'] as List<dynamic>? ?? [];
         emit(currentState.copyWith(cartItemCount: items.length));
@@ -160,7 +174,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (currentState is! HomeLoaded) return;
 
     try {
-      final count = await NotificationService.getUnreadCount();
+      final count = await _notificationRepository.getUnreadCount();
       emit(currentState.copyWith(unreadNotificationCount: count));
     } catch (e) {
       if (kDebugMode) {
@@ -187,8 +201,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       // Refresh all data in parallel
       final results = await Future.wait([
-        CategoryService.getCategories(),
-        ProductService.getProducts(categoryId: currentState.selectedCategoryId),
+        _categoryRepository.getCategories(),
+        _productRepository.getProducts(categoryId: currentState.selectedCategoryId),
       ]);
 
       final categories = results[0];

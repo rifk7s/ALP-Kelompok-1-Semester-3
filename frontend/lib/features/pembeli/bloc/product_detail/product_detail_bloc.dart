@@ -2,11 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
-import 'package:frontend/features/product/service/product_service.dart';
-import 'package:frontend/features/pembeli/service/cart_service.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
+import 'package:frontend/features/pembeli/repository/cart_repository.dart';
 
 class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
-  ProductDetailBloc() : super(ProductDetailInitial()) {
+  final ProductRepository _productRepository;
+  final CartRepository _cartRepository;
+
+  ProductDetailBloc({
+    required ProductRepository productRepository,
+    required CartRepository cartRepository,
+  })  : _productRepository = productRepository,
+        _cartRepository = cartRepository,
+        super(ProductDetailInitial()) {
     on<ProductDetailLoadRequested>(_onLoadRequested);
     on<ProductDetailCartCountRequested>(_onCartCountRequested);
     on<ProductDetailQuantityChanged>(_onQuantityChanged);
@@ -21,7 +29,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     emit(ProductDetailLoading());
 
     try {
-      final product = await ProductService.getProductById(event.productId);
+      final product = await _productRepository.getProductById(event.productId);
 
       if (product != null) {
         emit(ProductDetailLoaded(product: product));
@@ -48,7 +56,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     if (currentState is! ProductDetailLoaded) return;
 
     try {
-      final cart = await CartService.getCart();
+      final cart = await _cartRepository.getCart();
       final cartItemCount = cart?['item_count'] ?? 0;
 
       // Get quantity of this product in cart
@@ -105,7 +113,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
 
     try {
       // Fetch fresh stock from database
-      final freshProduct = await ProductService.getProductById(event.productId);
+      final freshProduct = await _productRepository.getProductById(event.productId);
 
       if (freshProduct == null) {
         emit(const ProductDetailError('Produk tidak ditemukan'));
@@ -139,14 +147,14 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       }
 
       // Add to cart via backend
-      final success = await CartService.addToCart(
+      final success = await _cartRepository.addToCart(
         productId: event.productId,
         quantityKg: event.quantityKg,
       );
 
       if (success) {
         // Reload cart count
-        final cart = await CartService.getCart();
+        final cart = await _cartRepository.getCart();
         final newCartCount = cart?['item_count'] ?? 0;
 
         // Calculate new available stock
@@ -187,7 +195,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     Emitter<ProductDetailState> emit,
   ) async {
     try {
-      final freshProduct = await ProductService.getProductById(event.productId);
+      final freshProduct = await _productRepository.getProductById(event.productId);
 
       if (freshProduct == null) {
         emit(
@@ -245,7 +253,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
 
   Future<double> _getQtyInCartAsync(int productId) async {
     try {
-      final cart = await CartService.getCart();
+      final cart = await _cartRepository.getCart();
       if (cart == null) return 0;
 
       final items = cart['items'] as List<dynamic>? ?? [];
