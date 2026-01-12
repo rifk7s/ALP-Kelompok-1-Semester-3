@@ -32,9 +32,6 @@ class UploadProdukScreen extends StatefulWidget {
 class _UploadProdukScreenState extends State<UploadProdukScreen> {
   // Multiple petani contributors
   List<Map<String, dynamic>> petaniContributors = [];
-  int? selectedPetaniId;
-  String? selectedPetani;
-  final _kontribusiController = TextEditingController();
   DateTime? selectedHarvestDate;
 
   String? selectedKategori;
@@ -49,7 +46,6 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   // Shake key for validation
   final _namaProdukShakeKey = GlobalKey<ShakeWidgetState>();
-  String? masaSimpanNote;
 
   List<File> selectedImages = [];
 
@@ -137,7 +133,6 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   @override
   void dispose() {
-    _kontribusiController.dispose();
     _jumlahController.dispose();
     _namaProdukController.dispose();
     _hargaController.dispose();

@@ -14,7 +14,6 @@ import 'package:frontend/features/pembeli/view/widgets/product_card.dart';
 /// Reduced from ~668 lines to ~250 lines
 /// Business logic moved to HomeBloc
 /// Reusable widgets: ProductCard
-// ignore_for_file: prefer_typing_uninitialized_variables
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
