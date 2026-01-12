@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -138,7 +139,7 @@ class ProductCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            "Sengka, Gowa",
+                            LocationConstants.defaultLocation,
                             style: TextStyle(
                               fontSize: 11,
                               color: isSoldOut

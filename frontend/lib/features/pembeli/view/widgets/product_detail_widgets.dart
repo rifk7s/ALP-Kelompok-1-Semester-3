@@ -11,6 +11,7 @@ import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_blo
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_event.dart';
 import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_state.dart';
 import 'package:frontend/features/pembeli/view/widgets/quantity_selector.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 
 /// Widget components for Product Detail Screen
 /// Extracted from product_detail_screen.dart to reduce file size
@@ -177,7 +178,7 @@ class ProductDetailSellerCard extends StatelessWidget {
               children: [
                 Text("BUMDes", style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(
-                  "Sengka, Gowa",
+                  LocationConstants.defaultLocation,
                   style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],

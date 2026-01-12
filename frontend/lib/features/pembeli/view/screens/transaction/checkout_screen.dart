@@ -5,6 +5,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/shared/service/profile_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -26,9 +27,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
   bool isLoadingProfile = true;
   bool isCreatingOrder = false;
 
-  String paymentMethod = "Transfer Bank (BCA)";
-  int ongkir = 15000;
-  int biayaLayanan = 2500;
+  String paymentMethod = "Transfer Bank (${PaymentConstants.defaultBank})";
+  int ongkir = ShippingConstants.defaultRegularShipping;
+  int biayaLayanan = ShippingConstants.serviceFee;
   String shippingMethod = "Reguler";
   String estimatedArrival = "2–4 hari";
 

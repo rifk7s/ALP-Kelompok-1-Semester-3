@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
+import 'package:frontend/features/pembeli/view/widgets/transaction/payment_info_section.dart';
 import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/features/pembeli/service/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -221,14 +222,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   int get totalPayment {
     if (widget.totalPayment != null) return widget.totalPayment!;
     if (orderDetails != null) {
-      final total = orderDetails!['total'];
-      if (total is int) return total;
-      if (total is double) return total.toInt();
-      if (total is String) {
-        // Try parsing as double first (for "29100.00"), then convert to int
-        final doubleValue = double.tryParse(total);
-        if (doubleValue != null) return doubleValue.toInt();
-      }
+      return CurrencyFormatter.parseTotal(orderDetails!['total']);
     }
     return 0;
   }
@@ -401,50 +395,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
 
               const SizedBox(height: 20),
 
-              _section(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Transfer ke Rekening",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _infoRow("Bank", "BCA"),
-                    _infoRow("No. Rekening", "1234566"),
-                    _infoRow("A.n", "Bumdes Desa Sengka"),
-
-                    const SizedBox(height: 14),
-                    Divider(),
-
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.copy_rounded,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          "Salin No. Rekening",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              const PaymentInfoSection(),
 
               const SizedBox(height: 20),
 
@@ -552,19 +503,6 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
         ],
       ),
       child: child,
-    );
-  }
-
-  Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
     );
   }
 }

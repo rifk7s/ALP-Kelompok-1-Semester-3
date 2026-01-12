@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_spacing.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
@@ -375,7 +376,7 @@ Widget productCard({
                     const SizedBox(width: 4),
                     const Expanded(
                       child: Text(
-                        "Sengka, Gowa",
+                        LocationConstants.defaultLocation,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
