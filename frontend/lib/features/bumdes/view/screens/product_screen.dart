@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:frontend/core/router/route_constants.dart';
-
-final NumberFormat rupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: "Rp ",
-  decimalDigits: 0,
-);
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -377,7 +371,7 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                         ),
                         Text(
-                          rupiah.format(pricePerKg.toInt()),
+                          CurrencyFormatter.rupiah.format(pricePerKg.toInt()),
                           style: TextStyle(
                             fontSize: 12,
                             color: isSoldOut

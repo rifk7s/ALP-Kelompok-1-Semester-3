@@ -6,13 +6,7 @@ import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
-import 'package:intl/intl.dart';
-
-final NumberFormat rupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: "Rp ",
-  decimalDigits: 0,
-);
+import 'package:frontend/core/utils/currency_formatter.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -220,7 +214,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ),
         const SizedBox(height: 6),
         Text(
-          '${rupiah.format(pricePerKg)}/kg',
+          '${CurrencyFormatter.rupiah.format(pricePerKg)}/kg',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

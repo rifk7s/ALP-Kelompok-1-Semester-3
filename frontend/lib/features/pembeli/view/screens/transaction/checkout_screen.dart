@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/shared/service/profile_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -31,12 +31,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   int biayaLayanan = 2500;
   String shippingMethod = "Reguler";
   String estimatedArrival = "2–4 hari";
-
-  final NumberFormat rupiah = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
 
   @override
   void initState() {
@@ -300,7 +294,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               const SizedBox(height: 6),
 
                               Text(
-                                "Harga: ${rupiah.format(double.parse(item['product']['price_per_kg'].toString()).toInt())} /kg",
+                                "Harga: ${CurrencyFormatter.rupiah.format(double.parse(item['product']['price_per_kg'].toString()).toInt())} /kg",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.greyDark,
@@ -311,7 +305,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
 
                         Text(
-                          rupiah.format(
+                          CurrencyFormatter.rupiah.format(
                             (double.parse(item['quantity_kg'].toString()) *
                                     double.parse(
                                       item['product']['price_per_kg']
@@ -446,13 +440,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 _box(
                   child: Column(
                     children: [
-                      _row("Subtotal", rupiah.format(subtotal)),
-                      _row("Ongkos Kirim", rupiah.format(ongkir)),
-                      _row("Biaya Layanan", rupiah.format(biayaLayanan)),
+                      _row("Subtotal", CurrencyFormatter.rupiah.format(subtotal)),
+                      _row("Ongkos Kirim", CurrencyFormatter.rupiah.format(ongkir)),
+                      _row("Biaya Layanan", CurrencyFormatter.rupiah.format(biayaLayanan)),
                       const Divider(height: 26, thickness: 0.8),
                       _row(
                         "Total Pembayaran",
-                        rupiah.format(totalAkhir),
+                        CurrencyFormatter.rupiah.format(totalAkhir),
                         bold: true,
                         color: AppColors.primary,
                       ),
@@ -517,7 +511,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        rupiah.format(totalAkhir),
+                        CurrencyFormatter.rupiah.format(totalAkhir),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,

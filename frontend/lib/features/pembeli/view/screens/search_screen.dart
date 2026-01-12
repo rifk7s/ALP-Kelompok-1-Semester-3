@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_spacing.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/utils/product_image_utils.dart';
@@ -350,11 +350,7 @@ Widget productCard({
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  NumberFormat.currency(
-                    locale: 'id',
-                    symbol: 'Rp ',
-                    decimalDigits: 0,
-                  ).format(_parsePrice(product)),
+                  CurrencyFormatter.formatRupiah(_parsePrice(product)),
                   style: const TextStyle(
                     color: AppColors.danger,
                     fontWeight: FontWeight.bold,

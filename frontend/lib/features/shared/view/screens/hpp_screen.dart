@@ -4,7 +4,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
-import 'package:intl/intl.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 
 class HppPage extends StatefulWidget {
   const HppPage({super.key});
@@ -84,13 +84,8 @@ class _HppPageState extends State<HppPage> {
   }
 
   String _formatPrice(dynamic price) {
-    final f = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    );
     double priceNum = price is String ? double.parse(price) : price.toDouble();
-    return f.format(priceNum);
+    return CurrencyFormatter.formatRupiah(priceNum.toInt());
   }
 
   @override

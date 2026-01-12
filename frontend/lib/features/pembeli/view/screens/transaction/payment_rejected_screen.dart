@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:intl/intl.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 
 class PaymentRejectedScreen extends StatefulWidget {
   final int total;
@@ -61,12 +61,7 @@ class _PaymentRejectedScreenState extends State<PaymentRejectedScreen>
   }
 
   String formatCurrency(int number) {
-    final f = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    return f.format(number);
+    return CurrencyFormatter.formatRupiah(number);
   }
 
   @override

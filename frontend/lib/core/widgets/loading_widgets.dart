@@ -324,3 +324,36 @@ void showLoadingDialog(BuildContext context, {String? message}) {
     ),
   );
 }
+
+/// Full screen loading with scaffold
+/// Best for: Page-level loading states with scaffold wrapper
+class AppLoadingScreen extends StatelessWidget {
+  final String? message;
+
+  const AppLoadingScreen({super.key, this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const AppLoadingIndicator(),
+            if (message != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                message!,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/features/pembeli/service/cart_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -215,12 +215,7 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   }
 
   String formatCurrency(int number) {
-    final f = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    return f.format(number);
+    return CurrencyFormatter.formatRupiah(number);
   }
 
   int get totalPayment {

@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/currency_formatter.dart';
 
 /// Form field widgets commonly used in bumdes screens
-
-final NumberFormat rupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: "Rp ",
-  decimalDigits: 0,
-);
 
 /// Text field for price input with automatic Rupiah formatting
 class BumdesPriceField extends StatefulWidget {
@@ -48,7 +42,7 @@ class _BumdesPriceFieldState extends State<BumdesPriceField> {
     _controller.addListener(() {
       final text = _controller.text.replaceAll(RegExp(r'[^0-9]'), '');
       if (text.isNotEmpty) {
-        final formatted = rupiah.format(int.parse(text));
+        final formatted = CurrencyFormatter.rupiah.format(int.parse(text));
         if (formatted != _controller.text) {
           _controller.value = TextEditingValue(
             text: formatted,
