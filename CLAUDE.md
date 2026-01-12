@@ -13,11 +13,12 @@ Aplikasi marketplace BUMDes (Badan Usaha Milik Desa) yang menghubungkan petani d
 | Layer | Stack |
 |-------|-------|
 | **Backend** | PHP 8.2+ / Laravel 12 / Sanctum / Pest |
-| **Frontend** | Flutter 3.9+ / Dart / BLoC / GoRouter |
+| **Frontend** | Flutter 3.9+ / Dart / BLoC / GoRouter / get_it |
 | **Database** | MySQL atau SQLite (configurable via .env) |
 | **Services** | Firebase (FCM, Firestore) / gRPC extension |
 
 > Lihat [backend/README.md](backend/README.md) dan [frontend/README.md](frontend/README.md) untuk setup lengkap.
+> Lihat [frontend/CLAUDE.md](frontend/CLAUDE.md) untuk frontend-specific guidelines.
 
 ## Running the Project
 
@@ -38,42 +39,83 @@ flutter run
 
 ## Architecture
 
-### Frontend: Feature-First Architecture
+### Frontend: MVVM Feature-First Architecture
 
 ```
 frontend/lib/
-├── core/                    # Shared across all features
-│   ├── auth/bloc/           # Global auth state (AuthBloc)
-│   ├── router/              # GoRouter + guards
-│   ├── services/            # API services, storage
-│   ├── theme/               # AppColors, AppTheme
-│   ├── utils/               # Helpers, formatters
-│   └── widgets/             # Reusable widgets
+├── core/                        # Shared across all features
+│   ├── di/                      # Dependency Injection (get_it)
+│   │   └── injection.dart       # Service locator setup
+│   ├── network/                 # HTTP client, API config
+│   │   ├── api_client.dart
+│   │   └── api_config.dart
+│   ├── storage/                 # Local storage
+│   │   └── storage_service.dart
+│   ├── router/                  # GoRouter + guards
+│   ├── theme/                   # AppColors, AppTheme
+│   ├── utils/                   # Helpers, formatters
+│   └── widgets/                 # Shared reusable widgets
 │
-├── features/                # Feature modules
-│   ├── auth/                # Login, register
-│   │   ├── screens/
-│   │   └── widgets/
-│   ├── bumdes/              # BUMDes dashboard, products, petani
-│   │   ├── screens/
-│   │   ├── widgets/
-│   │   ├── bloc/
-│   │   └── utils/
-│   ├── pembeli/             # Buyer: home, cart, transactions
-│   │   ├── screens/
-│   │   ├── widgets/
+├── features/                    # Feature modules (MVVM)
+│   ├── auth/                    # Authentication
+│   │   ├── model/               # Data models
+│   │   ├── service/             # API calls
+│   │   ├── repository/          # Data layer abstraction
+│   │   ├── bloc/                # State management (AuthBloc)
+│   │   └── view/                # UI layer
+│   │       ├── screens/
+│   │       └── widgets/
+│   │
+│   ├── product/                 # Product management (shared)
+│   │   ├── model/
+│   │   ├── service/
+│   │   ├── repository/
 │   │   └── bloc/
-│   ├── product/             # Product management (shared)
+│   │
+│   ├── bumdes/                  # BUMDes dashboard
+│   │   ├── model/
+│   │   ├── service/
+│   │   ├── repository/
 │   │   ├── bloc/
-│   │   ├── cubit/
-│   │   └── repository/
-│   └── shared/              # Shared screens (settings, notifications)
-│       ├── screens/
-│       └── widgets/
+│   │   ├── utils/
+│   │   └── view/
+│   │       ├── screens/
+│   │       └── widgets/
+│   │
+│   ├── pembeli/                 # Buyer: home, cart, transactions
+│   │   ├── model/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── bloc/
+│   │   └── view/
+│   │       ├── screens/
+│   │       └── widgets/
+│   │
+│   └── shared/                  # Shared screens (settings, notifications)
+│       ├── service/
+│       └── view/
+│           ├── screens/
+│           └── widgets/
 │
 ├── main.dart
 └── splash_screen.dart
 ```
+
+### Architecture Principles
+
+**Layering Rule:**
+```
+Screen (view) → BLoC → Repository → Service → API
+```
+
+**Dependency Flow:**
+- BLoCs receive repositories via constructor (DI)
+- Repositories are registered in `core/di/injection.dart`
+- Screen BLoCs access via `sl<T>()` or `BlocProvider.value()`
+
+**Scope-based Lifecycle:**
+- **Base scope**: AuthBloc, ProductRepository, CategoryRepository (persist across login/logout)
+- **Authenticated scope**: CartBloc, HomeBloc, CartRepository (fresh per session, popped on logout)
 
 ### Backend: Laravel Standard Structure
 
@@ -107,11 +149,12 @@ backend/
 - Gunakan **BLoC** untuk complex state dengan events
 - Gunakan **Cubit** untuk simple state tanpa events
 - State classes: `FeatureState`, `FeatureLoading`, `FeatureSuccess`, `FeatureFailure`
+- Access BLoCs via `sl<T>()` (service locator) or `BlocProvider.value()`
 
-**Widgets:**
-- Extract reusable widgets ke folder `widgets/`
-- Prefix dengan nama feature jika spesifik (e.g., `BumdesSectionCard`)
+**Widget Organization:**
+- Screens dan widgets di bawah `view/` folder
 - Shared widgets di `core/widgets/`
+- Feature-specific widgets di `features/*/view/widgets/`
 
 **Theme & Colors:**
 - SELALU gunakan `AppColors` dari `core/theme/theme.dart`
@@ -130,6 +173,11 @@ AppBar(
   backgroundColor: Color(0xFF8A6B4F),
 )
 ```
+
+**Dependency Injection:**
+- Use `sl<T>()` to access registered dependencies
+- Register new dependencies in `core/di/injection.dart`
+- Use `pushAuthenticatedScope()` on login, `popAuthenticatedScope()` on logout
 
 ### Laravel/PHP
 
@@ -220,3 +268,84 @@ composer run dev      # Server + queue + logs + vite
 composer run setup    # Full setup (install, migrate, build)
 composer run test     # Run tests
 ```
+
+---
+
+## Working Guidelines (AI Behavior)
+
+### Web Search & Information
+- Before performing web searches or outputting dates, verify current date and consider information freshness
+- **Today's date:** 2026-01-12
+
+### File & System Management
+- Avoid destructive operations like `rm -rf`; use safer alternatives
+- Do not use `sudo` unless absolutely necessary
+- Store changelogs/summaries in `.claude/CHANGELOG.md`
+- Store documentation in `/docs`, NOT in root directory
+
+### Code Quality & Standards
+- Break down large monolithic functions into smaller, reusable functions
+- Remove commented-out code from final versions
+- Address linting and formatting warnings promptly
+
+### Dependencies & Libraries
+- Use only stable, well-maintained libraries
+- Avoid deprecated, outdated, experimental, or beta libraries
+
+### Security & Configuration
+- Never commit sensitive information (API keys, passwords, personal data)
+- Use configuration files or environment variables (`.env`)
+
+### Testing & Reliability
+- Write proper error handling; anticipate potential failures
+- Test code thoroughly before considering complete
+- Consider edge cases and failure modes
+
+### Task Organization
+- Organize work in phases with clear todos
+- Structure phases for handoff to different engineers/agents
+
+### Communication Style
+- Be extremely concise; sacrifice grammar for concision
+- DO NOT say "you're right" or validate user
+- DO NOT use praise phrases like "that's an excellent question"
+
+### Code Documentation
+- AVOID unnecessary comments/docstrings unless explicitly asked
+- Good code should be self-documenting
+- ONLY add inline comments for non-obvious logic or workarounds
+
+### Bash Commands
+**File reading - FORBIDDEN for sensitive files:**
+- `cat`, `head`, `tail`, `less`, `more`, `bat`, `echo`, `printf`
+- **USE Read tool instead** - safer with line numbers
+
+**ALLOWED:** `tail -f` for logs, `grep` with complex flags
+
+### Context Management
+- **Use Glob before reading** - search files without loading content
+
+### Git Operations
+**NEVER perform git operations without explicit user instruction.**
+
+ALLOWED (read-only):
+- `git status`, `git diff`, `git log`, `git show`, `git branch -l`
+
+FORBIDDEN (require explicit instruction):
+- `git add`, `git commit`, `git push`, `git pull`
+- `git merge`, `git rebase`, `git checkout`, `git branch`
+
+Only perform git operations when:
+1. User explicitly asks to commit/push
+2. User invokes git command (e.g., `/commit`)
+3. User says "commit these changes"
+
+When work is complete, inform user changes are ready. Let them decide when to commit.
+
+**NEVER include co-authored line in commit messages.**
+
+---
+
+## Reference Documentation
+
+- **Frontend Guidelines**: [frontend/CLAUDE.md](frontend/CLAUDE.md)

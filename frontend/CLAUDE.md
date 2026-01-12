@@ -4,6 +4,108 @@
 
 ---
 
+## Architecture Overview
+
+### MVVM Feature-First Structure
+
+```
+features/feature_name/
+├── model/               # Data models (optional - can use Map<String, dynamic>)
+├── service/             # API calls
+├── repository/          # Data layer abstraction
+├── bloc/                # State management (BLoC/Cubit)
+└── view/                # UI layer
+    ├── screens/         # Full page widgets
+    └── widgets/         # Reusable components
+```
+
+### Layering Rule
+
+```
+Screen (view) → BLoC → Repository → Service → API
+```
+
+**IMPORTANT:** BLoCs should NEVER call services directly. Always go through repositories.
+
+---
+
+## Dependency Injection (get_it)
+
+### Service Locator Pattern
+
+**Import:**
+```dart
+import 'package:frontend/core/di/injection.dart';
+```
+
+**Access dependencies anywhere:**
+```dart
+// Get registered instance
+final authBloc = sl<AuthBloc>();
+final productRepo = sl<ProductRepository>();
+
+// In widgets (preferred - context-aware)
+context.read<AuthBloc>();
+context.watch<CartBloc>();
+```
+
+### Scope-based Lifecycle
+
+**Base Scope** (persists across login/logout):
+- AuthBloc, AuthRepository
+- ProductRepository, CategoryRepository
+- BumdesRepository, PetaniRepository
+
+**Authenticated Scope** (fresh per session, popped on logout):
+- CartBloc, HomeBloc, ProductDetailBloc
+- CartRepository, OrderRepository, NotificationRepository
+
+**Usage:**
+```dart
+// Setup (called once in main())
+setupLocator();
+
+// On login (automatic in AuthBloc)
+pushAuthenticatedScope();
+
+// On logout (automatic in AuthBloc)
+await popAuthenticatedScope();
+```
+
+### Registering New Dependencies
+
+**In `core/di/injection.dart`:**
+
+```dart
+void setupLocator() {
+  // Base scope - persist across login/logout
+  sl.registerLazySingleton<MyRepository>(() => MyRepository());
+  sl.registerLazySingleton<MyBloc>(
+    () => MyBloc(repository: sl<MyRepository>()),
+  );
+
+  // Factory - new instance each time (for screen-specific BLoCs)
+  sl.registerFactory<ScreenBloc>(
+    () => ScreenBloc(repository: sl<MyRepository>()),
+  );
+}
+
+void pushAuthenticatedScope() {
+  sl.pushNewScope(
+    scopeName: 'authenticated',
+    init: (getIt) {
+      // User-specific dependencies
+      getIt.registerLazySingleton<CartRepository>(() => CartRepository());
+      getIt.registerLazySingleton<CartBloc>(
+        () => CartBloc(repository: getIt<CartRepository>()),
+      );
+    },
+  );
+}
+```
+
+---
+
 ## State Management
 
 ### BLoC vs Cubit: Kapan Pakai Apa?
@@ -90,8 +192,88 @@ class ProductEditingCubit extends Cubit<ProductEditing> {
 
 | Scope | Location | Contoh |
 |-------|----------|--------|
-| **Global** | `core/auth/bloc/` | AuthBloc (dipakai seluruh app) |
-| **Feature** | `features/feature/bloc/` | CartBloc, HomeBloc, ProductBloc |
+| **Global (base scope)** | `features/auth/bloc/` | AuthBloc |
+| **Scoped (auth scope)** | `features/*/bloc/` | CartBloc, HomeBloc |
+| **Screen-specific** | Direct instantiation via factory | ProductBloc (upload/edit) |
+
+---
+
+## Repository Pattern
+
+### What is a Repository?
+
+Repository abstracts the data source. BLoCs call repositories, not services.
+
+**Benefits:**
+- Centralized data logic
+- Easier testing (can mock repositories)
+- Single source of truth for data operations
+
+### Example Repository
+
+```dart
+// features/product/repository/product_repository.dart
+class ProductRepository {
+  final ProductService _service = ProductService();
+
+  Future<List<Map<String, dynamic>>> getProducts() async {
+    return await _service.getProducts();
+  }
+
+  Future<Map<String, dynamic>> getProduct(int id) async {
+    return await _service.getProduct(id);
+  }
+
+  Future<Map<String, dynamic>> createProduct(Map<String, dynamic> data) async {
+    return await _service.createProduct(data);
+  }
+}
+```
+
+### BLoC with Repository
+
+```dart
+// features/product/bloc/product_bloc.dart
+class ProductBloc extends Bloc<ProductEvent, ProductState> {
+  final ProductRepository _repository;
+
+  ProductBloc({required ProductRepository repository})
+      : _repository = repository,
+        super(ProductInitial()) {
+    on<ProductLoadRequested>(_onLoadRequested);
+  }
+
+  Future<void> _onLoadRequested(
+    ProductLoadRequested event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(ProductLoading());
+    try {
+      final products = await _repository.getProducts();
+      emit(ProductSuccess(products: products));
+    } catch (e) {
+      emit(ProductFailure(error: e.toString()));
+    }
+  }
+}
+```
+
+**Register in DI:**
+```dart
+// core/di/injection.dart
+sl.registerLazySingleton<ProductRepository>(() => ProductRepository());
+sl.registerFactory<ProductBloc>(
+  () => ProductBloc(repository: sl<ProductRepository>()),
+);
+```
+
+**Use in screen:**
+```dart
+BlocProvider(
+  create: (_) => sl<ProductBloc>()..add(ProductLoadRequested()),
+  child: ...,
+)
+```
 
 ---
 
@@ -101,13 +283,14 @@ class ProductEditingCubit extends Cubit<ProductEditing> {
 
 ```
 features/feature_name/
-├── screens/           # Full page widgets
-│   └── feature_screen.dart
-└── widgets/           # Reusable components
-    ├── feature_card.dart
-    └── feature_list.dart
+└── view/
+    ├── screens/           # Full page widgets
+    │   └── feature_screen.dart
+    └── widgets/           # Reusable components
+        ├── feature_card.dart
+        └── feature_list.dart
 
-core/widgets/          # Shared across ALL features
+core/widgets/              # Shared across ALL features
 ├── loading_widgets.dart
 └── app_spacing.dart
 ```
@@ -122,7 +305,7 @@ core/widgets/          # Shared across ALL features
 
 ### BUMDes Widgets (Reusable)
 
-**Form Widgets** (`features/bumdes/widgets/`):
+**Form Widgets** (`features/bumdes/view/widgets/`):
 ```dart
 // Section card dengan title
 BumdesSectionCard(
@@ -252,7 +435,7 @@ class FeatureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => FeatureBloc()..add(FeatureLoadRequested()),
+      create: (_) => sl<FeatureBloc>()..add(FeatureLoadRequested()),
       child: BlocBuilder<FeatureBloc, FeatureState>(
         builder: (context, state) {
           if (state is FeatureLoading) {
@@ -272,12 +455,28 @@ class FeatureScreen extends StatelessWidget {
 }
 ```
 
+### Screen with Scoped BLoCs (from DI)
+
+```dart
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Access via BlocProvider.value (provided in router/shell)
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        return Scaffold(...);
+      },
+    );
+  }
+}
+```
+
 ### Form Screen with Multiple BLoCs
 
 ```dart
 return MultiBlocProvider(
   providers: [
-    BlocProvider(create: (_) => ProductBloc(repository: ProductRepository())),
+    BlocProvider(create: (_) => sl<ProductBloc>()),
     BlocProvider(create: (_) => ProductEditingCubit()),
   ],
   child: BlocListener<ProductBloc, ProductState>(
@@ -329,6 +528,9 @@ Future<void> loadData() async {
 // Theme & Colors
 import 'package:frontend/core/theme/theme.dart';
 
+// Dependency Injection
+import 'package:frontend/core/di/injection.dart';
+
 // Loading widgets
 import 'package:frontend/core/widgets/loading_widgets.dart';
 
@@ -343,11 +545,36 @@ import 'package:go_router/go_router.dart';
 
 ```dart
 // BUMDes widgets
-import 'package:frontend/features/bumdes/widgets/common_widgets.dart';
-import 'package:frontend/features/bumdes/widgets/form_field_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/common_widgets.dart';
+import 'package:frontend/features/bumdes/view/widgets/form_field_widgets.dart';
 
 // Product BLoC
 import 'package:frontend/features/product/bloc/product_bloc.dart';
 import 'package:frontend/features/product/bloc/product_state.dart';
 import 'package:frontend/features/product/bloc/product_event.dart';
+
+// Repositories
+import 'package:frontend/features/product/repository/product_repository.dart';
 ```
+
+---
+
+## Quick Reference
+
+### Accessing Dependencies
+
+| Method | When to Use | Example |
+|--------|-------------|---------|
+| `sl<T>()` | Anywhere, no context | `final repo = sl<ProductRepository>();` |
+| `context.read<T>()` | Inside widgets, one-time read | `context.read<CartBloc>().add(CartAdd());` |
+| `context.watch<T>()` | Inside widgets, rebuild on change | `final state = context.watch<CartBloc>().state;` |
+| `BlocProvider.value()` | Expose existing BLoC to subtree | `BlocProvider.value(value: sl<AuthBloc>())` |
+
+### Folder Import Paths
+
+| From | To | Import Pattern |
+|------|-----|----------------|
+| Any | Core | `package:frontend/core/...` |
+| Any | Feature | `package:frontend/features/feature_name/...` |
+| Feature | Core | `package:frontend/core/...` |
+| Feature | Another feature | `package:frontend/features/other_feature/...` |
