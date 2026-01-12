@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/features/bumdes/service/bumdes_service.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/router/route_constants.dart';

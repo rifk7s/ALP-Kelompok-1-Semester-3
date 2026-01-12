@@ -16,15 +16,17 @@ import 'package:frontend/features/pembeli/view/screens/transaction/waiting_payme
 import 'package:frontend/features/pembeli/view/screens/transaction/payment_confirmed_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/transaction/payment_rejected_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/transaction/receipt_screen.dart';
-import 'package:frontend/features/shared/screens/notification_screen.dart';
+import 'package:frontend/features/shared/view/screens/notification_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/profile_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/edit_profile_screen.dart';
-import 'package:frontend/core/services/profile_service.dart';
-import 'package:frontend/features/shared/screens/setting_screen.dart';
-import 'package:frontend/features/shared/screens/help_screen.dart';
-import 'package:frontend/features/shared/screens/about_screen.dart';
-import 'package:frontend/features/shared/screens/hpp_screen.dart';
-import 'package:frontend/features/shared/screens/chat_detail_page.dart';
+import 'package:frontend/features/shared/service/profile_service.dart';
+import 'package:frontend/features/shared/view/screens/setting_screen.dart';
+import 'package:frontend/features/shared/view/screens/notifikasi_setting_screen.dart';
+import 'package:frontend/features/shared/view/screens/security_screen.dart';
+import 'package:frontend/features/shared/view/screens/help_screen.dart';
+import 'package:frontend/features/shared/view/screens/about_screen.dart';
+import 'package:frontend/features/shared/view/screens/hpp_screen.dart';
+import 'package:frontend/features/shared/view/screens/chat_detail_page.dart';
 import 'package:frontend/features/pembeli/view/screens/transaction/order_track_screen.dart';
 import 'package:frontend/features/bumdes/view/screens/product_detail_screen.dart'
     as bumdes;
@@ -168,6 +170,16 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
       path: RoutePaths.settings,
       name: RouteNames.settings,
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: RoutePaths.notificationSettings,
+      name: RouteNames.notificationSettings,
+      builder: (context, state) => const NotificationSettingsPage(),
+    ),
+    GoRoute(
+      path: RoutePaths.security,
+      name: RouteNames.security,
+      builder: (context, state) => const SecuritySettingsPage(),
     ),
     GoRoute(
       path: RoutePaths.help,

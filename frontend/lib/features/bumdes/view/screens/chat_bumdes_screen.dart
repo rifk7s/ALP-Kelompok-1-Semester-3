@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
-import 'package:frontend/features/shared/widgets/typing_indicator.dart'
+import 'package:frontend/features/shared/view/widgets/typing_indicator.dart'
     show TypingBubble;
 
 class ChatBumdesPage extends StatefulWidget {

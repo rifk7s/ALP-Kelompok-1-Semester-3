@@ -34,14 +34,14 @@ class SettingsPage extends StatelessWidget {
             context,
             "Notifikasi",
             Icons.notifications_outlined,
-            RoutePaths.notifications,
+            RoutePaths.notificationSettings,
           ),
           const SizedBox(height: AppSpacing.sm),
           _settingItem(
             context,
             "Keamanan Akun",
             Icons.lock_outline,
-            RoutePaths.settings,
+            RoutePaths.security,
           ),
           const SizedBox(height: AppSpacing.sm),
           _settingItem(

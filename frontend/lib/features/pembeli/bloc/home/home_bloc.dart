@@ -5,7 +5,7 @@ import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
 import 'package:frontend/features/product/service/category_service.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/features/pembeli/service/cart_service.dart';
-import 'package:frontend/core/services/notification_service.dart';
+import 'package:frontend/features/shared/service/notification_service.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {

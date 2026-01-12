@@ -28,6 +28,8 @@ class RoutePaths {
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
   static const String settings = '/settings';
+  static const String notificationSettings = '/settings/notifications';
+  static const String security = '/settings/security';
   static const String help = '/help';
   static const String about = '/about';
 
@@ -64,6 +66,8 @@ class RouteNames {
   static const String profile = 'profile';
   static const String editProfile = 'edit_profile';
   static const String settings = 'settings';
+  static const String notificationSettings = 'notification_settings';
+  static const String security = 'security';
   static const String help = 'help';
   static const String about = 'about';
   static const String checkout = 'checkout';

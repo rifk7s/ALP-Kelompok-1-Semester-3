@@ -9,8 +9,8 @@ import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/features/bumdes/service/admin_service.dart';
-import 'package:frontend/core/services/notification_service.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/notification_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 
 class HomePageBumdes extends StatefulWidget {
   final VoidCallback? onProductTap;

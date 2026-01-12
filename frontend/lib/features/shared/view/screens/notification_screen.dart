@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
-import 'package:frontend/core/services/notification_service.dart';
+import 'package:frontend/features/shared/service/notification_service.dart';
 import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:intl/intl.dart';
 
 class NotificationPage extends StatefulWidget {

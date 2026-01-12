@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:intl/intl.dart';
 

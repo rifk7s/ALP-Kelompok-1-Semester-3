@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/bumdes/utils/transaction_bumdes_helper.dart';

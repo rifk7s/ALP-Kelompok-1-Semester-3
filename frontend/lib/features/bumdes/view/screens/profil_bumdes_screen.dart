@@ -5,7 +5,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/auth/service/auth_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/services/profile_service.dart';
+import 'package:frontend/features/shared/service/profile_service.dart';
 import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 
 class ProfileBumdesPage extends StatefulWidget {

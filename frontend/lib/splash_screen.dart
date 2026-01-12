@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/service/auth_service.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/core/network/network_detector.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/auth/bloc/auth_bloc.dart';

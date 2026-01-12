@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
 import 'package:frontend/core/network/network_detector.dart';
 
 // Fast timeout for quick UX feedback - user shouldn't wait more than 5 seconds
