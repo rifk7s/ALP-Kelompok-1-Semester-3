@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+import 'package:frontend/core/di/injection.dart';
+import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/view/screens/home_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/profile_screen.dart';
 import 'package:frontend/features/shared/view/screens/contact_screen.dart';
@@ -26,6 +31,7 @@ class PembeliRoutes {
 }
 
 /// Navigation wrapper for Pembeli - maintains bottom navigation
+/// Wraps authenticated screens with scoped BLoC providers
 class _PembeliNavigationWrapper extends StatefulWidget {
   final Widget child;
 
@@ -64,12 +70,21 @@ class _PembeliNavigationWrapperState extends State<_PembeliNavigationWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: IndexedStack(index: _currentIndex, children: _pages),
+    // Provide scoped BLoCs from authenticated scope
+    // These are registered in pushAuthenticatedScope() after login
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: sl<CartBloc>()),
+        BlocProvider.value(value: sl<HomeBloc>()),
+        BlocProvider.value(value: sl<ProductDetailBloc>()),
+      ],
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        body: SafeArea(
+          child: IndexedStack(index: _currentIndex, children: _pages),
+        ),
+        bottomNavigationBar: _buildBottomNav(),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/router/guards/auth_guard.dart';
 import 'package:frontend/core/router/routes/auth_routes.dart';
 import 'package:frontend/core/router/routes/pembeli_routes.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/bloc/auth_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/cart/cart_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/home/home_bloc.dart';
+import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_bloc.dart';
 import 'package:frontend/features/pembeli/view/screens/product_detail_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/search_screen.dart';
 import 'package:frontend/features/pembeli/view/screens/transaction/cart_screen.dart';
@@ -73,7 +77,7 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
     GoRoute(
       path: RoutePaths.cart,
       name: RouteNames.cart,
-      builder: (context, state) => const CartPage(),
+      builder: (context, state) => _withScopedBlocs(const CartPage()),
     ),
     GoRoute(
       path: RoutePaths.transactionHistory,
@@ -239,7 +243,8 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
               ),
             );
           }
-          return ProductDetailPage(product: productMap);
+          // Wrap pembeli product detail with scoped BLoCs
+          return _withScopedBlocs(ProductDetailPage(product: productMap));
         }
       },
     ),
@@ -352,4 +357,17 @@ class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) : _stream = stream {
     _stream.listen((_) => notifyListeners());
   }
+}
+
+/// Helper to wrap a widget with scoped BLoC providers
+/// Used for routes outside the PembeliShellRoute that need access to scoped BLoCs
+Widget _withScopedBlocs(Widget child) {
+  return MultiBlocProvider(
+    providers: [
+      BlocProvider.value(value: sl<CartBloc>()),
+      BlocProvider.value(value: sl<HomeBloc>()),
+      BlocProvider.value(value: sl<ProductDetailBloc>()),
+    ],
+    child: child,
+  );
 }
