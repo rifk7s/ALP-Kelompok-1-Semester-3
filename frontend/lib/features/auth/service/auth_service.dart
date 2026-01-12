@@ -5,8 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/network/network_detector.dart';
 
-const Duration _timeout = Duration(seconds: 30);
+// Fast timeout for quick UX feedback - user shouldn't wait more than 5 seconds
+const Duration _timeout = Duration(seconds: 5);
 
 class AuthResult {
   final bool success;
@@ -76,13 +78,19 @@ class AuthService {
         );
       }
     } on TimeoutException {
-      debugPrint(
-        '❌ Register: Connection timeout - Backend not reachable at ${ApiConfig.baseUrl}',
+      // Try to detect correct IP and show helpful error
+      await NetworkDetector.detectAndSetActiveIP();
+      return AuthResult(
+        success: false,
+        message: 'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
       );
-      return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
     } catch (e) {
-      debugPrint('❌ Register: Connection failed - $e');
-      return AuthResult(success: false, message: 'Koneksi gagal: $e');
+      // Try to detect correct IP
+      await NetworkDetector.detectAndSetActiveIP();
+      return AuthResult(
+        success: false,
+        message: 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+      );
     }
   }
 
@@ -131,9 +139,19 @@ class AuthService {
         );
       }
     } on TimeoutException {
-      return AuthResult(success: false, message: 'Koneksi timeout, coba lagi');
+      // Try to detect correct IP and show helpful error
+      await NetworkDetector.detectAndSetActiveIP();
+      return AuthResult(
+        success: false,
+        message: 'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+      );
     } catch (e) {
-      return AuthResult(success: false, message: 'Koneksi gagal: $e');
+      // Try to detect correct IP
+      await NetworkDetector.detectAndSetActiveIP();
+      return AuthResult(
+        success: false,
+        message: 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+      );
     }
   }
 
@@ -206,9 +224,13 @@ class AuthService {
         );
       }
     } on TimeoutException {
+      // Try to detect correct IP
+      await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(success: false, message: 'Koneksi timeout');
     } catch (e) {
-      return AuthResult(success: false, message: 'Koneksi gagal: $e');
+      // Try to detect correct IP
+      await NetworkDetector.detectAndSetActiveIP();
+      return AuthResult(success: false, message: 'Koneksi gagal');
     }
   }
 }

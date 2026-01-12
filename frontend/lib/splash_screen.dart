@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/service/auth_service.dart';
 import 'package:frontend/core/services/chat_service.dart';
+import 'package:frontend/core/network/network_detector.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/features/auth/bloc/auth_bloc.dart';
 // navigation handled by router (go_router) using named routes
@@ -94,6 +95,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkExistingSession() async {
+    // Auto-detect correct backend IP on app startup
+    await NetworkDetector.detectAndSetActiveIP();
+
     final result = await AuthService.getMe();
     if (result.success && result.user != null) {
       _userRole = result.user!['role'];
