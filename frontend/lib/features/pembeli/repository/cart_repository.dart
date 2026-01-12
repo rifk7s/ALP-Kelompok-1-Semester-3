@@ -13,10 +13,7 @@ class CartRepository {
     required int productId,
     required double quantityKg,
   }) async {
-    return CartService.addToCart(
-      productId: productId,
-      quantityKg: quantityKg,
-    );
+    return CartService.addToCart(productId: productId, quantityKg: quantityKg);
   }
 
   /// Update cart item quantity
@@ -24,10 +21,7 @@ class CartRepository {
     required int cartId,
     required double quantityKg,
   }) async {
-    return CartService.updateCartItem(
-      cartId: cartId,
-      quantityKg: quantityKg,
-    );
+    return CartService.updateCartItem(cartId: cartId, quantityKg: quantityKg);
   }
 
   /// Remove item from cart

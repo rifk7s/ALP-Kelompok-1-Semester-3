@@ -82,14 +82,16 @@ class AuthService {
       await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message: 'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message:
+            'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
       );
     } catch (e) {
       // Try to detect correct IP
       await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message: 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message:
+            'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
       );
     }
   }
@@ -143,14 +145,16 @@ class AuthService {
       await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message: 'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message:
+            'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
       );
     } catch (e) {
       // Try to detect correct IP
       await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message: 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message:
+            'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
       );
     }
   }

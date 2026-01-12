@@ -6,7 +6,7 @@ class PetaniRepository {
   final PetaniService _petaniService;
 
   PetaniRepository({PetaniService? petaniService})
-      : _petaniService = petaniService ?? PetaniService();
+    : _petaniService = petaniService ?? PetaniService();
 
   /// Fetch all petani data
   Future<List<PetaniData>> fetchAllPetani({required String token}) async {

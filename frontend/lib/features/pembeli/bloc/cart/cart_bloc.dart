@@ -13,9 +13,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   CartBloc({
     required CartRepository cartRepository,
     required ProductRepository productRepository,
-  })  : _cartRepository = cartRepository,
-        _productRepository = productRepository,
-        super(CartInitial()) {
+  }) : _cartRepository = cartRepository,
+       _productRepository = productRepository,
+       super(CartInitial()) {
     on<CartLoadRequested>(_onLoadRequested);
     on<CartItemQuantityChanged>(_onQuantityChanged);
     on<CartItemRemoved>(_onItemRemoved);

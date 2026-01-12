@@ -12,9 +12,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
   ProductDetailBloc({
     required ProductRepository productRepository,
     required CartRepository cartRepository,
-  })  : _productRepository = productRepository,
-        _cartRepository = cartRepository,
-        super(ProductDetailInitial()) {
+  }) : _productRepository = productRepository,
+       _cartRepository = cartRepository,
+       super(ProductDetailInitial()) {
     on<ProductDetailLoadRequested>(_onLoadRequested);
     on<ProductDetailCartCountRequested>(_onCartCountRequested);
     on<ProductDetailQuantityChanged>(_onQuantityChanged);
@@ -113,7 +113,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
 
     try {
       // Fetch fresh stock from database
-      final freshProduct = await _productRepository.getProductById(event.productId);
+      final freshProduct = await _productRepository.getProductById(
+        event.productId,
+      );
 
       if (freshProduct == null) {
         emit(const ProductDetailError('Produk tidak ditemukan'));
@@ -195,7 +197,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     Emitter<ProductDetailState> emit,
   ) async {
     try {
-      final freshProduct = await _productRepository.getProductById(event.productId);
+      final freshProduct = await _productRepository.getProductById(
+        event.productId,
+      );
 
       if (freshProduct == null) {
         emit(

@@ -55,7 +55,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
       }
       int totalUnread = 0;
       final chatRooms = await ChatService.getChatRooms().first;
-      debugPrint('Fetched ${chatRooms.docs.length} chat rooms for unread count');
+      debugPrint(
+        'Fetched ${chatRooms.docs.length} chat rooms for unread count',
+      );
       for (final doc in chatRooms.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final unreadCounts = data['unreadCounts'];
@@ -104,7 +106,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
       }).length;
 
       // Fetch petani count
-      final petaniList = await PetaniService().fetchAllPetani(token: token ?? '');
+      final petaniList = await PetaniService().fetchAllPetani(
+        token: token ?? '',
+      );
 
       // Fetch completed orders this month
       final orders = await AdminService.getOrdersByStatus();
@@ -140,7 +144,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     }
   }
 
-  List<Map<String, dynamic>> _getRecentOrders(List<Map<String, dynamic>> orders) {
+  List<Map<String, dynamic>> _getRecentOrders(
+    List<Map<String, dynamic>> orders,
+  ) {
     final ordersWithTimestamps = orders.map((order) {
       final status = order['status'] as String?;
       DateTime? latestTimestamp;
@@ -167,7 +173,8 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     }).toList();
 
     ordersWithTimestamps.sort(
-      (a, b) => (b['timestamp'] as DateTime).compareTo(a['timestamp'] as DateTime),
+      (a, b) =>
+          (b['timestamp'] as DateTime).compareTo(a['timestamp'] as DateTime),
     );
 
     return ordersWithTimestamps

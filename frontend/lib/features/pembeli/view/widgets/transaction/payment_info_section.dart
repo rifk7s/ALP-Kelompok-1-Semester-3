@@ -27,7 +27,8 @@ class PaymentInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayBank = bank ?? PaymentConstants.defaultBank;
-    final displayAccount = accountNumber ?? PaymentConstants.defaultAccountNumber;
+    final displayAccount =
+        accountNumber ?? PaymentConstants.defaultAccountNumber;
     final displayName = accountName ?? PaymentConstants.defaultAccountName;
 
     return Container(
@@ -48,10 +49,7 @@ class PaymentInfoSection extends StatelessWidget {
         children: [
           const Text(
             "Transfer ke Rekening",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           _infoRow("Bank", displayBank),
@@ -73,10 +71,7 @@ class PaymentInfoSection extends StatelessWidget {
               onTap: () => _copyAccountNumber(context, displayAccount),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.copy_rounded,
-                    color: AppColors.primary,
-                  ),
+                  const Icon(Icons.copy_rounded, color: AppColors.primary),
                   const SizedBox(width: 8),
                   const Text(
                     "Salin No. Rekening",
@@ -86,10 +81,7 @@ class PaymentInfoSection extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.primary,
-                  ),
+                  const Icon(Icons.chevron_right, color: AppColors.primary),
                 ],
               ),
             ),
@@ -105,10 +97,7 @@ class PaymentInfoSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
+          Text(label, style: const TextStyle(color: AppColors.textSecondary)),
           Text(
             value,
             style: TextStyle(

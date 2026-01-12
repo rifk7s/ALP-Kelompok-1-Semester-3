@@ -10,8 +10,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repository;
 
   AuthBloc({required AuthRepository repository})
-      : _repository = repository,
-        super(const AuthState()) {
+    : _repository = repository,
+      super(const AuthState()) {
     on<AuthStarted>(_onAuthStarted);
     on<AuthLoggedIn>(_onLoggedIn);
     on<AuthLoggedOut>(_onLoggedOut);

@@ -18,11 +18,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required ProductRepository productRepository,
     required CartRepository cartRepository,
     required NotificationRepository notificationRepository,
-  })  : _categoryRepository = categoryRepository,
-        _productRepository = productRepository,
-        _cartRepository = cartRepository,
-        _notificationRepository = notificationRepository,
-        super(HomeInitial()) {
+  }) : _categoryRepository = categoryRepository,
+       _productRepository = productRepository,
+       _cartRepository = cartRepository,
+       _notificationRepository = notificationRepository,
+       super(HomeInitial()) {
     on<HomeCategoriesLoadRequested>(_onCategoriesLoadRequested);
     on<HomeProductsLoadRequested>(_onProductsLoadRequested);
     on<HomeCategorySelected>(_onCategorySelected);
@@ -202,7 +202,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Refresh all data in parallel
       final results = await Future.wait([
         _categoryRepository.getCategories(),
-        _productRepository.getProducts(categoryId: currentState.selectedCategoryId),
+        _productRepository.getProducts(
+          categoryId: currentState.selectedCategoryId,
+        ),
       ]);
 
       final categories = results[0];

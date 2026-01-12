@@ -131,14 +131,13 @@ class CheckoutCartItemsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: cart.map((item) => _buildCartItem(item)).toList(),
-    );
+    return Column(children: cart.map((item) => _buildCartItem(item)).toList());
   }
 
   Widget _buildCartItem(Map<String, dynamic> item) {
     final product = item['product'];
-    final imagePath = product['product_images'] != null &&
+    final imagePath =
+        product['product_images'] != null &&
             (product['product_images'] as List).isNotEmpty
         ? product['product_images'][0]['image_path']
         : null;
@@ -432,7 +431,10 @@ class CheckoutBottomBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
-          BoxShadow(color: AppColors.black.withValues(alpha: 0.06), blurRadius: 6),
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.06),
+            blurRadius: 6,
+          ),
         ],
       ),
       child: Row(

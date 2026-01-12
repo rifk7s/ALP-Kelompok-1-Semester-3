@@ -25,7 +25,8 @@ class ProductImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.getImageUrl(imagePath);
-    final hasImage = imageUrl.isNotEmpty && imageUrl != 'https://via.placeholder.com/150';
+    final hasImage =
+        imageUrl.isNotEmpty && imageUrl != 'https://via.placeholder.com/150';
 
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(8),
@@ -50,11 +51,7 @@ class ProductImageWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.image,
-              color: AppColors.textMuted,
-              size: 32,
-            ),
+            const Icon(Icons.image, color: AppColors.textMuted, size: 32),
             if (placeholderText != null) ...[
               const SizedBox(height: 8),
               Text(

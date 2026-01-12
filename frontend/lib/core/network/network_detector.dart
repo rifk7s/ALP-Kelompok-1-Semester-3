@@ -52,14 +52,19 @@ class NetworkDetector {
       final response = await http
           .post(
             Uri.parse(url),
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
           )
           .timeout(_detectionTimeout);
 
       // Any response means backend is running
       // We expect validation error (422) or auth error (401), both mean backend is up
       if (response.statusCode >= 400 && response.statusCode < 500) {
-        debugPrint('  ✅ $ip: Backend is running (status: ${response.statusCode})');
+        debugPrint(
+          '  ✅ $ip: Backend is running (status: ${response.statusCode})',
+        );
         return true;
       }
 
@@ -82,7 +87,10 @@ class NetworkDetector {
       final response = await http
           .post(
             Uri.parse(url),
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
           )
           .timeout(const Duration(seconds: 3));
 

@@ -10,8 +10,7 @@ class ApiConfig {
   static const String _androidEmulatorUrl = 'http://10.0.2.2:8000/api';
 
   // iOS IPs - Priority order: tries home first, then cafe as fallback
-  static const String _homeIP =
-      '192.168.18.182'; // Home IP (primary)
+  static const String _homeIP = '192.168.18.182'; // Home IP (primary)
   static const String _cafeIP = '192.168.1.50'; // Cafe IP (fallback)
 
   // List of IPs to try in priority order (home first!)
