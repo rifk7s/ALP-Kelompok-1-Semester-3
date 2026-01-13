@@ -271,7 +271,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
     // This prevents _debugLocked errors when showing dialog after returning from another screen
     await Future.delayed(Duration.zero);
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     showGeneralDialog(
       context: context,
