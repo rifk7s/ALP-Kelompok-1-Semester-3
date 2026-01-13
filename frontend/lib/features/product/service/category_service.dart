@@ -1,18 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class CategoryService {
   // Fetch all categories
   static Future<List<dynamic>> getCategories() async {
     try {
-      final url = '${ApiConfig.baseUrl}/products/categories';
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: ApiConfig.headers(),
-      );
+      final response = await apiClient.get('/products/categories');
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -25,7 +19,7 @@ class CategoryService {
       if (kDebugMode) {
         debugPrint('CategoryService: Error fetching categories: $e');
       }
-      throw Exception('Error fetching categories: $e');
+      rethrow;
     }
   }
 }

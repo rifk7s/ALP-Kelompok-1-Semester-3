@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class OrderService {
@@ -31,18 +30,13 @@ class OrderService {
       }
 
       if (kDebugMode) {
-        debugPrint('Creating order with URL: ${ApiConfig.baseUrl}/checkout');
-        debugPrint('Request body: ${json.encode(body)}');
+        debugPrint('Creating order with body: ${json.encode(body)}');
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/checkout'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode(body),
+      final response = await apiClient.post(
+        '/checkout',
+        token: token,
+        body: body,
       );
 
       if (kDebugMode) {
@@ -65,7 +59,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error creating order: $e');
       }
-      return null;
+      rethrow;
     }
   }
 
@@ -74,13 +68,7 @@ class OrderService {
       final token = await StorageService.getToken();
       if (token == null) return [];
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/orders'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.get('/orders', token: token);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -91,7 +79,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error fetching orders: $e');
       }
-      return [];
+      rethrow;
     }
   }
 
@@ -106,12 +94,9 @@ class OrderService {
         return null;
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/orders/$orderId/status'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.get(
+        '/orders/$orderId/status',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -126,7 +111,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error checking order status: $e');
       }
-      return null;
+      rethrow;
     }
   }
 
@@ -136,13 +121,7 @@ class OrderService {
       final token = await StorageService.getToken();
       if (token == null) return null;
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/orders/$orderId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.get('/orders/$orderId', token: token);
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -152,7 +131,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error fetching order: $e');
       }
-      return null;
+      rethrow;
     }
   }
 
@@ -167,17 +146,13 @@ class OrderService {
         return false;
       }
 
-      final url = '${ApiConfig.baseUrl}/orders/$orderId/complete';
       if (kDebugMode) {
-        debugPrint('Attempting to complete order at: $url');
+        debugPrint('Attempting to complete order: $orderId');
       }
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/orders/$orderId/complete',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -199,7 +174,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error completing order: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -214,17 +189,13 @@ class OrderService {
         return false;
       }
 
-      final url = '${ApiConfig.baseUrl}/orders/$orderId/cancel';
       if (kDebugMode) {
-        debugPrint('Attempting to cancel order at: $url');
+        debugPrint('Attempting to cancel order: $orderId');
       }
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/orders/$orderId/cancel',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -246,7 +217,7 @@ class OrderService {
       if (kDebugMode) {
         debugPrint('Error cancelling order: $e');
       }
-      return false;
+      rethrow;
     }
   }
 }

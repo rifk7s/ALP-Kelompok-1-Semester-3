@@ -49,7 +49,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     try {
-      final data = await _categoryRepository.getCategories();
+      // Minimum delay for UX - ensures spinner is visible
+      final categoriesFuture = _categoryRepository.getCategories();
+      final delayFuture = Future.delayed(const Duration(milliseconds: 900));
+
+      final data = await categoriesFuture;
+      await delayFuture;
 
       // Re-check the state after the async operation
       // This handles the race condition where products might have loaded first
@@ -89,9 +94,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     try {
-      final data = await _productRepository.getProducts(
+      // Minimum delay for UX - ensures spinner is visible
+      final productsFuture = _productRepository.getProducts(
         categoryId: event.categoryId,
       );
+      final delayFuture = Future.delayed(const Duration(milliseconds: 900));
+
+      final data = await productsFuture;
+      await delayFuture;
 
       // Sort: active products first, sold_out at bottom
       data.sort((a, b) {
@@ -199,16 +209,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(const HomeLoading(isLoadingCategories: true, isLoadingProducts: true));
 
     try {
-      // Refresh all data in parallel
-      final results = await Future.wait([
-        _categoryRepository.getCategories(),
-        _productRepository.getProducts(
-          categoryId: currentState.selectedCategoryId,
-        ),
-      ]);
+      // Refresh all data in parallel with minimum delay for UX
+      // This ensures spinner is visible even when API is fast
+      final categoriesFuture = _categoryRepository.getCategories();
+      final productsFuture = _productRepository.getProducts(
+        categoryId: currentState.selectedCategoryId,
+      );
+      final delayFuture = Future.delayed(const Duration(milliseconds: 1600));
 
-      final categories = results[0];
-      final products = results[1];
+      final categories = await categoriesFuture;
+      final products = await productsFuture;
+      await delayFuture;
 
       // Sort products: active first, then sold_out
       products.sort((a, b) {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class BumdesInfo {
   final String id;
@@ -26,10 +25,7 @@ class BumdesService {
     if (_cachedBumdes != null) return _cachedBumdes;
 
     try {
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/bumdes'),
-        headers: ApiConfig.headers(),
-      );
+      final response = await apiClient.get('/bumdes');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -38,6 +34,7 @@ class BumdesService {
       }
     } catch (e) {
       debugPrint('BumdesService error: $e');
+      rethrow;
     }
     return null;
   }

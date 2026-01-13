@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class AdminService {
@@ -13,17 +12,11 @@ class AdminService {
       final token = await StorageService.getToken();
       if (token == null) return [];
 
-      final uri = status != null
-          ? Uri.parse('${ApiConfig.baseUrl}/admin/orders?status=$status')
-          : Uri.parse('${ApiConfig.baseUrl}/admin/orders');
+      final endpoint = status != null
+          ? '/admin/orders?status=$status'
+          : '/admin/orders';
 
-      final response = await http.get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.get(endpoint, token: token);
 
       if (kDebugMode) {
         debugPrint('Admin orders response status: ${response.statusCode}');
@@ -39,7 +32,7 @@ class AdminService {
       if (kDebugMode) {
         debugPrint('Error fetching admin orders: $e');
       }
-      return [];
+      rethrow;
     }
   }
 
@@ -49,12 +42,9 @@ class AdminService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/admin/orders/$orderId/confirm-payment'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/admin/orders/$orderId/confirm-payment',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -65,7 +55,7 @@ class AdminService {
       if (kDebugMode) {
         debugPrint('Error confirming payment: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -75,12 +65,9 @@ class AdminService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/admin/orders/$orderId/reject-payment'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/admin/orders/$orderId/reject-payment',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -91,7 +78,7 @@ class AdminService {
       if (kDebugMode) {
         debugPrint('Error rejecting payment: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -101,12 +88,9 @@ class AdminService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/admin/orders/$orderId/mark-processing'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/admin/orders/$orderId/mark-processing',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -117,7 +101,7 @@ class AdminService {
       if (kDebugMode) {
         debugPrint('Error marking processing: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -127,12 +111,9 @@ class AdminService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/admin/orders/$orderId/mark-shipped'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/admin/orders/$orderId/mark-shipped',
+        token: token,
       );
 
       if (kDebugMode) {
@@ -143,7 +124,7 @@ class AdminService {
       if (kDebugMode) {
         debugPrint('Error marking shipped: $e');
       }
-      return false;
+      rethrow;
     }
   }
 }

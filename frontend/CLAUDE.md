@@ -198,6 +198,78 @@ class ProductEditingCubit extends Cubit<ProductEditing> {
 
 ---
 
+## Network Layer (`core/network/`)
+
+### ApiClient - Centralized HTTP Client
+
+**SELALU gunakan `apiClient` untuk semua HTTP calls di services!**
+
+```dart
+import 'package:frontend/core/network/api_client.dart';
+
+// Global singleton instance
+final response = await apiClient.get('/products', token: token);
+```
+
+**Available Methods:**
+
+| Method | Use For |
+|--------|---------|
+| `apiClient.get()` | GET requests |
+| `apiClient.post()` | POST with JSON body |
+| `apiClient.put()` | PUT with JSON body |
+| `apiClient.patch()` | PATCH with JSON body |
+| `apiClient.delete()` | DELETE requests |
+| `apiClient.multipartPost()` | File uploads |
+
+**Benefits:**
+- **Timeout protection** - All requests have configurable timeout (default 2s connection, 10s receive)
+- **IP fallback** - Automatically tries backup IPs on connection failure
+- **Auto-reset** - Resets to primary IP before each request cycle
+- **Centralized error handling** - Throws `ApiException` with helpful hints
+
+**Example Service:**
+```dart
+class ProductService {
+  static Future<List<dynamic>> getProducts() async {
+    final response = await apiClient.get('/products/product');
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    throw Exception('Failed to load products');
+  }
+}
+```
+
+### JANGAN Gunakan http Langsung
+
+```dart
+// ❌ Wrong - No timeout, no IP fallback
+final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/products'));
+
+// ✅ Correct - Uses centralized client
+final response = await apiClient.get('/products');
+```
+
+### ApiConfig - Network Configuration
+
+```dart
+import 'package:frontend/core/network/api_config.dart';
+
+// Get current base URL
+ApiConfig.baseUrl  // Returns platform-appropriate URL
+
+// Get image URL from relative path
+ApiConfig.getImageUrl('products/image.jpg')
+
+// Connection settings
+ApiConfig.connectionTimeout  // 2 seconds
+ApiConfig.receiveTimeout     // 10 seconds
+```
+
+---
+
 ## Repository Pattern
 
 ### What is a Repository?

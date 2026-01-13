@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class PetaniData {
   final int id;
@@ -29,25 +28,11 @@ class PetaniData {
 }
 
 class PetaniService {
-  final http.Client client;
-
-  PetaniService({http.Client? client}) : client = client ?? http.Client();
-
   Future<List<PetaniData>> fetchAllPetani({required String token}) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
-    final headers = ApiConfig.headers(token: token);
+    final response = await apiClient.get('/petani-data', token: token);
 
-    final resp = await client
-        .get(uri, headers: headers)
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('Request timeout - server tidak merespons');
-          },
-        );
-
-    if (resp.statusCode == 200) {
-      final jsonBody = json.decode(resp.body);
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
       if (jsonBody is Map && jsonBody.containsKey('data')) {
         final List<dynamic> dataList = jsonBody['data'] as List<dynamic>;
         return dataList
@@ -55,50 +40,44 @@ class PetaniService {
             .toList();
       }
       return [];
-    } else if (resp.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Token expired atau tidak valid');
-    } else if (resp.statusCode == 403) {
+    } else if (response.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
 
-    throw Exception('Gagal memuat data petani: ${resp.statusCode}');
+    throw Exception('Gagal memuat data petani: ${response.statusCode}');
   }
 
   Future<PetaniData> createPetani({
     required Map<String, dynamic> data,
     required String token,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data');
-    final headers = ApiConfig.headers(token: token);
+    final response = await apiClient.post(
+      '/petani-data',
+      token: token,
+      body: data,
+    );
 
-    final resp = await client
-        .post(uri, headers: headers, body: json.encode(data))
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('Request timeout - server tidak merespons');
-          },
-        );
-
-    if (resp.statusCode == 201) {
-      final jsonBody = json.decode(resp.body);
+    if (response.statusCode == 201) {
+      final jsonBody = json.decode(response.body);
       if (jsonBody is Map && jsonBody.containsKey('data')) {
         return PetaniData.fromJson(jsonBody['data'] as Map<String, dynamic>);
       }
       throw Exception('Invalid response format');
-    } else if (resp.statusCode == 422) {
-      final errors = json.decode(resp.body);
+    } else if (response.statusCode == 422) {
+      final errors = json.decode(response.body);
       final errorMsg = errors['errors'] != null
           ? (errors['errors'] as Map).values.first[0]
           : errors['message'] ?? 'Validation error';
       throw Exception(errorMsg);
-    } else if (resp.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Token expired atau tidak valid');
-    } else if (resp.statusCode == 403) {
+    } else if (response.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
 
-    throw Exception('Gagal menambah petani: ${resp.statusCode}');
+    throw Exception('Gagal menambah petani: ${response.statusCode}');
   }
 
   Future<PetaniData> updatePetani({
@@ -106,91 +85,65 @@ class PetaniService {
     required Map<String, dynamic> data,
     required String token,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data/$id');
-    final headers = ApiConfig.headers(token: token);
+    final response = await apiClient.put(
+      '/petani-data/$id',
+      token: token,
+      body: data,
+    );
 
-    final resp = await client
-        .put(uri, headers: headers, body: json.encode(data))
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('Request timeout - server tidak merespons');
-          },
-        );
-
-    if (resp.statusCode == 200) {
-      final jsonBody = json.decode(resp.body);
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
       if (jsonBody is Map && jsonBody.containsKey('data')) {
         return PetaniData.fromJson(jsonBody['data'] as Map<String, dynamic>);
       }
       throw Exception('Invalid response format');
-    } else if (resp.statusCode == 422) {
-      final errors = json.decode(resp.body);
+    } else if (response.statusCode == 422) {
+      final errors = json.decode(response.body);
       final errorMsg = errors['errors'] != null
           ? (errors['errors'] as Map).values.first[0]
           : errors['message'] ?? 'Validation error';
       throw Exception(errorMsg);
-    } else if (resp.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Token expired atau tidak valid');
-    } else if (resp.statusCode == 403) {
+    } else if (response.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
 
-    throw Exception('Gagal memperbarui petani: ${resp.statusCode}');
+    throw Exception('Gagal memperbarui petani: ${response.statusCode}');
   }
 
   Future<bool> deletePetani({required int id, required String token}) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data/$id');
-    final headers = ApiConfig.headers(token: token);
+    final response = await apiClient.delete('/petani-data/$id', token: token);
 
-    final resp = await client
-        .delete(uri, headers: headers)
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('Request timeout - server tidak merespons');
-          },
-        );
-
-    if (resp.statusCode == 200) {
+    if (response.statusCode == 200) {
       return true;
-    } else if (resp.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Token expired atau tidak valid');
-    } else if (resp.statusCode == 403) {
+    } else if (response.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
 
-    throw Exception('Gagal menghapus petani: ${resp.statusCode}');
+    throw Exception('Gagal menghapus petani: ${response.statusCode}');
   }
 
   Future<Map<String, dynamic>> fetchPetaniDetail({
     required int petaniId,
     required String token,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/petani-data/$petaniId');
-    final headers = ApiConfig.headers(token: token);
+    final response = await apiClient.get('/petani-data/$petaniId', token: token);
 
-    final resp = await client
-        .get(uri, headers: headers)
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception('Request timeout - server tidak merespons');
-          },
-        );
-
-    if (resp.statusCode == 200) {
-      final jsonBody = json.decode(resp.body);
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
       if (jsonBody is Map && jsonBody.containsKey('data')) {
         return jsonBody['data'] as Map<String, dynamic>;
       }
       throw Exception('Invalid response format');
-    } else if (resp.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Token expired atau tidak valid');
-    } else if (resp.statusCode == 403) {
+    } else if (response.statusCode == 403) {
       throw Exception('Anda tidak memiliki akses (hanya BumDes)');
     }
 
-    throw Exception('Gagal memuat detail petani: ${resp.statusCode}');
+    throw Exception('Gagal memuat detail petani: ${response.statusCode}');
   }
 }

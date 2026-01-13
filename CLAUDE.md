@@ -179,6 +179,11 @@ AppBar(
 - Register new dependencies in `core/di/injection.dart`
 - Use `pushAuthenticatedScope()` on login, `popAuthenticatedScope()` on logout
 
+**Network Layer:**
+- SELALU gunakan `apiClient` untuk HTTP calls (bukan `http.get()` langsung)
+- ApiClient provides: timeout protection, IP fallback, centralized error handling
+- See `frontend/CLAUDE.md` for detailed usage
+
 **UI Helpers** (`core/utils/ui_helpers.dart`):
 - `SnackBarHelper` - Throttled SnackBar with `showSuccess`, `showError`, `showInfo`
 - `RetryableContent` - Error state with retry button (for load failures)

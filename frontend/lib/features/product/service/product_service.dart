@@ -1,22 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class ProductService {
   // Fetch all products
   static Future<List<dynamic>> getProducts({int? categoryId}) async {
     try {
-      String url = '${ApiConfig.baseUrl}/products/product';
+      String endpoint = '/products/product';
       if (categoryId != null) {
-        url += '?category_id=$categoryId';
+        endpoint += '?category_id=$categoryId';
       }
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: ApiConfig.headers(),
-      );
+      final response = await apiClient.get(endpoint);
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -31,10 +28,7 @@ class ProductService {
   // Fetch a single product by ID
   static Future<Map<String, dynamic>?> getProductById(int productId) async {
     try {
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/products/product/$productId'),
-        headers: ApiConfig.headers(),
-      );
+      final response = await apiClient.get('/products/product/$productId');
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -62,64 +56,57 @@ class ProductService {
     List<Map<String, dynamic>>? petaniContributors,
     List<File>? images,
   }) async {
-    // Get token for authentication
     final token = await StorageService.getToken();
 
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('${ApiConfig.baseUrl}/products/product'),
-    );
+    final fields = <String, String>{
+      'name': name,
+      'category_id': categoryId.toString(),
+      'variety': variety,
+      'storage_days': storageDays.toString(),
+      'price_per_kg': pricePerKg.toString(),
+      'stock_kg': stockKg.toString(),
+    };
 
-    // Add auth header
-    if (token != null) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
-    request.headers['Accept'] = 'application/json';
-
-    // Add fields
-    request.fields['name'] = name;
-    request.fields['category_id'] = categoryId.toString();
-    request.fields['variety'] = variety;
     if (harvestDate != null) {
-      request.fields['harvest_date'] = harvestDate;
+      fields['harvest_date'] = harvestDate;
     }
-    request.fields['storage_days'] = storageDays.toString();
-    request.fields['price_per_kg'] = pricePerKg.toString();
-    request.fields['stock_kg'] = stockKg.toString();
-
     if (description != null) {
-      request.fields['description'] = description;
+      fields['description'] = description;
     }
 
     // Handle multiple petani contributors
     if (petaniContributors != null && petaniContributors.isNotEmpty) {
       for (int i = 0; i < petaniContributors.length; i++) {
-        request.fields['petani_contributors[$i][petani_id]'] =
+        fields['petani_contributors[$i][petani_id]'] =
             petaniContributors[i]['petani_id'].toString();
-        request.fields['petani_contributors[$i][contributed_kg]'] =
+        fields['petani_contributors[$i][contributed_kg]'] =
             petaniContributors[i]['contributed_kg'].toString();
-        // Include harvest date for each contributor
         if (petaniContributors[i]['harvest_date'] != null) {
-          request.fields['petani_contributors[$i][harvest_date]'] =
+          fields['petani_contributors[$i][harvest_date]'] =
               petaniContributors[i]['harvest_date'].toString();
         }
       }
     } else if (petaniId != null) {
-      // Backward compatibility - single petani
-      request.fields['petani_id'] = petaniId.toString();
+      fields['petani_id'] = petaniId.toString();
     }
 
-    // Add images
-    if (images != null) {
+    // Prepare image files
+    List<http.MultipartFile>? multipartFiles;
+    if (images != null && images.isNotEmpty) {
+      multipartFiles = [];
       for (var i = 0; i < images.length; i++) {
-        request.files.add(
+        multipartFiles.add(
           await http.MultipartFile.fromPath('images[$i]', images[i].path),
         );
       }
     }
 
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await apiClient.multipartPost(
+      '/products/product',
+      token: token,
+      fields: fields,
+      files: multipartFiles,
+    );
 
     if (response.statusCode == 201) {
       return json.decode(response.body);
@@ -134,12 +121,9 @@ class ProductService {
     required String token,
   }) async {
     try {
-      final response = await http.delete(
-        Uri.parse('${ApiConfig.baseUrl}/products/product/$productId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.delete(
+        '/products/product/$productId',
+        token: token,
       );
 
       if (response.statusCode != 204 && response.statusCode != 200) {
@@ -170,52 +154,30 @@ class ProductService {
     try {
       // If there are images to upload or delete, use multipart form data
       if (newImages != null || imageIdsToDelete != null) {
-        var request = http.MultipartRequest(
-          'POST', // Using POST with _method field for Laravel
-          Uri.parse('${ApiConfig.baseUrl}/products/product/$productId'),
-        );
+        final fields = <String, String>{
+          '_method': 'PUT', // Laravel method spoofing
+        };
 
-        request.headers['Authorization'] = 'Bearer $token';
-        request.headers['Accept'] = 'application/json';
-
-        // Add _method field for Laravel to recognize this as PUT
-        request.fields['_method'] = 'PUT';
-
-        // Add product data
-        if (name != null) {
-          request.fields['name'] = name;
-        }
-        if (categoryId != null) {
-          request.fields['category_id'] = categoryId.toString();
-        }
-        if (variety != null) {
-          request.fields['variety'] = variety;
-        }
-        if (harvestDate != null) {
-          request.fields['harvest_date'] = harvestDate;
-        }
+        if (name != null) fields['name'] = name;
+        if (categoryId != null) fields['category_id'] = categoryId.toString();
+        if (variety != null) fields['variety'] = variety;
+        if (harvestDate != null) fields['harvest_date'] = harvestDate;
         if (storageDays != null) {
-          request.fields['storage_days'] = storageDays.toString();
+          fields['storage_days'] = storageDays.toString();
         }
         if (pricePerKg != null) {
-          request.fields['price_per_kg'] = pricePerKg.toString();
+          fields['price_per_kg'] = pricePerKg.toString();
         }
-        if (stockKg != null) {
-          request.fields['stock_kg'] = stockKg.toString();
-        }
-        if (description != null) {
-          request.fields['description'] = description;
-        }
-        if (status != null) {
-          request.fields['status'] = status;
-        }
+        if (stockKg != null) fields['stock_kg'] = stockKg.toString();
+        if (description != null) fields['description'] = description;
+        if (status != null) fields['status'] = status;
 
         // Add petani contributors
         if (petaniContributors != null && petaniContributors.isNotEmpty) {
           for (int i = 0; i < petaniContributors.length; i++) {
-            request.fields['petani_contributors[$i][petani_id]'] =
+            fields['petani_contributors[$i][petani_id]'] =
                 petaniContributors[i]['petani_id'].toString();
-            request.fields['petani_contributors[$i][contributed_kg]'] =
+            fields['petani_contributors[$i][contributed_kg]'] =
                 petaniContributors[i]['contributed_kg'].toString();
           }
         }
@@ -223,22 +185,27 @@ class ProductService {
         // Add image IDs to delete
         if (imageIdsToDelete != null && imageIdsToDelete.isNotEmpty) {
           for (int i = 0; i < imageIdsToDelete.length; i++) {
-            request.fields['delete_image_ids[$i]'] = imageIdsToDelete[i]
-                .toString();
+            fields['delete_image_ids[$i]'] = imageIdsToDelete[i].toString();
           }
         }
 
-        // Add new images
+        // Prepare image files
+        List<http.MultipartFile>? multipartFiles;
         if (newImages != null && newImages.isNotEmpty) {
+          multipartFiles = [];
           for (var image in newImages) {
-            request.files.add(
+            multipartFiles.add(
               await http.MultipartFile.fromPath('images[]', image.path),
             );
           }
         }
 
-        final streamedResponse = await request.send();
-        final response = await http.Response.fromStream(streamedResponse);
+        final response = await apiClient.multipartPost(
+          '/products/product/$productId',
+          token: token,
+          fields: fields,
+          files: multipartFiles,
+        );
 
         if (response.statusCode == 200) {
           return json.decode(response.body);
@@ -270,14 +237,10 @@ class ProductService {
               .toList();
         }
 
-        final response = await http.put(
-          Uri.parse('${ApiConfig.baseUrl}/products/product/$productId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: json.encode(data),
+        final response = await apiClient.put(
+          '/products/product/$productId',
+          token: token,
+          body: data,
         );
 
         if (response.statusCode == 200) {

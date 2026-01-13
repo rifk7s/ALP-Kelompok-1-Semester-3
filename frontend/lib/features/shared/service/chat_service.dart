@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class ChatService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -133,18 +131,14 @@ class ChatService {
     try {
       final token = await StorageService.getToken();
       if (token != null) {
-        await http.post(
-          Uri.parse('${ApiConfig.baseUrl}/chat/notify'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: json.encode({
+        await apiClient.post(
+          '/chat/notify',
+          token: token,
+          body: {
             'recipient_id': recipientId,
             'message': text,
             'chat_id': chatId,
-          }),
+          },
         );
       }
     } catch (e) {

@@ -52,6 +52,13 @@ class ApiConfig {
     return false; // No more IPs to try
   }
 
+  // Reset to primary IP (call before starting a new request cycle)
+  static void resetToPrimaryIP() {
+    if (_currentIP != _ipPriority.first) {
+      setIOSDeviceIP(_ipPriority.first);
+    }
+  }
+
   static String get baseUrl {
     if (Platform.isAndroid) {
       return _androidEmulatorUrl;

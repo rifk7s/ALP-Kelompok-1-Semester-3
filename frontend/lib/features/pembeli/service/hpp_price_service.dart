@@ -1,20 +1,16 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class HppPriceService {
   // Fetch all HPP prices
   static Future<List<dynamic>> getHppPrices({int? categoryId}) async {
     try {
-      String url = '${ApiConfig.baseUrl}/products/hpp-prices';
+      String endpoint = '/products/hpp-prices';
       if (categoryId != null) {
-        url += '?category_id=$categoryId';
+        endpoint += '?category_id=$categoryId';
       }
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: ApiConfig.headers(),
-      );
+      final response = await apiClient.get(endpoint);
 
       if (response.statusCode == 200) {
         return json.decode(response.body);

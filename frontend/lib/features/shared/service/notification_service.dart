@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
-import 'package:http/http.dart' as http;
 
 class NotificationService {
   /// Get all notifications for the current user
@@ -13,13 +12,7 @@ class NotificationService {
         throw Exception('Not authenticated');
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/notifications'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.get('/notifications', token: token);
 
       if (kDebugMode) {
         debugPrint('Notifications response status: ${response.statusCode}');
@@ -36,7 +29,7 @@ class NotificationService {
       if (kDebugMode) {
         debugPrint('Error fetching notifications: $e');
       }
-      return [];
+      rethrow;
     }
   }
 
@@ -48,12 +41,9 @@ class NotificationService {
         return 0;
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/notifications/unread-count'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.get(
+        '/notifications/unread-count',
+        token: token,
       );
 
       if (response.statusCode == 200) {
@@ -66,7 +56,7 @@ class NotificationService {
       if (kDebugMode) {
         debugPrint('Error fetching unread count: $e');
       }
-      return 0;
+      rethrow;
     }
   }
 
@@ -78,14 +68,9 @@ class NotificationService {
         throw Exception('Not authenticated');
       }
 
-      final response = await http.post(
-        Uri.parse(
-          '${ApiConfig.baseUrl}/notifications/$notificationId/mark-read',
-        ),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/notifications/$notificationId/mark-read',
+        token: token,
       );
 
       return response.statusCode == 200;
@@ -93,7 +78,7 @@ class NotificationService {
       if (kDebugMode) {
         debugPrint('Error marking notification as read: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -105,12 +90,9 @@ class NotificationService {
         throw Exception('Not authenticated');
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/notifications/mark-all-read'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final response = await apiClient.post(
+        '/notifications/mark-all-read',
+        token: token,
       );
 
       return response.statusCode == 200;
@@ -118,7 +100,7 @@ class NotificationService {
       if (kDebugMode) {
         debugPrint('Error marking all notifications as read: $e');
       }
-      return false;
+      rethrow;
     }
   }
 }

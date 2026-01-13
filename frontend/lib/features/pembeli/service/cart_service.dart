@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class CartService {
@@ -15,13 +14,7 @@ class CartService {
         return null;
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/cart'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.get('/cart', token: token);
 
       if (kDebugMode) {
         debugPrint('Cart response status: ${response.statusCode}');
@@ -36,7 +29,7 @@ class CartService {
       if (kDebugMode) {
         debugPrint('Error getting cart: $e');
       }
-      return null;
+      rethrow;
     }
   }
 
@@ -48,14 +41,10 @@ class CartService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/cart'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode({'product_id': productId, 'quantity_kg': quantityKg}),
+      final response = await apiClient.post(
+        '/cart',
+        token: token,
+        body: {'product_id': productId, 'quantity_kg': quantityKg},
       );
 
       return response.statusCode == 201;
@@ -63,7 +52,7 @@ class CartService {
       if (kDebugMode) {
         debugPrint('Error adding to cart: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -75,14 +64,10 @@ class CartService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.put(
-        Uri.parse('${ApiConfig.baseUrl}/cart/$cartId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode({'quantity_kg': quantityKg}),
+      final response = await apiClient.put(
+        '/cart/$cartId',
+        token: token,
+        body: {'quantity_kg': quantityKg},
       );
 
       return response.statusCode == 200;
@@ -90,7 +75,7 @@ class CartService {
       if (kDebugMode) {
         debugPrint('Error updating cart item: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -99,20 +84,14 @@ class CartService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.delete(
-        Uri.parse('${ApiConfig.baseUrl}/cart/$cartId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.delete('/cart/$cartId', token: token);
 
       return response.statusCode == 200;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error removing from cart: $e');
       }
-      return false;
+      rethrow;
     }
   }
 
@@ -121,20 +100,14 @@ class CartService {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final response = await http.delete(
-        Uri.parse('${ApiConfig.baseUrl}/cart'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await apiClient.delete('/cart', token: token);
 
       return response.statusCode == 200;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error clearing cart: $e');
       }
-      return false;
+      rethrow;
     }
   }
 }
