@@ -3,13 +3,58 @@
 
 [⬅ Back to root README](../README.md) · [Backend README ➜](../backend/README.md)
 
-Flutter mobile app for the project.
+Flutter mobile app for the project using **MVVM Feature-First Architecture**.
+
+## Tech Stack
+
+### Core
+- [![Flutter](https://img.shields.io/badge/Flutter-3.9.2%2B-02569B?style=flat&labelColor=02569B&logo=flutter&logoColor=white&color=6c757d)](https://flutter.dev)
+- [![Dart](https://img.shields.io/badge/Dart-3.9.2%2B-0175C2?style=flat&labelColor=0175C2&logo=dart&logoColor=white&color=6c757d)](https://dart.dev)
+
+### State Management & Navigation
+- [![BLoC](https://img.shields.io/badge/BLoC-State%20Management-00D1B2?style=flat&labelColor=00D1B2&logo=flutter&logoColor=white&color=6c757d)](https://bloclibrary.dev)
+- [![GoRouter](https://img.shields.io/badge/GoRouter-Navigation-02569B?style=flat&labelColor=02569B&logo=flutter&logoColor=white&color=6c757d)](https://pub.dev/packages/go_router)
+- [![get_it](https://img.shields.io/badge/get__it-DI-FF6F00?style=flat&labelColor=FF6F00&logo=flutter&logoColor=white&color=6c757d)](https://pub.dev/packages/get_it)
+
+### Services
+- [![Firebase](https://img.shields.io/badge/Firebase-Core%20%2B%20Auth%20%2B%20Firestore-FFCA28?style=flat&labelColor=FFCA28&logo=firebase&logoColor=black&color=6c757d)](https://firebase.google.com)
+
+## Architecture
+
+```
+lib/
+├── core/                        # Shared across all features
+│   ├── di/                      # Dependency Injection (get_it)
+│   │   └── injection.dart       # Service locator + scopes
+│   ├── network/                 # HTTP client, API config
+│   ├── router/                  # GoRouter + guards
+│   ├── theme/                   # AppColors, AppTheme
+│   ├── utils/                   # Helpers, formatters
+│   │   ├── ui_helpers.dart      # SnackBarHelper, ShakeWidget, etc.
+│   │   └── currency_formatter.dart
+│   └── widgets/                 # Shared reusable widgets
+│
+└── features/                    # Feature modules (MVVM)
+    └── feature_name/
+        ├── model/               # Data models
+        ├── service/             # API calls
+        ├── repository/          # Data layer abstraction
+        ├── bloc/                # State management (BLoC/Cubit)
+        └── view/                # UI layer
+            ├── screens/
+            └── widgets/
+```
+
+**Layering Rule:** `Screen → BLoC → Repository → Service → API`
+
+> [!NOTE]
+> See [CLAUDE.md](CLAUDE.md) for detailed coding guidelines and patterns.
 
 ## Prerequisites
 
-- [![Flutter](https://img.shields.io/badge/Flutter-3.9.2%2B-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
-- [![Dart](https://img.shields.io/badge/Dart-3.9.2%2B-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
-- [![Firebase](https://img.shields.io/badge/Firebase-Core%20%2B%20Auth%20%2B%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
+- [![Flutter](https://img.shields.io/badge/Flutter-3.9.2%2B-02569B?style=flat-square&labelColor=02569B&logo=flutter&logoColor=white&color=6c757d)](https://flutter.dev)
+- [![Dart](https://img.shields.io/badge/Dart-3.9.2%2B-0175C2?style=flat-square&labelColor=0175C2&logo=dart&logoColor=white&color=6c757d)](https://dart.dev)
+- [![Firebase](https://img.shields.io/badge/Firebase-Core%20%2B%20Auth%20%2B%20Firestore-FFCA28?style=flat-square&labelColor=FFCA28&logo=firebase&logoColor=black&color=6c757d)](https://firebase.google.com)
 
 > [!IMPORTANT]
 > This app is configured for **Android** and **iOS** only.
@@ -87,12 +132,21 @@ FIREBASE_STORAGE_BUCKET=
 
 ## Backend API configuration (required)
 
-This app calls the Laravel API using a hard-coded base URL in `lib/core/services/api_config.dart`.
+This app calls the Laravel API with platform-specific IP handling.
+
+**Configuration file:** `lib/core/network/api_config.dart`
 
 Current behavior:
+- **Android emulator**: Uses `http://10.0.2.2:8000/api` (special alias to host machine)
+- **iOS (Simulator & Physical)**: Uses host machine's LAN IP (e.g., `192.168.x.x`)
 
-- Android emulator uses `http://10.0.2.2:8000/api`
-- iOS/physical device uses `http://10.1.50.240:8000/api` (you likely need to change this)
+> [!IMPORTANT]
+> iOS does NOT support `127.0.0.1` or `localhost`. You must use your machine's LAN IP.
+>
+> Update the IP constants in `lib/core/network/api_config.dart`:
+> ```dart
+> static const String _homeIP = '192.168.18.182'; // Your LAN IP here
+> ```
 
 > [!IMPORTANT]
 > If you're running the backend on your machine, start it with network binding:
@@ -100,10 +154,7 @@ Current behavior:
 > cd ../backend
 > php artisan serve --host=0.0.0.0 --port=8000
 > ```
-> Then update the `_iosDeviceUrl` and `_iosDeviceBase` constants in `lib/core/services/api_config.dart` to your machine's LAN IP.
-
-> [!TIP]
-> For iOS Simulator (on macOS), you can usually point it to `http://127.0.0.1:8000/api`.
+> Then update the constants in `lib/core/network/api_config.dart` to your machine's LAN IP if needed.
 
 Backend setup docs are in [../backend/README.md](../backend/README.md).
 

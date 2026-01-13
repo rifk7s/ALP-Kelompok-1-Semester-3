@@ -39,6 +39,9 @@ A full-stack mobile application built with Flutter (frontend) and Laravel (backe
 ### Frontend
 - [![Flutter](https://img.shields.io/badge/Flutter-3.9.2%2B-02569B?style=flat&labelColor=02569B&logo=flutter&logoColor=white&color=6c757d)](https://flutter.dev)
 - [![Dart](https://img.shields.io/badge/Dart-3.9.2%2B-0175C2?style=flat&labelColor=0175C2&logo=dart&logoColor=white&color=6c757d)](https://dart.dev)
+- [![BLoC](https://img.shields.io/badge/BLoC-State%20Management-00D1B2?style=flat&labelColor=00D1B2&logo=flutter&logoColor=white&color=6c757d)](https://bloclibrary.dev)
+- [![GoRouter](https://img.shields.io/badge/GoRouter-Navigation-02569B?style=flat&labelColor=02569B&logo=flutter&logoColor=white&color=6c757d)](https://pub.dev/packages/go_router)
+- [![get_it](https://img.shields.io/badge/get__it-DI-FF6F00?style=flat&labelColor=FF6F00&logo=dart&logoColor=white&color=6c757d)](https://pub.dev/packages/get_it)
 - [![Firebase](https://img.shields.io/badge/Firebase-Core%20%2B%20Auth%20%2B%20Firestore-FFCA28?style=flat&labelColor=FFCA28&logo=firebase&logoColor=black&color=6c757d)](https://firebase.google.com)
 
 ### Database
@@ -107,15 +110,30 @@ flutter run
 
 ```
 .
-├── backend/           # Laravel API + Firebase Admin SDK
-│   ├── app/          # Controllers, Models, Services
-│   ├── database/     # Migrations, Seeders
-│   └── routes/       # API routes
+├── backend/              # Laravel API + Firebase Admin SDK
+│   ├── app/
+│   │   ├── Http/Controllers/   # API controllers
+│   │   ├── Models/             # Eloquent models
+│   │   └── Services/           # Business logic
+│   ├── database/         # Migrations, Seeders
+│   └── routes/           # API routes
 │
-└── frontend/         # Flutter mobile app
-    ├── lib/         # Dart source code
-    ├── android/     # Android platform files
-    └── ios/         # iOS platform files
+└── frontend/             # Flutter mobile app (MVVM)
+    └── lib/
+        ├── core/               # Shared utilities
+        │   ├── di/             # Dependency injection (get_it)
+        │   ├── network/        # API client, config
+        │   ├── router/         # GoRouter + guards
+        │   ├── theme/          # AppColors, AppTheme
+        │   ├── utils/          # Helpers (SnackBarHelper, etc.)
+        │   └── widgets/        # Shared widgets
+        │
+        └── features/           # Feature modules
+            ├── auth/           # Authentication (BLoC)
+            ├── product/        # Product management
+            ├── bumdes/         # BUMDes dashboard
+            ├── pembeli/        # Buyer (cart, transactions)
+            └── shared/         # Shared screens
 ```
 
 ## Common Issues
@@ -133,7 +151,7 @@ cd backend
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-Update IP in `frontend/lib/core/services/api_config.dart` if needed.
+Update IP in `frontend/lib/core/network/api_config.dart` if needed.
 
 ### Firebase configuration missing
 

@@ -426,6 +426,200 @@ AppColors.greyLight
 
 ---
 
+## UI Helpers (`core/utils/ui_helpers.dart`)
+
+### SnackBarHelper - Throttled SnackBar
+
+**SELALU gunakan `SnackBarHelper` daripada `ScaffoldMessenger` langsung!**
+
+```dart
+// Correct - with throttle protection
+SnackBarHelper.showSuccess(context, 'Profil berhasil diperbarui');
+SnackBarHelper.showError(context, 'Gagal menyimpan data');
+SnackBarHelper.showInfo(context, 'Sedang memproses...');
+
+// Wrong - no throttle, inconsistent
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(content: Text('Message')),
+);
+```
+
+**Kapan gunakan SnackBarHelper:**
+| ✅ Gunakan | ❌ Jangan gunakan |
+|-----------|------------------|
+| Success/failure setelah action | Form validation errors |
+| Network operation results | Inline warnings (stock limit) |
+| Post-action confirmation | Load failures (use RetryableContent) |
+
+### RetryableContent - Error State dengan Retry
+
+**Gunakan untuk data loading errors, bukan SnackBar:**
+
+```dart
+// 1. Add error state
+String? _errorMessage;
+
+// 2. Track error in loadData()
+Future<void> loadData() async {
+  setState(() {
+    isLoading = true;
+    _errorMessage = null;
+  });
+
+  try {
+    final data = await service.fetchData();
+    if (!mounted) return;
+    setState(() {
+      this.data = data;
+      isLoading = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+    setState(() {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      isLoading = false;
+    });
+  }
+}
+
+// 3. Wrap content
+body: RetryableContent(
+  isLoading: isLoading,
+  hasError: _errorMessage != null,
+  errorMessage: _errorMessage,
+  onRetry: loadData,
+  child: _buildContent(),
+),
+```
+
+### ShakeWidget - Form Validation Animation
+
+**Gunakan untuk inline form validation, bukan SnackBar:**
+
+```dart
+// 1. Add shake key and error state
+final _nameShakeKey = GlobalKey<ShakeWidgetState>();
+String? _nameError;
+
+// 2. Wrap TextField with ShakeWidget
+ShakeWidget(
+  key: _nameShakeKey,
+  child: TextField(
+    controller: _nameController,
+    decoration: InputDecoration(
+      labelText: 'Nama Produk *',
+      errorText: _nameError,  // Inline error
+    ),
+    onChanged: (_) {
+      if (_nameError != null) setState(() => _nameError = null);
+    },
+  ),
+),
+
+// 3. On validation failure
+void _validate() {
+  if (_nameController.text.isEmpty) {
+    setState(() => _nameError = 'Nama produk harus diisi');
+    _nameShakeKey.currentState?.shake();  // Trigger animation
+    return;
+  }
+  // Continue...
+}
+```
+
+### EmptyStateWidget - Empty State Display
+
+```dart
+EmptyStateWidget(
+  message: 'Tidak ada produk',
+  subMessage: 'Tambahkan produk pertama Anda',
+  icon: Icons.inventory_2_outlined,
+  onAction: () => context.push('/upload'),
+  actionLabel: 'Tambah Produk',
+)
+```
+
+### DialogManager - Prevent Duplicate Dialogs
+
+```dart
+// Prevents multiple dialogs from stacking
+await DialogManager.showAlert(
+  context: context,
+  title: 'Konfirmasi',
+  content: 'Yakin ingin menghapus?',
+  confirmText: 'Hapus',
+  cancelText: 'Batal',
+  onConfirm: () => _deleteItem(),
+);
+```
+
+### Other Utilities
+
+| Utility | Location | Purpose |
+|---------|----------|---------|
+| `CurrencyFormatter.rupiah` | `core/utils/currency_formatter.dart` | Format `Rp 25.000` |
+| `DateFormatter` | `core/utils/date_formatter.dart` | Format dates consistently |
+| `PullToRefresh` | `core/utils/ui_helpers.dart` | Simple pull-to-refresh wrapper |
+| `Debouncer` | `core/utils/ui_helpers.dart` | Prevent rapid calls |
+| `ButtonDebounceMixin` | `core/utils/ui_helpers.dart` | Mixin for button spam prevention |
+
+---
+
+## Navigation (GoRouter)
+
+### Prefer GoRouter Methods
+
+**SELALU gunakan GoRouter context methods daripada Navigator:**
+
+```dart
+// ✅ Correct - GoRouter
+context.pop();                           // Go back
+context.pop(result);                     // Go back with result
+context.push('/path');                   // Push route
+context.push('/path', extra: data);      // Push with data
+context.pushNamed('routeName');          // Push by name
+context.go('/path');                     // Replace entire stack
+
+// ❌ Wrong - Navigator (inconsistent with GoRouter)
+Navigator.pop(context);
+Navigator.push(context, MaterialPageRoute(...));
+Navigator.pushNamed(context, '/path');
+```
+
+### Async Navigation with Mounted Check
+
+```dart
+// ✅ Correct - Check context.mounted
+Future<void> _handleAction() async {
+  await someAsyncOperation();
+
+  if (!context.mounted) return;  // PENTING!
+
+  context.pop(true);
+}
+
+// ❌ Wrong - No mounted check
+Future<void> _handleAction() async {
+  await someAsyncOperation();
+  context.pop(true);  // May crash if widget disposed
+}
+```
+
+### Passing Data Between Routes
+
+```dart
+// Push with extra data
+context.push(
+  RoutePaths.productDetail,
+  extra: {'product': productData, 'isBumdes': true},
+);
+
+// Receive in destination screen (via GoRouterState in router config)
+// Or via constructor if using extra parameter parsing
+```
+
+---
+
 ## Common Patterns
 
 ### Screen with BLoC
@@ -498,25 +692,29 @@ return MultiBlocProvider(
 
 ### Mounted Check (Prevent setState after dispose)
 
+**Gunakan `context.mounted` daripada `mounted` untuk async operations:**
+
 ```dart
 Future<void> loadData() async {
   try {
     final data = await ApiService.fetchData();
 
-    if (!mounted) return;  // PENTING!
+    if (!context.mounted) return;  // PENTING! Use context.mounted
 
     setState(() {
       this.data = data;
       isLoading = false;
     });
   } catch (e) {
-    if (mounted) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(...);
-    }
+    if (!context.mounted) return;
+
+    setState(() => isLoading = false);
+    SnackBarHelper.showError(context, 'Gagal memuat data');
   }
 }
 ```
+
+**Note:** `context.mounted` lebih aman daripada `mounted` karena lint `use_build_context_synchronously` akan warn jika tidak di-check.
 
 ---
 
@@ -531,6 +729,12 @@ import 'package:frontend/core/theme/theme.dart';
 // Dependency Injection
 import 'package:frontend/core/di/injection.dart';
 
+// UI Helpers (SnackBarHelper, RetryableContent, ShakeWidget, etc.)
+import 'package:frontend/core/utils/ui_helpers.dart';
+
+// Currency formatting
+import 'package:frontend/core/utils/currency_formatter.dart';
+
 // Loading widgets
 import 'package:frontend/core/widgets/loading_widgets.dart';
 
@@ -539,6 +743,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Router
 import 'package:go_router/go_router.dart';
+import 'package:frontend/core/router/route_constants.dart';
 ```
 
 ### Feature-specific Imports

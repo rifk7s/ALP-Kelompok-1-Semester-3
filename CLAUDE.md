@@ -179,6 +179,18 @@ AppBar(
 - Register new dependencies in `core/di/injection.dart`
 - Use `pushAuthenticatedScope()` on login, `popAuthenticatedScope()` on logout
 
+**UI Helpers** (`core/utils/ui_helpers.dart`):
+- `SnackBarHelper` - Throttled SnackBar with `showSuccess`, `showError`, `showInfo`
+- `RetryableContent` - Error state with retry button (for load failures)
+- `ShakeWidget` - Form validation animation
+- `EmptyStateWidget` - Empty state display
+- `DialogManager` - Prevent duplicate dialogs
+
+**Navigation:**
+- PREFER `context.pop()` over `Navigator.pop(context)` for GoRouter consistency
+- Use `context.push()`, `context.pushNamed()`, `context.go()` for navigation
+- Check `context.mounted` before async navigation
+
 ### Laravel/PHP
 
 - Ikuti conventions dari `backend/CLAUDE.md` (Laravel Boost)
@@ -275,7 +287,7 @@ composer run test     # Run tests
 
 ### Web Search & Information
 - Before performing web searches or outputting dates, verify current date and consider information freshness
-- **Today's date:** 2026-01-12
+- **Today's date:** 2026-01-13
 
 ### File & System Management
 - Avoid destructive operations like `rm -rf`; use safer alternatives
