@@ -281,8 +281,10 @@ class _QuantitySelector extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 autofocus: true,
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
                 decoration: InputDecoration(
                   hintText: "Jumlah",
                   errorText: errorText,
@@ -335,8 +337,10 @@ class _QuantitySelector extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),
-                  child:
-                      const Text("OK", style: TextStyle(color: AppColors.white)),
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(color: AppColors.white),
+                  ),
                 ),
               ],
             );

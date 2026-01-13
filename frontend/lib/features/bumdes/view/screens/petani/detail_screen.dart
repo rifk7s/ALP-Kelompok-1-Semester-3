@@ -43,10 +43,15 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
         throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
-      final data = await _petaniService.fetchPetaniDetail(
+      // Minimum delay for UX - ensures spinner is visible
+      final detailFuture = _petaniService.fetchPetaniDetail(
         petaniId: widget.petaniId,
         token: token,
       );
+      final delayFuture = Future.delayed(const Duration(milliseconds: 10));
+
+      final data = await detailFuture;
+      await delayFuture;
 
       if (!mounted) return;
 

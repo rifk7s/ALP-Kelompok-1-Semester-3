@@ -68,7 +68,13 @@ class TransactionBumdesBloc {
   Future<void> loadOrders() async {
     emit(_state.copyWith(isLoading: true, hasError: false));
     try {
-      final orders = await AdminService.getOrdersByStatus();
+      // Minimum delay for UX - ensures spinner is visible
+      final ordersFuture = AdminService.getOrdersByStatus();
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final orders = await ordersFuture;
+      await delayFuture;
+
       emit(_state.copyWith(orders: orders, isLoading: false));
     } catch (e) {
       debugPrint('Error loading orders: $e');

@@ -37,8 +37,8 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
   List<int> _imagesToDelete = [];
 
   int get _totalImageCount {
-    final existingCount = (widget.existingImages?.length ?? 0) -
-        _imagesToDelete.length;
+    final existingCount =
+        (widget.existingImages?.length ?? 0) - _imagesToDelete.length;
     return widget.selectedImages.length + existingCount;
   }
 

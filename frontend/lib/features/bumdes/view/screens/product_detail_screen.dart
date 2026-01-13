@@ -143,7 +143,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     } catch (e) {
       if (!context.mounted) return;
 
-      SnackBarHelper.showError(context, 'Gagal menghapus produk: ${e.toString()}');
+      SnackBarHelper.showError(
+        context,
+        'Gagal menghapus produk: ${e.toString()}',
+      );
     }
   }
 

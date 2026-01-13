@@ -166,7 +166,9 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
           } else if (state is ProductFailure) {
             setState(() => isSubmitting = false);
             SnackBarHelper.showError(
-                context, 'Terjadi kesalahan: ${state.error}');
+              context,
+              'Terjadi kesalahan: ${state.error}',
+            );
           }
         },
         child: BlocBuilder<ProductBloc, ProductState>(
@@ -534,7 +536,10 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     // Get price from HPP
     final price = getPriceForSelection();
     if (price == null) {
-      SnackBarHelper.showError(context, 'Harga tidak ditemukan untuk kombinasi kategori/varietas ini');
+      SnackBarHelper.showError(
+        context,
+        'Harga tidak ditemukan untuk kombinasi kategori/varietas ini',
+      );
       return;
     }
 

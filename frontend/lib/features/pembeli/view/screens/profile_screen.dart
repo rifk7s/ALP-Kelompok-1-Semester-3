@@ -268,107 +268,107 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!context.mounted) return;
 
     showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: '',
-        barrierColor: AppColors.overlay,
-        transitionDuration: const Duration(milliseconds: 200),
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return Container();
-        },
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-            child: ScaleTransition(
-              scale: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ).drive(Tween<double>(begin: 0.95, end: 1.0)),
-              child: Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: AppColors.surface,
-                child: Container(
-                  width: 260,
-                  height: 170,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Apakah kamu yakin mau keluar?",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.black,
-                        ),
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: AppColors.overlay,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Container();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: ScaleTransition(
+            scale: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            ).drive(Tween<double>(begin: 0.95, end: 1.0)),
+            child: Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              backgroundColor: AppColors.surface,
+              child: Container(
+                width: 260,
+                height: 170,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Apakah kamu yakin mau keluar?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
                       ),
-                      const SizedBox(height: 25),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final authBloc = context.read<AuthBloc>();
-                              Navigator.of(context).pop();
-                              await AuthService.logout();
-                              authBloc.add(AuthLoggedOut());
-                            },
-                            child: Container(
-                              width: 88,
-                              height: 31,
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(color: AppColors.primary),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                "Ya",
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            final authBloc = context.read<AuthBloc>();
+                            Navigator.of(context).pop();
+                            await AuthService.logout();
+                            authBloc.add(AuthLoggedOut());
+                          },
+                          child: Container(
+                            width: 88,
+                            height: 31,
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: AppColors.primary),
                             ),
-                          ),
-                          const SizedBox(width: 20),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: 88,
-                              height: 31,
-                              decoration: BoxDecoration(
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Ya",
+                              style: TextStyle(
                                 color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                "Tidak",
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        const SizedBox(width: 20),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            width: 88,
+                            height: 31,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Tidak",
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
   }
 
   Widget profileCard(String title, IconData icon, VoidCallback onTap) {

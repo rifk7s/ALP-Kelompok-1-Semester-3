@@ -39,7 +39,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
 
     try {
-      final cart = await _cartRepository.getCart();
+      // Minimum delay for UX when spinner is shown
+      final cartFuture = _cartRepository.getCart();
+      final delayFuture = event.showSpinner
+          ? Future.delayed(const Duration(milliseconds: 500))
+          : Future.value();
+
+      final cart = await cartFuture;
+      await delayFuture;
+
       if (kDebugMode) {
         debugPrint('Cart response: $cart');
       }

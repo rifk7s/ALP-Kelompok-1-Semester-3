@@ -36,7 +36,13 @@ class _SearchPageState extends State<SearchPage> {
   Future<void> _loadProducts() async {
     setState(() => isLoading = true);
     try {
-      final products = await ProductService.getProducts();
+      // Minimum delay for UX - ensures spinner is visible
+      final productsFuture = ProductService.getProducts();
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final products = await productsFuture;
+      await delayFuture;
+
       setState(() {
         _allProducts = products.cast<Map<String, dynamic>>();
         isLoading = false;

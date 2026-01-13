@@ -37,7 +37,12 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
         throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
       }
 
-      final data = await _petaniService.fetchAllPetani(token: token);
+      // Minimum delay for UX - ensures spinner is visible
+      final petaniFuture = _petaniService.fetchAllPetani(token: token);
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final data = await petaniFuture;
+      await delayFuture;
 
       if (!mounted) return;
 

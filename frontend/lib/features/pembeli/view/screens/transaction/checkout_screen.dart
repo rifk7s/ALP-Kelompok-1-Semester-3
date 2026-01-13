@@ -42,7 +42,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => isLoadingProfile = true);
     try {
       final token = await StorageService.getToken();
-      final profile = await ProfileService().fetchProfile(token: token);
+
+      // Minimum delay for UX - ensures spinner is visible
+      final profileFuture = ProfileService().fetchProfile(token: token);
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final profile = await profileFuture;
+      await delayFuture;
+
       setState(() {
         userProfile = profile;
         isLoadingProfile = false;

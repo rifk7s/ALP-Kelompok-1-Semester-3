@@ -248,7 +248,10 @@ class _NotificationPageState extends State<NotificationPage> {
           notification['is_read'] = true;
         }
       });
-      SnackBarHelper.showSuccess(context, 'Semua notifikasi ditandai sudah dibaca');
+      SnackBarHelper.showSuccess(
+        context,
+        'Semua notifikasi ditandai sudah dibaca',
+      );
     }
   }
 

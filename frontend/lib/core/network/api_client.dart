@@ -148,8 +148,8 @@ class ApiClient {
       }
 
       final streamedResponse = await request.send().timeout(
-            timeout ?? Duration(seconds: ApiConfig.receiveTimeout),
-          );
+        timeout ?? Duration(seconds: ApiConfig.receiveTimeout),
+      );
       return http.Response.fromStream(streamedResponse);
     });
   }

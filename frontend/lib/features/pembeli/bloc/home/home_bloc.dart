@@ -51,7 +51,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final categoriesFuture = _categoryRepository.getCategories();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 900));
+      final delayFuture = Future.delayed(const Duration(milliseconds: 600));
 
       final data = await categoriesFuture;
       await delayFuture;
@@ -98,7 +98,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final productsFuture = _productRepository.getProducts(
         categoryId: event.categoryId,
       );
-      final delayFuture = Future.delayed(const Duration(milliseconds: 900));
+      final delayFuture = Future.delayed(const Duration(milliseconds: 600));
 
       final data = await productsFuture;
       await delayFuture;
@@ -215,7 +215,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final productsFuture = _productRepository.getProducts(
         categoryId: currentState.selectedCategoryId,
       );
-      final delayFuture = Future.delayed(const Duration(milliseconds: 1600));
+      final delayFuture = Future.delayed(const Duration(milliseconds: 1200));
 
       final categories = await categoriesFuture;
       final products = await productsFuture;

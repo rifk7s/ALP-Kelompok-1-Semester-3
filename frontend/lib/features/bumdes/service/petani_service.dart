@@ -130,7 +130,10 @@ class PetaniService {
     required int petaniId,
     required String token,
   }) async {
-    final response = await apiClient.get('/petani-data/$petaniId', token: token);
+    final response = await apiClient.get(
+      '/petani-data/$petaniId',
+      token: token,
+    );
 
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);

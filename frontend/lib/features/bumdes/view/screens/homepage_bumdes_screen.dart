@@ -93,6 +93,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
     try {
       final token = await StorageService.getToken();
 
+      // Minimum delay for UX - ensures spinner is visible
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
       // Fetch products and count those with stock > 0
       final products = await ProductService.getProducts();
       final activeProducts = products.where((p) {
@@ -130,6 +133,9 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
 
       // Get recent activities (3 most recent orders sorted by latest timestamp)
       final recentOrdersList = _getRecentOrders(orders);
+
+      // Wait for minimum delay
+      await delayFuture;
 
       setState(() {
         activeProductCount = activeProducts;

@@ -34,7 +34,13 @@ class _ProductPageState extends State<ProductPage> {
     });
 
     try {
-      final data = await ProductService.getProducts();
+      // Minimum delay for UX - ensures spinner is visible
+      final productsFuture = ProductService.getProducts();
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final data = await productsFuture;
+      await delayFuture;
+
       if (!mounted) return;
 
       setState(() {
@@ -115,7 +121,10 @@ class _ProductPageState extends State<ProductPage> {
                                 crossAxisSpacing: 12,
                                 childAspectRatio: 0.8,
                               ),
-                          delegate: SliverChildBuilderDelegate((context, index) {
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
                             final product = filteredProducts[index];
                             return _productCard(
                               context: context,

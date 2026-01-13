@@ -68,7 +68,13 @@ class TransactionBloc {
   Future<void> loadOrders() async {
     emit(_state.copyWith(isLoading: true));
     try {
-      final orders = await OrderService.getOrders();
+      // Minimum delay for UX - ensures spinner is visible
+      final ordersFuture = OrderService.getOrders();
+      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+
+      final orders = await ordersFuture;
+      await delayFuture;
+
       emit(_state.copyWith(orders: orders, isLoading: false));
       _updateCountdowns();
     } catch (e) {

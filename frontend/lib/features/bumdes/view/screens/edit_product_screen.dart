@@ -252,7 +252,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
             }
           } else if (state is ProductFailure) {
             SnackBarHelper.showError(
-                context, 'Terjadi kesalahan: ${state.error}');
+              context,
+              'Terjadi kesalahan: ${state.error}',
+            );
           }
         },
         child: BlocBuilder<ProductBloc, ProductState>(
@@ -616,7 +618,9 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     final price = getPriceForSelection();
     if (price == null) {
       SnackBarHelper.showError(
-          context, 'Harga tidak ditemukan untuk kombinasi kategori/varietas ini');
+        context,
+        'Harga tidak ditemukan untuk kombinasi kategori/varietas ini',
+      );
       return;
     }
 
