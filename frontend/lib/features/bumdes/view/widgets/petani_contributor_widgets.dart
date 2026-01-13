@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/bumdes/view/widgets/common_widgets.dart';
 
 /// Widget for managing petani contributors list
@@ -153,6 +154,16 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
   String? _selectedPetaniName;
   DateTime? _selectedHarvestDate;
 
+  // Shake keys for validation
+  final _petaniShakeKey = GlobalKey<ShakeWidgetState>();
+  final _kgShakeKey = GlobalKey<ShakeWidgetState>();
+  final _dateShakeKey = GlobalKey<ShakeWidgetState>();
+
+  // Error messages for inline validation
+  String? _petaniError;
+  String? _kgError;
+  String? _dateError;
+
   @override
   void initState() {
     super.initState();
@@ -191,58 +202,81 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BumdesInputLabel('Petani *', required: true),
-            DropdownButtonFormField<int>(
-              initialValue: _selectedPetaniId,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+            ShakeWidget(
+              key: _petaniShakeKey,
+              child: DropdownButtonFormField<int>(
+                initialValue: _selectedPetaniId,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.person),
+                  errorText: _petaniError,
+                ),
+                items: widget.petaniList.map<DropdownMenuItem<int>>((petani) {
+                  return DropdownMenuItem<int>(
+                    value: petani['id'] as int,
+                    child: Text(
+                      petani['name'] as String,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPetaniId = value;
+                    _selectedPetaniName =
+                        widget.petaniList.firstWhere(
+                              (p) => p['id'] == value,
+                            )['name']
+                            as String;
+                    if (_petaniError != null) _petaniError = null;
+                  });
+                },
               ),
-              items: widget.petaniList.map<DropdownMenuItem<int>>((petani) {
-                return DropdownMenuItem<int>(
-                  value: petani['id'] as int,
-                  child: Text(
-                    petani['name'] as String,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedPetaniId = value;
-                  _selectedPetaniName =
-                      widget.petaniList.firstWhere(
-                            (p) => p['id'] == value,
-                          )['name']
-                          as String;
-                });
-              },
             ),
             const SizedBox(height: 16),
             const BumdesInputLabel('Jumlah (kg) *', required: true),
-            TextField(
-              controller: _kgController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Jumlah (kg)',
-                prefixIcon: Icon(Icons.scale),
+            ShakeWidget(
+              key: _kgShakeKey,
+              child: TextField(
+                controller: _kgController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Jumlah (kg)',
+                  prefixIcon: const Icon(Icons.scale),
+                  errorText: _kgError,
+                ),
+                onChanged: (_) {
+                  if (_kgError != null) {
+                    setState(() => _kgError = null);
+                  }
+                },
               ),
             ),
             const SizedBox(height: 16),
             const BumdesInputLabel('Tanggal Panen *', required: true),
-            InkWell(
-              onTap: () => _selectDate(context),
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.calendar_today),
-                ),
-                child: Text(
-                  _selectedHarvestDate == null
-                      ? 'Pilih tanggal'
-                      : _formatDate(_selectedHarvestDate!),
-                ),
+            ShakeWidget(
+              key: _dateShakeKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () => _selectDate(context),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.calendar_today),
+                        errorText: _dateError,
+                      ),
+                      child: Text(
+                        _selectedHarvestDate == null
+                            ? 'Pilih tanggal'
+                            : _formatDate(_selectedHarvestDate!),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -268,30 +302,41 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
     if (picked != null) {
       setState(() {
         _selectedHarvestDate = picked;
+        if (_dateError != null) _dateError = null;
       });
     }
   }
 
   void _handleSubmit() {
+    // Clear previous errors
+    setState(() {
+      _kgError = null;
+      _petaniError = null;
+      _dateError = null;
+    });
+
+    bool hasError = false;
+
     final kg = double.tryParse(_kgController.text);
     if (kg == null || kg <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan jumlah kg yang valid')),
-      );
-      return;
+      setState(() => _kgError = 'Masukkan jumlah kg yang valid');
+      _kgShakeKey.currentState?.shake();
+      hasError = true;
     }
+
     if (_selectedPetaniId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Pilih petani')));
-      return;
+      setState(() => _petaniError = 'Pilih petani');
+      _petaniShakeKey.currentState?.shake();
+      hasError = true;
     }
+
     if (_selectedHarvestDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Pilih tanggal panen')));
-      return;
+      setState(() => _dateError = 'Pilih tanggal panen');
+      _dateShakeKey.currentState?.shake();
+      hasError = true;
     }
+
+    if (hasError) return;
 
     Navigator.pop(context, {
       'petani_id': _selectedPetaniId,

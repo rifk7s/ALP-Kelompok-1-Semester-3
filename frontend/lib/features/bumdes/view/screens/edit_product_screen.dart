@@ -50,6 +50,16 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   final _masaSimpanController = TextEditingController();
   final _infoTambahanController = TextEditingController();
 
+  // Shake keys for validation
+  final _namaProdukShakeKey = GlobalKey<ShakeWidgetState>();
+  final _kategoriShakeKey = GlobalKey<ShakeWidgetState>();
+  final _petaniShakeKey = GlobalKey<ShakeWidgetState>();
+
+  // Error messages for inline validation
+  String? _namaProdukError;
+  String? _kategoriError;
+  String? _petaniError;
+
   DateTime? tanggalPanen;
   String? masaSimpanNote;
 
@@ -112,9 +122,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
+        SnackBarHelper.showError(context, 'Gagal memuat data: $e');
       }
     }
   }
@@ -288,11 +296,20 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const BumdesInputLabel("Nama Produk *", required: true),
-          TextField(
-            controller: _namaProdukController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.shopping_bag),
+          ShakeWidget(
+            key: _namaProdukShakeKey,
+            child: TextField(
+              controller: _namaProdukController,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.shopping_bag),
+                errorText: _namaProdukError,
+              ),
+              onChanged: (_) {
+                if (_namaProdukError != null) {
+                  setState(() => _namaProdukError = null);
+                }
+              },
             ),
           ),
         ],
@@ -307,17 +324,37 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const BumdesInputLabel("Petani *", required: true),
-          PetaniContributorList(
-            contributors: petaniContributors,
-            isEnabled: true,
-            onEdit: (index) =>
-                _editContributor(index, petaniContributors[index]),
-            onDelete: (index) {
-              setState(() {
-                petaniContributors.removeAt(index);
-                _updateTotalQuantity();
-              });
-            },
+          ShakeWidget(
+            key: _petaniShakeKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PetaniContributorList(
+                  contributors: petaniContributors,
+                  isEnabled: true,
+                  onEdit: (index) =>
+                      _editContributor(index, petaniContributors[index]),
+                  onDelete: (index) {
+                    setState(() {
+                      petaniContributors.removeAt(index);
+                      _updateTotalQuantity();
+                      if (_petaniError != null) _petaniError = null;
+                    });
+                  },
+                ),
+                if (_petaniError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 12),
+                    child: Text(
+                      _petaniError!,
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           ElevatedButton.icon(
@@ -337,35 +374,40 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const BumdesInputLabel("Kategori *", required: true),
-          DropdownButtonFormField<String>(
-            initialValue: selectedKategori,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.category),
-            ),
-            items: categories.map<DropdownMenuItem<String>>((cat) {
-              return DropdownMenuItem<String>(
-                value: cat['name'],
-                child: Text(cat['name']),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedKategori = value;
-                selectedKategoriId = categories.firstWhere(
-                  (cat) => cat['name'] == value,
-                )['id'];
-                selectedVarietas = null;
+          ShakeWidget(
+            key: _kategoriShakeKey,
+            child: DropdownButtonFormField<String>(
+              initialValue: selectedKategori,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.category),
+                errorText: _kategoriError,
+              ),
+              items: categories.map<DropdownMenuItem<String>>((cat) {
+                return DropdownMenuItem<String>(
+                  value: cat['name'],
+                  child: Text(cat['name']),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedKategori = value;
+                  selectedKategoriId = categories.firstWhere(
+                    (cat) => cat['name'] == value,
+                  )['id'];
+                  selectedVarietas = null;
+                  if (_kategoriError != null) _kategoriError = null;
 
-                // Update price based on category
-                final price = getPriceForSelection();
-                if (price != null) {
-                  _hargaController.text = CurrencyFormatter.rupiah.format(
-                    price.toInt(),
-                  );
-                }
-              });
-            },
+                  // Update price based on category
+                  final price = getPriceForSelection();
+                  if (price != null) {
+                    _hargaController.text = CurrencyFormatter.rupiah.format(
+                      price.toInt(),
+                    );
+                  }
+                });
+              },
+            ),
           ),
           if (selectedKategori != null &&
               varietiesByCategory[selectedKategori!] != null &&
@@ -507,6 +549,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       setState(() {
         petaniContributors.add(result);
         _updateTotalQuantity();
+        if (_petaniError != null) _petaniError = null;
       });
     }
   }
@@ -539,34 +582,41 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
   }
 
   Future<void> _submitUpdate(BuildContext ctx) async {
-    // Validation
+    // Clear previous errors
+    setState(() {
+      _namaProdukError = null;
+      _kategoriError = null;
+      _petaniError = null;
+    });
+
+    // Validation with inline errors
+    bool hasError = false;
+
     if (_namaProdukController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nama produk harus diisi')));
-      return;
+      setState(() => _namaProdukError = 'Nama produk harus diisi');
+      _namaProdukShakeKey.currentState?.shake();
+      hasError = true;
     }
 
     if (selectedKategori == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Kategori harus dipilih')));
-      return;
+      setState(() => _kategoriError = 'Kategori harus dipilih');
+      _kategoriShakeKey.currentState?.shake();
+      hasError = true;
     }
 
     if (petaniContributors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Minimal satu kontributor petani')),
-      );
-      return;
+      setState(() => _petaniError = 'Minimal satu kontributor petani');
+      _petaniShakeKey.currentState?.shake();
+      hasError = true;
     }
+
+    if (hasError) return;
 
     // Get price from HPP
     final price = getPriceForSelection();
     if (price == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Harga tidak ditemukan')));
+      SnackBarHelper.showError(
+          context, 'Harga tidak ditemukan untuk kombinasi kategori/varietas ini');
       return;
     }
 
@@ -596,9 +646,7 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
 
       ctx.read<ProductBloc>().add(event);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      SnackBarHelper.showError(context, 'Terjadi kesalahan: $e');
     }
   }
 }

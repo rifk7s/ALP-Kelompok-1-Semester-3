@@ -261,76 +261,86 @@ class _QuantitySelector extends StatelessWidget {
 
   void _showQtyInputDialog(BuildContext context) {
     final controller = TextEditingController(text: qty.toStringAsFixed(0));
+    String? errorText;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            "Masukkan Jumlah (kg)",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            decoration: InputDecoration(
-              hintText: "Jumlah",
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+              title: const Text(
+                "Masukkan Jumlah (kg)",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                "Batal",
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newQty = double.tryParse(controller.text) ?? 0;
-                if (newQty <= 0) {
-                  Navigator.of(context).pop();
-                  return;
-                }
-                if (newQty > stockKg) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Jumlah melebihi stok. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg',
-                      ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: "Jumlah",
+                  errorText: errorText,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
                     ),
-                  );
-                  return;
-                }
-                Navigator.of(context).pop();
-                onChanged(newQty);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                  ),
+                ),
+                onChanged: (_) {
+                  if (errorText != null) {
+                    setDialogState(() => errorText = null);
+                  }
+                },
               ),
-              child: const Text("OK", style: TextStyle(color: AppColors.white)),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    "Batal",
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final newQty = double.tryParse(controller.text) ?? 0;
+                    if (newQty <= 0) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
+                    if (newQty > stockKg) {
+                      setDialogState(() {
+                        errorText =
+                            'Jumlah melebihi stok. Stok tersedia: ${stockKg.toStringAsFixed(0)} kg';
+                      });
+                      return;
+                    }
+                    Navigator.of(context).pop();
+                    onChanged(newQty);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child:
+                      const Text("OK", style: TextStyle(color: AppColors.white)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
