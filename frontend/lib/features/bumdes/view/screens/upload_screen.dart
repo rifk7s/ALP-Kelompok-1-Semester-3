@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
@@ -153,20 +154,14 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
       child: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
           if (state is ProductSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Produk berhasil diupload!'),
-                backgroundColor: AppColors.success,
-              ),
-            );
+            SnackBarHelper.showSuccess(context, 'Produk berhasil diupload!');
             if (context.mounted) {
-              Navigator.pop(context);
+              context.pop();
             }
           } else if (state is ProductFailure) {
             setState(() => isSubmitting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Terjadi kesalahan: ${state.error}')),
-            );
+            SnackBarHelper.showError(
+                context, 'Terjadi kesalahan: ${state.error}');
           }
         },
         child: BlocBuilder<ProductBloc, ProductState>(

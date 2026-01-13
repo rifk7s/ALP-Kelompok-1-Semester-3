@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 
 /// Reusable payment info section for transaction screens
 /// Displays bank transfer details with optional copy functionality
@@ -112,11 +113,6 @@ class PaymentInfoSection extends StatelessWidget {
 
   void _copyAccountNumber(BuildContext context, String accountNumber) {
     Clipboard.setData(ClipboardData(text: accountNumber));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('No. Rekening berhasil disalin'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    SnackBarHelper.showSuccess(context, 'No. Rekening berhasil disalin');
   }
 }

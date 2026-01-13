@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -79,24 +80,17 @@ class _EditPetaniScreenState extends State<EditPetaniScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data petani berhasil diperbarui'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      SnackBarHelper.showSuccess(context, 'Data petani berhasil diperbarui');
 
-      Navigator.pop(context, true); // Return true to indicate success
+      context.pop(true); // Return true to indicate success
     } catch (e) {
       if (!mounted) return;
 
       setState(() => _isSubmitting = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: AppColors.danger,
-        ),
+      SnackBarHelper.showError(
+        context,
+        e.toString().replaceAll('Exception: ', ''),
       );
     }
   }

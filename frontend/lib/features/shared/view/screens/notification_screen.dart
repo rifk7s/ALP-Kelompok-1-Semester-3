@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/service/notification_service.dart';
 import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -224,9 +225,7 @@ class _NotificationPageState extends State<NotificationPage> {
             }
           } else {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chat tidak ditemukan')),
-              );
+              SnackBarHelper.showError(context, 'Chat tidak ditemukan');
             }
           }
         } catch (e) {
@@ -234,9 +233,7 @@ class _NotificationPageState extends State<NotificationPage> {
             debugPrint('Error navigating to chat: $e');
           }
           if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Gagal membuka chat: $e')));
+            SnackBarHelper.showError(context, 'Gagal membuka chat: $e');
           }
         }
       }
@@ -251,9 +248,7 @@ class _NotificationPageState extends State<NotificationPage> {
           notification['is_read'] = true;
         }
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua notifikasi ditandai sudah dibaca')),
-      );
+      SnackBarHelper.showSuccess(context, 'Semua notifikasi ditandai sudah dibaca');
     }
   }
 

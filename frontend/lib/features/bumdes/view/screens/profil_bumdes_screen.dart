@@ -266,7 +266,13 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
     );
   }
 
-  void _showLogoutConfirmationDialog(BuildContext context) {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+    // Wait for Navigator to settle after any previous navigation
+    // This prevents _debugLocked errors when showing dialog after returning from another screen
+    await Future.delayed(Duration.zero);
+
+    if (!mounted) return;
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,

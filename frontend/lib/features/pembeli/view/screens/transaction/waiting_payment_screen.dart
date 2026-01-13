@@ -180,10 +180,9 @@ class _WaitingPaymentPageState extends State<WaitingPaymentPage>
   }
 
   Future<void> _handleBackNavigation() async {
-    final navigator = Navigator.of(context);
     await CartService.clearCart();
     if (mounted) {
-      navigator.popUntil((route) => route.isFirst);
+      context.go(RoutePaths.pembeliHome);
     }
   }
 

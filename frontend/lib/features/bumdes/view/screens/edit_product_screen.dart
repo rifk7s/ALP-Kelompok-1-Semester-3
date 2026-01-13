@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/product/service/category_service.dart';
 import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
@@ -236,19 +238,13 @@ class _EditProdukScreenState extends State<EditProdukScreen> {
       child: BlocListener<ProductBloc, ProductState>(
         listener: (context, state) {
           if (state is ProductSuccess && state.product != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Produk berhasil diperbarui!'),
-                backgroundColor: AppColors.success,
-              ),
-            );
+            SnackBarHelper.showSuccess(context, 'Produk berhasil diperbarui!');
             if (context.mounted) {
-              Navigator.pop(context, state.product);
+              context.pop(true);
             }
           } else if (state is ProductFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Terjadi kesalahan: ${state.error}')),
-            );
+            SnackBarHelper.showError(
+                context, 'Terjadi kesalahan: ${state.error}');
           }
         },
         child: BlocBuilder<ProductBloc, ProductState>(

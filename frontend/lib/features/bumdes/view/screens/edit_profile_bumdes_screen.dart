@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/service/profile_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
@@ -59,7 +61,7 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
 
@@ -218,19 +220,13 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
       setState(() => _saving = false);
 
       // Show success and return updated profile
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profil berhasil diperbarui'),
-          backgroundColor: AppColors.success,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      SnackBarHelper.showSuccess(context, 'Profil berhasil diperbarui');
 
       // Wait a bit for user to see the success message
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (!mounted) return;
-      Navigator.pop(context, updated);
+      context.pop(true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -239,8 +235,6 @@ class _EditProfileBumdesPageState extends State<EditProfileBumdesPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: AppColors.danger),
-    );
+    SnackBarHelper.showError(context, message);
   }
 }

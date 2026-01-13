@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
@@ -135,24 +136,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
       if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produk berhasil dihapus'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      SnackBarHelper.showSuccess(context, 'Produk berhasil dihapus');
 
       // Return true to indicate deletion
       Navigator.pop(context, true);
     } catch (e) {
       if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menghapus produk: ${e.toString()}'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
+      SnackBarHelper.showError(context, 'Gagal menghapus produk: ${e.toString()}');
     }
   }
 

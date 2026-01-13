@@ -213,13 +213,9 @@ class _BumdesTransactionPageState extends State<BumdesTransactionPage>
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Status berhasil diperbarui')),
-      );
+      SnackBarHelper.showSuccess(context, 'Status berhasil diperbarui');
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Gagal memperbarui status')));
+      SnackBarHelper.showError(context, 'Gagal memperbarui status');
     }
   }
 
