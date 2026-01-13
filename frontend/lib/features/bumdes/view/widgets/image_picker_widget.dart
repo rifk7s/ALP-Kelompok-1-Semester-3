@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
 
 /// Widget for picking and displaying multiple images
 /// Used in product upload and edit screens
@@ -31,8 +32,17 @@ class BumdesImagePicker extends StatefulWidget {
 }
 
 class _BumdesImagePickerState extends State<BumdesImagePicker> {
+  static const int _maxImages = 5;
   final ImagePicker _picker = ImagePicker();
   List<int> _imagesToDelete = [];
+
+  int get _totalImageCount {
+    final existingCount = (widget.existingImages?.length ?? 0) -
+        _imagesToDelete.length;
+    return widget.selectedImages.length + existingCount;
+  }
+
+  bool get _canAddMoreImages => _totalImageCount < _maxImages;
 
   @override
   void initState() {
@@ -48,6 +58,43 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = [];
+
+    // Image counter badge - always visible
+    children.add(
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: _canAddMoreImages
+              ? AppColors.primaryLight
+              : AppColors.dangerShade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.photo_library,
+              size: 16,
+              color: _canAddMoreImages
+                  ? AppColors.primary
+                  : AppColors.dangerShade700,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$_totalImageCount/$_maxImages foto',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _canAddMoreImages
+                    ? AppColors.primary
+                    : AppColors.dangerShade700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    children.add(const SizedBox(height: 12));
 
     // Selected new images section
     if (widget.selectedImages.isNotEmpty) {
@@ -83,31 +130,36 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
       ]);
     }
 
-    // Add image button
+    // Add image button - disabled when at limit
     if (widget.isEnabled) {
+      final isDisabled = !_canAddMoreImages;
       children.add(
         InkWell(
-          onTap: _pickImages,
+          onTap: isDisabled ? null : _pickImages,
           borderRadius: BorderRadius.circular(8),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               border: Border.all(
-                color: AppColors.primary,
+                color: isDisabled ? AppColors.grey400 : AppColors.primary,
                 style: BorderStyle.solid,
               ),
               borderRadius: BorderRadius.circular(8),
+              color: isDisabled ? AppColors.grey100 : null,
             ),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_photo_alternate, color: AppColors.primary),
-                SizedBox(width: 8),
+                Icon(
+                  Icons.add_photo_alternate,
+                  color: isDisabled ? AppColors.grey400 : AppColors.primary,
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  'Tambah Gambar',
+                  isDisabled ? 'Batas Foto Tercapai' : 'Tambah Gambar',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: isDisabled ? AppColors.grey400 : AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -258,63 +310,38 @@ class _BumdesImagePickerState extends State<BumdesImagePicker> {
   }
 
   Future<void> _pickImages() async {
-    try {
-      // Check if adding images would exceed limit
-      final currentCount = widget.selectedImages.length;
-      if (currentCount >= 5) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("Maksimal 5 foto")));
-        }
-        return;
-      }
+    // Button is already disabled when at limit, but double-check
+    if (!_canAddMoreImages) return;
 
+    try {
       final List<XFile> images = await _picker.pickMultiImage();
 
       if (!mounted) return;
 
-      if (images.isEmpty) {
-        // User cancelled or didn't select any photos
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Tidak ada foto yang dipilih")),
-        );
-        return;
-      }
+      // User cancelled - no need to show SnackBar, just return
+      if (images.isEmpty) return;
 
-      // Check total after adding
-      if (currentCount + images.length > 5) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Total foto tidak boleh lebih dari 5"),
-            ),
-          );
-        }
-        // Only add up to the limit
-        images.take(5 - currentCount);
-      }
+      // Calculate how many we can add
+      final remainingSlots = _maxImages - _totalImageCount;
+      final imagesToAdd = images.take(remainingSlots).toList();
 
-      final imageFiles = images
-          .take(5 - currentCount)
-          .map((xFile) => File(xFile.path))
-          .toList();
+      final imageFiles = imagesToAdd.map((xFile) => File(xFile.path)).toList();
 
       setState(() {
         widget.selectedImages.addAll(imageFiles);
       });
       widget.onImagesChanged(widget.selectedImages);
 
+      // Show success feedback if added images
       if (mounted && imageFiles.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${imageFiles.length} foto ditambahkan")),
+        SnackBarHelper.showSuccess(
+          context,
+          '${imageFiles.length} foto ditambahkan',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memilih gambar: $e')));
+        SnackBarHelper.showError(context, 'Gagal memilih gambar: $e');
       }
     }
   }

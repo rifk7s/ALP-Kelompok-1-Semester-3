@@ -124,23 +124,16 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       if (!mounted) return;
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data petani berhasil dihapus'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      SnackBarHelper.showSuccess(context, 'Data petani berhasil dihapus');
 
       // Go back to manage screen with result true to refresh the list
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: AppColors.danger,
-        ),
+      SnackBarHelper.showError(
+        context,
+        e.toString().replaceAll('Exception: ', ''),
       );
     }
   }
@@ -171,9 +164,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
 
       // Show error
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
+        SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
       }
     }
   }

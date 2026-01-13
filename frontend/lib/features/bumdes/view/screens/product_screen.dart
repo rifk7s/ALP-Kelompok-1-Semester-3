@@ -4,7 +4,6 @@ import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
 import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/network/api_config.dart';
-import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/router/route_constants.dart';
 
@@ -20,6 +19,7 @@ class _ProductPageState extends State<ProductPage> {
   String _searchQuery = "";
   List<dynamic> products = [];
   bool isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -28,21 +28,26 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<void> loadProducts() async {
+    setState(() {
+      isLoading = true;
+      _errorMessage = null;
+    });
+
     try {
       final data = await ProductService.getProducts();
+      if (!mounted) return;
+
       setState(() {
         products = data;
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
         isLoading = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memuat produk: $e')));
-      }
     }
   }
 
@@ -76,52 +81,51 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.surface,
-        body: const Center(child: AppLoadingIndicator()),
-      );
-    }
-
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: PullToRefresh(
-        onRefresh: loadProducts,
-        color: AppColors.primary,
-        backgroundColor: AppColors.surface,
-        displacement: 40,
-        strokeWidth: 2.5,
-        child: SafeArea(
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: _header()),
-              SliverToBoxAdapter(child: _filterChips()),
-              filteredProducts.isEmpty
-                  ? SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _emptyState(),
-                    )
-                  : SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 0.8,
-                            ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final product = filteredProducts[index];
-                          return _productCard(
-                            context: context,
-                            product: product,
-                          );
-                        }, childCount: filteredProducts.length),
+      body: RetryableContent(
+        isLoading: isLoading,
+        hasError: _errorMessage != null,
+        errorMessage: _errorMessage,
+        onRetry: loadProducts,
+        child: PullToRefresh(
+          onRefresh: loadProducts,
+          color: AppColors.primary,
+          backgroundColor: AppColors.surface,
+          displacement: 40,
+          strokeWidth: 2.5,
+          child: SafeArea(
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(child: _header()),
+                SliverToBoxAdapter(child: _filterChips()),
+                filteredProducts.isEmpty
+                    ? SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _emptyState(),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 0.8,
+                              ),
+                          delegate: SliverChildBuilderDelegate((context, index) {
+                            final product = filteredProducts[index];
+                            return _productCard(
+                              context: context,
+                              product: product,
+                            );
+                          }, childCount: filteredProducts.length),
+                        ),
                       ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
