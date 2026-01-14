@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 class ReportPage extends StatefulWidget {
@@ -71,7 +72,7 @@ class _ReportPageState extends State<ReportPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // tutup popup
-                Navigator.pop(context); // kembali ke halaman sebelumnya
+                context.pop(); // kembali ke halaman sebelumnya
               },
               child: Text("OK", style: TextStyle(color: AppColors.primary)),
             ),

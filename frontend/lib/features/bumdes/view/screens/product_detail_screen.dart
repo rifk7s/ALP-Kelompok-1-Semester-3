@@ -139,7 +139,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       SnackBarHelper.showSuccess(context, 'Produk berhasil dihapus');
 
       // Return true to indicate deletion
-      Navigator.pop(context, true);
+      context.pop(true);
     } catch (e) {
       if (!context.mounted) return;
 

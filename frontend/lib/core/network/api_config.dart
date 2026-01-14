@@ -11,7 +11,7 @@ class ApiConfig {
 
   // iOS IPs - Priority order: tries home first, then cafe as fallback
   static const String _homeIP = '192.168.18.182'; // Home IP (primary)
-  static const String _cafeIP = '192.168.1.24'; // Cafe IP (fallback)
+  static const String _cafeIP = '192.168.1.42'; // Cafe IP (fallback)
 
   // List of IPs to try in priority order (home first!)
   static const List<String> _ipPriority = [_homeIP, _cafeIP];

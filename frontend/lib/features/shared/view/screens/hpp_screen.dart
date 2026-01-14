@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/pembeli/service/hpp_price_service.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -97,7 +98,7 @@ class _HppPageState extends State<HppPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           "Harga Acuan HPP",

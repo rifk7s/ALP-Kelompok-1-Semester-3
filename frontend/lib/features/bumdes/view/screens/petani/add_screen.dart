@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -88,10 +89,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
                   if (!context.mounted) return;
                   Navigator.pop(context); // Close dialog
                   if (!context.mounted) return;
-                  Navigator.pop(
-                    context,
-                    true,
-                  ); // Return to manage screen with success flag
+                  context.pop(true); // Return to manage screen with success flag
                 },
                 child: const Text("OK"),
               ),
@@ -142,7 +140,7 @@ class _TambahPetaniScreenState extends State<TambahPetaniScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textLight),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
 

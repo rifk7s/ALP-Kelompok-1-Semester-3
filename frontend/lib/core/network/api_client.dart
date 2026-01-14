@@ -158,8 +158,9 @@ class ApiClient {
   Future<http.Response> _executeWithFallback(
     Future<http.Response> Function() request,
   ) async {
-    // Reset to primary IP before starting - ensures we always try best IP first
-    ApiConfig.resetToPrimaryIP();
+    // NOTE: We do NOT reset to primary IP here.
+    // Network detection at app start already finds the working IP.
+    // Resetting would waste time re-trying IPs that don't work.
 
     // Try all available IPs
     for (var i = 0; i < ApiConfig.availableIPs.length; i++) {

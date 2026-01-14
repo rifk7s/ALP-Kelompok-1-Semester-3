@@ -129,7 +129,7 @@ class _SearchPageState extends State<SearchPage> {
                     Icons.arrow_back,
                     color: AppColors.textLight,
                   ),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                 ),
                 Expanded(
                   child: Container(

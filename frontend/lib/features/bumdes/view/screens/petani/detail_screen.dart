@@ -132,7 +132,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       SnackBarHelper.showSuccess(context, 'Data petani berhasil dihapus');
 
       // Go back to manage screen with result true to refresh the list
-      Navigator.pop(context, true);
+      context.pop(true);
     } catch (e) {
       if (!mounted) return;
 
