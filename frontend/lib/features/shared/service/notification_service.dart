@@ -9,7 +9,7 @@ class NotificationService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Not authenticated');
+        throw Exception('Belum login');
       }
 
       final response = await apiClient.get('/notifications', token: token);
@@ -23,7 +23,7 @@ class NotificationService {
         final List<dynamic> data = json.decode(response.body);
         return data.cast<Map<String, dynamic>>();
       } else {
-        throw Exception('Failed to load notifications');
+        throw Exception('Gagal memuat notifikasi');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -65,7 +65,7 @@ class NotificationService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Not authenticated');
+        throw Exception('Belum login');
       }
 
       final response = await apiClient.post(
@@ -87,7 +87,7 @@ class NotificationService {
     try {
       final token = await StorageService.getToken();
       if (token == null) {
-        throw Exception('Not authenticated');
+        throw Exception('Belum login');
       }
 
       final response = await apiClient.post(

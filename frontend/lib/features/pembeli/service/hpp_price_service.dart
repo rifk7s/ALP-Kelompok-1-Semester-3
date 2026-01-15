@@ -15,10 +15,10 @@ class HppPriceService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to load HPP prices');
+        throw Exception('Gagal memuat harga HPP');
       }
     } catch (e) {
-      throw Exception('Error fetching HPP prices: $e');
+      throw Exception('Gagal memuat harga HPP: $e');
     }
   }
 
@@ -38,7 +38,7 @@ class HppPriceService {
 
       return null;
     } catch (e) {
-      throw Exception('Error getting price for variety: $e');
+      throw Exception('Gagal mendapatkan harga varietas: $e');
     }
   }
 }

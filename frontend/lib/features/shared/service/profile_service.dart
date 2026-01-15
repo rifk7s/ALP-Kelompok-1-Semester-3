@@ -35,7 +35,7 @@ class ProfileService {
       final jsonBody = json.decode(response.body) as Map<String, dynamic>;
       return Profile.fromJson(jsonBody);
     }
-    throw Exception('Failed to load profile: ${response.statusCode}');
+    throw Exception('Gagal memuat profil: ${response.statusCode}');
   }
 
   Future<Profile> updateProfile({
@@ -58,10 +58,10 @@ class ProfileService {
       final jsonBody = json.decode(response.body) as Map<String, dynamic>;
       final errors =
           jsonBody['errors'] ?? jsonBody['message'] ?? 'Validation failed';
-      throw Exception('Validation error: $errors');
+      throw Exception('Error validasi: $errors');
     }
     throw Exception(
-      'Failed to update profile: Status ${response.statusCode}, Body: ${response.body}',
+      'Gagal memperbarui profil: Status ${response.statusCode}',
     );
   }
 }

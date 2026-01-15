@@ -265,11 +265,9 @@ class _SearchPageState extends State<SearchPage> {
                               );
                             },
                           )
-                        : const Center(
-                            child: Text(
-                              "Belum ada pencarian",
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
+                        : const EmptyStateWidget(
+                            message: 'Belum ada pencarian',
+                            icon: Icons.history,
                           ),
                   ),
                 ],

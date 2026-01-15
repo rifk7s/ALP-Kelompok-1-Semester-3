@@ -286,25 +286,9 @@ class _NotificationPageState extends State<NotificationPage> {
       body: _isLoading
           ? const Center(child: AppLoadingIndicator())
           : _notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 64,
-                    color: AppColors.grey400,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Tidak ada notifikasi',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+          ? const EmptyStateWidget(
+              message: 'Tidak ada notifikasi',
+              icon: Icons.notifications_none,
             )
           : RefreshIndicator(
               onRefresh: _loadNotifications,

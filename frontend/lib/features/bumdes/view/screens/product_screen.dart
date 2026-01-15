@@ -254,15 +254,9 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Widget _emptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inventory_2_outlined, size: 70, color: AppColors.grey400),
-          const SizedBox(height: 12),
-          const Text("Tidak ada produk", style: TextStyle(fontSize: 16)),
-        ],
-      ),
+    return const EmptyStateWidget(
+      message: 'Tidak ada produk',
+      icon: Icons.inventory_2_outlined,
     );
   }
 

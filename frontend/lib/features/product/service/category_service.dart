@@ -12,7 +12,7 @@ class CategoryService {
         return json.decode(response.body);
       } else {
         throw Exception(
-          'Failed to load categories: Status ${response.statusCode}',
+          'Gagal memuat kategori: Status ${response.statusCode}',
         );
       }
     } catch (e) {

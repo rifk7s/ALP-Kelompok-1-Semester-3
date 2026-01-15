@@ -5,6 +5,24 @@ import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 
 class ProductService {
+  /// Maps petani contributors to multipart form fields.
+  /// Used by both createProduct and updateProduct for consistent field naming.
+  static void _mapContributorsToFields(
+    Map<String, String> fields,
+    List<Map<String, dynamic>> contributors,
+  ) {
+    for (int i = 0; i < contributors.length; i++) {
+      fields['petani_contributors[$i][petani_id]'] =
+          contributors[i]['petani_id'].toString();
+      fields['petani_contributors[$i][contributed_kg]'] =
+          contributors[i]['contributed_kg'].toString();
+      if (contributors[i]['harvest_date'] != null) {
+        fields['petani_contributors[$i][harvest_date]'] =
+            contributors[i]['harvest_date'].toString();
+      }
+    }
+  }
+
   // Fetch all products
   static Future<List<dynamic>> getProducts({int? categoryId}) async {
     try {
@@ -18,10 +36,10 @@ class ProductService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to load products');
+        throw Exception('Gagal memuat produk');
       }
     } catch (e) {
-      throw Exception('Error fetching products: $e');
+      throw Exception('Gagal memuat produk: $e');
     }
   }
 
@@ -35,10 +53,10 @@ class ProductService {
       } else if (response.statusCode == 404) {
         return null;
       } else {
-        throw Exception('Failed to load product');
+        throw Exception('Gagal memuat detail produk');
       }
     } catch (e) {
-      throw Exception('Error fetching product: $e');
+      throw Exception('Gagal memuat detail produk: $e');
     }
   }
 
@@ -76,16 +94,7 @@ class ProductService {
 
     // Handle multiple petani contributors
     if (petaniContributors != null && petaniContributors.isNotEmpty) {
-      for (int i = 0; i < petaniContributors.length; i++) {
-        fields['petani_contributors[$i][petani_id]'] =
-            petaniContributors[i]['petani_id'].toString();
-        fields['petani_contributors[$i][contributed_kg]'] =
-            petaniContributors[i]['contributed_kg'].toString();
-        if (petaniContributors[i]['harvest_date'] != null) {
-          fields['petani_contributors[$i][harvest_date]'] =
-              petaniContributors[i]['harvest_date'].toString();
-        }
-      }
+      _mapContributorsToFields(fields, petaniContributors);
     } else if (petaniId != null) {
       fields['petani_id'] = petaniId.toString();
     }
@@ -111,7 +120,7 @@ class ProductService {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      throw Exception('Failed to create product: ${response.body}');
+      throw Exception('Gagal membuat produk: ${response.body}');
     }
   }
 
@@ -127,10 +136,10 @@ class ProductService {
       );
 
       if (response.statusCode != 204 && response.statusCode != 200) {
-        throw Exception('Failed to delete product: ${response.body}');
+        throw Exception('Gagal menghapus produk: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error deleting product: $e');
+      throw Exception('Gagal menghapus produk: $e');
     }
   }
 
@@ -174,12 +183,7 @@ class ProductService {
 
         // Add petani contributors
         if (petaniContributors != null && petaniContributors.isNotEmpty) {
-          for (int i = 0; i < petaniContributors.length; i++) {
-            fields['petani_contributors[$i][petani_id]'] =
-                petaniContributors[i]['petani_id'].toString();
-            fields['petani_contributors[$i][contributed_kg]'] =
-                petaniContributors[i]['contributed_kg'].toString();
-          }
+          _mapContributorsToFields(fields, petaniContributors);
         }
 
         // Add image IDs to delete
@@ -210,7 +214,7 @@ class ProductService {
         if (response.statusCode == 200) {
           return json.decode(response.body);
         } else {
-          throw Exception('Failed to update product: ${response.body}');
+          throw Exception('Gagal memperbarui produk: ${response.body}');
         }
       } else {
         // No images, use regular JSON request
@@ -246,11 +250,11 @@ class ProductService {
         if (response.statusCode == 200) {
           return json.decode(response.body);
         } else {
-          throw Exception('Failed to update product: ${response.body}');
+          throw Exception('Gagal memperbarui produk: ${response.body}');
         }
       }
     } catch (e) {
-      throw Exception('Error updating product: $e');
+      throw Exception('Gagal memperbarui produk: $e');
     }
   }
 }
