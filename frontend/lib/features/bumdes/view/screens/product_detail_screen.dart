@@ -105,11 +105,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => context.pop(false),
             child: const Text("Batal"),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => context.pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text("Hapus"),
           ),

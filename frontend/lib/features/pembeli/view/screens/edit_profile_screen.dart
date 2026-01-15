@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/features/shared/service/profile_service.dart';
@@ -223,7 +224,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       SnackBarHelper.showSuccess(context, 'Profil berhasil diperbarui');
 
       // Wait a bit for user to see the success message
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(LoadingDelayConstants.profileUpdate);
 
       if (!mounted) return;
       context.pop(true);

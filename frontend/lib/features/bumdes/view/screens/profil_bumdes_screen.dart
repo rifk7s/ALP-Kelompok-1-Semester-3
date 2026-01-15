@@ -349,7 +349,7 @@ class _ProfileBumdesPageState extends State<ProfileBumdesPage> {
                         const SizedBox(width: 20),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pop(context);
+                            context.pop();
                           },
                           child: Container(
                             width: 88,

@@ -45,7 +45,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       // Minimum delay for UX - ensures spinner is visible
       final profileFuture = ProfileService().fetchProfile(token: token);
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final profile = await profileFuture;
       await delayFuture;

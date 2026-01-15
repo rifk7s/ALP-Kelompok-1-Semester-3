@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -284,7 +285,7 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
           child: const Text('Batal'),
         ),
         ElevatedButton(onPressed: _handleSubmit, child: const Text('Simpan')),
@@ -338,7 +339,7 @@ class _PetaniContributorDialogState extends State<PetaniContributorDialog> {
 
     if (hasError) return;
 
-    Navigator.pop(context, {
+    context.pop({
       'petani_id': _selectedPetaniId,
       'petani_name': _selectedPetaniName,
       'contributed_kg': kg,

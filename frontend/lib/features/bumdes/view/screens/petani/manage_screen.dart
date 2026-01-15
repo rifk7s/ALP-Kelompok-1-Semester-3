@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/bumdes/service/petani_service.dart';
 import 'package:frontend/core/storage/storage_service.dart';
@@ -39,7 +40,7 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
 
       // Minimum delay for UX - ensures spinner is visible
       final petaniFuture = _petaniService.fetchAllPetani(token: token);
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final data = await petaniFuture;
       await delayFuture;

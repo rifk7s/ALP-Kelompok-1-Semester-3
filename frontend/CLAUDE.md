@@ -637,6 +637,88 @@ await DialogManager.showAlert(
 
 ---
 
+## Loading Delay Constants (`core/constants/app_constants.dart`)
+
+### Why Loading Delays?
+
+Minimum loading delays prevent "flash of loading state" - when API responses are too fast, users may not register that loading occurred, making the UI feel glitchy.
+
+**Pattern:** Run delay in parallel with API call, not sequentially:
+
+```dart
+// ✅ Correct - parallel execution (delay doesn't add to total time)
+final dataFuture = repository.fetchData();
+final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
+
+final data = await dataFuture;
+await delayFuture;
+
+// ❌ Wrong - sequential (adds delay to total time)
+final data = await repository.fetchData();
+await Future.delayed(Duration(milliseconds: 500));
+```
+
+### Available Constants
+
+```dart
+import 'package:frontend/core/constants/app_constants.dart';
+```
+
+| Constant | Duration | Use For |
+|----------|----------|---------|
+| `LoadingDelayConstants.standardList` | 500ms | List/grid loading (products, petani, transactions) |
+| `LoadingDelayConstants.initialLoad` | 600ms | Initial page load (home categories) |
+| `LoadingDelayConstants.fullRefresh` | 1200ms | Pull-to-refresh operations |
+| `LoadingDelayConstants.profileUpdate` | 500ms | After profile save (show success message) |
+
+### Example Usage
+
+**In BLoC:**
+```dart
+Future<void> _onLoadRequested(event, emit) async {
+  emit(state.copyWith(status: LoadStatus.loading));
+
+  final dataFuture = _repository.fetchData();
+  final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
+
+  final data = await dataFuture;
+  await delayFuture;
+
+  emit(state.copyWith(status: LoadStatus.success, data: data));
+}
+```
+
+**In StatefulWidget:**
+```dart
+Future<void> _loadData() async {
+  setState(() => isLoading = true);
+
+  final dataFuture = service.fetchData();
+  final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
+
+  final data = await dataFuture;
+  await delayFuture;
+
+  if (!mounted) return;
+  setState(() {
+    this.data = data;
+    isLoading = false;
+  });
+}
+```
+
+### Jangan Hardcode Delay
+
+```dart
+// ❌ Wrong - magic number
+await Future.delayed(Duration(milliseconds: 500));
+
+// ✅ Correct - centralized constant
+await Future.delayed(LoadingDelayConstants.standardList);
+```
+
+---
+
 ## Navigation (GoRouter)
 
 ### Prefer GoRouter Methods

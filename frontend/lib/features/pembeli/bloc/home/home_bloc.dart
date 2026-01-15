@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_event.dart';
 import 'package:frontend/features/pembeli/bloc/home/home_state.dart';
 import 'package:frontend/features/product/repository/category_repository.dart';
@@ -51,7 +52,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final categoriesFuture = _categoryRepository.getCategories();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 600));
+      final delayFuture = Future.delayed(LoadingDelayConstants.initialLoad);
 
       final data = await categoriesFuture;
       await delayFuture;
@@ -98,7 +99,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final productsFuture = _productRepository.getProducts(
         categoryId: event.categoryId,
       );
-      final delayFuture = Future.delayed(const Duration(milliseconds: 600));
+      final delayFuture = Future.delayed(LoadingDelayConstants.initialLoad);
 
       final data = await productsFuture;
       await delayFuture;
@@ -215,7 +216,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final productsFuture = _productRepository.getProducts(
         categoryId: currentState.selectedCategoryId,
       );
-      final delayFuture = Future.delayed(const Duration(milliseconds: 1200));
+      final delayFuture = Future.delayed(LoadingDelayConstants.fullRefresh);
 
       final categories = await categoriesFuture;
       final products = await productsFuture;

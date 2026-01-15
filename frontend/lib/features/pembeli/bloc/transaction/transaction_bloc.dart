@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/pembeli/service/order_service.dart';
 import 'package:frontend/core/utils/order_status_helper.dart';
 import 'package:frontend/core/utils/date_formatter.dart';
@@ -70,7 +71,7 @@ class TransactionBloc {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final ordersFuture = OrderService.getOrders();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final orders = await ordersFuture;
       await delayFuture;

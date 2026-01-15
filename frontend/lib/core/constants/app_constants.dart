@@ -29,6 +29,28 @@ class TimeoutConstants {
   static const Duration maxPaymentWaitTime = Duration(minutes: 30);
 }
 
+/// UX Loading Delay constants
+/// Minimum delays to prevent flash-of-loading-state on fast networks.
+/// These run in parallel with API calls, so they don't add extra time
+/// beyond what the API takes.
+class LoadingDelayConstants {
+  /// Standard delay for list loading screens (500ms)
+  /// Used in: Cart, BUMDes products, Petani list, Search, Checkout, Transaction
+  static const Duration standardList = Duration(milliseconds: 500);
+
+  /// Initial categories/products load (600ms)
+  /// Used in: HomeBloc for categories and products
+  static const Duration initialLoad = Duration(milliseconds: 600);
+
+  /// Full page refresh with pull-to-refresh (1200ms)
+  /// Used in: HomeBloc refresh, Cart refresh
+  static const Duration fullRefresh = Duration(milliseconds: 1200);
+
+  /// Profile update feedback delay (500ms)
+  /// Used in: Edit profile screens
+  static const Duration profileUpdate = Duration(milliseconds: 500);
+}
+
 /// Pagination constants
 class PaginationConstants {
   static const int defaultPageSize = 10;

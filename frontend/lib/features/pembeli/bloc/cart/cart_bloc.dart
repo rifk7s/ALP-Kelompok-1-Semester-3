@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:bloc/bloc.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_event.dart';
 import 'package:frontend/features/pembeli/bloc/cart/cart_state.dart';
 import 'package:frontend/features/pembeli/repository/cart_repository.dart';
@@ -42,7 +43,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       // Minimum delay for UX when spinner is shown
       final cartFuture = _cartRepository.getCart();
       final delayFuture = event.showSpinner
-          ? Future.delayed(const Duration(milliseconds: 500))
+          ? Future.delayed(LoadingDelayConstants.standardList)
           : Future.value();
 
       final cart = await cartFuture;

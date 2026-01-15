@@ -38,7 +38,7 @@ class _SearchPageState extends State<SearchPage> {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final productsFuture = ProductService.getProducts();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final products = await productsFuture;
       await delayFuture;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/router/route_constants.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
@@ -94,7 +95,7 @@ class _HomePageBumdesState extends State<HomePageBumdes> {
       final token = await StorageService.getToken();
 
       // Minimum delay for UX - ensures spinner is visible
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       // Fetch products and count those with stock > 0
       final products = await ProductService.getProducts();

@@ -1,14 +1,11 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/storage/storage_service.dart';
 import 'package:frontend/features/shared/service/chat_service.dart';
-import 'package:frontend/core/network/network_detector.dart';
 
 // Fast timeout for quick UX feedback - user shouldn't wait more than 5 seconds
-const Duration _timeout = Duration(seconds: 5);
+const Duration _authTimeout = Duration(seconds: 5);
 
 class AuthResult {
   final bool success;
@@ -47,15 +44,11 @@ class AuthService {
         body['email'] = email;
       }
 
-      final url = '${ApiConfig.baseUrl}/auth/register';
-
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: ApiConfig.headers(),
-            body: jsonEncode(body),
-          )
-          .timeout(_timeout);
+      final response = await apiClient.post(
+        '/auth/register',
+        body: body,
+        timeout: _authTimeout,
+      );
 
       final data = jsonDecode(response.body);
 
@@ -77,21 +70,17 @@ class AuthService {
           message: data['message'] ?? 'Registrasi gagal',
         );
       }
-    } on TimeoutException {
-      // Try to detect correct IP and show helpful error
-      await NetworkDetector.detectAndSetActiveIP();
+    } on ApiException catch (e) {
       return AuthResult(
         success: false,
-        message:
-            'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message: e.isConnectionError
+            ? 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000'
+            : e.message,
       );
     } catch (e) {
-      // Try to detect correct IP
-      await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message:
-            'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message: 'Terjadi kesalahan: ${e.toString()}',
       );
     }
   }
@@ -101,13 +90,11 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await http
-          .post(
-            Uri.parse('${ApiConfig.baseUrl}/auth/login'),
-            headers: ApiConfig.headers(),
-            body: jsonEncode({'phone': phone, 'password': password}),
-          )
-          .timeout(_timeout);
+      final response = await apiClient.post(
+        '/auth/login',
+        body: {'phone': phone, 'password': password},
+        timeout: _authTimeout,
+      );
 
       final data = jsonDecode(response.body);
 
@@ -140,21 +127,17 @@ class AuthService {
           message: data['message'] ?? 'Login gagal',
         );
       }
-    } on TimeoutException {
-      // Try to detect correct IP and show helpful error
-      await NetworkDetector.detectAndSetActiveIP();
+    } on ApiException catch (e) {
       return AuthResult(
         success: false,
-        message:
-            'Backend tidak berjalan atau tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message: e.isConnectionError
+            ? 'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000'
+            : e.message,
       );
     } catch (e) {
-      // Try to detect correct IP
-      await NetworkDetector.detectAndSetActiveIP();
       return AuthResult(
         success: false,
-        message:
-            'Backend tidak terjangkau. Pastikan server berjalan dengan: php artisan serve --host=0.0.0.0 --port=8000',
+        message: 'Terjadi kesalahan: ${e.toString()}',
       );
     }
   }
@@ -170,20 +153,14 @@ class AuthService {
         return AuthResult(success: true, message: 'Logout berhasil');
       }
 
-      final response = await http
-          .post(
-            Uri.parse('${ApiConfig.baseUrl}/auth/logout'),
-            headers: ApiConfig.headers(token: token),
-          )
-          .timeout(const Duration(seconds: 10));
+      await apiClient.post(
+        '/auth/logout',
+        token: token,
+        timeout: const Duration(seconds: 10),
+      );
 
       await StorageService.clearAll();
-
-      if (response.statusCode == 200) {
-        return AuthResult(success: true, message: 'Logout berhasil');
-      } else {
-        return AuthResult(success: true, message: 'Logout berhasil');
-      }
+      return AuthResult(success: true, message: 'Logout berhasil');
     } catch (e) {
       debugPrint('Logout error: $e');
       await StorageService.clearAll();
@@ -202,12 +179,11 @@ class AuthService {
         );
       }
 
-      final response = await http
-          .get(
-            Uri.parse('${ApiConfig.baseUrl}/me'),
-            headers: ApiConfig.headers(token: token),
-          )
-          .timeout(_timeout);
+      final response = await apiClient.get(
+        '/me',
+        token: token,
+        timeout: _authTimeout,
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -227,14 +203,16 @@ class AuthService {
           message: 'Gagal mendapatkan data user',
         );
       }
-    } on TimeoutException {
-      // Try to detect correct IP
-      await NetworkDetector.detectAndSetActiveIP();
-      return AuthResult(success: false, message: 'Koneksi timeout');
+    } on ApiException catch (e) {
+      return AuthResult(
+        success: false,
+        message: e.isConnectionError ? 'Koneksi gagal' : e.message,
+      );
     } catch (e) {
-      // Try to detect correct IP
-      await NetworkDetector.detectAndSetActiveIP();
-      return AuthResult(success: false, message: 'Koneksi gagal');
+      return AuthResult(
+        success: false,
+        message: 'Terjadi kesalahan: ${e.toString()}',
+      );
     }
   }
 }

@@ -36,7 +36,7 @@ class _ReportPageState extends State<ReportPage> {
             content: const Text("Deskripsi masalah tidak boleh kosong."),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => context.pop(),
                 child: const Text("OK"),
               ),
             ],
@@ -71,7 +71,7 @@ class _ReportPageState extends State<ReportPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // tutup popup
+                context.pop(); // tutup popup
                 context.pop(); // kembali ke halaman sebelumnya
               },
               child: Text("OK", style: TextStyle(color: AppColors.primary)),

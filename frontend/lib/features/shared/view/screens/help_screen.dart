@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_spacing.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -52,7 +53,7 @@ class HelpPage extends StatelessWidget {
                   content: const Text('Fitur ini akan segera hadir!'),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => context.pop(),
                       child: const Text('OK'),
                     ),
                   ],

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/features/bumdes/service/admin_service.dart';
 
 /// Transaction Bumdes state
@@ -70,7 +71,7 @@ class TransactionBumdesBloc {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final ordersFuture = AdminService.getOrdersByStatus();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final orders = await ordersFuture;
       await delayFuture;

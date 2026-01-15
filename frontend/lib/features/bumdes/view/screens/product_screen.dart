@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
@@ -36,7 +37,7 @@ class _ProductPageState extends State<ProductPage> {
     try {
       // Minimum delay for UX - ensures spinner is visible
       final productsFuture = ProductService.getProducts();
-      final delayFuture = Future.delayed(const Duration(milliseconds: 500));
+      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
 
       final data = await productsFuture;
       await delayFuture;

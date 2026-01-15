@@ -104,11 +104,11 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => context.pop(false),
             child: const Text('Batal'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => context.pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text('Hapus'),
           ),
@@ -155,7 +155,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       final fullProduct = await ProductService.getProductById(productId);
 
       // Hide loading
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
 
       if (fullProduct != null && mounted) {
         context.push(
@@ -165,7 +165,7 @@ class _PetaniDetailScreenState extends State<PetaniDetailScreen> {
       }
     } catch (e) {
       // Hide loading
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
 
       // Show error
       if (mounted) {

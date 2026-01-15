@@ -339,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(width: 20),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pop(context);
+                            context.pop();
                           },
                           child: Container(
                             width: 88,
