@@ -19,7 +19,7 @@ class TransactionHistoryPage extends StatefulWidget {
 }
 
 class _TransactionHistoryPageState extends State<TransactionHistoryPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   late TransactionBloc _bloc;
 
@@ -29,6 +29,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(
       length: 3,
       vsync: this,
@@ -36,10 +37,22 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage>
     );
     _bloc = TransactionBloc();
     _bloc.loadOrders();
+    _bloc.startTimer();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Stop timer when app is backgrounded, start when resumed
+    if (state == AppLifecycleState.paused) {
+      _bloc.stopTimer();
+    } else if (state == AppLifecycleState.resumed) {
+      _bloc.startTimer();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     _bloc.dispose();
     super.dispose();

@@ -55,14 +55,27 @@ class TransactionBloc {
   TransactionState get state => _state;
 
   Timer? _countdownTimer;
-
-  TransactionBloc() {
-    _startCountdownTimer();
-  }
+  bool _isTimerRunning = false;
 
   void emit(TransactionState newState) {
     _state = newState;
     _stateController.add(_state);
+  }
+
+  /// Start countdown timer (call when screen becomes visible)
+  void startTimer() {
+    if (_isTimerRunning) return;
+    _isTimerRunning = true;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _updateCountdowns();
+    });
+  }
+
+  /// Stop countdown timer (call when screen becomes invisible)
+  void stopTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    _isTimerRunning = false;
   }
 
   /// Load orders from backend
@@ -107,13 +120,6 @@ class TransactionBloc {
     }
 
     emit(_state.copyWith(countdowns: newCountdowns));
-  }
-
-  /// Start countdown timer
-  void _startCountdownTimer() {
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _updateCountdowns();
-    });
   }
 
   /// Toggle order expansion

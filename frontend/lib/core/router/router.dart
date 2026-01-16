@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -352,10 +354,16 @@ GoRouter createRouter(AuthBloc authBloc) => GoRouter(
 
 /// Custom Listenable that wraps a Stream to trigger router refresh
 class GoRouterRefreshStream extends ChangeNotifier {
-  late final Stream<dynamic> _stream;
+  late final StreamSubscription<dynamic> _subscription;
 
-  GoRouterRefreshStream(Stream<dynamic> stream) : _stream = stream {
-    _stream.listen((_) => notifyListeners());
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    _subscription = stream.listen((_) => notifyListeners());
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }
 
