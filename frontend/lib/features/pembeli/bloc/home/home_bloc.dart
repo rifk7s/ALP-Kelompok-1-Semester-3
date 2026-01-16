@@ -126,6 +126,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Products loaded first (or both loading)
         emit(HomeLoaded(products: data, selectedCategoryId: event.categoryId));
       }
+
+      // Load cart and notification counts after main data is loaded
+      // This ensures HomeLoaded state exists before count handlers run
+      add(const HomeCartCountRequested());
+      add(const HomeNotificationCountRequested());
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error loading products: $e');
@@ -161,11 +166,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeCartCountRequested event,
     Emitter<HomeState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is! HomeLoaded) return;
+    // Check state before async operation
+    if (state is! HomeLoaded) return;
 
     try {
       final cartData = await _cartRepository.getCart();
+
+      // Re-check state AFTER async - it may have changed
+      final currentState = state;
+      if (currentState is! HomeLoaded) return;
+
       if (cartData != null) {
         final items = cartData['items'] as List<dynamic>? ?? [];
         emit(currentState.copyWith(cartItemCount: items.length));
@@ -181,11 +191,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeNotificationCountRequested event,
     Emitter<HomeState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is! HomeLoaded) return;
+    // Check state before async operation
+    if (state is! HomeLoaded) return;
 
     try {
       final count = await _notificationRepository.getUnreadCount();
+
+      // Re-check state AFTER async - it may have changed
+      final currentState = state;
+      if (currentState is! HomeLoaded) return;
+
       emit(currentState.copyWith(unreadNotificationCount: count));
     } catch (e) {
       if (kDebugMode) {
@@ -238,6 +253,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           unreadNotificationCount: currentState.unreadNotificationCount,
         ),
       );
+
+      // Also refresh cart and notification counts
+      add(const HomeCartCountRequested());
+      add(const HomeNotificationCountRequested());
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error refreshing home data: $e');

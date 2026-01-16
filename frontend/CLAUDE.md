@@ -148,6 +148,17 @@ context.watch<HomeBloc>().state;
 | **States** | `FeatureStatus` | `ProductInitial`, `ProductLoading`, `ProductSuccess` |
 | **Files** | `feature_bloc.dart`, `feature_event.dart`, `feature_state.dart` |
 
+### Async Handler Rule
+
+```dart
+// ✅ Read state AFTER await (prevents race conditions)
+final data = await _repository.fetch();
+final currentState = state;  // Read here, not before await
+emit(currentState.copyWith(...));
+```
+
+> See [docs/flutter-patterns.md#async-bloc-handler](docs/flutter-patterns.md#async-bloc-handler---state-capture-timing) for details.
+
 ---
 
 ## Caching

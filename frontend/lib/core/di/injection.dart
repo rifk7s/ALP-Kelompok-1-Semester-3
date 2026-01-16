@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
@@ -20,6 +22,9 @@ import 'package:frontend/features/pembeli/bloc/product_detail/product_detail_blo
 /// Global service locator instance
 final sl = GetIt.instance;
 
+/// Mutex to prevent race conditions in scope operations
+Completer<void>? _scopeOperationLock;
+
 /// Setup base dependencies (called once at app start)
 /// These persist across login/logout cycles
 void setupLocator() {
@@ -41,59 +46,92 @@ void setupLocator() {
 
 /// Push authenticated scope after login
 /// Creates fresh instances for user-specific data
-void pushAuthenticatedScope() {
+/// Uses mutex to prevent race conditions from concurrent calls
+Future<void> pushAuthenticatedScope() async {
+  // Wait for any pending scope operation to complete
+  if (_scopeOperationLock != null && !_scopeOperationLock!.isCompleted) {
+    debugPrint('🔐 Waiting for pending scope operation...');
+    await _scopeOperationLock!.future;
+  }
+
   // Don't push if already in authenticated scope
   if (sl.hasScope('authenticated')) {
     debugPrint('🔐 Authenticated scope already exists, skipping push');
     return;
   }
 
-  sl.pushNewScope(
-    scopeName: 'authenticated',
-    init: (getIt) {
-      debugPrint('🔐 Pushing authenticated scope');
+  // Acquire lock
+  _scopeOperationLock = Completer<void>();
 
-      // User-specific repositories (fresh per session)
-      getIt.registerLazySingleton<CartRepository>(() => CartRepository());
-      getIt.registerLazySingleton<OrderRepository>(() => OrderRepository());
-      getIt.registerLazySingleton<NotificationRepository>(
-        () => NotificationRepository(),
-      );
+  try {
+    sl.pushNewScope(
+      scopeName: 'authenticated',
+      init: (getIt) {
+        debugPrint('🔐 Pushing authenticated scope');
 
-      // User-specific BLoCs (fresh per session)
-      getIt.registerLazySingleton<CartBloc>(
-        () => CartBloc(
-          cartRepository: getIt<CartRepository>(),
-          productRepository: sl<ProductRepository>(),
-        ),
-      );
-      getIt.registerLazySingleton<HomeBloc>(
-        () => HomeBloc(
-          categoryRepository: sl<CategoryRepository>(),
-          productRepository: sl<ProductRepository>(),
-          cartRepository: getIt<CartRepository>(),
-          notificationRepository: getIt<NotificationRepository>(),
-        ),
-      );
-      getIt.registerLazySingleton<ProductDetailBloc>(
-        () => ProductDetailBloc(
-          productRepository: sl<ProductRepository>(),
-          cartRepository: getIt<CartRepository>(),
-        ),
-      );
-    },
-    dispose: () async {
-      debugPrint('🔐 Disposing authenticated scope');
-    },
-  );
+        // User-specific repositories (fresh per session)
+        getIt.registerLazySingleton<CartRepository>(() => CartRepository());
+        getIt.registerLazySingleton<OrderRepository>(() => OrderRepository());
+        getIt.registerLazySingleton<NotificationRepository>(
+          () => NotificationRepository(),
+        );
+
+        // User-specific BLoCs (fresh per session)
+        getIt.registerLazySingleton<CartBloc>(
+          () => CartBloc(
+            cartRepository: getIt<CartRepository>(),
+            productRepository: sl<ProductRepository>(),
+          ),
+        );
+        getIt.registerLazySingleton<HomeBloc>(
+          () => HomeBloc(
+            categoryRepository: sl<CategoryRepository>(),
+            productRepository: sl<ProductRepository>(),
+            cartRepository: getIt<CartRepository>(),
+            notificationRepository: getIt<NotificationRepository>(),
+          ),
+        );
+        getIt.registerLazySingleton<ProductDetailBloc>(
+          () => ProductDetailBloc(
+            productRepository: sl<ProductRepository>(),
+            cartRepository: getIt<CartRepository>(),
+          ),
+        );
+      },
+      dispose: () async {
+        debugPrint('🔐 Disposing authenticated scope');
+      },
+    );
+  } finally {
+    // Release lock
+    _scopeOperationLock!.complete();
+  }
 }
 
 /// Pop authenticated scope on logout
 /// Cleans up all user-specific instances
+/// Uses mutex to prevent race conditions from concurrent calls
 Future<void> popAuthenticatedScope() async {
-  if (sl.hasScope('authenticated')) {
+  // Wait for any pending scope operation to complete
+  if (_scopeOperationLock != null && !_scopeOperationLock!.isCompleted) {
+    debugPrint('🔐 Waiting for pending scope operation...');
+    await _scopeOperationLock!.future;
+  }
+
+  if (!sl.hasScope('authenticated')) {
+    debugPrint('🔐 No authenticated scope to pop');
+    return;
+  }
+
+  // Acquire lock
+  _scopeOperationLock = Completer<void>();
+
+  try {
     await sl.popScope();
     debugPrint('🔐 Authenticated scope popped');
+  } finally {
+    // Release lock
+    _scopeOperationLock!.complete();
   }
 }
 

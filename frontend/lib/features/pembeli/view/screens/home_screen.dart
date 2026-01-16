@@ -25,11 +25,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Load initial data
+    // Load initial data - cart/notification counts are loaded
+    // automatically after products load (see HomeBloc._onProductsLoadRequested)
     context.read<HomeBloc>().add(const HomeCategoriesLoadRequested());
     context.read<HomeBloc>().add(const HomeProductsLoadRequested());
-    context.read<HomeBloc>().add(const HomeCartCountRequested());
-    context.read<HomeBloc>().add(const HomeNotificationCountRequested());
   }
 
   @override
@@ -46,9 +45,9 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: AppColors.surface,
             body: PullToRefresh(
               onRefresh: () async {
+                // Refresh all data - counts are loaded automatically
+                // after HomeRefreshRequested completes (see HomeBloc._onRefreshRequested)
                 context.read<HomeBloc>().add(const HomeRefreshRequested());
-                // Also refresh cart count
-                context.read<HomeBloc>().add(const HomeCartCountRequested());
               },
               color: AppColors.primary,
               backgroundColor: AppColors.surface,

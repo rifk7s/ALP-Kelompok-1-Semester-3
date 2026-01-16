@@ -28,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final role = user?['role'] as String?;
 
       // Push authenticated scope for returning users
-      pushAuthenticatedScope();
+      await pushAuthenticatedScope();
 
       emit(AuthState(status: AuthStatus.authenticated, user: user, role: role));
     } else {
@@ -38,7 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLoggedIn(AuthLoggedIn event, Emitter<AuthState> emit) async {
     // Push authenticated scope for fresh login
-    pushAuthenticatedScope();
+    await pushAuthenticatedScope();
 
     final role = event.user['role'] as String?;
     emit(
@@ -64,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     if (event.isAuthenticated) {
       // Push scope if transitioning to authenticated
-      pushAuthenticatedScope();
+      await pushAuthenticatedScope();
 
       final role = event.user?['role'] as String?;
       emit(

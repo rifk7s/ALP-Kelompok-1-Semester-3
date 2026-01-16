@@ -66,6 +66,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
 
   bool isLoading = true;
   bool isSubmitting = false;
+  String? loadError;
 
   @override
   void initState() {
@@ -75,6 +76,11 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
   }
 
   Future<void> loadData() async {
+    setState(() {
+      isLoading = true;
+      loadError = null;
+    });
+
     try {
       final token = await StorageService.getToken();
       if (token == null) {
@@ -110,11 +116,14 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
         hppPrices = hppData;
         varietiesByCategory = varieties;
         isLoading = false;
+        loadError = null;
       });
     } catch (e) {
       if (mounted) {
-        setState(() => isLoading = false);
-        SnackBarHelper.showError(context, 'Gagal memuat data: $e');
+        setState(() {
+          isLoading = false;
+          loadError = e.toString();
+        });
       }
     }
   }
@@ -181,24 +190,31 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
               ),
-              body: isLoading
-                  ? const BumdesLoadingIndicator(message: 'Memuat data...')
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildImageSection(ctx),
-                          _buildMainInfoSection(),
-                          _buildContributorSection(ctx),
-                          _buildCategorySection(),
-                          _buildPricingSection(),
-                          _buildAdditionalInfoSection(),
-                          const SizedBox(height: 20),
-                          _buildSubmitButton(ctx, state),
-                        ],
-                      ),
-                    ),
+              body: RetryableContent(
+                isLoading: isLoading,
+                hasError: loadError != null,
+                errorMessage: 'Gagal memuat data',
+                onRetry: loadData,
+                loadingWidget: const BumdesLoadingIndicator(
+                  message: 'Memuat data...',
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildImageSection(ctx),
+                      _buildMainInfoSection(),
+                      _buildContributorSection(ctx),
+                      _buildCategorySection(),
+                      _buildPricingSection(),
+                      _buildAdditionalInfoSection(),
+                      const SizedBox(height: 20),
+                      _buildSubmitButton(ctx, state),
+                    ],
+                  ),
+                ),
+              ),
             );
           },
         ),

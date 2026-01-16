@@ -168,6 +168,41 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 }
 ```
 
+### Async BLoC Handler - State Capture Timing
+
+**CRITICAL: Read `state` AFTER await, not before.**
+
+When multiple async handlers run concurrently, capturing state before await causes race conditions where one handler overwrites another's changes:
+
+```dart
+// ❌ Wrong - state captured before await gets stale
+Future<void> _onCartCountRequested(event, emit) async {
+  final currentState = state;  // Captured at T0
+  if (currentState is! HomeLoaded) return;
+
+  final data = await _repository.getCart();  // During await, other handler may emit
+  emit(currentState.copyWith(cartCount: data.length));  // Uses stale T0 state!
+}
+
+// ✅ Correct - read state after await
+Future<void> _onCartCountRequested(event, emit) async {
+  if (state is! HomeLoaded) return;  // Quick check before await
+
+  final data = await _repository.getCart();
+
+  // Re-read state AFTER await - gets latest including other handlers' changes
+  final currentState = state;
+  if (currentState is! HomeLoaded) return;
+
+  emit(currentState.copyWith(cartCount: data.length));
+}
+```
+
+**Why this matters:**
+- BLoC events with async handlers can overlap during await
+- Handler A awaits → Handler B completes and emits → Handler A resumes with stale state
+- Result: Handler A's emit overwrites Handler B's changes
+
 ---
 
 ## Repository Pattern
