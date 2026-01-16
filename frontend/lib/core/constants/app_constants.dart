@@ -44,7 +44,7 @@ class LoadingDelayConstants {
 
   /// Full page refresh with pull-to-refresh (1200ms)
   /// Used in: HomeBloc refresh, Cart refresh
-  static const Duration fullRefresh = Duration(milliseconds: 1200);
+  static const Duration fullRefresh = Duration(milliseconds: 400);
 
   /// Profile update feedback delay (500ms)
   /// Used in: Edit profile screens

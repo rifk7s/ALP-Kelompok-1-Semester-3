@@ -1,154 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/constants/app_constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/utils/currency_formatter.dart';
-import 'package:frontend/features/product/service/product_service.dart';
 import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/features/bumdes/bloc/product_list/product_list_bloc.dart';
+import 'package:frontend/features/bumdes/bloc/product_list/product_list_event.dart';
+import 'package:frontend/features/bumdes/bloc/product_list/product_list_state.dart';
+import 'package:frontend/features/product/repository/product_repository.dart';
 
-class ProductPage extends StatefulWidget {
+class ProductPage extends StatelessWidget {
   const ProductPage({super.key});
 
   @override
-  State<ProductPage> createState() => _ProductPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => ProductListBloc(
+        productRepository: sl<ProductRepository>(),
+      )..add(const ProductListLoadRequested()),
+      child: const _ProductPageContent(),
+    );
+  }
 }
 
-class _ProductPageState extends State<ProductPage> {
-  String _filter = "all";
-  String _searchQuery = "";
-  List<dynamic> products = [];
-  bool isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    loadProducts();
-  }
-
-  Future<void> loadProducts() async {
-    setState(() {
-      isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // Minimum delay for UX - ensures spinner is visible
-      final productsFuture = ProductService.getProducts();
-      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
-
-      final data = await productsFuture;
-      await delayFuture;
-
-      if (!mounted) return;
-
-      setState(() {
-        products = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-        isLoading = false;
-      });
-    }
-  }
-
-  List<dynamic> get filteredProducts {
-    List<dynamic> temp = products.where((p) {
-      final status = p['status'].toString();
-
-      // Filter by stock status
-      if (_filter == "available" && status == 'sold_out') return false;
-      if (_filter == "empty" && status == 'active') return false;
-
-      // Filter by search query
-      if (_searchQuery.isNotEmpty &&
-          !p["name"].toString().toLowerCase().contains(
-            _searchQuery.toLowerCase(),
-          )) {
-        return false;
-      }
-      return true;
-    }).toList();
-
-    // Sort: active products first, sold_out at bottom
-    temp.sort((a, b) {
-      if (a['status'] == 'active' && b['status'] == 'sold_out') return -1;
-      if (a['status'] == 'sold_out' && b['status'] == 'active') return 1;
-      return 0;
-    });
-
-    return temp;
-  }
+class _ProductPageContent extends StatelessWidget {
+  const _ProductPageContent();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: RetryableContent(
-        isLoading: isLoading,
-        hasError: _errorMessage != null,
-        errorMessage: _errorMessage,
-        onRetry: loadProducts,
-        child: PullToRefresh(
-          onRefresh: loadProducts,
-          color: AppColors.primary,
-          backgroundColor: AppColors.surface,
-          displacement: 40,
-          strokeWidth: 2.5,
-          child: SafeArea(
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(child: _header()),
-                SliverToBoxAdapter(child: _filterChips()),
-                filteredProducts.isEmpty
-                    ? SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: _emptyState(),
-                      )
-                    : SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
+      body: BlocBuilder<ProductListBloc, ProductListState>(
+        builder: (context, state) {
+          return RetryableContent(
+            isLoading: state.isLoading,
+            hasError: state.hasError,
+            errorMessage: state.errorMessage,
+            onRetry: () => context
+                .read<ProductListBloc>()
+                .add(const ProductListLoadRequested()),
+            child: PullToRefresh(
+              onRefresh: () async {
+                context.read<ProductListBloc>().add(
+                      const ProductListLoadRequested(
+                        showSpinner: false,
+                        forceRefresh: true,
+                      ),
+                    );
+              },
+              color: AppColors.primary,
+              backgroundColor: AppColors.surface,
+              displacement: 40,
+              strokeWidth: 2.5,
+              child: SafeArea(
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(child: _Header()),
+                    SliverToBoxAdapter(child: _FilterChips()),
+                    state.filteredProducts.isEmpty
+                        ? SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _emptyState(),
+                          )
+                        : SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
                                 childAspectRatio: 0.8,
                               ),
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final product = filteredProducts[index];
-                            return _productCard(
-                              context: context,
-                              product: product,
-                            );
-                          }, childCount: filteredProducts.length),
-                        ),
-                      ),
-              ],
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final product = state.filteredProducts[index];
+                                  return _ProductCard(product: product);
+                                },
+                                childCount: state.filteredProducts.length,
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
-
       floatingActionButton: FloatingActionButton(
         heroTag: "addProdukFab",
         backgroundColor: AppColors.primary,
         elevation: 4,
         onPressed: () async {
-          // Gunakan pushNamed untuk lebih aman
           final result = await context.pushNamed(RouteNames.productUpload);
-          if (result == true) {
-            loadProducts();
+          if (result == true && context.mounted) {
+            context.read<ProductListBloc>().add(
+                  const ProductListLoadRequested(
+                    showSpinner: false,
+                    forceRefresh: true,
+                  ),
+                );
           }
         },
         child: const Icon(Icons.add, size: 28, color: AppColors.white),
@@ -156,7 +112,17 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  Widget _header() {
+  Widget _emptyState() {
+    return const EmptyStateWidget(
+      message: 'Tidak ada produk',
+      icon: Icons.inventory_2_outlined,
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Column(
@@ -205,45 +171,70 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ),
             onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
+              context
+                  .read<ProductListBloc>()
+                  .add(ProductListSearchChanged(value));
             },
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _filterChips() {
-    return Column(
-      children: [
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            physics: const BouncingScrollPhysics(),
-            children: [
-              _buildFilterChip("all", "Semua"),
-              const SizedBox(width: 8),
-              _buildFilterChip("available", "Stok Tersedia"),
-              const SizedBox(width: 8),
-              _buildFilterChip("empty", "Stok Habis"),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
+class _FilterChips extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ProductListBloc, ProductListState>(
+      buildWhen: (prev, curr) => prev.filter != curr.filter,
+      builder: (context, state) {
+        return Column(
+          children: [
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildFilterChip(context, state.filter, "all", "Semua"),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    context,
+                    state.filter,
+                    "available",
+                    "Stok Tersedia",
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    context,
+                    state.filter,
+                    "empty",
+                    "Stok Habis",
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildFilterChip(String key, String label) {
-    final selected = _filter == key;
+  Widget _buildFilterChip(
+    BuildContext context,
+    String currentFilter,
+    String key,
+    String label,
+  ) {
+    final selected = currentFilter == key;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
-      onSelected: (_) => setState(() => _filter = key),
+      onSelected: (_) => context
+          .read<ProductListBloc>()
+          .add(ProductListFilterChanged(key)),
       selectedColor: AppColors.primaryLight,
       backgroundColor: AppColors.white,
       labelStyle: TextStyle(
@@ -252,23 +243,19 @@ class _ProductPageState extends State<ProductPage> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
     );
   }
+}
 
-  Widget _emptyState() {
-    return const EmptyStateWidget(
-      message: 'Tidak ada produk',
-      icon: Icons.inventory_2_outlined,
-    );
-  }
+class _ProductCard extends StatelessWidget {
+  final Map<String, dynamic> product;
 
-  Widget _productCard({
-    required BuildContext context,
-    required Map<String, dynamic> product,
-  }) {
+  const _ProductCard({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
     final isSoldOut = product['status'] == 'sold_out';
     final stockKg = double.parse(product['stock_kg'].toString());
     final pricePerKg = double.parse(product['price_per_kg'].toString());
-    final imagePath =
-        product['product_images'] != null &&
+    final imagePath = product['product_images'] != null &&
             (product['product_images'] as List).isNotEmpty
         ? product['product_images'][0]['image_path']
         : null;
@@ -286,13 +273,19 @@ class _ProductPageState extends State<ProductPage> {
           RoutePaths.productDetail.replaceAll(':id', '${product['id']}'),
           extra: {
             ...product,
-            'isBumdes': true, // Flag untuk BUMDes product detail
+            'isBumdes': true,
           },
         );
 
         // Reload products after returning from detail screen
-        // This handles both edit and delete operations
-        loadProducts();
+        if (context.mounted) {
+          context.read<ProductListBloc>().add(
+                const ProductListLoadRequested(
+                  showSpinner: false,
+                  forceRefresh: true,
+                ),
+              );
+        }
       },
       child: Opacity(
         opacity: isSoldOut ? 0.5 : 1.0,

@@ -35,6 +35,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartLoadRequested event,
     Emitter<CartState> emit,
   ) async {
+    final isFirstLoad = state is! CartLoaded;
+
     if (event.showSpinner) {
       emit(const CartLoading());
     }
@@ -86,11 +88,21 @@ class CartBloc extends Bloc<CartEvent, CartState> {
                 : [],
           ),
         );
+
+        // Auto-load recommendations after first cart load
+        if (event.loadRecommendations || (isFirstLoad && currentState is! CartLoaded)) {
+          add(const CartRecommendationsLoadRequested());
+        }
       } else {
         if (kDebugMode) {
           debugPrint('Cart is null');
         }
-        emit(CartLoaded());
+        emit(const CartLoaded());
+
+        // Still load recommendations for empty cart
+        if (event.loadRecommendations || isFirstLoad) {
+          add(const CartRecommendationsLoadRequested());
+        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -229,6 +241,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartRecommendationsLoadRequested event,
     Emitter<CartState> emit,
   ) async {
+    // Cart should be loaded before recommendations
+    final currentState = state;
+    if (currentState is! CartLoaded) {
+      if (kDebugMode) {
+        debugPrint('Skipping recommendations - cart not loaded yet');
+      }
+      return;
+    }
+
     try {
       final products = await _productRepository.getProducts();
       final productsWithStock = products
@@ -242,28 +263,23 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       productsWithStock.shuffle();
 
-      final currentState = state;
-      if (currentState is CartLoaded) {
+      // Re-check state after async operation
+      final latestState = state;
+      if (latestState is CartLoaded) {
         emit(
-          currentState.copyWith(
+          latestState.copyWith(
             recommendations: productsWithStock.take(3).toList(),
           ),
         );
-      } else {
-        // Emit a CartLoaded state with recommendations even if cart is empty
-        emit(CartLoaded(recommendations: productsWithStock.take(3).toList()));
+        if (kDebugMode) {
+          debugPrint('Loaded ${productsWithStock.take(3).length} recommendations');
+        }
       }
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Error loading recommendations: $e');
       }
-      // If there's an error, still emit a state with empty recommendations
-      final currentState = state;
-      if (currentState is CartLoaded) {
-        emit(currentState.copyWith(recommendations: []));
-      } else {
-        emit(const CartLoaded(recommendations: []));
-      }
+      // Don't emit error state for recommendations - they're optional
     }
   }
 

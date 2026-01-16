@@ -1,85 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/core/constants/app_constants.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/bumdes/service/petani_service.dart';
-import 'package:frontend/core/storage/storage_service.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:frontend/core/utils/ui_helpers.dart';
 import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/features/bumdes/bloc/petani/petani_bloc.dart';
+import 'package:frontend/features/bumdes/bloc/petani/petani_event.dart';
+import 'package:frontend/features/bumdes/bloc/petani/petani_state.dart';
+import 'package:frontend/features/bumdes/repository/petani_repository.dart';
 
-class KelolaPetaniScreen extends StatefulWidget {
+class KelolaPetaniScreen extends StatelessWidget {
   const KelolaPetaniScreen({super.key});
 
   @override
-  State<KelolaPetaniScreen> createState() => _KelolaPetaniScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => PetaniBloc(
+        petaniRepository: sl<PetaniRepository>(),
+      )..add(const PetaniLoadRequested()),
+      child: const _KelolaPetaniContent(),
+    );
+  }
 }
 
-class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
-  final _petaniService = PetaniService();
-  List<PetaniData> _petaniList = [];
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPetaniData();
-  }
-
-  Future<void> _loadPetaniData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) {
-        throw Exception('Token tidak ditemukan. Silakan masuk kembali.');
-      }
-
-      // Minimum delay for UX - ensures spinner is visible
-      final petaniFuture = _petaniService.fetchAllPetani(token: token);
-      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
-
-      final data = await petaniFuture;
-      await delayFuture;
-
-      if (!mounted) return;
-
-      setState(() {
-        _petaniList = data;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _navigateToAddScreen() async {
-    final result = await context.push(RoutePaths.petaniAdd);
-
-    // If result is true, reload the list
-    if (result == true) {
-      _loadPetaniData();
-    }
-  }
-
-  Future<void> _navigateToDetailScreen(PetaniData petani) async {
-    final result = await context.push(
-      RoutePaths.petaniDetail.replaceAll(':id', '${petani.id}'),
-    );
-
-    // If result is true (deleted), reload the list
-    if (result == true) {
-      _loadPetaniData();
-    }
-  }
+class _KelolaPetaniContent extends StatelessWidget {
+  const _KelolaPetaniContent();
 
   @override
   Widget build(BuildContext context) {
@@ -100,117 +46,156 @@ class _KelolaPetaniScreenState extends State<KelolaPetaniScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: _navigateToAddScreen,
+            onPressed: () => _navigateToAddScreen(context),
           ),
         ],
       ),
-
-      body: RetryableContent(
-        isLoading: _isLoading,
-        hasError: _errorMessage != null,
-        errorMessage: _errorMessage,
-        onRetry: _loadPetaniData,
-        child: _petaniList.isEmpty
-            ? EmptyStateWidget(
-                message: 'Belum ada data petani',
-                subMessage: 'Tambahkan data baru dengan tombol + di atas',
-                icon: Icons.people_outline,
-              )
-            : RefreshIndicator(
-                onRefresh: _loadPetaniData,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: GridView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+      body: BlocBuilder<PetaniBloc, PetaniState>(
+        builder: (context, state) {
+          return RetryableContent(
+            isLoading: state.isLoading,
+            hasError: state.hasError,
+            errorMessage: state.errorMessage,
+            onRetry: () =>
+                context.read<PetaniBloc>().add(const PetaniLoadRequested()),
+            child: state.petaniList.isEmpty
+                ? EmptyStateWidget(
+                    message: 'Belum ada data petani',
+                    subMessage: 'Tambahkan data baru dengan tombol + di atas',
+                    icon: Icons.people_outline,
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<PetaniBloc>().add(
+                            const PetaniLoadRequested(showSpinner: false),
+                          );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: GridView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
                           childAspectRatio: 0.85,
                         ),
-                    itemCount: _petaniList.length,
-                    itemBuilder: (context, index) {
-                      final petani = _petaniList[index];
-                      final nama = petani.name;
-                      final hp = petani.phone ?? '-';
+                        itemCount: state.petaniList.length,
+                        itemBuilder: (context, index) {
+                          final petani = state.petaniList[index];
+                          return _PetaniCard(
+                            name: petani.name,
+                            phone: petani.phone ?? '-',
+                            onTap: () =>
+                                _navigateToDetailScreen(context, petani.id),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+          );
+        },
+      ),
+    );
+  }
 
-                      return GestureDetector(
-                        onTap: () => _navigateToDetailScreen(petani),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: AppColors.shadowLight,
-                                blurRadius: 6,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.warningAccent.withValues(
-                                      alpha: 0.85,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    nama.isNotEmpty
-                                        ? nama[0].toUpperCase()
-                                        : 'P',
-                                    style: const TextStyle(
-                                      fontSize: 26,
-                                      color: AppColors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+  Future<void> _navigateToAddScreen(BuildContext context) async {
+    final result = await context.push(RoutePaths.petaniAdd);
 
-                                const SizedBox(height: 14),
+    // If result is true, reload the list
+    if (result == true && context.mounted) {
+      context.read<PetaniBloc>().add(const PetaniLoadRequested(showSpinner: false));
+    }
+  }
 
-                                Text(
-                                  nama,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+  Future<void> _navigateToDetailScreen(BuildContext context, int petaniId) async {
+    final result = await context.push(
+      RoutePaths.petaniDetail.replaceAll(':id', '$petaniId'),
+    );
 
-                                const SizedBox(height: 6),
+    // If result is true (deleted/updated), reload the list
+    if (result == true && context.mounted) {
+      context.read<PetaniBloc>().add(const PetaniLoadRequested(showSpinner: false));
+    }
+  }
+}
 
-                                Text(
-                                  hp,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+class _PetaniCard extends StatelessWidget {
+  final String name;
+  final String phone;
+  final VoidCallback onTap;
+
+  const _PetaniCard({
+    required this.name,
+    required this.phone,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.warningAccent.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : 'P',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+              const SizedBox(height: 14),
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                phone,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

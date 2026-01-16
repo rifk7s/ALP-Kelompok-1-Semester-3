@@ -29,9 +29,16 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    // Load cart and recommendations when screen initializes
-    context.read<CartBloc>().add(const CartLoadRequested());
-    context.read<CartBloc>().add(const CartRecommendationsLoadRequested());
+    final bloc = context.read<CartBloc>();
+    final currentState = bloc.state;
+
+    if (currentState is! CartLoaded) {
+      // First time: load cart with spinner (recommendations auto-load after)
+      bloc.add(const CartLoadRequested(loadRecommendations: true));
+    } else {
+      // Already loaded: refresh in background without spinner
+      bloc.add(const CartLoadRequested(showSpinner: false));
+    }
   }
 
   String formatRupiah(int price) => "Rp ${formatter.format(price)}";
@@ -61,10 +68,12 @@ class _CartPageState extends State<CartPage> {
           }
         },
         builder: (context, state) {
+          // Show loading spinner only for initial load (CartInitial -> CartLoading)
           if (state is CartLoading && state.showSpinner) {
             return const Center(child: AppLoadingIndicator());
           }
 
+          // Show cart content when loaded
           if (state is CartLoaded) {
             if (state.cartItems.isEmpty) {
               return const _EmptyCartWidget();
@@ -77,7 +86,9 @@ class _CartPageState extends State<CartPage> {
             );
           }
 
-          return const SizedBox.shrink();
+          // For CartInitial or other states, show loading
+          // This should rarely happen since we check in initState
+          return const Center(child: AppLoadingIndicator());
         },
       ),
     );

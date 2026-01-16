@@ -9,11 +9,15 @@ abstract class CartEvent extends Equatable {
 
 class CartLoadRequested extends CartEvent {
   final bool showSpinner;
+  final bool loadRecommendations;
 
-  const CartLoadRequested({this.showSpinner = true});
+  const CartLoadRequested({
+    this.showSpinner = true,
+    this.loadRecommendations = false,
+  });
 
   @override
-  List<Object?> get props => [showSpinner];
+  List<Object?> get props => [showSpinner, loadRecommendations];
 }
 
 class CartItemQuantityChanged extends CartEvent {
