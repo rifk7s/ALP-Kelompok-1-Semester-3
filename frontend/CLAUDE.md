@@ -76,6 +76,27 @@ if (!context.mounted) return;  // REQUIRED!
 context.pop();
 ```
 
+### StatefulWidget Lifecycle
+
+```dart
+// ALWAYS dispose controllers
+@override
+void dispose() {
+  _controller.removeListener(_onChange);  // Remove listeners first
+  _controller.dispose();                   // Then dispose
+  _timer?.cancel();                        // Cancel timers
+  _subscription?.cancel();                 // Cancel streams
+  super.dispose();
+}
+
+// ALWAYS check mounted after await
+final data = await api.fetch();
+if (!mounted) return;
+setState(() => _data = data);
+```
+
+> See [docs/flutter-patterns.md#statefulwidget-lifecycle](docs/flutter-patterns.md#statefulwidget-lifecycle) for detailed patterns.
+
 ### SnackBars - Use helper
 
 ```dart

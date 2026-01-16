@@ -14,6 +14,7 @@
 5. [UI Helpers](#ui-helpers)
 6. [Loading Delays](#loading-delays)
 7. [Common Screen Patterns](#common-screen-patterns)
+8. [StatefulWidget Lifecycle](#statefulwidget-lifecycle)
 
 ---
 
@@ -563,6 +564,310 @@ ElevatedButton(
       ? const AppSmallLoadingIndicator(color: AppColors.white, size: 20.0)
       : const Text("UPLOAD PRODUK"),
 )
+```
+
+---
+
+## StatefulWidget Lifecycle
+
+### Controller Disposal
+
+**ALWAYS dispose controllers in StatefulWidget:**
+
+```dart
+class _MyScreenState extends State<MyScreen> {
+  final _nameController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+```
+
+**Objects requiring disposal:**
+
+| Object | Method | Notes |
+|--------|--------|-------|
+| `TextEditingController` | `.dispose()` | Always |
+| `ScrollController` | `.dispose()` | Always |
+| `AnimationController` | `.dispose()` | Always |
+| `FocusNode` | `.dispose()` | Always |
+| `PageController` | `.dispose()` | Always |
+| `TabController` | `.dispose()` | Always |
+| `StreamSubscription` | `.cancel()` | In dispose |
+| `Timer` | `.cancel()` | In dispose |
+| `StreamController` | `.close()` | In dispose |
+
+---
+
+### Listener Pattern
+
+**NEVER use anonymous listeners - they can't be removed:**
+
+```dart
+// ❌ Wrong - anonymous listener can't be removed
+@override
+void initState() {
+  super.initState();
+  _controller.addListener(() {
+    // do something
+  });
+}
+
+// ✅ Correct - named function can be removed
+void _onTextChanged() {
+  // do something
+}
+
+@override
+void initState() {
+  super.initState();
+  _controller.addListener(_onTextChanged);
+}
+
+@override
+void dispose() {
+  _controller.removeListener(_onTextChanged);  // MUST remove
+  _controller.dispose();
+  super.dispose();
+}
+```
+
+**Real example from BumdesPriceField:**
+
+```dart
+class _BumdesPriceFieldState extends State<BumdesPriceField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_formatCurrency);
+  }
+
+  void _formatCurrency() {
+    final text = _controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (text.isNotEmpty) {
+      final formatted = CurrencyFormatter.rupiah.format(int.parse(text));
+      if (formatted != _controller.text) {
+        _controller.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_formatCurrency);  // Remove BEFORE dispose
+    if (widget.controller == null) {
+      _controller.dispose();  // Only dispose if we created it
+    }
+    super.dispose();
+  }
+}
+```
+
+---
+
+### Timer & Stream Cleanup
+
+```dart
+class _ChatPageState extends State<ChatPage> {
+  Timer? _pollingTimer;
+  Timer? _typingTimer;
+  StreamSubscription? _messageSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _startPolling();
+    _subscribeToMessages();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(Duration(seconds: 5), (_) {
+      _fetchMessages();
+    });
+  }
+
+  void _subscribeToMessages() {
+    _messageSubscription = messageStream.listen((msg) {
+      // handle message
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _typingTimer?.cancel();
+    _messageSubscription?.cancel();
+    super.dispose();
+  }
+}
+```
+
+---
+
+### Async Safety - Mounted Check
+
+**ALWAYS check `mounted` before `setState` after async operations:**
+
+```dart
+// ❌ Wrong - may crash if widget disposed during await
+Future<void> _loadData() async {
+  final data = await api.fetchData();
+  setState(() {  // CRASH if user navigated away
+    _data = data;
+  });
+}
+
+// ✅ Correct - check mounted first
+Future<void> _loadData() async {
+  final data = await api.fetchData();
+
+  if (!mounted) return;  // REQUIRED after any await
+
+  setState(() {
+    _data = data;
+  });
+}
+```
+
+**Full pattern with error handling:**
+
+```dart
+Future<void> _loadData() async {
+  setState(() => _isLoading = true);
+
+  try {
+    final data = await repository.fetchData();
+
+    if (!mounted) return;
+
+    setState(() {
+      _data = data;
+      _isLoading = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+    SnackBarHelper.showError(context, 'Gagal memuat data');
+  }
+}
+```
+
+---
+
+### WidgetsBindingObserver Pattern
+
+```dart
+class _MyScreenState extends State<MyScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);  // MUST remove
+    super.dispose();
+  }
+}
+```
+
+---
+
+### Complete StatefulWidget Template
+
+```dart
+class MyScreen extends StatefulWidget {
+  const MyScreen({super.key});
+
+  @override
+  State<MyScreen> createState() => _MyScreenState();
+}
+
+class _MyScreenState extends State<MyScreen> {
+  // Controllers
+  final _textController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  // Timers & Subscriptions
+  Timer? _debounceTimer;
+  StreamSubscription? _dataSubscription;
+
+  // State
+  bool _isLoading = false;
+  List<dynamic> _data = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_onTextChanged);
+    _loadData();
+  }
+
+  void _onTextChanged() {
+    // Handle text changes
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final data = await repository.fetchData();
+
+      if (!mounted) return;
+
+      setState(() {
+        _data = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+      SnackBarHelper.showError(context, e.toString());
+    }
+  }
+
+  @override
+  void dispose() {
+    // 1. Cancel timers & subscriptions
+    _debounceTimer?.cancel();
+    _dataSubscription?.cancel();
+
+    // 2. Remove listeners
+    _textController.removeListener(_onTextChanged);
+
+    // 3. Dispose controllers
+    _textController.dispose();
+    _scrollController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(...);
+  }
+}
 ```
 
 ---
