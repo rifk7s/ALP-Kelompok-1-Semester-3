@@ -39,22 +39,25 @@ class _BumdesPriceFieldState extends State<BumdesPriceField> {
       _controller.text = widget.initialValue!;
     }
 
-    _controller.addListener(() {
-      final text = _controller.text.replaceAll(RegExp(r'[^0-9]'), '');
-      if (text.isNotEmpty) {
-        final formatted = CurrencyFormatter.rupiah.format(int.parse(text));
-        if (formatted != _controller.text) {
-          _controller.value = TextEditingValue(
-            text: formatted,
-            selection: TextSelection.collapsed(offset: formatted.length),
-          );
-        }
+    _controller.addListener(_formatCurrency);
+  }
+
+  void _formatCurrency() {
+    final text = _controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (text.isNotEmpty) {
+      final formatted = CurrencyFormatter.rupiah.format(int.parse(text));
+      if (formatted != _controller.text) {
+        _controller.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
       }
-    });
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_formatCurrency);
     if (widget.controller == null) {
       _controller.dispose();
     }

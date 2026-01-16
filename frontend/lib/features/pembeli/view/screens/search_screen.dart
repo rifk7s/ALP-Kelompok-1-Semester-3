@@ -33,6 +33,12 @@ class _SearchPageState extends State<SearchPage> {
     _loadProducts();
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadProducts() async {
     setState(() => isLoading = true);
     try {
@@ -43,15 +49,15 @@ class _SearchPageState extends State<SearchPage> {
       final products = await productsFuture;
       await delayFuture;
 
+      if (!mounted) return;
       setState(() {
         _allProducts = products.cast<Map<String, dynamic>>();
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
-      if (mounted) {
-        SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
-      }
+      SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
     }
   }
 

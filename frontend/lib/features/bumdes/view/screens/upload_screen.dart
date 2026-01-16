@@ -13,6 +13,7 @@ import 'package:frontend/features/product/bloc/product_bloc.dart';
 import 'package:frontend/features/product/bloc/product_state.dart';
 import 'package:frontend/features/product/bloc/product_event.dart';
 import 'package:frontend/features/product/repository/product_repository.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:frontend/features/product/cubit/product_editing_cubit.dart';
 import 'package:frontend/core/widgets/loading_widgets.dart';
 import 'package:frontend/features/bumdes/view/widgets/common_widgets.dart';
@@ -152,7 +153,7 @@ class _UploadProdukScreenState extends State<UploadProdukScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ProductBloc(repository: ProductRepository()),
+          create: (_) => ProductBloc(repository: sl<ProductRepository>()),
         ),
         BlocProvider(create: (_) => ProductEditingCubit()),
       ],
