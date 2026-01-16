@@ -43,6 +43,34 @@ class ProductService {
     }
   }
 
+  /// Search products server-side with optional category filter
+  /// Returns products matching the search term in name, variety, or category
+  static Future<List<dynamic>> searchProducts({
+    required String query,
+    int? categoryId,
+  }) async {
+    try {
+      final params = <String, String>{'search': query};
+      if (categoryId != null) {
+        params['category_id'] = categoryId.toString();
+      }
+
+      final queryString = params.entries
+          .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+
+      final response = await apiClient.get('/products/product?$queryString');
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Gagal mencari produk');
+      }
+    } catch (e) {
+      throw Exception('Gagal mencari produk: $e');
+    }
+  }
+
   // Fetch a single product by ID
   static Future<Map<String, dynamic>?> getProductById(int productId) async {
     try {

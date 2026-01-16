@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -20,48 +22,57 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
   List<String> searchHistory = [];
-
   List<String> filteredHistory = [];
   List<Map<String, dynamic>> searchResults = [];
-  List<Map<String, dynamic>> _allProducts = [];
-  bool isLoading = true;
+  bool isLoading = false;
+  bool isSearching = false;
+
+  // Debounce timer for search
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 400);
 
   @override
   void initState() {
     super.initState();
     filteredHistory = List.from(searchHistory);
-    _loadProducts();
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
-  Future<void> _loadProducts() async {
-    setState(() => isLoading = true);
-    try {
-      // Minimum delay for UX - ensures spinner is visible
-      final productsFuture = ProductService.getProducts();
-      final delayFuture = Future.delayed(LoadingDelayConstants.standardList);
+  /// Perform server-side search with debouncing
+  Future<void> _searchProducts(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        searchResults = [];
+        isSearching = false;
+      });
+      return;
+    }
 
-      final products = await productsFuture;
-      await delayFuture;
+    setState(() => isSearching = true);
+
+    try {
+      final results = await ProductService.searchProducts(query: query);
 
       if (!mounted) return;
       setState(() {
-        _allProducts = products.cast<Map<String, dynamic>>();
-        isLoading = false;
+        searchResults = results.cast<Map<String, dynamic>>();
+        isSearching = false;
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => isLoading = false);
-      SnackBarHelper.showError(context, 'Gagal memuat produk: $e');
+      setState(() => isSearching = false);
+      SnackBarHelper.showError(context, 'Gagal mencari produk');
     }
   }
 
   void _onSearchChanged(String query) {
+    // Update filtered history immediately
     setState(() {
       filteredHistory = searchHistory
           .where((item) => item.toLowerCase().contains(query.toLowerCase()))
@@ -69,21 +80,18 @@ class _SearchPageState extends State<SearchPage> {
 
       if (query.isEmpty) {
         searchResults = [];
-      } else {
-        // Search in product name, category, and variety
-        searchResults = _allProducts.where((p) {
-          final name = (p['name'] as String? ?? '').toLowerCase();
-          final category = (p['category']?['name'] as String? ?? '')
-              .toLowerCase();
-          final variety = (p['variety'] as String? ?? '').toLowerCase();
-          final searchLower = query.toLowerCase();
-
-          return name.contains(searchLower) ||
-              category.contains(searchLower) ||
-              variety.contains(searchLower);
-        }).toList();
+        isSearching = false;
       }
     });
+
+    // Debounce the server search
+    _debounceTimer?.cancel();
+    if (query.isNotEmpty) {
+      setState(() => isSearching = true);
+      _debounceTimer = Timer(_debounceDuration, () {
+        _searchProducts(query);
+      });
+    }
   }
 
   void _executeSearch(String query) {
@@ -99,8 +107,9 @@ class _SearchPageState extends State<SearchPage> {
       }
     });
 
-    // Perform search
-    _onSearchChanged(query);
+    // Perform search immediately on submit
+    _debounceTimer?.cancel();
+    _searchProducts(query);
   }
 
   void _selectHistoryItem(String item) {
@@ -112,7 +121,8 @@ class _SearchPageState extends State<SearchPage> {
         searchHistory.insert(0, item);
       }
     });
-    _onSearchChanged(item);
+    _debounceTimer?.cancel();
+    _searchProducts(item);
   }
 
   @override
@@ -175,7 +185,16 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           ),
                         ),
-                        if (_controller.text.isNotEmpty)
+                        if (isSearching)
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        else if (_controller.text.isNotEmpty)
                           GestureDetector(
                             onTap: () {
                               _controller.clear();
@@ -212,72 +231,79 @@ class _SearchPageState extends State<SearchPage> {
                   return productCard(context: context, product: p);
                 },
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            : _controller.text.isNotEmpty && !isSearching
+                ? const Center(
+                    child: EmptyStateWidget(
+                      message: 'Tidak ada produk ditemukan',
+                      icon: Icons.search_off,
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Riwayat Pencarian",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      if (searchHistory.isNotEmpty)
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              searchHistory.clear();
-                              _onSearchChanged('');
-                            });
-                          },
-                          child: const Text(
-                            "Hapus semua",
-                            style: TextStyle(color: AppColors.danger),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Riwayat Pencarian",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
+                          if (searchHistory.isNotEmpty)
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  searchHistory.clear();
+                                  filteredHistory.clear();
+                                });
+                              },
+                              child: const Text(
+                                "Hapus semua",
+                                style: TextStyle(color: AppColors.danger),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Expanded(
+                        child: searchHistory.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: filteredHistory.length,
+                                itemBuilder: (context, index) {
+                                  final item = filteredHistory[index];
+                                  return ListTile(
+                                    title: Text(item),
+                                    leading: const Icon(
+                                      Icons.history,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    trailing: IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          searchHistory.remove(item);
+                                          filteredHistory.remove(item);
+                                        });
+                                      },
+                                    ),
+                                    onTap: () {
+                                      _selectHistoryItem(item);
+                                    },
+                                  );
+                                },
+                              )
+                            : const EmptyStateWidget(
+                                message: 'Belum ada pencarian',
+                                icon: Icons.history,
+                              ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  Expanded(
-                    child: searchHistory.isNotEmpty
-                        ? ListView.builder(
-                            itemCount: filteredHistory.length,
-                            itemBuilder: (context, index) {
-                              final item = filteredHistory[index];
-                              return ListTile(
-                                title: Text(item),
-                                leading: const Icon(
-                                  Icons.history,
-                                  color: AppColors.textSecondary,
-                                ),
-                                trailing: IconButton(
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      searchHistory.remove(item);
-                                      _onSearchChanged(_controller.text);
-                                    });
-                                  },
-                                ),
-                                onTap: () {
-                                  _selectHistoryItem(item);
-                                },
-                              );
-                            },
-                          )
-                        : const EmptyStateWidget(
-                            message: 'Belum ada pencarian',
-                            icon: Icons.history,
-                          ),
-                  ),
-                ],
-              ),
       ),
     );
   }
