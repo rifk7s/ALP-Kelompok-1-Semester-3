@@ -46,7 +46,7 @@ class CountdownTimerDisplay extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer, size: 16, color: AppColors.warningDark),
+          const Icon(Icons.timer, size: 16, color: AppColors.warningDark),
           const SizedBox(width: 6),
           Text(
             'Batas Waktu: $timeLeft',

@@ -56,7 +56,7 @@ class _ReportPageState extends State<ReportPage> {
           ),
           title: Row(
             children: [
-              Icon(Icons.check_circle, color: AppColors.primary, size: 28),
+              const Icon(Icons.check_circle, color: AppColors.primary, size: 28),
               const SizedBox(width: 10),
               const Text(
                 "Berhasil!",
@@ -111,7 +111,7 @@ class _ReportPageState extends State<ReportPage> {
               Center(
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.report_problem_outlined,
                       size: 70,
                       color: AppColors.primary,

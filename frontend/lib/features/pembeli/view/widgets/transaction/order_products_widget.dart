@@ -62,7 +62,7 @@ class OrderProductsWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: AppColors.grey600, size: 24),
+                const Icon(Icons.chevron_right, color: AppColors.grey600, size: 24),
               ],
             ),
           ),

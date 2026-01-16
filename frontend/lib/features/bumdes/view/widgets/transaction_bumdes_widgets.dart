@@ -435,7 +435,7 @@ class BumdesOrderProgress extends StatelessWidget {
           ],
           Row(
             children: [
-              Icon(Icons.schedule, size: 16, color: AppColors.grey600),
+              const Icon(Icons.schedule, size: 16, color: AppColors.grey600),
               const SizedBox(width: 6),
               Text(
                 TransactionBumdesHelper.formatDate(createdAt),

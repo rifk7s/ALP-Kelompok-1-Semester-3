@@ -149,7 +149,7 @@ class PendingOrderInfo extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.timer, size: 18, color: AppColors.warningDark),
+            const Icon(Icons.timer, size: 18, color: AppColors.warningDark),
             const SizedBox(width: 8),
             Text(
               'Batas: $deadlineText (${timeLeft ?? '-'})',
@@ -266,7 +266,7 @@ class CompletedOrderInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
+          const Icon(Icons.check_circle, size: 16, color: AppColors.successDark),
           const SizedBox(width: 6),
           Text(
             completedAt != null
