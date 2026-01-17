@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 class QuantitySelector extends StatelessWidget {
@@ -97,7 +98,7 @@ class QuantitySelector extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -132,7 +133,7 @@ class QuantitySelector extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => dialogContext.pop(),
               child: const Text(
                 "Batal",
                 style: TextStyle(color: AppColors.primary),
@@ -142,7 +143,7 @@ class QuantitySelector extends StatelessWidget {
               onPressed: () {
                 final input = int.tryParse(controller.text) ?? 1;
                 final qty = input < 1 ? 1 : input;
-                Navigator.of(context).pop();
+                dialogContext.pop();
                 onQuantityChanged(qty);
               },
               style: ElevatedButton.styleFrom(
@@ -153,7 +154,7 @@ class QuantitySelector extends StatelessWidget {
           ],
         );
       },
-    );
+    ).then((_) => controller.dispose());
   }
 }
 

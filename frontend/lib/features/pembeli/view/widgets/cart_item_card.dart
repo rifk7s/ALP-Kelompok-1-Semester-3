@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/network/api_config.dart';
@@ -265,9 +266,9 @@ class _QuantitySelector extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (dialogContext, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -311,7 +312,7 @@ class _QuantitySelector extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => dialogContext.pop(),
                   child: const Text(
                     "Batal",
                     style: TextStyle(color: AppColors.primary),
@@ -321,7 +322,7 @@ class _QuantitySelector extends StatelessWidget {
                   onPressed: () {
                     final newQty = double.tryParse(controller.text) ?? 0;
                     if (newQty <= 0) {
-                      Navigator.of(context).pop();
+                      dialogContext.pop();
                       return;
                     }
                     if (newQty > stockKg) {
@@ -331,7 +332,7 @@ class _QuantitySelector extends StatelessWidget {
                       });
                       return;
                     }
-                    Navigator.of(context).pop();
+                    dialogContext.pop();
                     onChanged(newQty);
                   },
                   style: ElevatedButton.styleFrom(
@@ -347,6 +348,6 @@ class _QuantitySelector extends StatelessWidget {
           },
         );
       },
-    );
+    ).then((_) => controller.dispose());
   }
 }
