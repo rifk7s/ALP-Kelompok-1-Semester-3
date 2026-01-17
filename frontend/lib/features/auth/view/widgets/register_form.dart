@@ -1,0 +1,273 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/utils/page_transitions.dart';
+import 'package:frontend/core/utils/ui_helpers.dart';
+import 'package:frontend/features/auth/service/auth_service.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
+import 'package:frontend/core/widgets/loading_widgets.dart';
+import 'package:frontend/features/pembeli/view/screens/start_page.dart';
+
+class RegisterForm extends StatefulWidget {
+  const RegisterForm({super.key});
+
+  @override
+  State<RegisterForm> createState() => _RegisterFormState();
+}
+
+class _RegisterFormState extends State<RegisterForm> {
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  // Keys untuk shake animation
+  final _nameShakeKey = GlobalKey<ShakeWidgetState>();
+  final _phoneShakeKey = GlobalKey<ShakeWidgetState>();
+  final _passwordShakeKey = GlobalKey<ShakeWidgetState>();
+  final _addressShakeKey = GlobalKey<ShakeWidgetState>();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (_isLoading) return;
+
+    // Validation dengan shake animation
+    bool hasError = false;
+
+    if (_nameController.text.isEmpty) {
+      _nameShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_phoneController.text.isEmpty) {
+      _phoneShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_passwordController.text.isEmpty) {
+      _passwordShakeKey.currentState?.shake();
+      hasError = true;
+    }
+    if (_addressController.text.isEmpty) {
+      _addressShakeKey.currentState?.shake();
+      hasError = true;
+    }
+
+    if (hasError) {
+      SnackBarHelper.showError(context, 'Semua field harus diisi');
+      return;
+    }
+
+    if (_passwordController.text.length < 8) {
+      _passwordShakeKey.currentState?.shake();
+      SnackBarHelper.showError(context, 'Kata sandi minimal 8 karakter');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await AuthService.register(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        password: _passwordController.text,
+        address: _addressController.text,
+        role: 'pembeli',
+      );
+
+      if (!mounted) return;
+
+      if (result.success) {
+        // Auto-login setelah register berhasil
+        final loginResult = await AuthService.login(
+          phone: _phoneController.text,
+          password: _passwordController.text,
+        );
+
+        if (!mounted) return;
+
+        if (loginResult.success) {
+          // Update AuthBloc with logged-in user
+          if (mounted && loginResult.user != null) {
+            context.read<AuthBloc>().add(AuthLoggedIn(loginResult.user!));
+          }
+
+          SnackBarHelper.showSuccess(
+            context,
+            'Registrasi berhasil! Selamat datang.',
+          );
+          context.pushReplacementSmooth(const StartPage());
+        } else {
+          SnackBarHelper.showInfo(
+            context,
+            'Registrasi berhasil! Silakan login.',
+          );
+        }
+      } else {
+        String errorMsg = result.message ?? 'Registrasi gagal';
+        if (result.errors != null) {
+          final errors = result.errors!.values
+              .expand((e) => e as List)
+              .join('\n');
+          errorMsg = errors;
+        }
+        SnackBarHelper.showError(context, errorMsg);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Nama',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        ShakeWidget(
+          key: _nameShakeKey,
+          child: TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              hintText: 'Masukkan Nama Lengkap',
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Nomor HP',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        ShakeWidget(
+          key: _phoneShakeKey,
+          child: TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: 'Masukkan Nomor HP'),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Atur Kata Sandi',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        ShakeWidget(
+          key: _passwordShakeKey,
+          child: TextFormField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            decoration: InputDecoration(
+              hintText: 'Masukkan Kata Sandi',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Alamat',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        ShakeWidget(
+          key: _addressShakeKey,
+          child: TextFormField(
+            controller: _addressController,
+            maxLines: 2,
+            decoration: const InputDecoration(hintText: 'Masukkan Alamat'),
+          ),
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton(
+          onPressed: _isLoading ? null : _handleRegister,
+          child: _isLoading
+              ? const AppSmallLoadingIndicator(
+                  color: AppColors.white,
+                  size: 20.0,
+                )
+              : const Text('Daftar Sebagai Pembeli'),
+        ),
+        const SizedBox(height: 24),
+        // const Row(
+        //   children: [
+        //     Expanded(child: Divider()),
+        //     Padding(
+        //       padding: EdgeInsets.symmetric(horizontal: 16),
+        //       child: Text(
+        //         'atau',
+        //         style: TextStyle(color: AppColors.textSecondary),
+        //       ),
+        //     ),
+        //     Expanded(child: Divider()),
+        //   ],
+        // ),
+        // const SizedBox(height: 24),
+        // Container(
+        //   width: double.infinity,
+        //   padding: const EdgeInsets.all(16),
+        //   decoration: BoxDecoration(
+        //     border: Border.all(color: AppColors.border),
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       const Text(
+        //         'Ingin daftar sebagai petani?',
+        //         style: TextStyle(
+        //           fontWeight: FontWeight.bold,
+        //           fontSize: 16,
+        //           color: AppColors.textPrimary,
+        //         ),
+        //       ),
+        //       const SizedBox(height: 4),
+        //       const Text(
+        //         'Datang ke kantor BUMDes:',
+        //         style: TextStyle(
+        //           fontWeight: FontWeight.bold,
+        //           color: AppColors.danger,
+        //         ),
+        //       ),
+        //       const SizedBox(height: 4),
+        //       const Text(
+        //         'Jl. Desa Sengka No. 10',
+        //         style: TextStyle(color: AppColors.textPrimary),
+        //       ),
+        //       const Text(
+        //         '0811-2222-3333',
+        //         style: TextStyle(color: AppColors.textPrimary),
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+}

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/core/services/auth_service.dart';
-import 'package:frontend/core/services/chat_service.dart';
-import 'package:frontend/features/pembeli/screens/start_page.dart';
-import 'package:frontend/features/bumdes/screens/start_page_bumdes.dart';
+import 'package:frontend/features/auth/service/auth_service.dart';
+import 'package:frontend/features/shared/service/chat_service.dart';
+import 'package:frontend/core/network/network_detector.dart';
+import 'package:frontend/core/router/route_constants.dart';
+import 'package:frontend/features/auth/bloc/auth_bloc.dart';
+// navigation handled by router (go_router) using named routes
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -68,71 +72,59 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _startAnimation() async {
-    // Check for existing session while showing splash
-    _checkExistingSession();
+    // Check for existing session while showing splash (await so we decide correct target)
+    await _checkExistingSession();
 
     // Entrance: dot moves to center
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      setState(() {
-        _isDotCenter = true;
-      });
-
-      // Wait for dot animation, then start exit sequence
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (!mounted) return;
-        setState(() {
-          _isExiting = true;
-        });
-
-        // Start exit animation
-        _exitController.forward().then((_) {
-          if (!mounted) return;
-          _navigateToHome();
-        });
-      });
+    if (!mounted) return;
+    setState(() {
+      _isDotCenter = true;
     });
+
+    // Wait for dot animation, then start exit sequence
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    setState(() {
+      _isExiting = true;
+    });
+
+    // Start exit animation
+    await _exitController.forward();
+    if (!mounted) return;
+    _navigateToHome();
   }
 
   Future<void> _checkExistingSession() async {
+    // Auto-detect correct backend IP on app startup
+    await NetworkDetector.detectAndSetActiveIP();
+
     final result = await AuthService.getMe();
     if (result.success && result.user != null) {
       _userRole = result.user!['role'];
+      // Update AuthBloc with logged-in user
+      if (mounted) {
+        context.read<AuthBloc>().add(AuthLoggedIn(result.user!));
+      }
       // Sign in to Firebase if token exists
       await ChatService.signInToFirebase();
+    } else {
+      // Explicitly set unauthenticated if no valid session
+      if (mounted) {
+        context.read<AuthBloc>().add(const AuthStatusChanged(false));
+      }
     }
   }
 
   void _navigateToHome() {
-    // Route based on user role
-    final Widget targetPage = _userRole == 'bumdes'
-        ? const StartPageBumdes()
-        : const StartPage();
-
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: (context, animation, secondaryAnimation) => targetPage,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // Scale up slightly from 0.95 to 1.0 for a subtle "emerge" effect
-          final scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          );
-
-          // Fade in
-          final fadeAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          );
-
-          return FadeTransition(
-            opacity: fadeAnimation,
-            child: ScaleTransition(scale: scaleAnimation, child: child),
-          );
-        },
-      ),
-    );
+    // Route based on user role and navigate using GoRouter
+    if (_userRole == 'bumdes') {
+      context.goNamed(RouteNames.bumdesHome);
+    } else if (_userRole != null) {
+      context.goNamed(RouteNames.pembeliHome);
+    } else {
+      // No authenticated user found, go to login
+      context.goNamed(RouteNames.login);
+    }
   }
 
   @override

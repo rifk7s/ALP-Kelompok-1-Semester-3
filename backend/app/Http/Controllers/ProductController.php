@@ -19,12 +19,30 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // return response()->json(Product::all());
-        // return response()->json(Product::with('category', 'productImages')->get());
         $query = Product::with('category', 'productImages', 'productContributions.petani');
 
+        // Filter by category
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        // Server-side search - searches name, variety, and category name
+        // Excludes out-of-stock products (stock_kg = 0) from search results
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where('stock_kg', '>', 0)
+                  ->where(function ($q) use ($searchTerm) {
+                      $q->where('name', 'like', "%{$searchTerm}%")
+                        ->orWhere('variety', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('category', function ($cq) use ($searchTerm) {
+                            $cq->where('name', 'like', "%{$searchTerm}%");
+                        });
+                  });
+        }
+
+        // Pagination support (optional, defaults to all if not provided)
+        if ($request->has('per_page')) {
+            return response()->json($query->paginate($request->per_page));
         }
 
         return response()->json($query->get());

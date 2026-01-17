@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 /// Simple reusable pull-to-refresh wrapper.
@@ -239,13 +241,13 @@ class DialogManager {
         actions: [
           if (cancelText != null)
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => context.pop(false),
               child: Text(cancelText),
             ),
           TextButton(
             onPressed: () {
               onConfirm?.call();
-              Navigator.pop(context, true);
+              context.pop(true);
             },
             child: Text(confirmText ?? 'OK'),
           ),
@@ -356,7 +358,10 @@ class RetryableContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return loadingWidget ?? const Center(child: CircularProgressIndicator());
+      return loadingWidget ??
+          const Center(
+            child: SpinKitCircle(color: AppColors.primary, size: 50.0),
+          );
     }
 
     if (hasError) {

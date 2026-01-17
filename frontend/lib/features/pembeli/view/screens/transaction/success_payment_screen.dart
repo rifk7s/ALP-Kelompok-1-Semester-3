@@ -1,0 +1,72 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/router/route_constants.dart';
+
+class SuccessPaymentScreen extends StatefulWidget {
+  final int total;
+  final String orderId;
+
+  const SuccessPaymentScreen({
+    super.key,
+    required this.total,
+    required this.orderId,
+  });
+
+  @override
+  State<SuccessPaymentScreen> createState() => _SuccessPaymentScreenState();
+}
+
+class _SuccessPaymentScreenState extends State<SuccessPaymentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      // Navigate to receipt using go_router
+      context.push(
+        Uri(
+          path: RoutePaths.receipt.replaceAll(':id', widget.orderId),
+          queryParameters: {'total': widget.total.toString()},
+        ).toString(),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surfaceAlt,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryLight,
+              ),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.primary,
+                size: 90,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Pengiriman Bukti Berhasil!",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
